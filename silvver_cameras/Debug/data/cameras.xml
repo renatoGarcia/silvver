@@ -1,0 +1,108 @@
+<?xml version="1.0" ?>
+<!--configurado para o chao-->
+<camera ligada="sim">
+	<!--camera perto dos robos-->
+	<modelo> PGR </modelo>
+	<serial> 5111119 </serial>
+	<diretorio> E:/renato/cam19/ </diretorio>
+	<resolucao> 640 480 </resolucao>
+	<frequencia> 30 </frequencia>
+	<distancia_focal> 530.09343 529.65974 </distancia_focal>
+	<ponto_principal> 341.69169 219.77290 </ponto_principal>
+	<distorcao_radial> -0.41522   0.16578   0.00092   -0.0016 0.0 0.0 </distorcao_radial>
+	<alfa_c> 0 </alfa_c>
+	<matrizH>
+ 		4.654740905227867 0.2122100122587447 -5845.671545425567
+		0.03184295142235603 -4.724545000112648 -2008.903768429641
+		-0.04034692936157106 0.01202307688910627 -1347.414986425455
+	</matrizH>
+</camera>
+
+<camera ligada="si">
+	<!--camera perto da porta-->
+	<modelo> PGR </modelo>
+	<serial> 5110532 </serial>
+	<diretorio> E:/renato/cam32/ </diretorio>
+	<resolucao> 640 480 </resolucao>
+	<frequencia> 30 </frequencia>
+	<distancia_focal> 526.71531 525.47478 </distancia_focal>
+	<ponto_principal> 340.42981 241.83143 </ponto_principal>
+	<distorcao_radial> -0.42224 0.17944 -0.00102 0.00152 0.0 0.0 </distorcao_radial>
+	<alfa_c> 0 </alfa_c>
+	<matrizH>
+		 1.6097e+00   4.5623e+01  -3.0781e+03
+		 4.5754e+01  -9.7888e-01   2.4937e+03
+		 1.8738e-03   1.8914e-03   8.7303e+01
+	</matrizH>
+</camera>
+
+<camera ligada="si">
+	<!--camera perto do puma-->
+	<modelo> PGR </modelo>
+	<serial> 5111139 </serial>
+	<diretorio> E:/renato/cam39/ </diretorio>
+	<resolucao> 640 480 </resolucao>
+	<frequencia> 30 </frequencia>
+	<distancia_focal> 532.24530 531.91314 </distancia_focal>
+	<ponto_principal> 318.48012 274.17395 </ponto_principal>
+	<distorcao_radial> -0.41413 0.18446 -0.00001 -0.00009 0.0 0.0 </distorcao_radial>
+	<alfa_c> 0 </alfa_c>
+	<matrizH>
+		 -4.7136e+02  -2.9670e+01   4.5691e+05
+		 -3.0902e+01   4.8133e+02  -3.3381e+04
+		  2.8011e-02   1.1996e-02   9.4150e+02
+	</matrizH>
+</camera>
+
+<!-- ***************************** PSEUDOCAMERAS ******************************** -->
+
+<camera ligada="si">
+	<modelo>PseudoCamera</modelo>
+	<serial>5111119</serial>
+	<diretorio>E:/renato/circulo/cam19/</diretorio>
+	<resolucao>640 480</resolucao>
+	<frequencia>60</frequencia>
+	<distancia_focal> 530.09343 529.65974 </distancia_focal>
+	<ponto_principal> 341.69169 219.77290 </ponto_principal>
+	<distorcao_radial> -0.41522   0.16578   0.00092   -0.0016 0.0 0.0 </distorcao_radial>
+	<alfa_c> 0 </alfa_c>
+	<matrizH>
+		-501.704035877456         -8.50954099265823          484610.518210343
+                -8.8008309707226          514.885788588819          141856.962912711
+        	0.0204879179063889        0.0254457665370389          990.986490177372	
+	</matrizH>
+</camera>
+
+<camera ligada="si">
+	<modelo>PseudoCamera</modelo>
+	<serial>5110532</serial>
+	<diretorio>E:/renato/circulo/cam32/</diretorio>
+	<resolucao>640 480</resolucao>
+	<frequencia>60</frequencia>
+	<distancia_focal> 526.71531 525.47478 </distancia_focal>
+	<ponto_principal> 340.42981 241.83143 </ponto_principal>
+	<distorcao_radial> -0.42224 0.17944 -0.00102 0.00152 0.0 0.0 </distorcao_radial>
+	<alfa_c> 0 </alfa_c>
+	<matrizH>
+    	 -1.22145478861282         -43.7115082105385          2874.50506321073
+    	 -44.1222069864932         0.707756804378083         -2310.72446041659
+  	 -0.00215068663248132      0.000860312728093621         -84.7522385871575	
+	</matrizH>
+</camera>
+
+<camera ligada="si">
+	<modelo>PseudoCamera</modelo>
+	<serial>5111139</serial>
+	<diretorio>E:/renato/circulo/cam39/</diretorio>
+	<resolucao>640 480</resolucao>
+	<frequencia>60</frequencia>
+	<distancia_focal> 532.24530 531.91314 </distancia_focal>
+	<ponto_principal> 318.48012 274.17395 </ponto_principal>
+	<distorcao_radial> -0.41413 0.18446 -0.00001 -0.00009 0.0 0.0 </distorcao_radial>
+	<alfa_c> 0 </alfa_c>
+	<matrizH>
+      	    472.348463670998          23.1639892421687         -460451.131383844
+      	    32.1998684567238         -479.490918623057          32380.6661487802
+       	 -0.0308908050239873       -0.0268716680270556         -943.873605864847
+	</matrizH>
+</camera>
