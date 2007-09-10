@@ -7,40 +7,42 @@ Marco::Marco(string ip, int id, bool registrar):
 ID_ROBO(id),
 IP(ip)
 {
-    conexao = new Conexao();
-    this->registrar = registrar;
+  conexao = new Conexao();
+  this->registrar = registrar;
 }
 
 Marco::~Marco()
 {
-    delete conexao;
-    delete arqRegistro;
-    delete thOuvirServidor;
+  this->finalizarThread = true;
+  delete conexao;
+  delete arqRegistro;
+  thOuvirServidor->join();
+  delete thOuvirServidor;
 }
 
 void Marco::criarConexao()
 {
-    unsigned int portaConexao;
-    Conexao conexaoRecepcionista;
+  unsigned int portaConexao;
+  Conexao conexaoRecepcionista;
 
-    conexaoRecepcionista.Iniciar(PORTA_RECEPCIONISTA,IP.c_str());
-    conexaoRecepcionista.Enviar((void*)"SD",sizeof("SD") );
-    conexaoRecepcionista.Receber((char*)&portaConexao,sizeof(portaConexao));
-    cout << "Porta: " << portaConexao << endl;
-    char OK[3]="OK";
-    char resposta[3];
-    conexao->Iniciar(portaConexao,IP.c_str());
-    conexao->Enviar(OK,sizeof(OK));
-    conexao->Enviar((void*)&ID_ROBO,sizeof(ID_ROBO));
-    conexao->Receber(resposta,sizeof(resposta));
-    cout << "Resposta: " << resposta << endl;
+  conexaoRecepcionista.Iniciar(PORTA_RECEPCIONISTA,IP.c_str());
+  conexaoRecepcionista.Enviar((void*)"SD",sizeof("SD") );
+  conexaoRecepcionista.Receber((char*)&portaConexao,sizeof(portaConexao));
+  cout << "Porta: " << portaConexao << endl;
+  char OK[3]="OK";
+  char resposta[3];
+  conexao->Iniciar(portaConexao,IP.c_str());
+  conexao->Enviar(OK,sizeof(OK));
+  conexao->Enviar((void*)&ID_ROBO,sizeof(ID_ROBO));
+  conexao->Receber(resposta,sizeof(resposta));
+  cout << "Resposta: " << resposta << endl;
 
-    if (registrar)
-    {
-      stringstream ssNome;
-      ssNome << ID_ROBO << ".txt";
-      arqRegistro = new ofstream(ssNome.str().c_str());
-    }
+  if (registrar)
+  {
+    stringstream ssNome;
+    ssNome << ID_ROBO << ".txt";
+    arqRegistro = new ofstream(ssNome.str().c_str());
+  }
 }
 
 void Marco::ouvirServidor(Marco *objeto)
@@ -52,7 +54,10 @@ void Marco::ouvirServidor(Marco *objeto)
     objeto->conexao->Receber((char*)&enteReceptor, sizeof(enteReceptor));
 
     if(enteReceptor.id == objeto->ID_ROBO) // Se o id do ente recebido é igual ao do robô.
+    {
+      mutex::scoped_lock lock(objeto->mutexUltimaPose);
       objeto->ultimaPose = Pose(enteReceptor.x, enteReceptor.y, enteReceptor.teta);
+    }
     else
     {
       cerr << "Recebido pacote com ente com id errado." << endl
