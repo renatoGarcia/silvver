@@ -42,16 +42,11 @@ void Saidas::ReceberEstado(const vector<Ente> &vecRobo)
 
   for(iteEnte = vecRobo.begin(); iteEnte < vecRobo.end(); iteEnte++)
   {
-    //Caso não exista um cliente com o mesmo id do Ente apontado por iteEnte não faz nada.
-    if(clientes.find(iteEnte->id) == clientes.end())
-      continue;
-    else //Caso contrário envia a localização encontrada para o cliente.
-    {
-      clientes.find(iteEnte->id)->second->Enviar( (void*)&(*iteEnte),sizeof(*iteEnte) );
-    }
-
     *arqLog << iteEnte->id << '\t' << iteEnte->tempo << '\t'
             << iteEnte->x  << '\t' << iteEnte->y << '\t' << iteEnte->teta <<  endl;
-//     cout << iteEnte->id << endl;
+
+    //Caso exista um cliente com o mesmo id do Ente apontado por iteEnte envia a pose para ele.
+    if(clientes.find(iteEnte->id) != clientes.end())
+      clientes.find(iteEnte->id)->second->Enviar( (void*)&(*iteEnte),sizeof(*iteEnte) );
   }
 }

@@ -1,8 +1,3 @@
-/**************************************************************************************
-    Esta classe representa o conjunto de clientes(blobCameras) conectados a este
-  servidor. Para cada cliente haver� uma thread espec�fica para trat�-lo
-**************************************************************************************/
-
 #ifndef ENTRADAS_H
 #define ENTRADAS_H
 
@@ -26,6 +21,11 @@ enum TipoDado
   MARCAS = 104
 };
 
+/** Gerencia o conjunto de clientes que fornecem dados de entrada ao silvver-servidor.
+ * Para cada tipo de dado de entrada deverá haver um método para tratá-lo.
+ * Atualmente todos os clientes que fornecem dados de entrada são câmeras, e os tipos de dados
+ * aceitos são a pose de marcos geométricos e a posição de blobs de cor.
+ */
 class Entradas
 {
 private:
@@ -34,14 +34,21 @@ private:
   static mutex mutexInstanciacao;
   Entradas();
 
-  // Cada item representará uma thread que irá receber
-  // informações de uma câmera.
+  /// Em cada thread deste vetor estará sendo executado um método que tratará dos dados recebidos por um cliente.
   vector<thread*> threadCliente;
 
-  // Controlará as informações recebidas de uma blobCamera
+  /** Tratará os dados recebidos de uma blobCamera.
+   *
+   * @param objeto Apontador para a instância da classe Entradas, um ponteiro para this.
+   * @param conexao Objeto de Conexao que contém as informações para a comunicação com o cliente através da rede.
+   */
   static void ClienteBlobCam(Entradas *objeto, Conexao *conexao);
 
-  // Controlará as informações recebidas de uma marcaCamera
+  /** Tratará os dados recebidos de uma marcoCamera.
+   *
+   * @param objeto Apontador para a instância da classe Entradas, um ponteiro para this.
+   * @param conexao Objeto de Conexao que contém as informações para a comunicação com o cliente através da rede.
+   */
   static void ClienteMarcaCam(Entradas *objeto, Conexao *conexao);
 
   Saidas *saidas;
@@ -50,8 +57,10 @@ private:
 
 public:
 
+  /// Esta é uma classe solitária, este método deve ser usado ao invés do construtor.
   static Entradas* Instanciar();
 
+  /// Recebe um objeto da classe conexão onde se encontram informações sobre um novo cliente e inicia o tratamento dos dados que serão recebidos.
   void AdicionarEntrada(Conexao *conexao);
 };
 

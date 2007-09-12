@@ -1,8 +1,3 @@
-/**************************************************************************************
-    Esta classe cuida do estabelecimento de novas conex�es. Ela lidar� tanto com
-   os clientes(c�meras), quanto com as saidas, que s�o conex�es com os programas
-   que far�o uso dos resultados obtidos por este programa.
-**************************************************************************************/
 #ifndef RECEPTOR_H
 #define RECEPTOR_H
 
@@ -14,6 +9,10 @@
 
 using namespace boost;
 
+/** Cuida dos pedidos de conexão com o silvver-servidor.
+ * Esta é a classe central de silvver servidor. Ela cuida de todos os pedidos de conexão,
+ * cria um objeto Conexao permanente, e o redistribui para a classe apropriada.
+ */
 class Receptor
 {
 private:
@@ -22,35 +21,42 @@ private:
   static mutex mutexInstanciacao;
   Receptor();
 
-  // Tempo referência para o inicio da execução do programa, serve para sincronizar as câmeras
+  /// Tempo do sistema no instante inicial da execução do silvver-servidor, serve como referência para sincronizar as câmeras.
   struct timeb tempoInicial;
 
-  // Porta onde o recepcionista estará
+  /// Porta onde o método Recepcionista ouvirá os pedidos de conexão. O valor padrão é 12000.
   const unsigned RECEPCIONISTA_PORTA;
 
-  // Porta que para que o cliente se conecte
+  /// Porta livre que será utilizada no próximo pedido de conexão.
   unsigned portaLivre;
 
   Entradas *entradas;
 
   Saidas *saidas;
 
-  // Thread que cuidará da aceitação de novas blobCâmeras
+  /// Thread onde onde será executado o método Recepcionista.
   thread *thRecepcionista;
 
-  // Método que tratará de todos os pedidos de conexão ao programa, seja de câmeras
-  // ou de robôs.
+  /** Método que tratará de todos os pedidos de conexão ao silvver-servidor.
+   * Este método ouvirá a porta dada por RECEPCIONISTA_PORTA, criará uma conexão permanente
+   * para o novo cliente, e encaminhará a nova conexão para uma classe apropriada.
+   *
+   * @param objeto Apontador para a instância da classe Receptor, ponteiro para this.
+   */
   static void Recepcionista(Receptor *objeto);
 
-  // Retorna em segundos o tempo passado desde a instanciação do receptor.
+  /// Retorna em segundos o tempo transcorrido desde a instanciação do receptor.
   double tempoDecorrido();
 
 public:
 
+  /// Esta é uma classe solitária, este método deve ser usado ao invés do construtor.
   static Receptor* Instanciar();
 
+  /// Inicia a escuta por pedidos de conexão.
   void CriarRecepcionista();
 
+  /// Encerra a escuta por pedidos de conexão.
   int FecharRecepcionista();
 };
 
