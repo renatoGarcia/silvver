@@ -11,7 +11,7 @@ class HardCamera
 protected:
 
     Timer timer;
-    
+
 public:
 
     //virtual ~HardCamera()=0;

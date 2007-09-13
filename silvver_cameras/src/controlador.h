@@ -1,8 +1,3 @@
-﻿  /**************************************************************************************
-    Esta classe implementa um controlador que centraliza o trabalho das v�rias
-  blobC�meras.
-**************************************************************************************/
-
 #ifndef CONTROLADOR_H
 #define CONTROLADOR_H
 
@@ -32,26 +27,29 @@ enum TipoDado
     MARCAS = 104
 };
 
+/** Inicia as câmeras, conecta-as ao silvver-servidor, e agrupa as threads onde elas serão executadas.
+ *
+ */
 class Controlador
 {
 private:
 
-    // Sincroniza a criação e iniciação de uma nova blobCamera.
+    /// Evita a criação e iniciação simultânea das câmeras.
     static mutex mutexInicarCamera;
 
-    // Cont�m o caminho e os nomes dos arquivos de texto que definem as cores
+    // Contém o caminho e os nomes dos arquivos de texto que definem as cores.
     vector<string> vectorCores;
 
-    // Conjunto das estruturas de configura��o de todas as c�meras
+    /// Conjunto das estruturas de configuração de todas as câmeras.
     vector<CameraConfig> vecCameraConfig;
 
-    // Threads em que os m�todos controladores das c�meras ser�o executados
+    /// Threads nas quais os métodos controladores das câmeras serão executados.
     vector<thread*> thCamera;
 
-    // Conex�o com o m�todo que cuidar� da aceita��o de novas c�meras
-    /*static*/ Conexao *conexaoRecepcionista;
+    /// Objeto da classe Conexao que se encontra que possui os dados para comunição com o recepcionista do silvver-servidor.
+    Conexao *conexaoRecepcionista;
 
-    // C�digo que representa o tipo de dado que ser� enviado para o receptor
+    // Código que representa o tipo de dado que será enviado para o receptor
     const TipoDado DADO;
 
     // Porta � qual enviar a primeira mensagem, a fim de se

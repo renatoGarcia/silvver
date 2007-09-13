@@ -1,7 +1,7 @@
 #include <iostream>
 #include <highgui.h>
-/**************************************************************************************
-    Classe base para as diversas c‚meras funcionais, como blobCamera e marcaCamera.
+/*************************************************************************************
+    Classe base para as diversas c√¢meras funcionais, como blobCamera e marcaCamera
 **************************************************************************************/
 
 #ifndef CAMERA_H
@@ -16,8 +16,8 @@
 
 using namespace verlab;
 
-// InformaÁıes de configuraÁ„o das c‚meras usadas para a
-// iniciaÁ„o das mesmas
+// Informa√ß√µes de configura√ß√£o das c√¢meras usadas para a
+// inicia√ß√£o das mesmas
 struct CameraConfig
 {
     enum enumModelo{PGR,PseudoCam}modelo;
@@ -34,24 +34,23 @@ struct CameraConfig
 class Camera
 {
 private:
-    
-    double fc[2];     // Dist‚ncia focal [pixels]
-    double cc[2];     // Coordenadas do ponto principal [pixels]
-    double kc[5];     // Coeficientes de distorÁ„o (radial e tangencial)
-    double alpha_c;   // Coeficiente de inclinaÁ„o (‚ngulo entre os eixos de pixels x e y)
+    double fc[2];     // Dist√¢ncia focal [pixels
+    double cc[2];     // Coordenadas do ponto principal [pixels
+    double kc[5];     // Coeficientes de distor√ß√£o (radial e tangencial
+    double alpha_c;   // Coeficiente de inclina√ß√£o (√¢ngulo entre os eixos de pixels x e y)
 
-    double H[3][3];   // Matriz homogr·fica    
+    double H[3][3];   // Matriz homogr√°fica
 
     // Conta o tempo em que a camera ficou em funcionamento, usado para
-    // calcular a taxa mÈdia de quadros por segundo.
-    //Timer *timer;    
+    // calcular a taxa m√©dia de quadros por segundo.
+    //Timer *timer;
 
-    // N˙mero de imagens processadas, usado para calcular a taxa mÈdia
+    // N√∫mero de imagens processadas, usado para calcular a taxa m√©dia
     // de quadros por segundo.
     unsigned quadros;
     float taxaDeQuadros;
 
-    HardCamera *hardCamera; // Hardware que far· a captura das imagens.
+    HardCamera *hardCamera; // Hardware que far√° a captura das imagens.
 
 protected:
 
@@ -61,14 +60,14 @@ protected:
 
     void Iniciar();
 
-    // N˙mero serial que identifica univocamente a c‚mera utilizada
+    // N√∫mero serial que identifica univocamente a c√¢mera utilizada
     unsigned cameraSerial;
 
     // Atualiza a imagem em "*imgCamera", e retorna o instante no tempo em que elas foram capturadas.
-    // Este tempo È dado em milisegundos, e È calculado levando em conta o "tempoInicial".
-    double CapturarImagem();    
+    // Este tempo √© dado em milisegundos, e √© calculado levando em conta o "tempoInicial".
+    double CapturarImagem();
 
-    // Converte a posiÁ„o das coordenadas em pixels para as coordenadas do mundo
+    // Converte a posi√ß√£o das coordenadas em pixels para as coordenadas do mundo
     void Localizar(Posicao &posicao);
 
 public:
