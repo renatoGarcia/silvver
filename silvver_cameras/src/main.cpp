@@ -2,7 +2,7 @@
 #include <string>
 #include <string.h>
 #include "controlador.h"
-#include "Camera.h"
+#include "camera.h"
 #include "tinyXml/tinyxml.h"
 #include <vector>
 #include <sstream>

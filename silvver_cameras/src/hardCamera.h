@@ -5,6 +5,7 @@
 #include <highgui.h>
 #include <string>
 #include "timer.h"
+#include "hardCameras/modelos.h"
 
 class HardCamera
 {

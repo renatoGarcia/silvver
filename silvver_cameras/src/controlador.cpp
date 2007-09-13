@@ -126,11 +126,11 @@ void Controlador::BlobCam(const CameraConfig &cameraConfig,
 
 void Controlador::MarcaCam(const CameraConfig &cameraConfig,int porta,char *ip,double tempoInicial)
 {
-  MarcaCamera *marcaCam;
+  MarcoCamera *marcaCam;
   unsigned marcaCamID;
-    
-  {mutex::scoped_lock lock(mutexInicarCamera);    
-    marcaCam = new MarcaCamera(cameraConfig,tempoInicial);
+
+  {mutex::scoped_lock lock(mutexInicarCamera);
+    marcaCam = new MarcoCamera(cameraConfig,tempoInicial);
     marcaCamID = marcaCam->Iniciar();}
 
   Conexao conexao;

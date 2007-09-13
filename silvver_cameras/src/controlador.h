@@ -10,9 +10,9 @@
 #include <boost/thread/mutex.hpp>
 #include <boost/bind.hpp>
 #include "tinyXml/tinyxml.h"
-#include "Camera.h"
-#include "BlobCamera.h"
-#include "marcaCam.h"
+#include "camera.h"
+#include "blobCamera.h"
+#include "marcoCamera.h"
 #include "conexao.h"
 #include "tipos.h"
 #include "timer.h"

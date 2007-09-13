@@ -11,8 +11,6 @@
 #include "tipos.h"
 #include "timer.h"
 #include "hardCamera.h"
-#include "PGRCamera.h"
-#include "pseudoCamera.h"
 
 using namespace verlab;
 

@@ -1,4 +1,4 @@
-#include "Camera.h"
+#include "camera.h"
 
 Camera::Camera(const CameraConfig& camConfig,double tempoInicial)
 {
@@ -29,7 +29,7 @@ Camera::Camera(const CameraConfig& camConfig,double tempoInicial)
     switch(camConfig.modelo)
     {
     case CameraConfig::PGR:
-        hardCamera    = new PGRCamera(camConfig.frequencia,camConfig.diretorio,tempoInicial);
+        hardCamera    = new PGR(camConfig.frequencia,camConfig.diretorio,tempoInicial);
         break;
     case CameraConfig::PseudoCam:
         hardCamera    = new PseudoCamera(733,camConfig.frequencia,camConfig.diretorio);
