@@ -1,34 +1,34 @@
-#include "blobCamera.h"
+#include "blobCamera.hpp"
 
 BlobCamera::BlobCamera(const CameraConfig& camConfig,double tempoInicial)
-:Camera(camConfig,tempoInicial)
+ :Camera(camConfig,tempoInicial)
 {
-    filtro        = new Filtro();
-    blobExtractor = new BlobExtractor();
-    imgTrabalho   = cvCreateImage( cvSize(camConfig.resolucao[0],camConfig.resolucao[1]), IPL_DEPTH_8U, 1 );
+  filtro        = new Filtro();
+  blobExtractor = new BlobExtractor();
+  imgTrabalho   = cvCreateImage( cvSize(camConfig.resolucao[0],camConfig.resolucao[1]), IPL_DEPTH_8U, 1 );
 }
 
 BlobCamera::~BlobCamera()
 {
-    cvReleaseImage(&imgTrabalho);
-    delete filtro;
-    delete blobExtractor;
+  cvReleaseImage(&imgTrabalho);
+  delete filtro;
+  delete blobExtractor;
 }
 
 int BlobCamera::Iniciar()
 {
-    filtro->Iniciar();
-    try
-    {
+  filtro->Iniciar();
+  try
+  {
     Camera::Iniciar();
-    }
-    catch(string erro)
-    {
-        cout << "Erro: " << erro << endl;
-        abort();
-    }
+  }
+  catch(string erro)
+  {
+    cout << "Erro: " << erro << endl;
+    abort();
+  }
 
-    return cameraSerial;
+  return cameraSerial;
 }
 
 void BlobCamera::ProcessarImagem(vector<Marca> &vecMarca)
@@ -42,9 +42,9 @@ void BlobCamera::ProcessarImagem(vector<Marca> &vecMarca)
   blobExtractor->ExtrairBlobs(imgTrabalho, vecMarca);
 
   vector<Marca>::iterator iteVecMarca = vecMarca.begin();
-cout << vecMarca.size() << "  !!!" << endl;
+  cout << vecMarca.size() << "  !!!" << endl;
   for(;iteVecMarca<vecMarca.end();iteVecMarca++)
   {
     Camera::Localizar(*iteVecMarca);
-  }  
+  }
 }

@@ -1,74 +1,75 @@
 #include "conexao.h"
+#include <iostream>
+
+using namespace std;
 
 Conexao::Conexao()
 {
-    this->SenderAddrSize = sizeof(SenderAddr);    
+  this->SenderAddrSize = sizeof(SenderAddr);
 }
 
-int Conexao::Iniciar(int porta, char *ip)
+int Conexao::Iniciar(int porta,const char *ip)
 {
-    int erro;
+  int erro;
 
-  #ifdef WINDOWS_SOCKET
+  #ifdef HAVE_WINDOWS_SOCKETS
     WSADATA initialisation_win32;
 
     erro = WSAStartup(MAKEWORD(2,2),&initialisation_win32);
     if(erro)
     {
-        printf("Suporte a sockets indisponível.\n");
-        return 1;
+      cerr << "Suporte a sockets indisponivel" << endl;
+      return 1;
     }
   #endif
 
-    // Criação de um Socket 
-    SocketConexao = socket(AF_INET,SOCK_DGRAM,0); 
-    if (SocketConexao==INVALID_SOCKET) 
-    {
-        printf("Impossível de Criar Socket.\n"); 
-        return 1;
-    }
+  // CriaÃ§Ã£o do Socket para conexao UDP/IP
+  SocketConexao = socket(AF_INET,SOCK_DGRAM,0);
+  if (SocketConexao<=0)
+  {
+    cerr << "Erro ao criar o socket" << endl;
+    return 1;
+  }
 
-    // Inicialização do Cliente
-    infConexao.sin_family=AF_INET;              // Indica a utilização do IPv4 
-    infConexao.sin_addr.s_addr = inet_addr(ip); //Endereço IP dos servidor
-    infConexao.sin_port=htons(porta);           // Porta utiliazada 
-//	SenderAddr=infConexao;
+  // IniciaÃ§Ã£o do Cliente
+  infConexao.sin_family = AF_INET;              // Indica a utilizaÃ§Ã£o do IPv4
+  infConexao.sin_addr.s_addr = inet_addr(ip);   // EndereÃ§o IP do servidor
+  infConexao.sin_port = htons(porta);           // Porta utiliazada
+//   SenderAddr=infConexao;
 
-	return 0;
+  return 0;
 }
 
 int Conexao::Receber(char *msg, int tamanho)
 {
-	int bytes_recebidos;
+  int bytes_recebidos;
 
-    
-	bytes_recebidos = recvfrom(SocketConexao, msg, tamanho, 
-                               0, (struct sockaddr*)&SenderAddr, 
-                               &SenderAddrSize);   
+  bytes_recebidos = recvfrom(SocketConexao, msg, tamanho,
+                             0, (struct sockaddr*)&SenderAddr,
+                             &SenderAddrSize);
 
-	if ( bytes_recebidos == SOCKET_ERROR )
-		printf("Erro %d: A mensagem nao foi recebida corretamente.\n",
-		WSAGetLastError() );
-	if ( bytes_recebidos != tamanho )
-		printf("O tamanho do dado recebido (%d) nao corresponde com o"
-			" esperado (%d).\n", bytes_recebidos, tamanho);
+  if ( bytes_recebidos == -1 )
+    cerr << "A mensagem nao foi recebida corretamente" << endl;
+  if ( bytes_recebidos != tamanho )
+    cerr << "O tamanho do dado recebido (" << bytes_recebidos
+         << ") nao corresponde com o esperado (" << tamanho << ")" << endl;
 
-	return( bytes_recebidos );
+  return( bytes_recebidos );
 }
 
-int Conexao::Enviar(void *msg, int tamanho)
+int Conexao::Enviar(void *msg, int tamanho)const
 {
-	int bytes_enviados;	
-	
-	
-	bytes_enviados=sendto(SocketConexao,(char*) msg, tamanho,
-                            0,(struct sockaddr*)&infConexao,
-                            sizeof(infConexao));
-	
-	if ( bytes_enviados == SOCKET_ERROR ) 
-		printf("Impossivel enviar dados\n");
-	if ( bytes_enviados != tamanho )
-		printf("Dados nao foram enviados corretamente\n");
-	
-	return(bytes_enviados);
+  int bytes_enviados;
+
+
+  bytes_enviados=sendto(SocketConexao,(char*) msg, tamanho,
+                        0,(struct sockaddr*)&infConexao,
+                        sizeof(infConexao)                 );
+
+  if ( bytes_enviados == -1 )
+    printf("Impossivel enviar dados\n");
+  if ( bytes_enviados != tamanho )
+    printf("Dados nao foram enviados corretamente\n");
+
+  return(bytes_enviados);
 }

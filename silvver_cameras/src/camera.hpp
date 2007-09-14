@@ -4,13 +4,13 @@
     Classe base para as diversas câmeras funcionais, como blobCamera e marcaCamera
 **************************************************************************************/
 
-#ifndef CAMERA_H
-#define CAMERA_H
+#ifndef CAMERA_HPP
+#define CAMERA_HPP
 
 #include <cv.h>
-#include "tipos.h"
-#include "timer.h"
-#include "hardCamera.h"
+#include "tipos.hpp"
+#include "timer.hpp"
+#include "hardCamera.hpp"
 
 using namespace verlab;
 

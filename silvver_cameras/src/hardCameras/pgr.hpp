@@ -1,14 +1,14 @@
 #include <iostream>
 #include <fstream>
 /**************************************************************************************/
-#ifndef PGR_H
-#define PGR_H
+#ifndef PGR_HPP
+#define PGR_HPP
 
 #include <pgrflycapture.h>
 #include <pgrflycaptureplus.h>
 #include <sstream>
 #include <string>
-#include "../hardCamera.h"
+#include "../hardCamera.hpp"
 
 using namespace std;
 

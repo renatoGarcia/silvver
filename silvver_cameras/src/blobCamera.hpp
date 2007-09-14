@@ -9,9 +9,9 @@
 #include <vector>
 #include <string>
 
-#include "camera.h"
-#include "filtro.h"
-#include "blobExtractor.h"
+#include "camera.hpp"
+#include "filtro.hpp"
+#include "blobExtractor.hpp"
 
 using namespace std;
 using namespace verlab;

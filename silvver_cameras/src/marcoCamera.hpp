@@ -3,13 +3,13 @@
     retornar um vector de Manchas com os blobs das cores encontradas.
 **************************************************************************************/
 
-#ifndef MARCOCAMERA_H
-#define MARCOCAMERA_H
+#ifndef MARCOCAMERA_HPP
+#define MARCOCAMERA_HPP
 
 #include <vector>
 #include <string>
-#include "Camera.h"
-#include "extratorMarca.h"
+#include "Camera.hpp"
+#include "extratorMarca.hpp"
 
 using namespace verlab;
 
@@ -17,20 +17,20 @@ class MarcoCamera : public Camera
 {
 private:
 
-    ExtratorMarca *extratorMarca;
+  ExtratorMarca *extratorMarca;
 
-    int numLogger;
+  int numLogger;
 
 public:
 
-    MarcoCamera(const CameraConfig& camConfig,double tempoInicial);
+  MarcoCamera(const CameraConfig& camConfig,double tempoInicial);
 
-    ~MarcoCamera();
+  ~MarcoCamera();
 
-    int Iniciar();
+  int Iniciar();
 
-    // Captura uma imagem e retorna
-    void ProcessarImagem(vector<Ente> &vecEnte);
+  // Captura uma imagem e retorna
+  void ProcessarImagem(vector<Ente> &vecEnte);
 
 };
 

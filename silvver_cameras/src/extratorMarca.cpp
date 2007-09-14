@@ -1,7 +1,7 @@
 #include <cv.h>
 #include <highgui.h>
 
-#include "extratorMarca.h"
+#include "extratorMarca.hpp"
 
 #include <ARToolKitPlus/TrackerSingleMarkerImpl.h>
 using namespace ARToolKitPlus;

@@ -1,4 +1,4 @@
-#include "PGR.h"
+#include "PGR.hpp"
 
 #define MAX_CAMERAS 5
 
@@ -65,39 +65,39 @@ void PGR::Iniciar(unsigned serial)
   erro = flycaptureInitializePlus(contexto, indiceCamera, NUMERO_BUFFERS, buffers);
   switch(erro)
   {
-   case FLYCAPTURE_OK:
+  case FLYCAPTURE_OK:
     break;
-   case FLYCAPTURE_ALREADY_INITIALIZED:
+  case FLYCAPTURE_ALREADY_INITIALIZED:
     throw("Camera ja iniciada");
     break;
-   default: //Algum outro erro qualquer
+  default: //Algum outro erro qualquer
     throw("Iniciacao da camera");
   }
 
   if(flycaptureSetColorProcessingMethod( contexto,FLYCAPTURE_EDGE_SENSING)==FLYCAPTURE_OK)
-  //{cout <<"Falhou"<<endl;}
+    //{cout <<"Falhou"<<endl;}
 
-  // Começa a capturar imagens
-  erro = flycaptureStartLockNext(
-           contexto,
-           FLYCAPTURE_VIDEOMODE_ANY,
-           this->frequencia );
+    // Começa a capturar imagens
+    erro = flycaptureStartLockNext(
+				   contexto,
+				   FLYCAPTURE_VIDEOMODE_ANY,
+				   this->frequencia );
   switch(erro)
   {
-   case FLYCAPTURE_OK:
+  case FLYCAPTURE_OK:
     break;
-   case FLYCAPTURE_ALREADY_STARTED:
+  case FLYCAPTURE_ALREADY_STARTED:
     throw("Camera ja esta capturando imagens");
     break;
-   default: //Algum outro erro qualquer
+  default: //Algum outro erro qualquer
     throw("Iniciacao da camera");
   }
 
   fcImagemBGR.pixelFormat = FLYCAPTURE_BGR;
 
   /* Cada char ocupa 8 bits, como o formato BGR ocupará 24 bits/pixel,     |
-  |   temos que o tamanho necessário para o vetor uchar pData será:        |
-  |   pixelsColunas x pixelsLinhas x 3                                    */
+     |   temos que o tamanho necessário para o vetor uchar pData será:        |
+     |   pixelsColunas x pixelsLinhas x 3                                    */
   fcImagemBGR.pData = new unsigned char[640 * 480 * 3];
 
   //memset( &fcImagemRaw, 0x0, sizeof( FlyCaptureImage ) );
@@ -112,10 +112,10 @@ void PGR::SalvarImagem()
   //{
   nomeImagem << this->diretorio << this->numeroImagem << ".bmp";
   /*}
-  else
-  {
+    else
+    {
     nomeImagem << "E:/renato/cam32/" << this->numeroImagem << ".bmp";
-  }*/
+    }*/
 
   FlyCaptureImage image,imageConverted;
   memset( &image, 0x0, sizeof( FlyCaptureImage ) );
@@ -126,10 +126,10 @@ void PGR::SalvarImagem()
   imageConverted.pixelFormat = FLYCAPTURE_BGR;
   flycaptureConvertImage( contexto, &image, &imageConverted );
   flycaptureSaveImage(
-    contexto,
-    &imageConverted,
-    nomeImagem.str().c_str(),
-    FLYCAPTURE_FILEFORMAT_BMP );
+		      contexto,
+		      &imageConverted,
+		      nomeImagem.str().c_str(),
+		      FLYCAPTURE_FILEFORMAT_BMP );
 }
 
 double PGR::CapturarImg(IplImage *iplImgRetorno)
@@ -159,7 +159,7 @@ double PGR::CapturarImg(IplImage *iplImgRetorno)
   iplImgRetorno = cvCreateImageHeader( cvSize(fcImagemBGR.iCols,fcImagemBGR.iRows),
                                        IPL_DEPTH_8U,
                                        3
-                                      );
+				       );
 
   /* Associa a imagem com o cabeçalho criado  */
   cvSetData( iplImgRetorno, fcImagemBGR.pData, fcImagemBGR.iRowInc );

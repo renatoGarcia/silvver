@@ -1,30 +1,30 @@
-#include "marcoCamera.h"
+#include "marcoCamera.hpp"
 
 MarcoCamera::MarcoCamera(const CameraConfig& camConfig,double tempoInicial)
-:Camera(camConfig,tempoInicial)
+ :Camera(camConfig,tempoInicial)
 {
-    extratorMarca = new ExtratorMarca(camConfig.resolucao[0],camConfig.resolucao[1]);
+  extratorMarca = new ExtratorMarca(camConfig.resolucao[0],camConfig.resolucao[1]);
 }
 
 MarcoCamera::~MarcoCamera()
 {
-    delete extratorMarca;
+  delete extratorMarca;
 }
 
 int MarcoCamera::Iniciar()
 {
-    try
-    {
+  try
+  {
     Camera::Iniciar();
     this->numLogger = extratorMarca->Iniciar();
-    }
-    catch(string erro)
-    {
-        cout << "Erro: " << erro << endl;
-        abort();
-    }
+  }
+  catch(string erro)
+  {
+    cout << "Erro: " << erro << endl;
+    abort();
+  }
 
-    return cameraSerial;
+  return cameraSerial;
 }
 
 void MarcoCamera::ProcessarImagem(vector<Ente> &vecEnte)
@@ -50,5 +50,6 @@ void MarcoCamera::ProcessarImagem(vector<Ente> &vecEnte)
     teta = iteMarkerPontos->verticeRef.CalcularAngulo(iteMarkerPontos->verticeSec);
 
     vecEnte.push_back( Ente(iteMarkerPontos->centro,teta) );
-  } 
+  }
 }
+

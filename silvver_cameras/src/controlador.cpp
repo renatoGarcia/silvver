@@ -1,4 +1,4 @@
-#include "controlador.h"
+#include "controlador.hpp"
 #include <string.h>
 
 extern boost::mutex mutexCout;
@@ -8,7 +8,7 @@ bool Controlador::termina = false;
 //Conexao* Controlador::conexaoRecepcionista = NULL;
 
 Controlador::Controlador(int porta,char *ip,TipoDado codigoDado,vector<CameraConfig> &vecCameraConfig)
- :DADO(codigoDado)
+  :DADO(codigoDado)
 {
   this->vecCameraConfig.resize( vecCameraConfig.size() );
   copy( vecCameraConfig.begin(),vecCameraConfig.end(),this->vecCameraConfig.begin() );
@@ -53,7 +53,7 @@ void Controlador::ConectarCamera(const CameraConfig &cameraConfig)
 
   switch(DADO)
   {
-    case CORES:
+  case CORES:
     {
       thCamera.push_back( new thread(bind(&Controlador::BlobCam,
                                           cameraConfig,
@@ -63,7 +63,7 @@ void Controlador::ConectarCamera(const CameraConfig &cameraConfig)
       break;
     }
 
-    case MARCAS:
+  case MARCAS:
     {
       thCamera.push_back( new thread(bind(&Controlador::MarcaCam,
                                           cameraConfig,
@@ -114,11 +114,11 @@ void Controlador::BlobCam(const CameraConfig &cameraConfig,
   Pacote<Marca> pacote(blobCamID);
 
   while(!termina)
-    {
-      blobCam->ProcessarImagem(vecMarca);
-      pacote.Empacotar(vecMarca);
-      conexao.Enviar( &pacote,sizeof(pacote) );
-    }
+  {
+    blobCam->ProcessarImagem(vecMarca);
+    pacote.Empacotar(vecMarca);
+    conexao.Enviar( &pacote,sizeof(pacote) );
+  }
 
   delete blobCam;
 
@@ -154,11 +154,11 @@ void Controlador::MarcaCam(const CameraConfig &cameraConfig,int porta,char *ip,d
   Pacote<Ente> pacote(marcaCamID);
 
   while(!termina)
-    {
-      marcaCam->ProcessarImagem(vecEnte);
-      pacote.Empacotar(vecEnte);
-      conexao.Enviar( &pacote,sizeof(pacote) );
-    }
+  {
+    marcaCam->ProcessarImagem(vecEnte);
+    pacote.Empacotar(vecEnte);
+    conexao.Enviar( &pacote,sizeof(pacote) );
+  }
 
   delete marcaCam;
 }
@@ -171,7 +171,7 @@ void Controlador::PararControlador()
 
   termina = true;
   for(;iteThread!=fimVecThread; iteThread++)
-    {
-      (*iteThread)->join();
-    }
+  {
+    (*iteThread)->join();
+  }
 }
