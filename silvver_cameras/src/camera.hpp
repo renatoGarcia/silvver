@@ -11,6 +11,7 @@
 #include "tipos.hpp"
 #include "timer.hpp"
 #include "hardCamera.hpp"
+#include "hardCameras/modelos.hpp"
 
 using namespace verlab;
 

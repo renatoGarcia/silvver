@@ -8,7 +8,7 @@
 #endif
 
 #ifdef HAVE_WINDOWS_SOCKETS
-#include <winsock2.h>
+#include <winsock.h>
 #include <stdio.h>
 #endif
 

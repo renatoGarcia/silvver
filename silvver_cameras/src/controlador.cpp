@@ -28,7 +28,7 @@ Controlador::~Controlador()
 
 void Controlador::RodarControlador()
 {
-  vector<CameraConfig>::iterator iteCameras;
+  vector<CameraConfig>::iterator iteCameraConfig;
   for(iteCameraConfig = vecCameraConfig.begin(); iteCameraConfig < vecCameraConfig.end(); iteCameraConfig++)
   {
     ConectarCamera(*iteCameraConfig);
