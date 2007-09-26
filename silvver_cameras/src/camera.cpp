@@ -2,31 +2,9 @@
 
 Camera::Camera(const CameraConfig& camConfig,double tempoInicial)
 {
-  fc[0] = camConfig.fc[0];
-  fc[1] = camConfig.fc[1];
+  this->configuracao = camConfig;
 
-  cc[0] = camConfig.cc[0];
-  cc[1] = camConfig.cc[1];
-
-  kc[0] = camConfig.kc[0];
-  kc[1] = camConfig.kc[1];
-  kc[2] = camConfig.kc[2];
-  kc[3] = camConfig.kc[3];
-  kc[4] = camConfig.kc[4];
-
-  alpha_c = camConfig.alpha_c;
-
-  for (int i=0; i<3; i++)
-  {
-    for (int j=0; j<3; j++)
-    {
-      this->H[i][j] = camConfig.H[i][j];
-    }
-  }
-
-  cameraSerial = camConfig.serial;
-
-  switch(camConfig.modelo)
+  switch(this->configuracao.modeloFisico)
   {
   case CameraConfig::PGR:
     hardCamera    = new PGR(camConfig.frequencia,camConfig.diretorio,tempoInicial);

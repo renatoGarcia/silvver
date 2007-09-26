@@ -8,7 +8,7 @@ bool Controlador::termina = false;
 //Conexao* Controlador::conexaoRecepcionista = NULL;
 
 Controlador::Controlador(int porta,char *ip,TipoDado codigoDado,vector<CameraConfig> &vecCameraConfig)
-  :DADO(codigoDado)
+:DADO(codigoDado)
 {
   this->vecCameraConfig.resize( vecCameraConfig.size() );
   copy( vecCameraConfig.begin(),vecCameraConfig.end(),this->vecCameraConfig.begin() );
@@ -41,15 +41,34 @@ void Controlador::ConectarCamera(const CameraConfig &cameraConfig)
   unsigned portaConectar;
   double tempoInicial;
 
-  // Envia a primeira mensagem ao recepcionista("PT"), para que ele envie
-  // como resposta a porta na qual a blobCamera deverá se conectar.
+  // Envia a primeira mensagem ao recepcionista, uma string "PT".
   conexaoRecepcionista->Enviar( (void*) msgPT,sizeof(msgPT) );
+
+  // Recebe como resposta a porta na qual a câmera deverá se conectar.
   conexaoRecepcionista->Receber( (char*)&portaConectar,sizeof(unsigned) );
 
+  // Recebe o tempo atual no silvver-servidor.
   conexaoRecepcionista->Receber( (char*)&tempoInicial, sizeof(tempoInicial) );
 
   {mutex::scoped_lock lock(mutexCout);
     cout << "PORTA: " << portaConectar << endl;}
+
+  Conexao conexao;
+  conexao.Iniciar(porta,ip);
+
+  // Envia a segunda mensagem ao recepcionista("OK"), informando que que a conexao foi criada
+  char msgOK[3] = "OK";
+  conexao.Enviar( msgOK,sizeof(msgOK) );
+
+  // Evia a terceira mensagem ao recepcionista, informando o código do dado que será transmitido
+  int tipoDado = cameraConfig.modeloAbstrato;
+  conexao.Enviar( &tipoDado,sizeof(tipoDado) );
+
+  char msg[3];
+  // Espera uma mensagem de confirmação
+  conexao.Receber( msg,sizeof(msg) );
+  {mutex::scoped_lock lock(mutexCout);
+    cout << "CAMERA: " << marcaCamID << " " << msg << endl;}
 
   switch(DADO)
   {
@@ -133,22 +152,6 @@ void Controlador::MarcaCam(const CameraConfig &cameraConfig,int porta,char *ip,d
     marcaCam = new MarcoCamera(cameraConfig,tempoInicial);
     marcaCamID = marcaCam->Iniciar();}
 
-  Conexao conexao;
-  conexao.Iniciar(porta,ip);
-
-  // Envia a segunda mensagem ao recepcionista("OK"), informando que que a conexao foi criada
-  char msgOK[3] = "OK";
-  conexao.Enviar( msgOK,sizeof(msgOK) );
-
-  // Evia a terceira mensagem ao recepcionista, informando o c�digo do dado que ser� transmitido
-  int tipoDado = MARCAS;
-  conexao.Enviar( &tipoDado,sizeof(tipoDado) );
-
-  char msg[3];
-  // Espera uma mensagem de confirma��o
-  conexao.Receber( msg,sizeof(msg) );
-  {mutex::scoped_lock lock(mutexCout);
-    cout << "CAMERA: " << marcaCamID << " " << msg << endl;}
 
   vector<Ente> vecEnte;
   Pacote<Ente> pacote(marcaCamID);

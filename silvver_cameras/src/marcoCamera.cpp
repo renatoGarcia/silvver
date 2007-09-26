@@ -52,4 +52,3 @@ void MarcoCamera::ProcessarImagem(vector<Ente> &vecEnte)
     vecEnte.push_back( Ente(iteMarkerPontos->centro,teta) );
   }
 }
-

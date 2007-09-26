@@ -1,21 +1,20 @@
 /**
- * @file   tipos.hpp
+ * @file   silvver_tipos.hpp
  *
- * @brief Especificação dos tipos usados para a comunicação entre as classes.
+ * @brief Especificação dos tipos e constantes usados para a comunicação entre os módulos de silvver.
  *
- * Versão 1.0
+ * Versão TODO:numerar versão
  */
-#ifndef TIPOS_HPP
-#define TIPOS_HPP
+#ifndef SILVVER_TIPOS_HPP
+#define SILVVER_TIPOS_HPP
 
 #define PORTA_RECEPCIONISTA 12000
-#define PORTA_BROADCAST 11999
 
 #include <math.h>
 #include <vector>
 #include <iterator>
 
-namespace verlab
+namespace silvver
 {
 
   /*----------------------------POSIÇÃO---------------------*/

@@ -14,6 +14,7 @@ protected:
 
 public:
 
+  HardCamera(
   //virtual ~HardCamera()=0;
   virtual void Iniciar(unsigned serial) = 0;
   virtual void Finalizar() = 0;

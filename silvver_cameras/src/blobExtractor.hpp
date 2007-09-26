@@ -10,10 +10,10 @@ mesma tonalidade, e cuja área é maior que uma área mínima preestabelecida.
 
 #include <cv.h>
 #include <vector>
-#include "tipos.hpp"
+#include "silvver_tipos.hpp"
 
 using namespace std;
-using namespace verlab;
+using namespace silvver;
 
 class BlobExtractor
 {

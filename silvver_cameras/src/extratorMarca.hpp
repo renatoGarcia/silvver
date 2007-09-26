@@ -7,11 +7,11 @@
 //using namespace ARToolKitPlus;
 #include <cv.h>
 #include <vector>
-#include "tipos.hpp"
+#include "silvver_tipos.hpp"
 #include <boost/thread/mutex.hpp>
 
 using namespace std;
-using namespace verlab;
+using namespace silvver;
 using namespace boost;
 // Estrutura para manter os pontos de interece de uma marca encontrada
 struct MarkerPontos

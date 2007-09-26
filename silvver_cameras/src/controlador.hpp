@@ -9,23 +9,16 @@
 #include <boost/thread/thread.hpp>
 #include <boost/thread/mutex.hpp>
 #include <boost/bind.hpp>
-#include "tinyXml/tinyxml.h"
 #include "camera.hpp"
 #include "blobCamera.hpp"
 #include "marcoCamera.hpp"
 #include "conexao.hpp"
-#include "tipos.hpp"
+#include "silvver_tipos.hpp"
 #include "timer.hpp"
 
 using namespace std;
 using namespace boost;
-using namespace verlab;
-
-enum TipoDado
-{
-  CORES  = 103,
-  MARCAS = 104
-};
+using namespace silvver;
 
 /** Inicia as câmeras, conecta-as ao silvver-servidor, e agrupa as threads onde elas serão executadas.
  *
@@ -38,7 +31,7 @@ private:
   static mutex mutexInicarCamera;
 
   // Contém o caminho e os nomes dos arquivos de texto que definem as cores.
-  vector<string> vectorCores;
+//   vector<string> vectorCores;
 
   /// Conjunto das estruturas de configuração de todas as câmeras.
   vector<CameraConfig> vecCameraConfig;
@@ -48,9 +41,6 @@ private:
 
   /// Objeto da classe Conexao que se encontra que possui os dados para comunição com o recepcionista do silvver-servidor.
   Conexao *conexaoRecepcionista;
-
-  // Código que representa o tipo de dado que será enviado para o receptor
-  const TipoDado DADO;
 
   // Porta � qual enviar a primeira mensagem, a fim de se
   // descobrir em qual porta a BlobCamera deve se conectar
