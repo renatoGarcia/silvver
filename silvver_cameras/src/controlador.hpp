@@ -10,6 +10,7 @@
 #include <boost/thread/mutex.hpp>
 #include <boost/bind.hpp>
 #include "camera.hpp"
+#include "cameraConfig.hpp"
 #include "blobCamera.hpp"
 #include "marcoCamera.hpp"
 #include "conexao.hpp"
@@ -53,17 +54,17 @@ private:
   static bool termina;
 
   // Controlar� uma blobCamera. � executado em uma thread separada.
-  static void BlobCam(const CameraConfig &cameraConfig,vector<string> vecCores,int porta,char *ip);
+  static void BlobCam(const CameraConfig &cameraConfig,vector<string> vecCores,int porta,char *ip,Conexao* conexao);
 
   // Controlar� uma marcaCamera. � executado em uma thread separada.
-  static void MarcaCam(const CameraConfig &cameraConfig,int porta,char *ip,double tempoInicial);
+  static void MarcaCam(const CameraConfig &cameraConfig,int porta,char *ip,double tempoInicial,Conexao* conexao);
 
   // Prepara um conex�o para um nova blobC�mera no servidor
   void ConectarCamera(const CameraConfig &cameraConfig);
 
  public:
 
-  Controlador(int porta,char *ip,TipoDado codigoDado,vector<CameraConfig> &vecCameraConfig);
+  Controlador(int porta,char *ip,vector<CameraConfig> &vecCameraConfig);
 
   ~Controlador();
 

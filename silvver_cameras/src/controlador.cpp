@@ -7,8 +7,7 @@ mutex Controlador::mutexInicarCamera;
 bool Controlador::termina = false;
 //Conexao* Controlador::conexaoRecepcionista = NULL;
 
-Controlador::Controlador(int porta,char *ip,TipoDado codigoDado,vector<CameraConfig> &vecCameraConfig)
-:DADO(codigoDado)
+Controlador::Controlador(int porta,char *ip,vector<CameraConfig> &vecCameraConfig)
 {
   this->vecCameraConfig.resize( vecCameraConfig.size() );
   copy( vecCameraConfig.begin(),vecCameraConfig.end(),this->vecCameraConfig.begin() );
@@ -53,50 +52,55 @@ void Controlador::ConectarCamera(const CameraConfig &cameraConfig)
   {mutex::scoped_lock lock(mutexCout);
     cout << "PORTA: " << portaConectar << endl;}
 
-  Conexao conexao;
-  conexao.Iniciar(porta,ip);
+  Conexao *conexao = new Conexao();
+  conexao->Iniciar(portaConectar,ipReceptor);
 
   // Envia a segunda mensagem ao recepcionista("OK"), informando que que a conexao foi criada
   char msgOK[3] = "OK";
-  conexao.Enviar( msgOK,sizeof(msgOK) );
+  conexao->Enviar( msgOK,sizeof(msgOK) );
 
   // Evia a terceira mensagem ao recepcionista, informando o código do dado que será transmitido
   int tipoDado = cameraConfig.modeloAbstrato;
-  conexao.Enviar( &tipoDado,sizeof(tipoDado) );
+  conexao->Enviar( &tipoDado,sizeof(tipoDado) );
 
   char msg[3];
   // Espera uma mensagem de confirmação
-  conexao.Receber( msg,sizeof(msg) );
+  conexao->Receber( msg,sizeof(msg) );
   {mutex::scoped_lock lock(mutexCout);
-    cout << "CAMERA: " << marcaCamID << " " << msg << endl;}
+  cout << "CAMERA: " << cameraConfig.serial << " " << msg << endl;}
 
-  switch(DADO)
+  //TODO: tirar isto, usando o que será implementado no cameraConfig
+  vector<string> vectorCores;
+
+  switch(cameraConfig.modeloAbstrato)
   {
-  case CORES:
+  case CameraConfig::enumAbstrato::BLOB:
     {
       thCamera.push_back( new thread(bind(&Controlador::BlobCam,
                                           cameraConfig,
                                           vectorCores,
                                           portaConectar,
-                                          ipReceptor) ) );
+                                          ipReceptor,
+                                          conexao) ) );
       break;
     }
 
-  case MARCAS:
+  case CameraConfig::enumAbstrato::MARCO:
     {
       thCamera.push_back( new thread(bind(&Controlador::MarcaCam,
                                           cameraConfig,
                                           portaConectar,
                                           ipReceptor,
-                                          tempoInicial) ) );
+                                          tempoInicial,
+                                          conexao) ) );
 
       break;
     }
   }
 }
 
-void Controlador::BlobCam(const CameraConfig &cameraConfig,
-                          vector<string> vecCores,int porta,char *ip)
+void Controlador::BlobCam(const CameraConfig &cameraConfig,vector<string> vecCores,
+                          int porta,char *ip,Conexao* conexao)
 {
   BlobCamera *blobCam;
   unsigned blobCamID;
@@ -112,23 +116,10 @@ void Controlador::BlobCam(const CameraConfig &cameraConfig,
     blobCamID = blobCam->Iniciar();
   }
 
-  Conexao conexao;
-  conexao.Iniciar(porta,ip);
-
   // Envia a segunda mensagem ao recepcionista("OK"), informando que que a conexao foi criada
   char msgOK[3] = "OK";
-  conexao.Enviar( msgOK,sizeof(msgOK) );
-
-  // Evia a terceira mensagem ao recepcionista, informando o c�digo do dado que ser� transmitido
-  int tipoDado = CORES;
-  conexao.Enviar( &tipoDado,sizeof(tipoDado) );
-
-  char msg[3];
-  // Espera uma mensagem de confirma��o
-  conexao.Receber( msg,sizeof(msg) );
-  {mutex::scoped_lock lock(mutexCout);
-    cout << "CAMERA: " << blobCamID << " " << msg << endl;}
-
+  conexao->Enviar( msgOK,sizeof(msgOK) );
+  
   vector<Marca> vecMarca;
   Pacote<Marca> pacote(blobCamID);
 
@@ -136,14 +127,15 @@ void Controlador::BlobCam(const CameraConfig &cameraConfig,
   {
     blobCam->ProcessarImagem(vecMarca);
     pacote.Empacotar(vecMarca);
-    conexao.Enviar( &pacote,sizeof(pacote) );
+    conexao->Enviar( &pacote,sizeof(pacote) );
   }
 
   delete blobCam;
 
 }
 
-void Controlador::MarcaCam(const CameraConfig &cameraConfig,int porta,char *ip,double tempoInicial)
+void Controlador::MarcaCam(const CameraConfig &cameraConfig,int porta,char *ip,
+                           double tempoInicial,Conexao* conexao)
 {
   MarcoCamera *marcaCam;
   unsigned marcaCamID;
@@ -160,7 +152,7 @@ void Controlador::MarcaCam(const CameraConfig &cameraConfig,int porta,char *ip,d
   {
     marcaCam->ProcessarImagem(vecEnte);
     pacote.Empacotar(vecEnte);
-    conexao.Enviar( &pacote,sizeof(pacote) );
+    conexao->Enviar( &pacote,sizeof(pacote) );
   }
 
   delete marcaCam;

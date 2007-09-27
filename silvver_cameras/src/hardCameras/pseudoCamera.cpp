@@ -2,7 +2,7 @@
 
 extern boost::mutex mutexCout;
 
-PseudoCamera::PseudoCamera(int totalImagens,unsigned frequencia,char* diretorio)
+PseudoCamera::PseudoCamera(int totalImagens,unsigned frequencia,const char* diretorio)
 {
   this->endImagem = diretorio;
   this->imagemAtual = 1;

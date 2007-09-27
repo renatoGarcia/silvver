@@ -12,6 +12,7 @@
 #include "timer.hpp"
 #include "hardCamera.hpp"
 #include "hardCameras/modelos.hpp"
+#include "CameraConfig.hpp"
 
 using namespace silvver;
 
@@ -20,9 +21,14 @@ class Camera
 private:
   // Conta o tempo em que a camera ficou em funcionamento, usado para
   // calcular a taxa média de quadros por segundo.
-  //Timer *timer;
+  //Timer *timer;  
 
-  CameraConfig configuracao;
+  double cc0, cc1;
+  double fc0, fc1;
+  double kc0, kc1, kc2, kc3, kc4;
+  double H00, H01, H02, 
+         H10, H11, H12,
+         H20, H21, H22;
 
   // Número de imagens processadas, usado para calcular a taxa média
   // de quadros por segundo.
@@ -32,6 +38,8 @@ private:
   HardCamera *hardCamera; // Hardware que fará a captura das imagens.
 
 protected:
+
+  CameraConfig configuracao;
 
   Camera(const CameraConfig& camConfig,double tempoInicial);
 

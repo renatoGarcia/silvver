@@ -4,13 +4,35 @@ Camera::Camera(const CameraConfig& camConfig,double tempoInicial)
 {
   this->configuracao = camConfig;
 
+  cc0 = camConfig.cc[0];
+  cc1 = camConfig.cc[1];
+
+  fc0 = camConfig.fc[0];
+  fc1 = camConfig.fc[1];
+
+  kc0 = camConfig.kc[0];
+  kc1 = camConfig.kc[1];
+  kc2 = camConfig.kc[2];
+  kc3 = camConfig.kc[3];
+  kc4 = camConfig.kc[4];
+
+  H00 = camConfig.H[0][0];
+  H01 = camConfig.H[0][1];
+  H02 = camConfig.H[0][2];
+  H10 = camConfig.H[1][0];
+  H11 = camConfig.H[1][1];
+  H12 = camConfig.H[1][2];
+  H20 = camConfig.H[2][0];
+  H21 = camConfig.H[2][1];
+  H22 = camConfig.H[2][2];
+ 
   switch(this->configuracao.modeloFisico)
   {
   case CameraConfig::PGR:
-    hardCamera    = new PGR(camConfig.frequencia,camConfig.diretorio,tempoInicial);
+    hardCamera    = new PGR(camConfig.frequencia,camConfig.diretorio.c_str(),tempoInicial);
     break;
   case CameraConfig::PseudoCam:
-    hardCamera    = new PseudoCamera(733,camConfig.frequencia,camConfig.diretorio);
+    hardCamera    = new PseudoCamera(733,camConfig.frequencia,camConfig.diretorio.c_str());
     break;
   }
 
@@ -33,7 +55,7 @@ void Camera::Iniciar()
 {
   try
   {
-    hardCamera->Iniciar(cameraSerial);
+    hardCamera->Iniciar(this->configuracao.serial);
   }
   catch(string erro)
   {
@@ -77,29 +99,24 @@ void Camera::Localizar(Posicao &posicao)
   xc[1] = posicao.y;
   double x[2];
   double x_distort[2];
-  x_distort[0] = (xc[0] - cc[0])/fc[0];
-  x_distort[1] = (xc[1] - cc[1])/fc[1];
+  x_distort[0] = (xc[0] - cc0)/fc0;
+  x_distort[1] = (xc[1] - cc1)/fc1;
 
   double delta_x[2];
-  double k1, k2, k3, k_radial, p1, p2, r2;
-  k1 = kc[0];
-  k2 = kc[1];
-  k3 = kc[4];
-  p1 = kc[2];
-  p2 = kc[3];
+  double k_radial, r2;
   x[0] = x_distort[0];
   x[1] = x_distort[1];
   for (int i = 0; i < 20; i++)
   {
     r2 = x[0]*x[0] + x[1]*x[1];
-    k_radial = 1.0 + k1 * r2 + k2 * pow(r2,2) + k3 * pow(r2,3);
-    delta_x[0] = 2 * p1 * x[0] * x[1] + p2*(r2 + 2 * pow(x[0],2));
-    delta_x[1] = p1*(r2 + 2 * pow(x[1],2)) + 2 * p2 * x[0] * x[1];
+    k_radial = 1.0 + kc0 * r2 + kc1 * pow(r2,2) + kc4 * pow(r2,3);
+    delta_x[0] = 2 * kc2 * x[0] * x[1] + kc3*(r2 + 2 * pow(x[0],2));
+    delta_x[1] = kc2*(r2 + 2 * pow(x[1],2)) + 2 * kc3 * x[0] * x[1];
     x[0] = (x_distort[0] - delta_x[0])/k_radial;
     x[1] = (x_distort[1] - delta_x[1])/k_radial;
   }
-  posicao.x = x[0]*fc[0] + cc[0];
-  posicao.y = x[1]*fc[1] + cc[1];
+  posicao.x = x[0]*fc0 + cc0;
+  posicao.y = x[1]*fc1 + cc1;
 
   //------------------------------------- Parâmetros Extrínsecos
 
@@ -108,13 +125,13 @@ void Camera::Localizar(Posicao &posicao)
   xPixel = posicao.x;
   yPixel = posicao.y;
 
-  escala = H[2][0]*xPixel + H[2][1]*yPixel + H[2][2];
-  xMundo = (H[0][0]*xPixel +
-            H[0][1]*yPixel +
-            H[0][2]) / escala;
-  yMundo = (H[1][0]*xPixel +
-            H[1][1]*yPixel +
-            H[1][2]) / escala;
+  escala = H20*xPixel + H21*yPixel + H22;
+  xMundo = (H00*xPixel +
+            H01*yPixel +
+            H02) / escala;
+  yMundo = (H10*xPixel +
+            H11*yPixel +
+            H12) / escala;
 
   posicao.x = xMundo;
   posicao.y = yMundo;

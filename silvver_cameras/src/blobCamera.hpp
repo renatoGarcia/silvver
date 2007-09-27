@@ -14,7 +14,7 @@
 #include "blobExtractor.hpp"
 
 using namespace std;
-using namespace verlab;
+using namespace silvver;
 
 class BlobCamera : public Camera
 {

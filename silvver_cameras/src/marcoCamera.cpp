@@ -24,7 +24,7 @@ int MarcoCamera::Iniciar()
     abort();
   }
 
-  return cameraSerial;
+  return configuracao.serial;
 }
 
 void MarcoCamera::ProcessarImagem(vector<Ente> &vecEnte)
@@ -36,7 +36,7 @@ void MarcoCamera::ProcessarImagem(vector<Ente> &vecEnte)
   vecEnte.clear();
   tempoAbsoluto = Camera::CapturarImagem();
 
-  extratorMarca->ExtrairMarcas(imgCamera,vecMarkerPontos,numLogger,this->cameraSerial);
+  extratorMarca->ExtrairMarcas(imgCamera,vecMarkerPontos,numLogger,configuracao.serial);
 
   vector<MarkerPontos>::iterator iteMarkerPontos = vecMarkerPontos.begin();
   double teta;

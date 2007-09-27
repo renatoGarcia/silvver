@@ -35,7 +35,7 @@ CameraConfig::CameraConfig(const CameraConfig& camConfig)
   this->modeloAbstrato = camConfig.modeloAbstrato;
 }
 
-static void CameraConfig::LerDadosCameras(vector<CameraConfig> &vecCameraConfig)
+void CameraConfig::LerDadosCameras(vector<CameraConfig> &vecCameraConfig)
 {
   vecCameraConfig.clear();
 
@@ -58,13 +58,22 @@ static void CameraConfig::LerDadosCameras(vector<CameraConfig> &vecCameraConfig)
 
     hCamera = TiXmlHandle(elemCamera);
 
-    TiXmlElement *elemModelo = hCamera.FirstChild("modelo").ToElement();
-    if ( elemModelo )
+    TiXmlElement *elemModeloFisico = hCamera.FirstChild("modelo_fisico").ToElement();
+    if ( elemModeloFisico )
     {
       sstream.clear();
-      sstream.str(elemModelo->GetText());
-      if( sstream.str() == "PGR" )tempCamConf.modelo = CameraConfig::PGR;
-      else tempCamConf.modelo = CameraConfig::PseudoCam;
+      sstream.str(elemModeloFisico->GetText());
+      if( sstream.str() == "PGR" )tempCamConf.modeloFisico = CameraConfig::enumFisico::PGR;
+      else tempCamConf.modeloFisico = CameraConfig::enumFisico::PseudoCam;
+    }
+
+    TiXmlElement *elemModeloAbstrato = hCamera.FirstChild("modelo_abstrato").ToElement();
+    if ( elemModeloAbstrato )
+    {
+      sstream.clear();
+      sstream.str(elemModeloAbstrato->GetText());
+      if( sstream.str() == "BLOB" )tempCamConf.modeloAbstrato = CameraConfig::enumAbstrato::BLOB;
+      else tempCamConf.modeloAbstrato = CameraConfig::enumAbstrato::MARCO;
     }
 
     TiXmlElement *elemSerial = hCamera.FirstChild("serial").ToElement();

@@ -10,12 +10,14 @@
 #include <vector>
 #include <string>
 
+using namespace std;
+
 class CameraConfig
 {
-private:
+public:
 
   enum enumFisico{PGR,PseudoCam}modeloFisico;
-  enum enumAbstrato{BLOB,MARCO}modeloAbstrato;
+  enum enumAbstrato{BLOB=103,MARCO=104}modeloAbstrato;
   unsigned frequencia;
   unsigned serial;
   unsigned resolucao[2];

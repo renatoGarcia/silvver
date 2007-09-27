@@ -119,6 +119,9 @@
 				RelativePath=".\src\camera.cpp">
 			</File>
 			<File
+				RelativePath=".\src\cameraConfig.cpp">
+			</File>
+			<File
 				RelativePath=".\src\conexao.cpp">
 			</File>
 			<File
@@ -169,6 +172,9 @@
 				RelativePath=".\src\camera.hpp">
 			</File>
 			<File
+				RelativePath=".\src\cameraConfig.hpp">
+			</File>
+			<File
 				RelativePath=".\src\conexao.hpp">
 			</File>
 			<File
@@ -196,6 +202,9 @@
 				RelativePath=".\src\hardCameras\pseudoCamera.hpp">
 			</File>
 			<File
+				RelativePath=".\src\silvver_tipos.hpp">
+			</File>
+			<File
 				RelativePath=".\src\timer.hpp">
 			</File>
 			<File
@@ -203,9 +212,6 @@
 			</File>
 			<File
 				RelativePath=".\src\tinyXml\tinyxml.h">
-			</File>
-			<File
-				RelativePath=".\src\tipos.hpp">
 			</File>
 		</Filter>
 		<Filter

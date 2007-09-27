@@ -10,12 +10,13 @@
 #include <string>
 #include "Camera.hpp"
 #include "extratorMarca.hpp"
+#include "cameraConfig.hpp"
 
-using namespace verlab;
+using namespace silvver;
 
 class MarcoCamera : public Camera
 {
-private:
+private: 
 
   ExtratorMarca *extratorMarca;
 

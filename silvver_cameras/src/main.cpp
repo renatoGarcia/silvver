@@ -24,15 +24,13 @@ int main(int argc, char **argv)
     portaRecepcionista = atoi(argv[2]);
   }
 
-  TipoDado tipoDado = /*CORES*/MARCAS;
-
   //-------------------------------------------------------------//
 
   vector<CameraConfig> vecCameraConfig;
-  LerDadosCameras(vecCameraConfig);
+  CameraConfig::LerDadosCameras(vecCameraConfig);
 
   Controlador *controlador;
-  controlador = new Controlador(portaRecepcionista,ip,tipoDado,vecCameraConfig);
+  controlador = new Controlador(portaRecepcionista,ip,vecCameraConfig);
 
   controlador->RodarControlador();
 

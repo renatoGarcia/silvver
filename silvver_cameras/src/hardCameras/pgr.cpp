@@ -2,7 +2,7 @@
 
 #define MAX_CAMERAS 5
 
-PGR::PGR(unsigned frequencia,char* diretorio,double tempoInicial)
+PGR::PGR(unsigned frequencia,const char* diretorio,double tempoInicial)
 {
   timer.iniciar(tempoInicial);
 

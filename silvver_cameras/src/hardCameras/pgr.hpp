@@ -38,7 +38,7 @@ private:
   FlyCaptureFrameRate frequencia;
 
 public:
-  PGR(unsigned frequencia,char* diretorio,double tempoInicial);
+  PGR(unsigned frequencia,const char* diretorio,double tempoInicial);
 
   ~PGR();
 

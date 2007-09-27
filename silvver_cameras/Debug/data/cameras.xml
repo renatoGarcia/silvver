@@ -2,7 +2,8 @@
 <!--configurado para o chao-->
 <camera ligada="sim">
 	<!--camera perto dos robos-->
-	<modelo> PGR </modelo>
+	<modelo_abstrato> MARCO </modelo_abstrato>
+	<modelo_fisico> PGR </modelo_fisico>
 	<serial> 5111119 </serial>
 	<diretorio> E:/renato/cam19/ </diretorio>
 	<resolucao> 640 480 </resolucao>
@@ -20,7 +21,8 @@
 
 <camera ligada="si">
 	<!--camera perto da porta-->
-	<modelo> PGR </modelo>
+	<modelo_abstrato> MARCO </modelo_abstrato>
+	<modelo_fisico> PGR </modelo_fisico>
 	<serial> 5110532 </serial>
 	<diretorio> E:/renato/cam32/ </diretorio>
 	<resolucao> 640 480 </resolucao>
@@ -38,7 +40,8 @@
 
 <camera ligada="si">
 	<!--camera perto do puma-->
-	<modelo> PGR </modelo>
+	<modelo_abstrato> MARCO </modelo_abstrato>
+	<modelo_fisico> PGR </modelo_fisico>
 	<serial> 5111139 </serial>
 	<diretorio> E:/renato/cam39/ </diretorio>
 	<resolucao> 640 480 </resolucao>
@@ -57,7 +60,8 @@
 <!-- ***************************** PSEUDOCAMERAS ******************************** -->
 
 <camera ligada="si">
-	<modelo>PseudoCamera</modelo>
+	<modelo_abstrato> MARCO </modelo_abstrato>
+	<modelo_fisico> PGR </modelo_fisico>
 	<serial>5111119</serial>
 	<diretorio>E:/renato/circulo/cam19/</diretorio>
 	<resolucao>640 480</resolucao>
@@ -74,7 +78,8 @@
 </camera>
 
 <camera ligada="si">
-	<modelo>PseudoCamera</modelo>
+	<modelo_abstrato> MARCO </modelo_abstrato>
+	<modelo_fisico> PGR </modelo_fisico>
 	<serial>5110532</serial>
 	<diretorio>E:/renato/circulo/cam32/</diretorio>
 	<resolucao>640 480</resolucao>
@@ -91,7 +96,8 @@
 </camera>
 
 <camera ligada="si">
-	<modelo>PseudoCamera</modelo>
+	<modelo_abstrato> MARCO </modelo_abstrato>
+	<modelo_fisico> PGR </modelo_fisico>
 	<serial>5111139</serial>
 	<diretorio>E:/renato/circulo/cam39/</diretorio>
 	<resolucao>640 480</resolucao>

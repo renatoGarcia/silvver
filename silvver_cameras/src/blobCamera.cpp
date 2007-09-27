@@ -28,7 +28,7 @@ int BlobCamera::Iniciar()
     abort();
   }
 
-  return cameraSerial;
+  return configuracao.serial;
 }
 
 void BlobCamera::ProcessarImagem(vector<Marca> &vecMarca)
