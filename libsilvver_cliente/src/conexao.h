@@ -1,6 +1,8 @@
-/**************************************************************************************
-    Efetua a conexão do cliente
-**************************************************************************************/
+/** Cabeçalho da classe Conexao
+ * @file   conexao.h
+ *
+ */
+
 #ifndef CONEXAO_H
 #define CONEXAO_H
 
@@ -21,11 +23,12 @@
 #define SOCKET int
 #endif
 
+/// Implementa a conecção e encapsula a comunicação com o Silvver-servidor.
 class Conexao
 {
 private:
 
-  // Socket para comunicação com o servidor.
+  /// Socket para comunicação com o servidor.
   SOCKET SocketConexao;
 
   // Define as caracteristicas do cliente
@@ -46,10 +49,22 @@ public:
 
   Conexao();
 
+  /** Inicia o socket SocketConexao. Utiliza o protocolo UDP/IP, e o associa à porta dada como
+   * como parâmetro.
+   * @return 1 em caso de erro, e 0 caso contrário.
+   */
   int Iniciar(int porta,const char *ip);
 
+  /** Envia uma mensagem para o Silvver-servidor.
+   * @param tamanho Tamanho da mensagem em Bytes.
+   * @return O número de Bytes efetivamente enviados.
+   */
   int Enviar(void *msg, int tamanho)const;
 
+  /** Recebe uma mensagem de Silvver-servidor.
+   * @param tamanho Tamanho esperado em Bytes da mensagem a ser recebida.
+   * @return O número de Bytes da mensagem recebida.
+   */
   int Receber(char *msg, int tamanho);
 };
 

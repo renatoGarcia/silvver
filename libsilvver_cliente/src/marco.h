@@ -19,34 +19,42 @@ using namespace verlab;
 using namespace boost;
 using namespace std;
 
-/// Representa um marco que será localizado.
+/// Representa um marco o qual será localizado pelo Silvver.
 class Marco
 {
 private:
 
-  // Mutex para a escrita e leitura em ultimaPose.
+  /// Mutex para controlar a escrita e leitura na Pose ultimaPose.
   mutex mutexUltimaPose;
 
-  // Última pose retornada pelas câmeras.
+  /// Valor da última Pose do presente marco que foi localizada  pelas câmeras,
+  /// e enviado através do Silvver-servidor.
   Pose ultimaPose;
 
+  /// Número de identificação único do marco, que será usado para identificar o robô univocamente.
   const int ID_ROBO;
 
-  // IP de onde está sendo executado o servidor.
+  /// Endereço IP da máquina onde está sendo executado o Silvver-servidor.
   const string IP;
 
+  /// Porta que será usada para a comunicação permanente com o Silvver-servidor.
+  /// Seu valor será dado pelo mesmo quando requisitada a conexão.
   unsigned portaConexao;
 
   Conexao *conexao;
 
-  // Thread para o método que ficará ouvindo a conexão com o servidor para receber os dados.
+  /// Thread onde será executado o método ouvirServidor.
   thread *thOuvirServidor;
 
-  // Instancia o atributo conexão, conectando-o ao sistema de visão.
-  void criarConexao();		/**< Testando o criarCon */
+  /// Envia um pedido de conexão ao recepcionista do Silvver-servidor, e a cria ao receber a resposta.
+  void criarConexao();
 
+  /// Método que ficará continuamente esperando pelas mensagens do Silvver-servidor contendo a pose atual.
+  /// Ele será executado em uma thread própria.
   static void ouvirServidor(Marco *objeto);
-  bool finalizarThread; // Sinaliza para função ouvirServidor terminar.
+
+  /// Sinalizador utilizado para terminar a função ouvirServidor.
+  bool finalizarThread;
 
   bool registrar;
   ofstream *arqRegistro;
@@ -54,7 +62,6 @@ private:
 public:
 
   /** Construtor da classe marco aaa
-   *
    * @param ip Endereço IP da máquina onde está sendo executado o silvver-servidor.
    * @param id Identificador único da marca que será localizada.
    * @param registrar Caso seja atribuido um valor true os dados recebidos serão registrados em um arquivo texto.
@@ -67,14 +74,13 @@ public:
   void conectar();
 
   /** Retorna a última pose recebida do servidor.
-   *
    * @param x Coordenada x da pose, valor dado em metros.
    * @param y Coordenada y da pose, valor dado em metros.
    * @param teta Ângulo da pose, valor dado em radianos.
    */
   void getPose(double &x,double &y, double &teta);
+
   /** Retorna um objeto do tipo Pose representando a última pose recebida do servidor.
-   *  Não é implementada na interface da biblioteca. silvver_cliente.h.
    */
   Pose getPose();
 };
