@@ -50,3 +50,8 @@ void Saidas::ReceberEstado(const vector<Ente> &vecRobo)
       clientes.find(iteEnte->id)->second->Enviar( (void*)&(*iteEnte),sizeof(*iteEnte) );
   }
 }
+
+void Saidas::RetirarSaida(int id)
+{
+  clientes.erase( clientes.find(id) );
+}

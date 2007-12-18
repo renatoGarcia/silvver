@@ -44,6 +44,13 @@ public:
    */
   void AdicionarSaida(Conexao *conexaoNovoCliente);
 
+  /** Retira o cliente com o id da lista de clientes.
+   * Caso haja um cliente o id dado, ele será retirado da lista de clientes.
+   *
+   * @param id Identificador do cliente a ser retirado
+   */
+  void RetirarSaida(int id);
+
   /** Recebe a pose de todos os robôs localizados, processa
    * e envia essa informação para os clientes.
    * @param vecRobo Vetor com todos os marcos localizados. Representados por um objeto da classe Ente.

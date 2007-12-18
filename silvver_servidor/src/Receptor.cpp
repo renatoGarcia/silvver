@@ -81,7 +81,7 @@ void Receptor::Recepcionista(Receptor *objeto)
 
       objeto->portaLivre++;
     }
-    else if( strcmp(msg,"SD") == 0 ) //Nova saida
+    else if( strcmp(msg,"SD") == 0 ) //Nova saída
     {
       Conexao *conexaoSaida = new Conexao();
       conexaoSaida->Iniciar(objeto->portaLivre);
@@ -91,6 +91,14 @@ void Receptor::Recepcionista(Receptor *objeto)
       objeto->saidas->AdicionarSaida( conexaoSaida );
 
       objeto->portaLivre++;
+    }
+    else if( strcmp(msg,"DC") == 0 ) //Desconectar saída
+    {
+      int id;
+      char OK[3] = "OK";
+      conexao.Receber( &id,sizeof(id) );
+      objeto->saidas->RetirarSaida(id);
+      conexao.Enviar( OK,sizeof(OK) );
     }
   }
 }
