@@ -9,14 +9,14 @@ IP(ip)
 {
   conexao = new Conexao();
   this->registrar = registrar;
+  this->finalizarThread = false;
 }
 
 Marco::~Marco()
 {
-  this->finalizarThread = true;
+  this->desconectar();
   delete conexao;
   delete arqRegistro;
-  thOuvirServidor->join();
   delete thOuvirServidor;
 }
 
@@ -49,7 +49,7 @@ void Marco::ouvirServidor(Marco *objeto)
 {
   Ente enteReceptor;
 
-  while(true)
+  while( !objeto->finalizarThread )
   {
     objeto->conexao->Receber((char*)&enteReceptor, sizeof(enteReceptor));
 
@@ -79,6 +79,19 @@ void Marco::conectar()
   criarConexao();
 
   thOuvirServidor= new thread( bind(&Marco::ouvirServidor,this) );
+}
+
+void Marco::desconectar()
+{
+  this->finalizarThread = true;
+  thOuvirServidor->join();
+
+  char resposta[3];
+  Conexao conexaoRecepcionista;
+  conexaoRecepcionista.Iniciar(PORTA_RECEPCIONISTA,IP.c_str());
+  conexaoRecepcionista.Enviar((void*)"DC",sizeof("DC") );
+  conexaoRecepcionista.Enviar((void*)ID_ROBO,sizeof(ID_ROBO) );
+  conexaoRecepcionista.Receber((char*)&resposta,sizeof(resposta));
 }
 
 Pose Marco::getPose()

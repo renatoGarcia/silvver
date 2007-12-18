@@ -70,8 +70,11 @@ public:
 
   ~Marco();
 
-  /// Conecta uma instância da classe ao servidor.
+  /// Conecta o marco ao servidor.
   void conectar();
+
+  /// Desfaz a conexão do marco com o servidor.
+  void desconectar();
 
   /** Retorna a última pose recebida do servidor.
    * @param x Coordenada x da pose, valor dado em metros.
