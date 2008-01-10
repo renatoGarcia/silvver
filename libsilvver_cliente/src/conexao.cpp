@@ -6,6 +6,8 @@ using namespace std;
 Conexao::Conexao()
 {
   this->SenderAddrSize = sizeof(SenderAddr);
+  TV.tv_sec = 0;
+  TV.tv_usec = 100000;
 }
 
 int Conexao::Iniciar(int porta,const char *ip)
@@ -24,35 +26,51 @@ int Conexao::Iniciar(int porta,const char *ip)
   #endif
 
   // Criação do Socket para conexao UDP/IP
-  SocketConexao = socket(AF_INET,SOCK_DGRAM,0);
-  if (SocketConexao<=0)
+  if( (SocketConexao = socket(AF_INET,SOCK_DGRAM,0)) <= 0 )
   {
     cerr << "Erro ao criar o socket" << endl;
     return 1;
   }
 
   // Iniciação do Cliente
-  infConexao.sin_family = AF_INET;              // Indica a utilização do IPv4
-  infConexao.sin_addr.s_addr = inet_addr(ip);   // Endereço IP do servidor
-  infConexao.sin_port = htons(porta);           // Porta utiliazada
-//   SenderAddr=infConexao;
+  infConexao.sin_family = AF_INET;            // Indica a utilização do IPv4
+  infConexao.sin_addr.s_addr = inet_addr(ip); // Endereço IP do servidor
+  infConexao.sin_port = htons(porta);         // Porta utiliazada
+
+  FD_ZERO(&master_readfds);
+  FD_SET(SocketConexao, &master_readfds);
 
   return 0;
 }
 
-int Conexao::Receber(char *msg, int tamanho)
+int Conexao::Receber(char *msg, int tamanho) throw(Excecoes)
 {
   int bytes_recebidos;
+  fd_set readfds;
+  struct timeval espera;
 
-  bytes_recebidos = recvfrom(SocketConexao, msg, tamanho,
-                             0, (struct sockaddr*)&SenderAddr,
-                             &SenderAddrSize);
+  readfds = master_readfds;
+  espera = TV;
 
-  if ( bytes_recebidos == -1 )
-    cerr << "A mensagem nao foi recebida corretamente" << endl;
-  if ( bytes_recebidos != tamanho )
-    cerr << "O tamanho do dado recebido (" << bytes_recebidos
-         << ") nao corresponde com o esperado (" << tamanho << ")" << endl;
+  select( SocketConexao+1, &readfds, NULL, NULL, &espera);
+  if( FD_ISSET(SocketConexao, &readfds) )
+  {
+
+    bytes_recebidos = recvfrom(SocketConexao, msg, tamanho,
+			       0, (struct sockaddr*)&SenderAddr,
+			       &SenderAddrSize);
+
+    if ( bytes_recebidos == -1 )
+      cerr << "A mensagem nao foi recebida corretamente" << endl;
+    if ( bytes_recebidos != tamanho )
+      cerr << "O tamanho do dado recebido (" << bytes_recebidos
+	   << ") nao corresponde com o esperado (" << tamanho << ")" << endl;
+  }
+  else
+  {
+    Excecoes ex = tempo_receber;
+    throw ex;
+  }
 
   return( bytes_recebidos );
 }

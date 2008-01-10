@@ -14,9 +14,11 @@ IP(ip)
 
 Marco::~Marco()
 {
-  this->desconectar();
   delete conexao;
-  delete arqRegistro;
+  if (registrar)
+  {
+    delete arqRegistro;
+  }
   delete thOuvirServidor;
 }
 
@@ -87,11 +89,15 @@ void Marco::desconectar()
   thOuvirServidor->join();
 
   char resposta[3];
+  char pedido[3] = "DC";
+  int id = ID_ROBO;
   Conexao conexaoRecepcionista;
   conexaoRecepcionista.Iniciar(PORTA_RECEPCIONISTA,IP.c_str());
-  conexaoRecepcionista.Enviar((void*)"DC",sizeof("DC") );
-  conexaoRecepcionista.Enviar((void*)ID_ROBO,sizeof(ID_ROBO) );
-  conexaoRecepcionista.Receber((char*)&resposta,sizeof(resposta));
+  conexaoRecepcionista.Enviar((void*)pedido,sizeof(pedido) );
+  conexaoRecepcionista.Enviar((void*)&id,sizeof(id) );
+  conexaoRecepcionista.Receber((char*)resposta,sizeof(resposta));
+
+  cout << "Desconectado, resposta: " << resposta << endl;
 }
 
 Pose Marco::getPose()

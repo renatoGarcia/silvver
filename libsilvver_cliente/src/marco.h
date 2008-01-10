@@ -9,7 +9,7 @@
 #define MARCO_H
 
 #include "conexao.h"
-#include <tipos.h>
+#include "tipos.h"
 #include <boost/thread/thread.hpp>
 #include <boost/thread/mutex.hpp>
 #include <string>

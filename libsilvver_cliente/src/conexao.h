@@ -6,6 +6,9 @@
 #ifndef CONEXAO_H
 #define CONEXAO_H
 
+#include <string>
+#include <unistd.h> //TODO: Verificar compatibilidade com windows para o uso
+                    //      de select()
 #ifdef HAVE_CONFIG_H
 #include <config.h>
 #endif
@@ -37,6 +40,9 @@ private:
   // SenderAddr.sin_family conterá o endereço
   sockaddr_in SenderAddr;
 
+  fd_set master_readfds;
+  struct timeval TV;
+
   // Tamanhos em bytes de sockaddr_in SenderAddr.
   #ifdef HAVE_WINDOWS_SOCKETS
   int SenderAddrSize;
@@ -48,6 +54,8 @@ private:
 public:
 
   Conexao();
+
+  typedef enum excecoes{ tempo_receber } Excecoes;
 
   /** Inicia o socket SocketConexao. Utiliza o protocolo UDP/IP, e o associa à porta dada como
    * como parâmetro.
@@ -65,7 +73,7 @@ public:
    * @param tamanho Tamanho esperado em Bytes da mensagem a ser recebida.
    * @return O número de Bytes da mensagem recebida.
    */
-  int Receber(char *msg, int tamanho);
+  int Receber(char *msg, int tamanho) throw(Excecoes);
 };
 
 #endif
