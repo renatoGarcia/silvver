@@ -99,6 +99,7 @@ void Receptor::Recepcionista(Receptor *objeto)
       conexao.Receber( &id,sizeof(id) );
       objeto->saidas->RetirarSaida(id);
       conexao.Enviar( OK,sizeof(OK) );
+      cout << "Retirado cliente id: " << id << endl;
     }
   }
 }
