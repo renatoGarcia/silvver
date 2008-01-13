@@ -10,6 +10,11 @@ Conexao::Conexao()
   TV.tv_usec = 100000;
 }
 
+Conexao::~Conexao()
+{
+  close(SocketConexao);
+}
+
 int Conexao::Iniciar(int porta,const char *ip)
 {
   int erro;
@@ -68,7 +73,7 @@ int Conexao::Receber(char *msg, int tamanho) throw(Excecoes)
   }
   else
   {
-    Excecoes ex = tempo_receber;
+    Excecoes ex = exc_tempoReceber;
     throw ex;
   }
 
