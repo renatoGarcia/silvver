@@ -1,5 +1,5 @@
 /**************************************************************************************
-    Esta classe implementa uma c�mera que filma blobs. Ele tem como objetivo
+    Esta classe implementa uma câmera que filma blobs. Ele tem como objetivo
     retornar um vector de CvConnectedComp com os blobs das cores encontradas.
 **************************************************************************************/
 

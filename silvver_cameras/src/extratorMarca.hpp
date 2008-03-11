@@ -1,18 +1,15 @@
-#include <iostream>
-
 #ifndef EXTRATORMARCA_HPP
 #define EXTRATORMARCA_HPP
 
-//#include <ARToolKitPlus/TrackerSingleMarkerImpl.h>
-//using namespace ARToolKitPlus;
-#include <cv.h>
+#include <ARToolKitPlus/TrackerSingleMarker.h>
+#include <iostream>
+#include <opencv/cv.h>
 #include <vector>
+#include <boost/scoped_ptr.hpp>
 #include "silvver_tipos.hpp"
-#include <boost/thread/mutex.hpp>
 
-using namespace std;
 using namespace silvver;
-using namespace boost;
+
 // Estrutura para manter os pontos de interece de uma marca encontrada
 struct MarkerPontos
 {
@@ -21,16 +18,22 @@ struct MarkerPontos
   Marca centro;
 };
 
+class MyLogger : public ARToolKitPlus::Logger
+{
+    void artLog(const char* nStr)
+    {
+      std::clog << nStr << std::endl;
+    }
+};
+
 class ExtratorMarca
 {
 
 private:
 
-  //MyLogger *logger;
+  MyLogger logger;
 
-  //TrackerSingleMarker *tracker;
-
-  static int numLogger;
+  boost::scoped_ptr<ARToolKitPlus::TrackerSingleMarker> tracker;
 
 public:
 
@@ -38,7 +41,7 @@ public:
 
   int Iniciar();
 
-  void ExtrairMarcas(IplImage *imgEntrada,vector<MarkerPontos> &vecMarkerPontos,int logNum,int serial);
+  void ExtrairMarcas(IplImage *imgEntrada,std::vector<MarkerPontos> &vecMarkerPontos,int logNum,int serial);
 };
 
 #endif

@@ -74,7 +74,7 @@ void Controlador::ConectarCamera(const CameraConfig &cameraConfig)
 
   switch(cameraConfig.modeloAbstrato)
   {
-  case CameraConfig::enumAbstrato::BLOB:
+  case CameraConfig::BLOB:
     {
       thCamera.push_back( new thread(bind(&Controlador::BlobCam,
                                           cameraConfig,
@@ -85,7 +85,7 @@ void Controlador::ConectarCamera(const CameraConfig &cameraConfig)
       break;
     }
 
-  case CameraConfig::enumAbstrato::MARCO:
+  case CameraConfig::MARCO:
     {
       thCamera.push_back( new thread(bind(&Controlador::MarcaCam,
                                           cameraConfig,

@@ -8,7 +8,7 @@
 
 #include <vector>
 #include <string>
-#include "Camera.hpp"
+#include "camera.hpp"
 #include "extratorMarca.hpp"
 #include "cameraConfig.hpp"
 

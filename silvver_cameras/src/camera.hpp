@@ -1,5 +1,5 @@
 #include <iostream>
-#include <highgui.h>
+#include <opencv/highgui.h>
 /*************************************************************************************
     Classe base para as diversas câmeras funcionais, como blobCamera e marcaCamera
 **************************************************************************************/
@@ -7,12 +7,12 @@
 #ifndef CAMERA_HPP
 #define CAMERA_HPP
 
-#include <cv.h>
+#include <opencv/cv.h>
 #include "silvver_tipos.hpp"
 #include "timer.hpp"
 #include "hardCamera.hpp"
 #include "hardCameras/modelos.hpp"
-#include "CameraConfig.hpp"
+#include "cameraConfig.hpp"
 
 using namespace silvver;
 
@@ -21,12 +21,12 @@ class Camera
 private:
   // Conta o tempo em que a camera ficou em funcionamento, usado para
   // calcular a taxa média de quadros por segundo.
-  //Timer *timer;  
+  //Timer *timer;
 
   double cc0, cc1;
   double fc0, fc1;
   double kc0, kc1, kc2, kc3, kc4;
-  double H00, H01, H02, 
+  double H00, H01, H02,
          H10, H11, H12,
          H20, H21, H22;
 

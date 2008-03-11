@@ -8,7 +8,7 @@ mesma tonalidade, e cuja área é maior que uma área mínima preestabelecida.
 #ifndef BLOBEXTRACTOR_HPP
 #define BLOBEXTRACTOR_HPP
 
-#include <cv.h>
+#include <opencv/cv.h>
 #include <vector>
 #include "silvver_tipos.hpp"
 

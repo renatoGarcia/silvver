@@ -1,8 +1,8 @@
 #ifndef HARDCAMERA_HPP
 #define HARDCAMERA_HPP
 
-#include <cv.h>
-#include <highgui.h>
+#include <opencv/cv.h>
+#include <opencv/highgui.h>
 #include <string>
 #include "timer.hpp"
 

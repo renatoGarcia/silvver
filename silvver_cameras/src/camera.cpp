@@ -25,12 +25,14 @@ Camera::Camera(const CameraConfig& camConfig,double tempoInicial)
   H20 = camConfig.H[2][0];
   H21 = camConfig.H[2][1];
   H22 = camConfig.H[2][2];
- 
+
   switch(this->configuracao.modeloFisico)
   {
+#ifdef HAVE_PGRFLYCAPTURE_HEADERS
   case CameraConfig::PGR:
     hardCamera    = new PGR(camConfig.frequencia,camConfig.diretorio.c_str(),tempoInicial);
     break;
+#endif
   case CameraConfig::PseudoCam:
     hardCamera    = new PseudoCamera(733,camConfig.frequencia,camConfig.diretorio.c_str());
     break;
