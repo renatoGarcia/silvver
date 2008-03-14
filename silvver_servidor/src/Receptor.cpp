@@ -67,15 +67,17 @@ void Receptor::Recepcionista(Receptor *objeto)
   {
     conexao.Receber( msg,sizeof(msg) );// Recebe a primeira mensagem
 
-    if( strcmp(msg,"PT") == 0 ) //Nova camera
+    if( strcmp(msg,"TP") == 0 ) //Tempo Atual
+    {
+      double tempoAtual = objeto->tempoDecorrido();
+      conexao.Enviar( &tempoAtual, sizeof(tempoAtual) );
+    }
+    else if( strcmp(msg,"PT") == 0 ) //Nova camera
     {
       Conexao *conexaoEntrada = new Conexao();
       conexaoEntrada->Iniciar(objeto->portaLivre);
 
       conexao.Enviar( &objeto->portaLivre,sizeof(objeto->portaLivre) );
-
-      double tempoAtual = objeto->tempoDecorrido();
-      conexao.Enviar( &tempoAtual, sizeof(tempoAtual) );
 
       objeto->entradas->AdicionarEntrada( conexaoEntrada );
 

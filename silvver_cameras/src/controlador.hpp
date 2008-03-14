@@ -1,79 +1,64 @@
 #ifndef CONTROLADOR_HPP
 #define CONTROLADOR_HPP
 
-#include <vector>
-#include <string>
-#include <algorithm>
-#include <sstream>
-#include <fstream>
-#include <boost/thread/thread.hpp>
+
+#include <boost/noncopyable.hpp>
+#include <boost/scoped_ptr.hpp>
 #include <boost/thread/mutex.hpp>
-#include <boost/bind.hpp>
-#include "camera.hpp"
+#include <string>
 #include "cameraConfig.hpp"
+#include "camera.hpp"
 #include "blobCamera.hpp"
 #include "marcoCamera.hpp"
 #include "conexao.hpp"
 #include "silvver_tipos.hpp"
-#include "timer.hpp"
 
-using namespace std;
-using namespace boost;
-using namespace silvver;
 
-/** Inicia as câmeras, conecta-as ao silvver-servidor, e agrupa as threads onde elas serão executadas.
- *
- */
-class Controlador
+class Controlador : boost::noncopyable
+{
+protected:
+
+  /// Evita a criação e iniciação simultânea das câmeras.
+  static boost::mutex mutexInicarCamera;
+
+  /// Classe que descreve as configurações da câmera abstrada
+  CameraConfig cameraConfig;
+
+  /// Conexao com o servidor, usada para enviar as localizações
+  Conexao conexao;
+  std::string ipServidor;
+  unsigned porta;
+
+  /// Número de identificação único da Câmera abstrata
+  unsigned marcoCamID;
+
+  bool termina;
+
+  void conectar();
+
+public:
+
+  virtual void operator()() = 0;
+
+  void terminar();
+};
+
+
+
+class MarcoCameraControlador : public Controlador
 {
 private:
 
-  /// Evita a criação e iniciação simultânea das câmeras.
-  static mutex mutexInicarCamera;
+  /// Câmera abstrata para a localização de marcos
+  boost::scoped_ptr<MarcoCamera> marcoCam;
 
-  // Contém o caminho e os nomes dos arquivos de texto que definem as cores.
-//   vector<string> vectorCores;
+public:
 
-  /// Conjunto das estruturas de configuração de todas as câmeras.
-  vector<CameraConfig> vecCameraConfig;
+  MarcoCameraControlador(CameraConfig cameraConfig, unsigned Porta,
+			 std::string ipServidor);
 
-  /// Threads nas quais os métodos controladores das câmeras serão executados.
-  vector<thread*> thCamera;
-
-  /// Objeto da classe Conexao que se encontra que possui os dados para comunição com o recepcionista do silvver-servidor.
-  Conexao *conexaoRecepcionista;
-
-  // Porta � qual enviar a primeira mensagem, a fim de se
-  // descobrir em qual porta a BlobCamera deve se conectar
-  int portaReceptor;
-
-  // Ip do receptor
-  char *ipReceptor;
-
-  // Ser� true quando for para encerrar as blobCameras
-  static bool termina;
-
-  // Controlar� uma blobCamera. � executado em uma thread separada.
-  static void BlobCam(const CameraConfig &cameraConfig,vector<string> vecCores,int porta,char *ip,Conexao* conexao);
-
-  // Controlar� uma marcaCamera. � executado em uma thread separada.
-  static void MarcaCam(const CameraConfig &cameraConfig,int porta,char *ip,double tempoInicial,Conexao* conexao);
-
-  // Prepara um conex�o para um nova blobC�mera no servidor
-  void ConectarCamera(const CameraConfig &cameraConfig);
-
- public:
-
-  Controlador(int porta,char *ip,vector<CameraConfig> &vecCameraConfig);
-
-  ~Controlador();
-
-  // Para cada par n�mero Serial/matriz H passados pelo arquivo
-  // cameras.txt cria uma thread que rodar� o m�todo BlobCam()
-  void RodarControlador();
-
-  // Fecha todas as blobCameras, e prepara o controlador para terminar
-  void PararControlador();
+  virtual void operator()();
 };
+
 
 #endif

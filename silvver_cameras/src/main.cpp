@@ -1,47 +1,37 @@
 #include <iostream>
-#include <string.h>
+#include <string>
 #include <vector>
-#include "controlador.hpp"
+#include <boost/scoped_ptr.hpp>
+#include "gerenciador.hpp"
 #include "cameraConfig.hpp"
-
-using namespace std;
+#include "cmdline.h"
 
 // Mutex para controlar a escrita na saida padrão
 boost::mutex mutexCout;
 
 int main(int argc, char **argv)
 {
+  gengetopt_args_info args_info;
+  if (cmdline_parser (argc, argv, &args_info) != 0)
+    return 1;
 
-  char ip[16]="127.0.0.1";
-  int portaRecepcionista = 12000;
+  std::string ipServidor(args_info.ip_servidor_arg);
+  int portaRecepcionista = args_info.porta_recepcionista_arg;
 
-  if(argc>1)
-  {
-    strncpy(ip,argv[1],16);
-  }
-  if(argc>2)
-  {
-    portaRecepcionista = atoi(argv[2]);
-  }
-
-  //-------------------------------------------------------------//
-
-  vector<CameraConfig> vecCameraConfig;
+  std::vector<CameraConfig> vecCameraConfig;
   CameraConfig::LerDadosCameras(vecCameraConfig);
 
-  Controlador *controlador;
-  controlador = new Controlador(portaRecepcionista,ip,vecCameraConfig);
+  Gerenciador gerenciador(portaRecepcionista,ipServidor,vecCameraConfig);
 
-  controlador->RodarControlador();
+  gerenciador.RodarGerenciador();
 
   char ch = getchar(); //Espera o usuário teclar enter para terminar.
 
-  cout << "Terminando..." << endl;
+  std::cout << "Terminando..." << std::endl;
 
-  controlador->PararControlador();
-  delete controlador;
+  gerenciador.PararGerenciador();
 
-  cout << "Fim do Programa" << endl;
+  std::cout << "Fim do Programa" << std::endl;
 
   return 0;
 }
