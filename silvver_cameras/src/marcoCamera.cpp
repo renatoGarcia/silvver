@@ -3,12 +3,7 @@
 MarcoCamera::MarcoCamera(const CameraConfig& camConfig,double tempoInicial)
  :Camera(camConfig,tempoInicial)
 {
-  extratorMarca = new ExtratorMarca(camConfig.resolucao[0],camConfig.resolucao[1]);
-}
-
-MarcoCamera::~MarcoCamera()
-{
-  delete extratorMarca;
+  extratorMarca.reset(new ExtratorMarca(camConfig.resolucao[0],camConfig.resolucao[1]));
 }
 
 int MarcoCamera::Iniciar()

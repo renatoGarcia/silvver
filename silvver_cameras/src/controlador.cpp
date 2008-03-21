@@ -3,7 +3,7 @@
 // Mutex usado para escrever na saída padrão. Declarado em main.cpp.
 extern boost::mutex mutexCout;
 
-boost::mutex Controlador::mutexInicarCamera;
+boost::mutex Controlador::mutexIniciarCamera;
 
 void Controlador::conectar()
 {
@@ -46,11 +46,11 @@ MarcoCameraControlador::MarcoCameraControlador(CameraConfig cameraConfig,
 
 void MarcoCameraControlador::operator()()
 {
-
+  {boost::mutex::scoped_lock lock(mutexIniciarCamera);
   //TODO: Implementar o controle de tempo
   double tempoInicial = 0;
   marcoCam.reset( new MarcoCamera(cameraConfig,tempoInicial) );
-  marcoCamID = marcoCam->Iniciar();
+  marcoCamID = marcoCam->Iniciar();}
 
   vector<Ente> vecEnte;
   Pacote<Ente> pacote(marcoCamID);

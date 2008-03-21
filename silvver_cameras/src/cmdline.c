@@ -34,6 +34,8 @@ const char *gengetopt_args_info_help[] = {
   "",
   "  -p, --porta-recepcionista=PORTA\n                                A porta onde o recepcionista do servidor está \n                                  ligado  (default=`12000')",
   "",
+  "  -c, --cameras-config=ARQUIVO  Arquivo XML com a configuração das câmeras.  \n                                  (default=`cameras.xml')",
+  "",
     0
 };
 
@@ -56,6 +58,7 @@ void clear_given (struct gengetopt_args_info *args_info)
   args_info->version_given = 0 ;
   args_info->ip_servidor_given = 0 ;
   args_info->porta_recepcionista_given = 0 ;
+  args_info->cameras_config_given = 0 ;
 }
 
 static
@@ -65,6 +68,8 @@ void clear_args (struct gengetopt_args_info *args_info)
   args_info->ip_servidor_orig = NULL;
   args_info->porta_recepcionista_arg = 12000;
   args_info->porta_recepcionista_orig = NULL;
+  args_info->cameras_config_arg = gengetopt_strdup ("cameras.xml");
+  args_info->cameras_config_orig = NULL;
   
 }
 
@@ -75,6 +80,7 @@ void init_args_info(struct gengetopt_args_info *args_info)
   args_info->version_help = gengetopt_args_info_help[1] ;
   args_info->ip_servidor_help = gengetopt_args_info_help[2] ;
   args_info->porta_recepcionista_help = gengetopt_args_info_help[3] ;
+  args_info->cameras_config_help = gengetopt_args_info_help[4] ;
   
 }
 
@@ -129,6 +135,16 @@ cmdline_parser_release (struct gengetopt_args_info *args_info)
       free (args_info->porta_recepcionista_orig); /* free previous argument */
       args_info->porta_recepcionista_orig = 0;
     }
+  if (args_info->cameras_config_arg)
+    {
+      free (args_info->cameras_config_arg); /* free previous argument */
+      args_info->cameras_config_arg = 0;
+    }
+  if (args_info->cameras_config_orig)
+    {
+      free (args_info->cameras_config_orig); /* free previous argument */
+      args_info->cameras_config_orig = 0;
+    }
   
   clear_given (args_info);
 }
@@ -165,6 +181,13 @@ cmdline_parser_file_save(const char *filename, struct gengetopt_args_info *args_
       fprintf(outfile, "%s=\"%s\"\n", "porta-recepcionista", args_info->porta_recepcionista_orig);
     } else {
       fprintf(outfile, "%s\n", "porta-recepcionista");
+    }
+  }
+  if (args_info->cameras_config_given) {
+    if (args_info->cameras_config_orig) {
+      fprintf(outfile, "%s=\"%s\"\n", "cameras-config", args_info->cameras_config_orig);
+    } else {
+      fprintf(outfile, "%s\n", "cameras-config");
     }
   }
   
@@ -253,11 +276,12 @@ cmdline_parser_internal (int argc, char * const *argv, struct gengetopt_args_inf
         { "version",	0, NULL, 'V' },
         { "ip-servidor",	1, NULL, 0 },
         { "porta-recepcionista",	1, NULL, 'p' },
+        { "cameras-config",	1, NULL, 'c' },
         { NULL,	0, NULL, 0 }
       };
 
       stop_char = 0;
-      c = getopt_long (argc, argv, "hVp:", long_options, &option_index);
+      c = getopt_long (argc, argv, "hVp:c:", long_options, &option_index);
 
       if (c == -1) break;	/* Exit from `while (1)' loop.  */
 
@@ -291,6 +315,24 @@ cmdline_parser_internal (int argc, char * const *argv, struct gengetopt_args_inf
           if (args_info->porta_recepcionista_orig)
             free (args_info->porta_recepcionista_orig); /* free previous string */
           args_info->porta_recepcionista_orig = gengetopt_strdup (optarg);
+          break;
+
+        case 'c':	/* Arquivo XML com a configuração das câmeras..  */
+          if (local_args_info.cameras_config_given)
+            {
+              fprintf (stderr, "%s: `--cameras-config' (`-c') option given more than once%s\n", argv[0], (additional_error ? additional_error : ""));
+              goto failure;
+            }
+          if (args_info->cameras_config_given && ! override)
+            continue;
+          local_args_info.cameras_config_given = 1;
+          args_info->cameras_config_given = 1;
+          if (args_info->cameras_config_arg)
+            free (args_info->cameras_config_arg); /* free previous string */
+          args_info->cameras_config_arg = gengetopt_strdup (optarg);
+          if (args_info->cameras_config_orig)
+            free (args_info->cameras_config_orig); /* free previous string */
+          args_info->cameras_config_orig = gengetopt_strdup (optarg);
           break;
 
 

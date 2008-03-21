@@ -13,3 +13,10 @@ option "porta-recepcionista"  p  "A porta onde o recepcionista do servidor está
        optional
 
 text   ""
+
+option "cameras-config"       c  "Arquivo XML com a configuração das câmeras."
+       string                 typestr="ARQUIVO"
+       default="cameras.xml"
+       optional
+
+text   ""

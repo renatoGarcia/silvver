@@ -19,7 +19,7 @@ class Controlador : boost::noncopyable
 protected:
 
   /// Evita a criação e iniciação simultânea das câmeras.
-  static boost::mutex mutexInicarCamera;
+  static boost::mutex mutexIniciarCamera;
 
   /// Classe que descreve as configurações da câmera abstrada
   CameraConfig cameraConfig;

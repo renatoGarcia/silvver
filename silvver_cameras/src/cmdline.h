@@ -32,11 +32,15 @@ struct gengetopt_args_info
   int porta_recepcionista_arg;	/* A porta onde o recepcionista do servidor está ligado (default='12000').  */
   char * porta_recepcionista_orig;	/* A porta onde o recepcionista do servidor está ligado original value given at command line.  */
   const char *porta_recepcionista_help; /* A porta onde o recepcionista do servidor está ligado help description.  */
+  char * cameras_config_arg;	/* Arquivo XML com a configuração das câmeras. (default='cameras.xml').  */
+  char * cameras_config_orig;	/* Arquivo XML com a configuração das câmeras. original value given at command line.  */
+  const char *cameras_config_help; /* Arquivo XML com a configuração das câmeras. help description.  */
   
   int help_given ;	/* Whether help was given.  */
   int version_given ;	/* Whether version was given.  */
   int ip_servidor_given ;	/* Whether ip-servidor was given.  */
   int porta_recepcionista_given ;	/* Whether porta-recepcionista was given.  */
+  int cameras_config_given ;	/* Whether cameras-config was given.  */
 
 } ;
 

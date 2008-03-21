@@ -4,11 +4,11 @@
 extern boost::mutex mutexCout;
 
 Gerenciador::Gerenciador(int portaRecepcionista, std::string ipServidor,
-			 vector<CameraConfig> &vecCameraConfig)
+                         vector<CameraConfig> &vecCameraConfig)
 {
   this->vecCameraConfig.resize( vecCameraConfig.size() );
   copy( vecCameraConfig.begin(), vecCameraConfig.end(),
-	this->vecCameraConfig.begin() );
+        this->vecCameraConfig.begin() );
 
   this->portaRecepcionista = portaRecepcionista;
   this->ipServidor = ipServidor;
@@ -56,8 +56,8 @@ void Gerenciador::ConectarCamera(const CameraConfig &cameraConfig)
     {
       vecCamControl.push_back(boost::shared_ptr<Controlador>
        	                      (new MarcoCameraControlador(cameraConfig,
-							  portaConectar,
-							  ipServidor)));
+                                                          portaConectar,
+                                                          ipServidor)));
       thCamera.push_back(boost::shared_ptr<boost::thread>
                          (new thread( boost::ref(*vecCamControl.back())) ));
       break;

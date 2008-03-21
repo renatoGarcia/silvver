@@ -4,27 +4,27 @@ Camera::Camera(const CameraConfig& camConfig,double tempoInicial)
 {
   this->configuracao = camConfig;
 
-  cc0 = camConfig.cc[0];
-  cc1 = camConfig.cc[1];
+  cc0 = camConfig.cc.at(0);
+  cc1 = camConfig.cc.at(1);
 
-  fc0 = camConfig.fc[0];
-  fc1 = camConfig.fc[1];
+  fc0 = camConfig.fc.at(0);
+  fc1 = camConfig.fc.at(1);
 
-  kc0 = camConfig.kc[0];
-  kc1 = camConfig.kc[1];
-  kc2 = camConfig.kc[2];
-  kc3 = camConfig.kc[3];
-  kc4 = camConfig.kc[4];
+  kc0 = camConfig.kc.at(0);
+  kc1 = camConfig.kc.at(1);
+  kc2 = camConfig.kc.at(2);
+  kc3 = camConfig.kc.at(3);
+  kc4 = camConfig.kc.at(4);
 
-  H00 = camConfig.H[0][0];
-  H01 = camConfig.H[0][1];
-  H02 = camConfig.H[0][2];
-  H10 = camConfig.H[1][0];
-  H11 = camConfig.H[1][1];
-  H12 = camConfig.H[1][2];
-  H20 = camConfig.H[2][0];
-  H21 = camConfig.H[2][1];
-  H22 = camConfig.H[2][2];
+  H00 = camConfig.H.at(0);
+  H01 = camConfig.H.at(1);
+  H02 = camConfig.H.at(2);
+  H10 = camConfig.H.at(3);
+  H11 = camConfig.H.at(4);
+  H12 = camConfig.H.at(5);
+  H20 = camConfig.H.at(6);
+  H21 = camConfig.H.at(7);
+  H22 = camConfig.H.at(8);
 
   switch(this->configuracao.modeloFisico)
   {

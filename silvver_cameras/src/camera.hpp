@@ -1,28 +1,26 @@
 #include <iostream>
 #include <opencv/highgui.h>
-/*************************************************************************************
-    Classe base para as diversas câmeras funcionais, como blobCamera e marcaCamera
-**************************************************************************************/
 
 #ifndef CAMERA_HPP
 #define CAMERA_HPP
 
 #include <opencv/cv.h>
+#include <boost/scoped_ptr.hpp>
+#include <boost/noncopyable.hpp>
 #include "silvver_tipos.hpp"
-#include "timer.hpp"
 #include "hardCamera.hpp"
 #include "hardCameras/modelos.hpp"
 #include "cameraConfig.hpp"
 
 using namespace silvver;
 
-class Camera
+
+// Classe base para as câmeras abstratas, como blobCamera e marcoCamera
+class Camera : boost::noncopyable
 {
 private:
-  // Conta o tempo em que a camera ficou em funcionamento, usado para
-  // calcular a taxa média de quadros por segundo.
-  //Timer *timer;
 
+  //Parâmetros intrínsecos e extrínsecos da câmera física.
   double cc0, cc1;
   double fc0, fc1;
   double kc0, kc1, kc2, kc3, kc4;

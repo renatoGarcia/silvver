@@ -17,10 +17,15 @@ int main(int argc, char **argv)
 
   std::string ipServidor(args_info.ip_servidor_arg);
   int portaRecepcionista = args_info.porta_recepcionista_arg;
+  std::string xmlConfigCameras = args_info.cameras_config_arg;
 
   std::vector<CameraConfig> vecCameraConfig;
-  CameraConfig::LerDadosCameras(vecCameraConfig);
+  CameraConfigArray camConfArray;
 
+  camConfArray.lerDadosCameras(xmlConfigCameras);
+
+  std::cout << "Saindo main" << std::endl;
+  return 0;
   Gerenciador gerenciador(portaRecepcionista,ipServidor,vecCameraConfig);
 
   gerenciador.RodarGerenciador();
