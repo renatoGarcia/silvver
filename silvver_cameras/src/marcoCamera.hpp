@@ -28,7 +28,7 @@ public:
   /** Captura uma imagem extrai a localização dos marcos.
    * @param vecEnte Vetor onde são retornadas as poses e identificações dos marcos.
    */
-  void ProcessarImagem(vector<Ente> &vecEnte);
+  void ProcessarImagem(std::vector<Ente> &vecEnte);
 
 };
 

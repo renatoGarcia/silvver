@@ -13,27 +13,27 @@ int MarcoCamera::Iniciar()
     Camera::Iniciar();
     this->numLogger = extratorMarca->Iniciar();
   }
-  catch(string erro)
+  catch(std::string erro)
   {
-    cout << "Erro: " << erro << endl;
+    std::cout << "Erro: " << erro << std::endl;
     abort();
   }
 
   return configuracao.serial;
 }
 
-void MarcoCamera::ProcessarImagem(vector<Ente> &vecEnte)
+void MarcoCamera::ProcessarImagem(std::vector<Ente> &vecEnte)
 {
   double tempoAbsoluto;
 
-  vector<MarkerPontos> vecMarkerPontos;
+  std::vector<MarkerPontos> vecMarkerPontos;
 
   vecEnte.clear();
   tempoAbsoluto = Camera::CapturarImagem();
 
   extratorMarca->ExtrairMarcas(imgCamera,vecMarkerPontos,numLogger,configuracao.serial);
 
-  vector<MarkerPontos>::iterator iteMarkerPontos = vecMarkerPontos.begin();
+  std::vector<MarkerPontos>::iterator iteMarkerPontos = vecMarkerPontos.begin();
   double teta;
   for(;iteMarkerPontos<vecMarkerPontos.end();iteMarkerPontos++)
   {

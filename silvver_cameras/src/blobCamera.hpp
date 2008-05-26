@@ -13,7 +13,6 @@
 #include "filtro.hpp"
 #include "blobExtractor.hpp"
 
-using namespace std;
 using namespace silvver;
 
 class BlobCamera : public Camera
@@ -34,6 +33,6 @@ public:
 
     int Iniciar();
 
-    void ProcessarImagem(vector<Marca> &vecMarca);
+    void ProcessarImagem(std::vector<Marca> &vecMarca);
 };
 #endif

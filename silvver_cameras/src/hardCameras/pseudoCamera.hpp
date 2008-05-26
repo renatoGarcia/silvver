@@ -9,13 +9,11 @@
 #include <boost/thread/xtime.hpp>
 #include <boost/thread/mutex.hpp>
 
-using namespace std;
-
 class PseudoCamera : public HardCamera
 {
 private:
 
-  string endImagem;
+  std::string endImagem;
 
   int imagemAtual;
 
@@ -30,13 +28,11 @@ public:
 
   ~PseudoCamera();
 
-  virtual void Iniciar(unsigned serial);
+  virtual void initialize();
 
-  virtual void Finalizar();
+  virtual void saveFrame();
 
-  virtual void SalvarImagem();
-
-  virtual double CapturarImg(IplImage *imgRetorno);//TODO: implementar o retorno com o tempo da imagem
+  virtual void captureFrame(IplImage *iplImage);
 
 };
 

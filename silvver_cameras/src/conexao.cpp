@@ -1,8 +1,6 @@
 #include "conexao.hpp"
 #include <iostream>
 
-using namespace std;
-
 Conexao::Conexao()
 {
   this->SenderAddrSize = sizeof(SenderAddr);
@@ -27,7 +25,7 @@ int Conexao::Iniciar(int porta,const char *ip)
   SocketConexao = socket(AF_INET,SOCK_DGRAM,0);
   if (SocketConexao<=0)
   {
-    cerr << "Erro ao criar o socket" << endl;
+    std::cerr << "Erro ao criar o socket" << std::endl;
     return 1;
   }
 
@@ -49,10 +47,11 @@ int Conexao::Receber(char *msg, int tamanho)
                              &SenderAddrSize);
 
   if ( bytes_recebidos == -1 )
-    cerr << "A mensagem nao foi recebida corretamente" << endl;
+    std::cerr << "A mensagem nao foi recebida corretamente" << std::endl;
   if ( bytes_recebidos != tamanho )
-    cerr << "O tamanho do dado recebido (" << bytes_recebidos
-         << ") nao corresponde com o esperado (" << tamanho << ")" << endl;
+    std::cerr << "O tamanho do dado recebido (" << bytes_recebidos
+              << ") nao corresponde com o esperado (" << tamanho << ")"
+              << std::endl;
 
   return( bytes_recebidos );
 }

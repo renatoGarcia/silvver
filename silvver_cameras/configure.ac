@@ -2,7 +2,7 @@
 # Process this file with autoconf to produce a configure script.
 
 AC_PREREQ(2.61)
-AC_INIT([silvver_cameras], [0.1], [fgarcia.renato@gmail.com])
+AC_INIT([silvver_cameras], [0.2], [fgarcia.renato@gmail.com])
 AM_INIT_AUTOMAKE([-Wall -Werror foreign])
 AC_CONFIG_SRCDIR([src/hardCamera.hpp])
 AC_CONFIG_HEADER([config.h])
@@ -38,6 +38,12 @@ AC_CHECK_HEADERS([pgrflycapture.h pgrflycaptureplus.h],
                  [AC_DEFINE([HAVE_PGRFLYCAPTURE_HEADERS],[1],[Cameras dragonFly])] [compile_pgr=true],
 		 [compile_pgr=false])
 AM_CONDITIONAL([COMPILE_PGR], [test $compile_pgr = true])
+
+AC_CHECK_HEADERS([libdc1394/dc1394_control.h],
+                 [compile_dc1394=true],
+                 [compile_dc1394=false])
+AM_CONDITIONAL([COMPILE_DC1394], [test $compile_dc1394 = true])
+
 
 dnl ====
 AC_CHECK_HEADERS([limits.h sys/timeb.h])

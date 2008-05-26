@@ -22,16 +22,16 @@ int BlobCamera::Iniciar()
   {
     Camera::Iniciar();
   }
-  catch(string erro)
+  catch(std::string erro)
   {
-    cout << "Erro: " << erro << endl;
+    std::cout << "Erro: " << erro << std::endl;
     abort();
   }
 
   return configuracao.serial;
 }
 
-void BlobCamera::ProcessarImagem(vector<Marca> &vecMarca)
+void BlobCamera::ProcessarImagem(std::vector<Marca> &vecMarca)
 {
   double tempoAbsoluto;
 
@@ -41,8 +41,8 @@ void BlobCamera::ProcessarImagem(vector<Marca> &vecMarca)
   filtro->FiltrarYUVImagem(Camera::imgCamera, imgTrabalho);
   blobExtractor->ExtrairBlobs(imgTrabalho, vecMarca);
 
-  vector<Marca>::iterator iteVecMarca = vecMarca.begin();
-  cout << vecMarca.size() << "  !!!" << endl;
+  std::vector<Marca>::iterator iteVecMarca = vecMarca.begin();
+  std::cout << vecMarca.size() << "  !!!" << std::endl;
   for(;iteVecMarca<vecMarca.end();iteVecMarca++)
   {
     Camera::Localizar(*iteVecMarca);

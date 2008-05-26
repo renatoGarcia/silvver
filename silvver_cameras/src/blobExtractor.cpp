@@ -5,7 +5,8 @@ BlobExtractor::BlobExtractor(int minArea)
   this->areaMinima = minArea;
 }
 
-void BlobExtractor::ExtrairBlobs(IplImage *imgEntrada,vector<Marca> &vectorMarca)
+void BlobExtractor::ExtrairBlobs(IplImage *imgEntrada,
+                                 std::vector<Marca> &vectorMarca)
 {
   vectorMarca.clear();
   double cor;

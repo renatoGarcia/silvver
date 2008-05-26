@@ -13,9 +13,6 @@
 #include "conexao.hpp"
 #include "timer.hpp"
 
-using namespace std;
-using namespace boost;
-
 class Gerenciador
 {
 private:
@@ -46,7 +43,7 @@ private:
  public:
 
   Gerenciador(int portaRecepcionista, std::string ipServidor,
-	      vector<CameraConfig> &vecCameraConfig);
+	      std::vector<CameraConfig> &vecCameraConfig);
 
   /// Inicia todas as câmeras abstradas contidas no vetod vecCameraConfig.
   void RodarGerenciador();

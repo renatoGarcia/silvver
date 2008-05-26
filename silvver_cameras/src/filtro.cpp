@@ -11,9 +11,9 @@ Filtro::Filtro()
 
 void Filtro::Iniciar()
 {
-  vector<string> vecYuvTxt;
-  ifstream streamCores("Cores.txt", ios::in);
-  string strCores;
+  std::vector<std::string> vecYuvTxt;
+  std::ifstream streamCores("Cores.txt", std::ios::in);
+  std::string strCores;
 
   while( streamCores.peek()!= EOF )
   {
@@ -22,22 +22,22 @@ void Filtro::Iniciar()
     vecYuvTxt.push_back(strCores);
   }
 
-  vector<string>::iterator iteYUV,fimVecYuvTxt;  // Iteradores para percorrer o vetor
+  std::vector<std::string>::iterator iteYUV,fimVecYuvTxt;  // Iteradores para percorrer o vetor
   iteYUV       = vecYuvTxt.begin();              // com o nome dos arquivos de texto
   fimVecYuvTxt = vecYuvTxt.end();
 
-  ifstream *streamYUV;
+  std::ifstream *streamYUV;
 
   for(this->numCores=1; iteYUV!=fimVecYuvTxt; iteYUV++,this->numCores++)
   {
-    streamYUV = new ifstream(iteYUV->c_str(), ios::in);
+    streamYUV = new std::ifstream(iteYUV->c_str(), std::ios::in);
     CarregarYUVLUT(streamYUV);
     delete streamYUV;
   }
 }
 
 // Carregar um arquivo codificado como o CDT_Mars original
-void Filtro::CarregarYUVLUT(ifstream *streamYUV)
+void Filtro::CarregarYUVLUT(std::ifstream *streamYUV)
 {
   int Ymax,Ymin,Umax,Umin,Vmax,Vmin;
   int codigoCor= this->numCores;

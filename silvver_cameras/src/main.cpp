@@ -15,7 +15,7 @@ int main(int argc, char **argv)
   if (cmdline_parser (argc, argv, &args_info) != 0)
     return 1;
 
-  std::string ipServidor(args_info.ip_servidor_arg);
+  std::string serverIP(args_info.ip_servidor_arg);
   int portaRecepcionista = args_info.porta_recepcionista_arg;
   std::string xmlConfigCameras = args_info.cameras_config_arg;
 
@@ -24,15 +24,11 @@ int main(int argc, char **argv)
 
   camConfArray.lerDadosCameras(xmlConfigCameras);
 
-  std::cout << "Saindo main" << std::endl;
-  return 0;
-  Gerenciador gerenciador(portaRecepcionista,ipServidor,vecCameraConfig);
+  Gerenciador gerenciador(portaRecepcionista,serverIP,vecCameraConfig);
 
   gerenciador.RodarGerenciador();
 
   char ch = getchar(); //Espera o usuário teclar enter para terminar.
-
-  std::cout << "Terminando..." << std::endl;
 
   gerenciador.PararGerenciador();
 

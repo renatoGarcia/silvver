@@ -4,7 +4,7 @@
 extern boost::mutex mutexCout;
 
 Gerenciador::Gerenciador(int portaRecepcionista, std::string ipServidor,
-                         vector<CameraConfig> &vecCameraConfig)
+                         std::vector<CameraConfig> &vecCameraConfig)
 {
   this->vecCameraConfig.resize( vecCameraConfig.size() );
   copy( vecCameraConfig.begin(), vecCameraConfig.end(),
@@ -16,27 +16,29 @@ Gerenciador::Gerenciador(int portaRecepcionista, std::string ipServidor,
   conexaoRecepcionista.reset( new Conexao() );
 }
 
-void Gerenciador::RodarGerenciador()
+void
+Gerenciador::RodarGerenciador()
 {
   // Está aqui só para compilar, não é usado.
   double tempoInicial = 0;
 
-  conexaoRecepcionista->Iniciar(portaRecepcionista,ipServidor.c_str());
+  this->conexaoRecepcionista->Iniciar(portaRecepcionista,ipServidor.c_str());
 
   char msgTP[3] = "TP";
-  conexaoRecepcionista->Enviar( (void*) msgTP,sizeof(msgTP) );
+  this->conexaoRecepcionista->Enviar( (void*) msgTP,sizeof(msgTP) );
 
   // Recebe o tempo atual no silvver-servidor.
-  conexaoRecepcionista->Receber( (char*)&tempoInicial, sizeof(tempoInicial) );
+  this->conexaoRecepcionista->Receber((char*)&tempoInicial,
+                                      sizeof(tempoInicial) );
 
-  BOOST_FOREACH(CameraConfig camConf, vecCameraConfig)
+  BOOST_FOREACH(CameraConfig camConf, this->vecCameraConfig)
   {
     ConectarCamera(camConf);
   }
-
 }
 
-void Gerenciador::ConectarCamera(const CameraConfig &cameraConfig)
+void
+Gerenciador::ConectarCamera(const CameraConfig &cameraConfig)
 {
   char msgPT[3] = "PT";
   unsigned portaConectar;
@@ -47,8 +49,8 @@ void Gerenciador::ConectarCamera(const CameraConfig &cameraConfig)
   // Recebe como resposta a porta na qual a câmera deverá se conectar.
   conexaoRecepcionista->Receber( (char*)&portaConectar,sizeof(unsigned) );
 
-  {mutex::scoped_lock lock(mutexCout);
-    cout << "PORTA: " << portaConectar << endl;}
+  {boost::mutex::scoped_lock lock(mutexCout);
+   std::cout << "PORTA: " << portaConectar << std::endl;}
 
   switch(cameraConfig.modeloAbstrato)
   {
@@ -59,7 +61,7 @@ void Gerenciador::ConectarCamera(const CameraConfig &cameraConfig)
                                                           portaConectar,
                                                           ipServidor)));
       thCamera.push_back(boost::shared_ptr<boost::thread>
-                         (new thread( boost::ref(*vecCamControl.back())) ));
+                         (new boost::thread( boost::ref(*vecCamControl.back())) ));
       break;
     }
   }

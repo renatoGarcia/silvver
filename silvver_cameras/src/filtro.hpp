@@ -18,8 +18,6 @@ valor 0, correspondente à cor preta.
 #include <opencv/cv.h>
 #include <fstream>
 
-using namespace std;
-
 class Filtro
 {
 private:
@@ -28,7 +26,7 @@ private:
   // Número de cores diferentes que estão sendo representadas.
   int numCores;
 
-  void CarregarYUVLUT(ifstream *streamYUV);
+  void CarregarYUVLUT(std::ifstream *streamYUV);
 public:
 
   Filtro();

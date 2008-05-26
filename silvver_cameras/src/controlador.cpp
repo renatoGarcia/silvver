@@ -24,7 +24,7 @@ void Controlador::conectar()
   conexao.Receber( msg,sizeof(msg) );
 
   {boost::mutex::scoped_lock lock(mutexCout);
-  cout << "CAMERA: " << cameraConfig.serial << " " << msg << endl;}
+   std::cout << "CAMERA: " << cameraConfig.serial << " " << msg << std::endl;}
 }
 
 void Controlador::terminar()
@@ -52,7 +52,7 @@ void MarcoCameraControlador::operator()()
   marcoCam.reset( new MarcoCamera(cameraConfig,tempoInicial) );
   marcoCamID = marcoCam->Iniciar();}
 
-  vector<Ente> vecEnte;
+  std::vector<Ente> vecEnte;
   Pacote<Ente> pacote(marcoCamID);
 
   while(!termina)

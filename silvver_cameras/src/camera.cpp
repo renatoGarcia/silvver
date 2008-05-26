@@ -1,4 +1,5 @@
 #include "camera.hpp"
+#include <stdexcept>
 
 Camera::Camera(const CameraConfig& camConfig,double tempoInicial)
 {
@@ -48,36 +49,24 @@ Camera::Camera(const CameraConfig& camConfig,double tempoInicial)
 Camera::~Camera()
 {
   cvReleaseImage(&imgCamera);
-  hardCamera->Finalizar();
   //delete hardCamera;
   //delete timer;
 }
 
 void Camera::Iniciar()
 {
-  try
-  {
-    hardCamera->Iniciar(this->configuracao.serial);
-  }
-  catch(string erro)
-  {
-    cout << "Erro: " << erro << endl;
-    abort();
-  }
-
-  //timer->Start();
+  hardCamera->initialize();
 }
 
 double Camera::CapturarImagem()
 {
-  double instante;
   try
   {
-    instante = hardCamera->CapturarImg(imgCamera);
+    hardCamera->captureFrame(imgCamera);
   }
-  catch(string erro)
+  catch(/*runtime_error error*/...)
   {
-    cout << erro << endl;
+  //   std::cout << error.what() << std::endl;
     return 0;
   }
 
@@ -89,7 +78,7 @@ double Camera::CapturarImagem()
     timer->Start();
     }*/
 
-  return instante;
+  return 0;
 }
 
 void Camera::Localizar(Posicao &posicao)

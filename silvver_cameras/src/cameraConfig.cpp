@@ -24,8 +24,8 @@ CameraConfig::CameraConfig(const CameraConfig& camConfig)
 //------------------------ CAMERA_CONFIG_ARRAY ----------------------------//
 
 template <typename Tipo,int nItens>
-boost::array<Tipo, nItens> CameraConfigArray::
-lerConteudoElemento(const TiXmlElement *elemento)
+boost::array<Tipo, nItens>
+CameraConfigArray::lerConteudoElemento(const TiXmlElement *elemento)
 {
   if(elemento == NULL)
   {

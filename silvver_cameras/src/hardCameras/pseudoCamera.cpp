@@ -2,7 +2,9 @@
 
 extern boost::mutex mutexCout;
 
-PseudoCamera::PseudoCamera(int totalImagens,unsigned frequencia,const char* diretorio)
+PseudoCamera::PseudoCamera(int totalImagens,unsigned frequencia,
+                           const char* diretorio)
+  :HardCamera(HardCamera::RESOLUTION_640x480, HardCamera::FR_30)
 {
   this->endImagem = diretorio;
   this->imagemAtual = 1;
@@ -13,16 +15,13 @@ PseudoCamera::PseudoCamera(int totalImagens,unsigned frequencia,const char* dire
 PseudoCamera::~PseudoCamera()
 {}
 
-void PseudoCamera::Iniciar(unsigned serial)
+void PseudoCamera::initialize()
 {}
 
-void PseudoCamera::Finalizar()
+void PseudoCamera::saveFrame()
 {}
 
-void PseudoCamera::SalvarImagem()
-{}
-
-double PseudoCamera::CapturarImg(IplImage *imgRetorno)
+void PseudoCamera::captureFrame(IplImage *iplImage)
 {
   boost::xtime xt;
   boost::xtime_get(&xt, boost::TIME_UTC);
@@ -30,25 +29,25 @@ double PseudoCamera::CapturarImg(IplImage *imgRetorno)
   boost::thread::sleep(xt);
 
   // Limpa a IplImage recebida para o retorno
-  cvReleaseImage( &imgRetorno );
+  cvReleaseImage( &iplImage );
 
-  ostringstream s1;
+  std::ostringstream s1;
 
   if(this->imagemAtual > this->totalImagens )
   {
     boost::mutex::scoped_lock lock(mutexCout);
-    cout << "A pseudoCamera terminou" << endl;
-    return 0;
+    std::cout << "A pseudoCamera terminou" << std::endl;
+    return;
   }
 
   //--------------------------------------------------------
   s1 << this->endImagem << this->imagemAtual << ".bmp";
-  cout << "---------------------" <<endl << endl << s1.str() << endl;
+  std::cout << "---------------------" <<std::endl << std::endl
+            << s1.str() << std::endl;
   //--------------------------------------------------------
-  imgRetorno = cvLoadImage( s1.str().c_str(), CV_LOAD_IMAGE_COLOR );
+  iplImage = cvLoadImage( s1.str().c_str(), CV_LOAD_IMAGE_COLOR );
 
   this->imagemAtual++;
 
-  return 0;
 }
 
