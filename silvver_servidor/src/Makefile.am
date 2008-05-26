@@ -12,4 +12,6 @@ silver_servidor_SOURCES = blobTratador.cpp \
      Receptor.cpp \
      Receptor.h \
      saidas.cpp \
-     saidas.h
+     saidas.h \
+     cmdline.h \
+     cmdline.c

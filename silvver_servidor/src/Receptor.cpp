@@ -65,7 +65,11 @@ void Receptor::Recepcionista(Receptor *objeto)
 
   while(true)
   {
+    cout << "iniciado Recepcionista    1" << endl;
+
     conexao.Receber( msg,sizeof(msg) );// Recebe a primeira mensagem
+
+    cout << "iniciado Recepcionista" << endl;
 
     if( strcmp(msg,"TP") == 0 ) //Tempo Atual
     {
@@ -102,6 +106,10 @@ void Receptor::Recepcionista(Receptor *objeto)
       objeto->saidas->RetirarSaida(id);
       conexao.Enviar( OK,sizeof(OK) );
       cout << "Retirado cliente id: " << id << endl;
+    }
+    else
+    {
+      std::cerr << "Unknown message: " << msg[0] << msg[1] << std::endl;
     }
   }
 }
