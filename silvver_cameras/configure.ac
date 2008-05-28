@@ -29,10 +29,10 @@ dnl === Checks for header files.                                           =
 dnl ========================================================================
 
 AC_CHECK_HEADERS([ARToolKitPlus/TrackerSingleMarkerImpl.h],
-                 [],[AC_MSG_ERROR([ARToolKitPlus headers was not found])])
+                 [],[AC_MSG_ERROR([ARToolKitPlus headers were not found])])
 
 AC_CHECK_HEADERS([opencv/cv.h opencv/highgui.h],
-                 [],[AC_MSG_ERROR([OpenCV headers was not found])])
+                 [],[AC_MSG_ERROR([OpenCV headers were not found])])
 
 AC_CHECK_HEADERS([pgrflycapture.h pgrflycaptureplus.h],
                  [AC_DEFINE([HAVE_PGRFLYCAPTURE_HEADERS],[1],[Cameras dragonFly])] [compile_pgr=true],

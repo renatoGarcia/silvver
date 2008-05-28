@@ -20,9 +20,9 @@ int main(int argc, char **argv)
   std::string xmlConfigCameras = args_info.cameras_config_arg;
 
   std::vector<CameraConfig> vecCameraConfig;
-  CameraConfigArray camConfArray;
+  CameraConfigExtractor camConfExtractor;
 
-  camConfArray.lerDadosCameras(xmlConfigCameras);
+  vecCameraConfig = camConfExtractor.lerDadosCameras(xmlConfigCameras);
 
   Gerenciador gerenciador(portaRecepcionista,serverIP,vecCameraConfig);
 

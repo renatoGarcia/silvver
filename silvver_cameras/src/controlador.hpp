@@ -44,7 +44,6 @@ public:
 };
 
 
-
 class MarcoCameraControlador : public Controlador
 {
 private:

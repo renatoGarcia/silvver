@@ -7,6 +7,8 @@
 #include "saidas.h"
 #include <sys/timeb.h>
 
+extern bool verbose;
+
 using namespace boost;
 
 /** Cuida dos pedidos de conexão com o silvver-servidor.

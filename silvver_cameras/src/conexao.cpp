@@ -60,7 +60,6 @@ int Conexao::Enviar(void *msg, int tamanho)const
 {
   int bytes_enviados;
 
-
   bytes_enviados=sendto(SocketConexao,(char*) msg, tamanho,
                         0,(struct sockaddr*)&infConexao,
                         sizeof(infConexao)                 );

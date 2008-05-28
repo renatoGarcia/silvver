@@ -7,21 +7,21 @@ boost::mutex Controlador::mutexIniciarCamera;
 
 void Controlador::conectar()
 {
-  conexao.Iniciar(porta, ipServidor.c_str());
+  this->conexao.Iniciar(this->porta,this->ipServidor.c_str());
 
   // Envia a segunda mensagem ao recepcionista("OK"), informando que
   // a conexao foi criada
   char msgOK[3] = "OK";
-  conexao.Enviar( msgOK,sizeof(msgOK) );
+  this->conexao.Enviar( msgOK,sizeof(msgOK) );
 
   // Envia a terceira mensagem ao recepcionista, informando o código
   // do dado que será transmitido
   int tipoDado = cameraConfig.modeloAbstrato;
-  conexao.Enviar( &tipoDado,sizeof(tipoDado) );
+  this->conexao.Enviar( &tipoDado,sizeof(tipoDado) );
 
   char msg[3];
   // Espera uma mensagem de confirmação
-  conexao.Receber( msg,sizeof(msg) );
+  this->conexao.Receber( msg,sizeof(msg) );
 
   {boost::mutex::scoped_lock lock(mutexCout);
    std::cout << "CAMERA: " << cameraConfig.serial << " " << msg << std::endl;}
@@ -35,7 +35,7 @@ void Controlador::terminar()
 // --------------------- MarcoCameraControlador ----------------------------//
 
 MarcoCameraControlador::MarcoCameraControlador(CameraConfig cameraConfig,
-					       unsigned Porta,
+					       unsigned porta,
 					       std::string ipServidor)
 {
   this->cameraConfig = cameraConfig;
@@ -51,6 +51,8 @@ void MarcoCameraControlador::operator()()
   double tempoInicial = 0;
   marcoCam.reset( new MarcoCamera(cameraConfig,tempoInicial) );
   marcoCamID = marcoCam->Iniciar();}
+
+  this->conectar();
 
   std::vector<Ente> vecEnte;
   Pacote<Ente> pacote(marcoCamID);

@@ -32,10 +32,12 @@ void Entradas::AdicionarEntrada(Conexao *conexao)
   switch(tipoDado)
   {
     case CORES:
-      threadCliente.push_back( new thread( bind(&Entradas::ClienteBlobCam,this,conexao) ) );
+      threadCliente.push_back(new thread(bind(&Entradas::ClienteBlobCam,
+                                              this,conexao)));
       break;
     case MARCAS:
-      threadCliente.push_back( new thread( bind(&Entradas::ClienteMarcaCam,this,conexao) ) );
+      threadCliente.push_back(new thread(bind(&Entradas::ClienteMarcaCam,
+                                              this,conexao)));
       break;
     default:
       break;

@@ -2,14 +2,15 @@
 #include <opencv/highgui.h>
 #include <ARToolKitPlus/TrackerSingleMarkerImpl.h>
 
-ExtratorMarca::ExtratorMarca(int largura,int altura)
+ExtratorMarca::ExtratorMarca(int largura, int altura)
 {
-  this->tracker.reset( new ARToolKitPlus::TrackerSingleMarkerImpl<16,16,64,50,50>(640,480) );
+  this->tracker.reset( new ARToolKitPlus::
+                       TrackerSingleMarkerImpl<16,16,64,50,50>(640,480) );
 }
 
 int ExtratorMarca::Iniciar()
 {
-  if(!tracker->init("data/no_distortion.cal",1000.0f, 7000.0f))
+  if(!this->tracker->init("./data/no_distortion.cal",1000.0f, 7000.0f))
   {
     std::cerr << "ERROR: init() failed\n" << std::endl;
     return 1;
@@ -81,7 +82,10 @@ int ExtratorMarca::Iniciar()
     return 0;
 }
 
-void ExtratorMarca::ExtrairMarcas(IplImage *imgEntrada,std::vector<MarkerPontos> &vecMarkerPontos,int logNum,int serial)
+void
+ExtratorMarca::ExtrairMarcas(IplImage *imgEntrada,
+                             std::vector<MarkerPontos> &vecMarkerPontos,
+                             int logNum,int serial)
 {
   vecMarkerPontos.clear();
 

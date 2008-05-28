@@ -31,12 +31,19 @@ Camera::Camera(const CameraConfig& camConfig,double tempoInicial)
   {
 #ifdef HAVE_PGRFLYCAPTURE_HEADERS
   case CameraConfig::PGR:
-    hardCamera    = new PGR(camConfig.frequencia,camConfig.diretorio.c_str(),tempoInicial);
+    hardCamera = new PGR(camConfig.frequencia,camConfig.diretorio.c_str(),tempoInicial);
+    break;
+#endif
+#ifdef HAVE_LIBDC1394_DC1394_CONTROL_H
+  case CameraConfig::DC1394:
+    hardCamera = new DC1394(0,camConfig.serial, HardCamera::FR_30);
     break;
 #endif
   case CameraConfig::PseudoCam:
     hardCamera    = new PseudoCamera(733,camConfig.frequencia,camConfig.diretorio.c_str());
     break;
+  default:
+    throw std::invalid_argument("HardCamera include headers non accessible");
   }
 
   imgCamera = cvCreateImage( cvSize(camConfig.resolucao[0],camConfig.resolucao[1]), IPL_DEPTH_8U, 3 );
@@ -49,8 +56,6 @@ Camera::Camera(const CameraConfig& camConfig,double tempoInicial)
 Camera::~Camera()
 {
   cvReleaseImage(&imgCamera);
-  //delete hardCamera;
-  //delete timer;
 }
 
 void Camera::Iniciar()

@@ -29,6 +29,7 @@ class CameraConfig
 public:
 
   enum enumFisico{PGR,
+                  DC1394,
                   PseudoCam
   }modeloFisico;
 
@@ -57,8 +58,16 @@ public:
 
 };
 
-class CameraConfigArray
+class CameraConfigExtractor
 {
+public:
+
+  std::vector<CameraConfig>
+  lerDadosCameras(const std::string arquivoConfiguracao
+                  )/*throw(std::invalid_argument,
+                     boost::bad_lexical_cast,
+                     TamanhoElemento)*/;
+
 private:
 
   template <typename Tipo,int nItens>
@@ -70,11 +79,6 @@ private:
 
   std::vector<CameraConfig> vecCameraConfig;
 
-public:
-  void lerDadosCameras(const std::string arquivoConfiguracao
-                       )/*throw(std::invalid_argument,
-                          boost::bad_lexical_cast,
-                          TamanhoElemento)*/;
 };
 
 #endif

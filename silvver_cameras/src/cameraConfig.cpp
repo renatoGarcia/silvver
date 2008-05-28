@@ -21,11 +21,11 @@ CameraConfig::CameraConfig(const CameraConfig& camConfig)
 }
 
 
-//------------------------ CAMERA_CONFIG_ARRAY ----------------------------//
+//------------------------ CAMERA_CONFIG_EXTRACTOR ------------------------//
 
 template <typename Tipo,int nItens>
 boost::array<Tipo, nItens>
-CameraConfigArray::lerConteudoElemento(const TiXmlElement *elemento)
+CameraConfigExtractor::lerConteudoElemento(const TiXmlElement *elemento)
 {
   if(elemento == NULL)
   {
@@ -67,7 +67,7 @@ CameraConfigArray::lerConteudoElemento(const TiXmlElement *elemento)
 }
 
 template <typename Tipo>
-Tipo CameraConfigArray::
+Tipo CameraConfigExtractor::
 lerAtributoElemento(const TiXmlElement *elemento,
                     const std::string& nomeAtributo)
 {
@@ -86,10 +86,12 @@ lerAtributoElemento(const TiXmlElement *elemento,
 }
 
 
-void CameraConfigArray::
-lerDadosCameras(const std::string arquivoConfiguracao)
+std::vector<CameraConfig>
+CameraConfigExtractor::lerDadosCameras(const std::string arquivoConfiguracao)
 {
   CameraConfig tempCamConf;
+  std::vector<CameraConfig> vecCameraConfig;
+
   TiXmlDocument doc(arquivoConfiguracao);
   if (!doc.LoadFile())
   {
@@ -119,9 +121,17 @@ lerDadosCameras(const std::string arquivoConfiguracao)
     {
       tempCamConf.modeloFisico = CameraConfig::PGR;
     }
-    else
+    else if(modeloFisico == "DC1394")
+    {
+      tempCamConf.modeloFisico = CameraConfig::DC1394;
+    }
+    else if(modeloFisico == "PseudoCam")
     {
       tempCamConf.modeloFisico = CameraConfig::PseudoCam;
+    }
+    else
+    {
+      throw std::invalid_argument("Unknown hardware camera: " + modeloFisico);
     }
 
 
@@ -172,6 +182,8 @@ lerDadosCameras(const std::string arquivoConfiguracao)
                                      FirstChildElement("alfa_c").
                                      ToElement()).at(0);
 
-    this->vecCameraConfig.push_back(tempCamConf);
+    vecCameraConfig.push_back(tempCamConf);
   }
+
+  return vecCameraConfig;
 }

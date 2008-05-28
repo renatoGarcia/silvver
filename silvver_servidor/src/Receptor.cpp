@@ -5,6 +5,9 @@
 
 using namespace std;
 
+extern bool verbose;
+#define VERBOSE_PRINT(msg) if(verbose)cout<<msg;
+
 auto_ptr<Receptor> Receptor::instanciaUnica;
 mutex Receptor::mutexInstanciacao;
 
@@ -65,19 +68,18 @@ void Receptor::Recepcionista(Receptor *objeto)
 
   while(true)
   {
-    cout << "iniciado Recepcionista    1" << endl;
-
+    VERBOSE_PRINT("Waiting message\n");
     conexao.Receber( msg,sizeof(msg) );// Recebe a primeira mensagem
-
-    cout << "iniciado Recepcionista" << endl;
 
     if( strcmp(msg,"TP") == 0 ) //Tempo Atual
     {
+      VERBOSE_PRINT("Receive message: TP (actual time)\n");
       double tempoAtual = objeto->tempoDecorrido();
       conexao.Enviar( &tempoAtual, sizeof(tempoAtual) );
     }
     else if( strcmp(msg,"PT") == 0 ) //Nova camera
     {
+      VERBOSE_PRINT("Receive message: PT (new camera)\n");
       Conexao *conexaoEntrada = new Conexao();
       conexaoEntrada->Iniciar(objeto->portaLivre);
 
@@ -89,6 +91,7 @@ void Receptor::Recepcionista(Receptor *objeto)
     }
     else if( strcmp(msg,"SD") == 0 ) //Nova saída
     {
+      VERBOSE_PRINT("Receive message: SD (connect client)\n");
       Conexao *conexaoSaida = new Conexao();
       conexaoSaida->Iniciar(objeto->portaLivre);
 
@@ -100,6 +103,7 @@ void Receptor::Recepcionista(Receptor *objeto)
     }
     else if( strcmp(msg,"DC") == 0 ) //Desconectar saída
     {
+      VERBOSE_PRINT("Receive message: DC (disconnect client)\n");
       int id;
       char OK[3] = "OK";
       conexao.Receber( &id,sizeof(id) );

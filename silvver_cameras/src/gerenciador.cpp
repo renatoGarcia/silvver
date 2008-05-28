@@ -22,7 +22,7 @@ Gerenciador::RodarGerenciador()
   // Está aqui só para compilar, não é usado.
   double tempoInicial = 0;
 
-  this->conexaoRecepcionista->Iniciar(portaRecepcionista,ipServidor.c_str());
+  this->conexaoRecepcionista->Iniciar(portaRecepcionista, ipServidor.c_str());
 
   char msgTP[3] = "TP";
   this->conexaoRecepcionista->Enviar( (void*) msgTP,sizeof(msgTP) );
@@ -44,10 +44,10 @@ Gerenciador::ConectarCamera(const CameraConfig &cameraConfig)
   unsigned portaConectar;
 
   // Envia a primeira mensagem ao recepcionista, uma string "PT".
-  conexaoRecepcionista->Enviar( (void*) msgPT,sizeof(msgPT) );
+  conexaoRecepcionista->Enviar((void*)msgPT, sizeof(msgPT));
 
   // Recebe como resposta a porta na qual a câmera deverá se conectar.
-  conexaoRecepcionista->Receber( (char*)&portaConectar,sizeof(unsigned) );
+  conexaoRecepcionista->Receber((char*)&portaConectar, sizeof(unsigned));
 
   {boost::mutex::scoped_lock lock(mutexCout);
    std::cout << "PORTA: " << portaConectar << std::endl;}
