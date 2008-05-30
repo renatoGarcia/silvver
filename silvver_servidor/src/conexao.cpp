@@ -7,8 +7,6 @@ Conexao::Conexao()
 
 int Conexao::Iniciar(int porta)
 {
-    int erro;
-
   #ifdef HAVE_WINDOWS_SOCKETS
     WSADATA initialisation_win32;
 

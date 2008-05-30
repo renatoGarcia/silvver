@@ -1,3 +1,4 @@
+AM_CPPFLAGS = -Wall
 bin_PROGRAMS = silver_servidor
 
 silver_servidor_SOURCES = blobTratador.cpp \

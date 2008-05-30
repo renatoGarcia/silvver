@@ -12,13 +12,13 @@ int main(int argc, char **argv)
   if (cmdline_parser (argc, argv, &args_info) != 0)
     return 1;
 
-  int portaRecepcionista = args_info.porta_recepcionista_arg;
+  // int portaRecepcionista = args_info.porta_recepcionista_arg;
   verbose = args_info.verbose_flag;
 
   Receptor *receptor = Receptor::Instanciar();
   receptor->CriarRecepcionista();
 
-  char ch = getchar();
+  getchar();
   cout << "Terminando..." << endl << endl;
 
   return 0;

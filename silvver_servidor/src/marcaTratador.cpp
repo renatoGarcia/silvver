@@ -42,7 +42,10 @@ void MarcaTratador::Localizar(vector<Ente> &vecRobos)
     iteMapa->second.clear();
   }
 
-  std::cout << vecRobos.size() << std::endl;
+  if(vecRobos.size() > 0)
+  {
+    std::cout << vecRobos.size() << std::endl;
+  }
   //---------------Verifica se há um mesmo robô reportado por duas câmeras diferentes
   vector<Ente>::iterator itePrimeiro,iteSegundo;
 
