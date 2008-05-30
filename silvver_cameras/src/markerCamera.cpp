@@ -18,6 +18,8 @@ MarkerCamera::operator()()
 
   this->startHardCamera();
 
+  this->extratorMarca->Iniciar();
+
   std::vector<Ente> vecEnte;
   Pacote<Ente> pacote(UID);
   std::vector<MarkerPontos> vecMarkerPontos;
