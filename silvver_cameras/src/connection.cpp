@@ -1,48 +1,52 @@
-#include "conexao.hpp"
+#include "connection.hpp"
 #include <iostream>
 
-Conexao::Conexao()
+Connection::Connection(std::string pairIP, unsigned port)
+  :pairIP(pairIP)
+  ,port(port)
 {
   this->SenderAddrSize = sizeof(SenderAddr);
 }
 
-int Conexao::Iniciar(int porta,const char *ip)
+void
+Connection::connect()
 {
+  #ifdef HAVE_WINDOWS_SOCKETS
   int erro;
 
-  #ifdef HAVE_WINDOWS_SOCKETS
-    WSADATA initialisation_win32;
+  WSADATA initialisation_win32;
 
     erro = WSAStartup(MAKEWORD(2,2),&initialisation_win32);
     if(erro)
     {
       cerr << "Suporte a sockets indisponivel" << endl;
-      return 1;
+      return;
     }
   #endif
 
   // Criação do Socket para conexao UDP/IP
-  SocketConexao = socket(AF_INET,SOCK_DGRAM,0);
-  if (SocketConexao<=0)
+  SocketConnection = socket(AF_INET,SOCK_DGRAM,0);
+  if (SocketConnection<=0)
   {
     std::cerr << "Erro ao criar o socket" << std::endl;
-    return 1;
+    return;
   }
 
   // Iniciação do Cliente
-  infConexao.sin_family = AF_INET;              // Indica a utilização do IPv4
-  infConexao.sin_addr.s_addr = inet_addr(ip);   // Endereço IP do servidor
-  infConexao.sin_port = htons(porta);           // Porta utiliazada
-//   SenderAddr=infConexao;
+  this->infConnection.sin_family = AF_INET;
+  this->infConnection.sin_addr.s_addr = inet_addr(this->pairIP.c_str());
+  this->infConnection.sin_port = htons(this->port);
+//   SenderAddr=infConnection;
 
-  return 0;
+  return;
 }
 
-int Conexao::Receber(char *msg, int tamanho)
+void
+Connection::receive(char *msg, int tamanho)
 {
   int bytes_recebidos;
 
-  bytes_recebidos = recvfrom(SocketConexao, msg, tamanho,
+  bytes_recebidos = recvfrom(SocketConnection, msg, tamanho,
                              0, (struct sockaddr*)&SenderAddr,
                              &SenderAddrSize);
 
@@ -53,21 +57,20 @@ int Conexao::Receber(char *msg, int tamanho)
               << ") nao corresponde com o esperado (" << tamanho << ")"
               << std::endl;
 
-  return( bytes_recebidos );
 }
 
-int Conexao::Enviar(void *msg, int tamanho)const
+void
+Connection::send(void *msg, int tamanho)const
 {
   int bytes_enviados;
 
-  bytes_enviados=sendto(SocketConexao,(char*) msg, tamanho,
-                        0,(struct sockaddr*)&infConexao,
-                        sizeof(infConexao)                 );
+  bytes_enviados=sendto(SocketConnection,(char*) msg, tamanho,
+                        0,(struct sockaddr*)&infConnection,
+                        sizeof(infConnection)                 );
 
   if ( bytes_enviados == -1 )
     printf("Impossivel enviar dados\n");
   if ( bytes_enviados != tamanho )
     printf("Dados nao foram enviados corretamente\n");
 
-  return(bytes_enviados);
 }

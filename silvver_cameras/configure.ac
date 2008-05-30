@@ -9,6 +9,19 @@ AC_CONFIG_HEADER([config.h])
 AC_LANG([C++])
 
 dnl ========================================================================
+dnl === Optional new path to headers
+dnl ========================================================================
+
+AC_ARG_WITH(artoolkitplus-dir,
+     [AC_HELP_STRING([--with-artoolkitplus-dir=<dir>],
+     [use arToolKitPlus library in directory <dir>])])
+
+if test "$with_artoolkitplus_dir" != ""; then
+     ARTOOLKITPLUS_DIR="-I$with_artoolkitplus_dir"
+fi
+AC_SUBST(ARTOOLKITPLUS_DIR)
+
+dnl ========================================================================
 dnl === Checks for programs.
 dnl ========================================================================
 
@@ -28,8 +41,11 @@ dnl ========================================================================
 dnl === Checks for header files.                                           =
 dnl ========================================================================
 
+save_CPPFLAGS="$CPPFLAGS"
+CPPFLAGS="$ARTOOLKITPLUS_DIR $CPPFLAGS"
 AC_CHECK_HEADERS([ARToolKitPlus/TrackerSingleMarkerImpl.h],
                  [],[AC_MSG_ERROR([ARToolKitPlus headers were not found])])
+CPPFLAGS="$save_CPPFLAGS"
 
 AC_CHECK_HEADERS([opencv/cv.h opencv/highgui.h],
                  [],[AC_MSG_ERROR([OpenCV headers were not found])])

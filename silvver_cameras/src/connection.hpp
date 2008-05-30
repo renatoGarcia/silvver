@@ -1,8 +1,6 @@
-/**************************************************************************************
-    Efetua a conexão do cliente
-**************************************************************************************/
-#ifndef CONEXAO_H
-#define CONEXAO_H
+#ifndef CONNECTION_HPP
+#define CONNECTION_HPP
+
 #ifdef HAVE_CONFIG_H
 #include <config.h>
 #endif
@@ -20,15 +18,31 @@
 #define SOCKET int
 #endif
 
-class Conexao
+#include <string>
+
+class Connection
 {
+public:
+
+  Connection(std::string pairIP, unsigned port);
+
+  void connect();
+
+  void send(void *msg, int tamanho)const;
+
+  void receive(char *msg, int tamanho);
+
 private:
 
+  const std::string pairIP;
+
+  const unsigned port;
+
   // Socket para comunicação com o servidor.
-  SOCKET SocketConexao;
+  SOCKET SocketConnection;
 
   // Define as caracteristicas do cliente
-  sockaddr_in infConexao;
+  sockaddr_in infConnection;
 
   // SenderAddr.sin_family conterá o endereço
   sockaddr_in SenderAddr;
@@ -41,15 +55,6 @@ private:
   socklen_t SenderAddrSize;
   #endif
 
-public:
-
-  Conexao();
-
-  int Iniciar(int porta,const char *ip);
-
-  int Enviar(void *msg, int tamanho)const;
-
-  int Receber(char *msg, int tamanho);
 };
 
 #endif

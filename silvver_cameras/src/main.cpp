@@ -28,7 +28,17 @@ int main(int argc, char **argv)
 
   gerenciador.RodarGerenciador();
 
-  char ch = getchar(); //Espera o usuário teclar enter para terminar.
+  std::string command;
+  while(true)
+  {
+    std::cout << ">";
+    std::getline(std::cin, command, '\n');
+
+    if(command == "q")
+    {
+      break;
+    }
+  }
 
   gerenciador.PararGerenciador();
 

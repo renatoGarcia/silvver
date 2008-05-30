@@ -37,7 +37,7 @@ public:
                     MARCO = 104
   }modeloAbstrato;
 
-  unsigned frequencia;
+  float frameRate;
   unsigned serial;
   boost::array<unsigned,2> resolucao;
 

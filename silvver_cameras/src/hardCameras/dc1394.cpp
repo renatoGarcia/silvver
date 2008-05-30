@@ -3,20 +3,18 @@
 #include <fstream>
 #include <iostream>
 
-DC1394::DC1394(int nCard, unsigned identifier, FrameRate frameRate,
-               Mode mode, Format format)
-  :HardCamera(HardCamera::RESOLUTION_640x480, HardCamera::FR_30)
+DC1394::DC1394(int nCard, unsigned UID, FrameRate frameRate,
+               Resolution resolution, Format format)
+  :HardCamera(resolution, frameRate)
 {
   this->nCard = nCard;
   this->device = "/dev/video1394/" + boost::lexical_cast<std::string>(nCard);
 
-  this->mode = mode;
+  this->mode = MODE_640x480_MONO;
   this->format = format;
 
-  if(this->mode == DC1394::_640x480_MONO)
-  {
-    this->bytesPerPixel = 1;
-  }
+  // if mode == MODE_640x40_MONO
+  this->bytesPerPixel = 1;
 
   this->bRaw1394HandleCreated = false;
   this->bDc1394CameraCreated = false;

@@ -8,9 +8,10 @@
 #include <boost/scoped_ptr.hpp>
 #include <boost/ref.hpp>
 #include <boost/foreach.hpp>
-#include "controlador.hpp"
+#include "abstractCamera.hpp"
+#include "markerCamera.hpp"
 #include "cameraConfig.hpp"
-#include "conexao.hpp"
+#include "connection.hpp"
 #include "timer.hpp"
 
 class Gerenciador
@@ -23,7 +24,7 @@ private:
   std::vector< boost::shared_ptr< boost::thread > > thCamera;
 
   /// Objeto da classe Conexao que se encontra que possui os dados para comunição com o recepcionista do silvver-servidor.
-  boost::scoped_ptr<Conexao> conexaoRecepcionista;
+  boost::scoped_ptr<Connection> conexaoRecepcionista;
 
   // Porta para qual enviar a primeira mensagem, a fim de se
   // descobrir em qual porta a BlobCamera deve se conectar
@@ -38,7 +39,7 @@ private:
   // Inicia a câmera abstrata descrita por cameraConfig
   void ConectarCamera(const CameraConfig &cameraConfig);
 
-  std::vector< boost::shared_ptr<Controlador> > vecCamControl;
+  std::vector< boost::shared_ptr<AbstractCamera> > vecAbstractCamera;
 
  public:
 

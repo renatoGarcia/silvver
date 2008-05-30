@@ -84,8 +84,7 @@ int ExtratorMarca::Iniciar()
 
 void
 ExtratorMarca::ExtrairMarcas(IplImage *imgEntrada,
-                             std::vector<MarkerPontos> &vecMarkerPontos,
-                             int logNum,int serial)
+                             std::vector<MarkerPontos> &vecMarkerPontos)
 {
   vecMarkerPontos.clear();
 

@@ -14,17 +14,13 @@ class DC1394: public HardCamera
 {
 public:
 
-
-  enum Mode{
-    _640x480_MONO = MODE_640x480_MONO,
-  };
-
   enum Format{
     F_VGA_NONCOMPRESSED = FORMAT_VGA_NONCOMPRESSED,
   };
 
-  DC1394(int nCard, unsigned identifier, FrameRate frameRate,
-         Mode mode = _640x480_MONO,
+  DC1394(int nCard, unsigned identifier,
+         HardCamera::FrameRate frameRate,
+         HardCamera::Resolution resolution,
          Format format = F_VGA_NONCOMPRESSED);
 
   ~DC1394();
@@ -50,7 +46,7 @@ private:
   bool                 bDc1394CameraCreated;
 
   Format format;
-  Mode mode;
+  int mode;
   int bytesPerPixel;
 
   bayer_pattern_t pattern;

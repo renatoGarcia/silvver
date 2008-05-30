@@ -14,7 +14,7 @@ CameraConfig::CameraConfig(const CameraConfig& camConfig)
   this->resolucao = camConfig.resolucao;
   this->H = camConfig.H;
   this->serial = camConfig.serial;
-  this->frequencia = camConfig.frequencia;
+  this->frameRate = camConfig.frameRate;
   this->diretorio = camConfig.diretorio;
   this->modeloFisico = camConfig.modeloFisico;
   this->modeloAbstrato = camConfig.modeloAbstrato;
@@ -38,7 +38,7 @@ CameraConfigExtractor::lerConteudoElemento(const TiXmlElement *elemento)
 
   std::string texto(elemento->GetText());
   boost::tokenizer<boost::char_separator<char> > tok(texto, separadores);
-  int i = 0;
+  unsigned i = 0;
 
   BOOST_FOREACH(std::string item, tok)
   {
@@ -157,10 +157,10 @@ CameraConfigExtractor::lerDadosCameras(const std::string arquivoConfiguracao)
       lerConteudoElemento<unsigned, 2>(hElemCamera.
                                        FirstChildElement("resolucao").
                                        ToElement());
-    tempCamConf.frequencia =
-      lerConteudoElemento<unsigned, 1>(hElemCamera.
-                                       FirstChildElement("frequencia").
-                                       ToElement()).at(0);
+    tempCamConf.frameRate =
+      lerConteudoElemento<float, 1>(hElemCamera.
+                                    FirstChildElement("frame_rate").
+                                    ToElement()).at(0);
     tempCamConf.H =
       lerConteudoElemento<double, 9>(hElemCamera.
                                      FirstChildElement("matrizH").

@@ -1,28 +1,23 @@
+AM_CPPFLAGS = -Wall
 bin_PROGRAMS = silvver_cameras
 
-silvver_cameras_SOURCES = blobCamera.cpp \
-                          blobCamera.hpp \
-                          blobExtractor.cpp \
-                          blobExtractor.hpp \
-                          cameraConfig.cpp \
+silvver_cameras_CPPFLAGS = $(ARTOOLKITPLUS_DIR)
+
+silvver_cameras_SOURCES = cameraConfig.cpp \
                           cameraConfig.hpp \
-                          camera.cpp \
-                          camera.hpp \
-                          conexao.cpp \
-                          conexao.hpp \
-                          controlador.cpp \
-                          controlador.hpp \
+                          abstractCamera.cpp \
+                          abstractCamera.hpp \
+                          connection.cpp \
+                          connection.hpp \
                           extratorMarca.cpp \
                           extratorMarca.hpp \
-                          filtro.cpp \
-                          filtro.hpp \
                           gerenciador.cpp \
                           gerenciador.hpp \
                           hardCamera.cpp \
                           hardCamera.hpp \
                           main.cpp \
-                          marcoCamera.cpp \
-                          marcoCamera.hpp \
+                          markerCamera.cpp \
+                          markerCamera.hpp \
                           silvver_tipos.hpp \
                           timer.hpp \
                           cmdline.h \
@@ -38,7 +33,8 @@ silvver_cameras_SOURCES = blobCamera.cpp \
                           tinyXml/tinyxmlparser.cpp
 
 if COMPILE_PGR
-silvver_cameras_SOURCES += hardCameras/pgr.cpp hardCameras/pgr.hpp
+silvver_cameras_SOURCES += hardCameras/pgr.cpp \
+                           hardCameras/pgr.hpp
 endif
 
 if COMPILE_DC1394

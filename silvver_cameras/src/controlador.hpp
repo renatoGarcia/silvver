@@ -1,7 +1,6 @@
 #ifndef CONTROLADOR_HPP
 #define CONTROLADOR_HPP
 
-
 #include <boost/noncopyable.hpp>
 #include <boost/scoped_ptr.hpp>
 #include <boost/thread/mutex.hpp>
@@ -18,29 +17,16 @@ class Controlador : boost::noncopyable
 {
 protected:
 
-  /// Evita a criação e iniciação simultânea das câmeras.
-  static boost::mutex mutexIniciarCamera;
 
   /// Classe que descreve as configurações da câmera abstrada
   CameraConfig cameraConfig;
 
-  /// Conexao com o servidor, usada para enviar as localizações
-  Conexao conexao;
-  std::string ipServidor;
-  unsigned porta;
-
   /// Número de identificação único da Câmera abstrata
   unsigned marcoCamID;
 
-  bool termina;
-
-  void conectar();
 
 public:
 
-  virtual void operator()() = 0;
-
-  void terminar();
 };
 
 
@@ -56,7 +42,6 @@ public:
   MarcoCameraControlador(CameraConfig cameraConfig, unsigned Porta,
 			 std::string ipServidor);
 
-  virtual void operator()();
 };
 
 

@@ -41,7 +41,8 @@ public:
 
   int Iniciar();
 
-  void ExtrairMarcas(IplImage *imgEntrada,std::vector<MarkerPontos> &vecMarkerPontos,int logNum,int serial);
+  void ExtrairMarcas(IplImage *imgEntrada,
+                     std::vector<MarkerPontos> &vecMarkerPontos);
 };
 
 #endif
