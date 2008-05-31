@@ -53,9 +53,11 @@ protected:
   unsigned frameSize;
   unsigned frameWidth, frameHeight;
 
+  const uint64 UID;
+
   FrameRate frameRate;
 
-  HardCamera(Resolution resolution, FrameRate frameRate);
+  HardCamera(uint64 UID, Resolution resolution, FrameRate frameRate);
 
 };
 

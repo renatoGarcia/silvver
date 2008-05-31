@@ -85,7 +85,8 @@ AbstractCamera::AbstractCamera(CameraConfig cameraConfig, std::string serverIP,
     break;
 #endif
   case CameraConfig::PseudoCam:
-    this->hardCamera.reset(new PseudoCamera(733,
+    this->hardCamera.reset(new PseudoCamera(cameraConfig.serial,
+                                            733,
                                             cameraConfig.frameRate,
                                             cameraConfig.diretorio.c_str()));
     break;
@@ -122,7 +123,7 @@ AbstractCamera::connect()
   this->connection->receive(msg,sizeof(msg));
 
   {boost::mutex::scoped_lock lock(mutexCout);
-    std::cout << "CAMERA: " << cameraConfig.serial << " " << msg << std::endl;
+    std::cout << "Conecção câmera: " << cameraConfig.serial << " " << msg << std::endl;
   }
 }
 

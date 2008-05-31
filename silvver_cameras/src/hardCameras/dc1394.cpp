@@ -3,9 +3,9 @@
 #include <fstream>
 #include <iostream>
 
-DC1394::DC1394(int nCard, unsigned UID, FrameRate frameRate,
+DC1394::DC1394(int nCard, uint64 UID, FrameRate frameRate,
                Resolution resolution, Format format)
-  :HardCamera(resolution, frameRate)
+  :HardCamera(UID, resolution, frameRate)
 {
   this->nCard = nCard;
   this->device = "/dev/video1394/" + boost::lexical_cast<std::string>(nCard);
@@ -101,13 +101,15 @@ DC1394::initialize()
   {
     dc1394_get_camera_info(this->raw1394Handle, cameraNodes[cameraIndex],
                            &cameraInfo);
-    dc1394_print_camera_info(&cameraInfo);
-    quadlet_t value[2];
 
-    std::cout << "------------------- -----------\n";
-    value[0]= cameraInfo.euid_64 & 0xffffffff;
-    value[1]= (cameraInfo.euid_64 >> 32) & 0xffffffff;
-    printf("UID: 0x%08x%08x\n", value[1], value[0]);
+    if(cameraInfo.euid_64 == this->UID)
+    {
+      break;
+    }
+  }
+  if(cameraIndex == numCameras)
+  {
+    throw std::invalid_argument("It don't find a camera with this UID");
   }
 
   /*-----------------------------------------------------------------------

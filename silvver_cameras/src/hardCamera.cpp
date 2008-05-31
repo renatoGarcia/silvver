@@ -1,7 +1,10 @@
 #include "hardCamera.hpp"
 
-HardCamera::HardCamera(Resolution resolution, FrameRate frameRate)
-  :frameRate(frameRate)
+HardCamera::HardCamera(uint64 UID,
+                       Resolution resolution,
+                       FrameRate frameRate)
+  :UID(UID)
+  ,frameRate(frameRate)
 {
   if(resolution == HardCamera::RESOLUTION_640x480)
   {

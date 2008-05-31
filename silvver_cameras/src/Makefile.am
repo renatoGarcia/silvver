@@ -1,7 +1,5 @@
-AM_CPPFLAGS = -Wall
+AM_CPPFLAGS = -Wall $(ARTOOLKITPLUS_DIR)
 bin_PROGRAMS = silvver_cameras
-
-silvver_cameras_CPPFLAGS = $(ARTOOLKITPLUS_DIR)
 
 silvver_cameras_SOURCES = cameraConfig.cpp \
                           cameraConfig.hpp \

@@ -24,7 +24,8 @@ private:
 
 public:
 
-  PseudoCamera(int totalImagens,unsigned frequencia,const char* diretorio);
+  PseudoCamera(uint64 UID, int totalImagens,
+               unsigned frequencia,const char* diretorio);
 
   ~PseudoCamera();
 

@@ -18,7 +18,7 @@ public:
     F_VGA_NONCOMPRESSED = FORMAT_VGA_NONCOMPRESSED,
   };
 
-  DC1394(int nCard, unsigned identifier,
+  DC1394(int nCard, uint64 identifier,
          HardCamera::FrameRate frameRate,
          HardCamera::Resolution resolution,
          Format format = F_VGA_NONCOMPRESSED);

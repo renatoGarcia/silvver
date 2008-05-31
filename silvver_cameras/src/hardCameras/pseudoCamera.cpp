@@ -2,9 +2,10 @@
 
 extern boost::mutex mutexCout;
 
-PseudoCamera::PseudoCamera(int totalImagens,unsigned frequencia,
+PseudoCamera::PseudoCamera(uint64 UID, int totalImagens,
+                           unsigned frequencia,
                            const char* diretorio)
-  :HardCamera(HardCamera::RESOLUTION_640x480, HardCamera::FR_30)
+  :HardCamera(UID, HardCamera::RESOLUTION_640x480, HardCamera::FR_30)
 {
   this->endImagem = diretorio;
   this->imagemAtual = 1;

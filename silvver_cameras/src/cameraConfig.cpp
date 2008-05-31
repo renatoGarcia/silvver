@@ -1,4 +1,8 @@
 #include "cameraConfig.hpp"
+#include <boost/foreach.hpp>
+#include <boost/tokenizer.hpp>
+#include <boost/lexical_cast.hpp>
+
 
 //--------------------------- CAMERA_CONFIG -------------------------------//
 
@@ -150,9 +154,10 @@ CameraConfigExtractor::lerDadosCameras(const std::string arquivoConfiguracao)
 
 
     tempCamConf.serial =
-      lerConteudoElemento<unsigned, 1>(hElemCamera.
-                                       FirstChildElement("serial").
-                                       ToElement()).at(0);
+      lerConteudoElemento<uint64, 1>(hElemCamera.
+                                     FirstChildElement("serial").
+                                     ToElement()).at(0);
+    std::cout << tempCamConf.serial << std::endl;
     tempCamConf.resolucao =
       lerConteudoElemento<unsigned, 2>(hElemCamera.
                                        FirstChildElement("resolucao").

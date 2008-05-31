@@ -8,37 +8,28 @@
 #define CAMERACONFIG_HPP
 
 #include <boost/array.hpp>
-#include <boost/scoped_ptr.hpp>
-#include <boost/lexical_cast.hpp>
-#include <boost/tokenizer.hpp>
-#include <boost/foreach.hpp>
 #include <stdexcept>
 #include <vector>
 #include <string>
 #include "tinyXml/tinyxml.h"
 
-class XmlLoad_error : std::runtime_error
-{
-public:
-  XmlLoad_error(const std::string& whatArg):
-    runtime_error(whatArg){};
-};
+typedef unsigned long long uint64;
 
 class CameraConfig
 {
 public:
 
-  enum enumFisico{PGR,
-                  DC1394,
-                  PseudoCam
+  enum enumModeloFisico{PGR,
+                    DC1394,
+                    PseudoCam
   }modeloFisico;
 
-  enum enumAbstrato{BLOB  = 103,
-                    MARCO = 104
+  enum enumModeloAbstrato{BLOB  = 103,
+                      MARCO = 104
   }modeloAbstrato;
 
   float frameRate;
-  unsigned serial;
+  uint64 serial;
   boost::array<unsigned,2> resolucao;
 
   boost::array<double,2> fc;     // Distância focal [pixels
@@ -61,6 +52,13 @@ public:
 class CameraConfigExtractor
 {
 public:
+
+  class XmlLoad_error : std::runtime_error
+  {
+  public:
+    XmlLoad_error(const std::string& whatArg):
+      runtime_error(whatArg){};
+  };
 
   std::vector<CameraConfig>
   lerDadosCameras(const std::string arquivoConfiguracao

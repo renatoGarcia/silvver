@@ -34,7 +34,7 @@ protected:
 
   CameraConfig cameraConfig;
 
-  unsigned UID;
+  unsigned long UID;
 
   bool stopping;
 
