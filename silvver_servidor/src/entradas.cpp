@@ -18,15 +18,15 @@ Entradas::Entradas()
   saidas = Saidas::Instanciar();
 }
 
-void Entradas::AdicionarEntrada(Conexao *conexao)
+void Entradas::AdicionarEntrada(Connection *conexao)
 {
   char msg[3];
   TipoDado tipoDado;
 
-  conexao->Receber( msg,sizeof(msg) );
+  conexao->receive( msg,sizeof(msg) );
   cout << "Confirma conexao: " << msg << endl;
 
-  conexao->Receber( &tipoDado,sizeof(TipoDado) );
+  conexao->receive( &tipoDado,sizeof(TipoDado) );
   cout << "Tipo de dado: " << tipoDado2string(tipoDado) << endl << endl;
 
   switch(tipoDado)
@@ -62,36 +62,36 @@ string Entradas::tipoDado2string(TipoDado td)
   return str;
 }
 
-void Entradas::ClienteBlobCam(Entradas *objeto, Conexao *conexao)
+void Entradas::ClienteBlobCam(Entradas *objeto, Connection *conexao)
 {
   char msgOK[3] = "OK";
 
   BlobTratador *tratador = BlobTratador::Instanciar();
 
-  conexao->Enviar(msgOK,sizeof(msgOK));
+  conexao->send(msgOK,sizeof(msgOK));
 
   Pacote<Marca> pacote;
   while(true)
   {
-    conexao->Receber( &pacote,sizeof(pacote) );
+    conexao->receive( &pacote,sizeof(pacote) );
     tratador->EntregarPacotes(pacote);
     //saidas->
   }
 }
 
-void Entradas::ClienteMarcaCam(Entradas *objeto, Conexao *conexao)
+void Entradas::ClienteMarcaCam(Entradas *objeto, Connection *conexao)
 {
   char msgOK[3] = "OK";
 
   MarcaTratador *tratador = MarcaTratador::Instanciar();
 
-  conexao->Enviar(msgOK,sizeof(msgOK));
+  conexao->send(msgOK,sizeof(msgOK));
 
   Pacote<Ente> pacote;
   vector<Ente> resultados;
   while(true)
   {
-    conexao->Receber( &pacote,sizeof(pacote) );
+    conexao->receive( &pacote,sizeof(pacote) );
     tratador->EntregarPacotes(pacote);
     tratador->Localizar(resultados);
     objeto->saidas->ReceberEstado(resultados);

@@ -1,6 +1,7 @@
 #include "receptor.hpp"
 #include <iostream>
 #include "cmdline.h"
+#include <boost/scoped_ptr.hpp>
 
 using namespace std;
 
@@ -15,8 +16,8 @@ int main(int argc, char **argv)
   // int portaRecepcionista = args_info.porta_recepcionista_arg;
   verbose = args_info.verbose_flag;
 
-  Receptor *receptor = Receptor::Instanciar();
-  receptor->CriarRecepcionista();
+  boost::scoped_ptr<Receptionist> receptionist(new Receptionist());
+  receptionist->run();
 
   getchar();
   cout << "Terminando..." << endl << endl;

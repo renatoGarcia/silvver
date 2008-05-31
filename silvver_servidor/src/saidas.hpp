@@ -28,7 +28,7 @@ private:
   /** Socket de comunicação com os clientes que receberão a sua própria pose.
    * A chave int é o id de interesse.
    */
-  map< int,Conexao* > clientes;
+  map< int,Connection* > clientes;
 
   /// Registrará todas as informações obtidas das cameras
   ofstream *arqLog;
@@ -42,7 +42,7 @@ public:
    *
    * @param conexaoNovoCliente Um objeto da classe Conexão que contenha o endereço IP do novo cliente e a porta utilizada para a cominicação.
    */
-  void AdicionarSaida(Conexao *conexaoNovoCliente);
+  void AdicionarSaida(Connection *conexaoNovoCliente);
 
   /** Retira o cliente com o id da lista de clientes.
    * Caso haja um cliente o id dado, ele será retirado da lista de clientes.

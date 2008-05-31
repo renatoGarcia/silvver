@@ -1,4 +1,5 @@
 #include "saidas.hpp"
+#include <iostream>
 
 auto_ptr<Saidas> Saidas::instanciaUnica;
 mutex Saidas::mutexInstanciacao;
@@ -17,21 +18,21 @@ Saidas::Saidas()
   arqLog = new ofstream("log.txt");
 }
 
-void Saidas::AdicionarSaida(Conexao *conexaoNovoCliente)
+void Saidas::AdicionarSaida(Connection *conexaoNovoCliente)
 {
   char msg[3];
   char OK[3] = "OK";
   int idCliente;
 
-  conexaoNovoCliente->Receber( msg,sizeof(msg) ); //Deverá receber como resposta a mensagem "OK".
-  cout << "Confirma conexao: " << msg << endl;
+  conexaoNovoCliente->receive( msg,sizeof(msg) ); //Deverá receber como resposta a mensagem "OK".
+  std::cout << "Confirma conexao: " << msg << std::endl;
 
-  conexaoNovoCliente->Receber( &idCliente,sizeof(int) );
-  cout << "ID: " << idCliente << endl;
+  conexaoNovoCliente->receive( &idCliente,sizeof(int) );
+  std::cout << "ID: " << idCliente << std::endl;
 
   clientes[idCliente] = conexaoNovoCliente;
 
-  clientes.find(idCliente)->second->Enviar(OK,sizeof(OK));
+  clientes.find(idCliente)->second->send(OK,sizeof(OK));
 }
 
 void Saidas::ReceberEstado(const vector<Ente> &vecRobo)
@@ -47,7 +48,7 @@ void Saidas::ReceberEstado(const vector<Ente> &vecRobo)
 
     //Caso exista um cliente com o mesmo id do Ente apontado por iteEnte envia a pose para ele.
     if(clientes.find(iteEnte->id) != clientes.end())
-      clientes.find(iteEnte->id)->second->Enviar( (void*)&(*iteEnte),sizeof(*iteEnte) );
+      clientes.find(iteEnte->id)->second->send( (void*)&(*iteEnte),sizeof(*iteEnte) );
   }
 }
 

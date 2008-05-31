@@ -1,77 +1,83 @@
 #include "connection.hpp"
 
-Conexao::Conexao()
+Connection::Connection(unsigned port)
+  :port(port)
 {
-    this->SenderAddrSize = sizeof(SenderAddr);
+  this->SenderAddrSize = sizeof(SenderAddr);
 }
 
-int Conexao::Iniciar(int porta)
+void
+Connection::initialize()
 {
-  #ifdef HAVE_WINDOWS_SOCKETS
-    WSADATA initialisation_win32;
+#ifdef HAVE_WINDOWS_SOCKETS
+  WSADATA initialisation_win32;
 
-    erro = WSAStartup(MAKEWORD(2,2),&initialisation_win32);
-    if(erro)
-    {
-        printf("Suporte a sockets indisponivel.\n");
-        return 1;
-    }
-  #endif
+  int erro = WSAStartup(MAKEWORD(2,2),&initialisation_win32);
+  if(erro)
+  {
+//     printf("Suporte a sockets indisponivel.\n");
+    return;
+  }
+#endif
 
-    // Cria��o de um Socket
-    SocketConexao = socket(AF_INET,SOCK_DGRAM,0);
-    if (SocketConexao<=0)
-    {
-        printf("Imposs�vel de Criar Socket.\n");
-        return 1;
-    }
+  this->connectionSocket = socket(AF_INET,SOCK_DGRAM,0);
+  if(this->connectionSocket<=0)
+  {
+//     printf("Impossível de Criar Socket.\n");
+    return;
+  }
 
-    // Inicializa��o do Servidor
-    infConexao.sin_family = AF_INET;         //Indica a utiliza��o do IPv4
-    infConexao.sin_addr.s_addr = INADDR_ANY; //Ecoute sur toutes les IP locales
-    infConexao.sin_port = htons(porta);      //porta na qual o cliente estar� escutando
+  this->infConnection.sin_family = AF_INET;
+  this->infConnection.sin_addr.s_addr = INADDR_ANY;
+  this->infConnection.sin_port = htons(this->port);
 
-    if( bind(SocketConexao,(struct sockaddr*)&infConexao,sizeof(infConexao)) == -1 )
-    {
-        perror("bind");
-        return 1;
-    }
+  if(bind(this->connectionSocket,
+          (struct sockaddr*)&infConnection,
+          sizeof(infConnection))
+     == -1 )
+  {
+//     perror("bind");
+    return;
+  }
 
-	SenderAddr.sin_family = 0;
-
-    return 0;
+  this->SenderAddr.sin_family = 0;
 }
 
-int Conexao::Receber(void *msg, int tamanho)
+void
+Connection::receive(void *msg, int tamanho)
 {
-	int bytes_recebidos;
+  int bytes_recebidos;
 
-	bytes_recebidos = recvfrom(SocketConexao,(char*) msg, tamanho,
-                                0, (struct sockaddr*)&SenderAddr,
-                                &SenderAddrSize);
+  bytes_recebidos = recvfrom(this->connectionSocket,
+                             (char*) msg,
+                             tamanho,
+                             0,
+                             (struct sockaddr*)&SenderAddr,
+                             &SenderAddrSize);
 
-	if ( bytes_recebidos == -1 )
-		printf("Erro d: A mensagem nao foi recebida corretamente.\n"/*,
-		WSAGetLastError()*/ );
-	if ( bytes_recebidos != tamanho )
-		printf("O tamanho do dado recebido (%d) nao corresponde com o"
-			" esperado (%d).\n", bytes_recebidos, tamanho);
+//   if ( bytes_recebidos == -1 )
+//     printf("Erro d: A mensagem nao foi recebida corretamente.\n"/*,
+//                                                                   WSAGetLastError()*/ );
+//   if ( bytes_recebidos != tamanho )
+//     printf("O tamanho do dado recebido (%d) nao corresponde com o"
+//            " esperado (%d).\n", bytes_recebidos, tamanho);
 
-	return( bytes_recebidos );
+  return;
 }
 
-int Conexao::Enviar(void *msg, int tamanho)
+void
+Connection::send(void *msg, int tamanho)
 {
-    int bytes_enviados;
+  int bytes_enviados;
 
-    bytes_enviados = sendto(SocketConexao,(char*) msg, tamanho,
-                            0,(struct sockaddr*)&SenderAddr,
-                            sizeof(SenderAddr));
+  bytes_enviados = sendto(connectionSocket,(char*) msg, tamanho,
+                          0,(struct sockaddr*)&SenderAddr,
+                          sizeof(SenderAddr));
 
-    if ( bytes_enviados == -1 )
-		printf("Impossivel enviar dados\n");
-	if ( bytes_enviados != tamanho )
-		printf("Dados nao foram enviados corretamente\n");
+//   if ( bytes_enviados == -1 )
+// //     printf("Impossivel enviar dados\n");
+//   if ( bytes_enviados != tamanho )
+//     printf("Dados nao foram enviados corretamente\n");
 
-	return(bytes_enviados);
+  return;
 }

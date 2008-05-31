@@ -42,14 +42,14 @@ private:
    * @param objeto Apontador para a instância da classe Entradas, um ponteiro para this.
    * @param conexao Objeto de Conexao que contém as informações para a comunicação com o cliente através da rede.
    */
-  static void ClienteBlobCam(Entradas *objeto, Conexao *conexao);
+  static void ClienteBlobCam(Entradas *objeto, Connection *conexao);
 
   /** Tratará os dados recebidos de uma marcoCamera.
    *
    * @param objeto Apontador para a instância da classe Entradas, um ponteiro para this.
    * @param conexao Objeto de Conexao que contém as informações para a comunicação com o cliente através da rede.
    */
-  static void ClienteMarcaCam(Entradas *objeto, Conexao *conexao);
+  static void ClienteMarcaCam(Entradas *objeto, Connection *conexao);
 
   Saidas *saidas;
 
@@ -61,7 +61,7 @@ public:
   static Entradas* Instanciar();
 
   /// Recebe um objeto da classe conexão onde se encontram informações sobre um novo cliente e inicia o tratamento dos dados que serão recebidos.
-  void AdicionarEntrada(Conexao *conexao);
+  void AdicionarEntrada(Connection *conexao);
 };
 
 #endif
