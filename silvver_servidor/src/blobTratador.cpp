@@ -1,4 +1,4 @@
-#include "blobTratador.h"
+#include "blobTratador.hpp"
 
 mutex BlobTratador::mutexInstanciacao;
 auto_ptr<BlobTratador> BlobTratador::instanciaUnica;

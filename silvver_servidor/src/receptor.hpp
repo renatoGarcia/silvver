@@ -1,10 +1,10 @@
-#ifndef RECEPTOR_H
-#define RECEPTOR_H
+#ifndef RECEPTOR_HPP
+#define RECEPTOR_HPP
 
 #include <boost/thread/thread.hpp>
 #include <boost/thread/mutex.hpp>
-#include "entradas.h"
-#include "saidas.h"
+#include "entradas.hpp"
+#include "saidas.hpp"
 #include <sys/timeb.h>
 
 extern bool verbose;

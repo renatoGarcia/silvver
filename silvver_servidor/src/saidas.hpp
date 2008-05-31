@@ -1,10 +1,10 @@
-#ifndef SAIDAS_H
-#define SAIDAS_H
+#ifndef SAIDAS_HPP
+#define SAIDAS_HPP
 
 #include <map>
-#include "tipos.h"
+#include "tipos.hpp"
 #include <boost/thread/mutex.hpp>
-#include "conexao.h"
+#include "connection.hpp"
 #include <fstream>
 
 using namespace std;

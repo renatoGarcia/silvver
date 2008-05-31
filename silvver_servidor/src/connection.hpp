@@ -2,8 +2,8 @@
 /**************************************************************************************
     Efetua a conex�o do servidor
 **************************************************************************************/
-#ifndef CONEXAO_H
-#define CONEXAO_H
+#ifndef CONNECTION_HPP
+#define CONNECTION_HPP
 
 #ifdef HAVE_CONFIG_H
 #include <config.h>

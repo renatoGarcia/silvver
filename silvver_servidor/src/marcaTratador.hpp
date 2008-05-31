@@ -3,13 +3,13 @@
 
 *************************************************************************************/
 
-#ifndef MARCATRATADOR_H
-#define MARCATRATADOR_H
+#ifndef MARCATRATADOR_HPP
+#define MARCATRATADOR_HPP
 
 #include <map>
 #include <vector>
 #include <boost/thread/mutex.hpp>
-#include "tipos.h"
+#include "tipos.hpp"
 
 using namespace std;
 using namespace verlab;

@@ -2,8 +2,8 @@
     Especifica��o dos tipos usados para a comunica��o entre as classes
     Versão 1.0
 *************************************************************************************/
-#ifndef TIPOS_H
-#define TIPOS_H
+#ifndef TIPOS_HPP
+#define TIPOS_HPP
 
 #define PORTA_RECEPCIONISTA 12000
 #define PORTA_BROADCAST 11999

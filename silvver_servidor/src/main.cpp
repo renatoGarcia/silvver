@@ -1,4 +1,4 @@
-#include "Receptor.h"
+#include "receptor.hpp"
 #include <iostream>
 #include "cmdline.h"
 

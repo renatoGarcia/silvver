@@ -2,17 +2,17 @@ AM_CPPFLAGS = -Wall
 bin_PROGRAMS = silver_servidor
 
 silver_servidor_SOURCES = blobTratador.cpp \
-     blobTratador.h \
-     conexao.cpp \
-     conexao.h \
+     blobTratador.hpp \
+     connection.cpp \
+     connection.hpp \
      entradas.cpp \
-     entradas.h \
+     entradas.hpp \
      main.cpp \
      marcaTratador.cpp \
-     marcaTratador.h \
-     Receptor.cpp \
-     Receptor.h \
+     marcaTratador.hpp \
+     receptor.cpp \
+     receptor.hpp \
      saidas.cpp \
-     saidas.h \
+     saidas.hpp \
      cmdline.h \
      cmdline.c

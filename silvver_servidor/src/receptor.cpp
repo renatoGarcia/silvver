@@ -1,5 +1,5 @@
-#include "Receptor.h"
-#include "conexao.h"
+#include "receptor.hpp"
+#include "connection.hpp"
 #include <boost/bind.hpp>
 #include <iostream>
 

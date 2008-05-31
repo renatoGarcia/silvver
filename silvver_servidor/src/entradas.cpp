@@ -1,4 +1,4 @@
-#include "entradas.h"
+#include "entradas.hpp"
 #include <iostream>
 
 mutex Entradas::mutexInstanciacao;

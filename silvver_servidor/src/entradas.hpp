@@ -1,15 +1,15 @@
-#ifndef ENTRADAS_H
-#define ENTRADAS_H
+#ifndef ENTRADAS_HPP
+#define ENTRADAS_HPP
 
 #include <vector>
 #include <string>
 #include <boost/thread/thread.hpp>
 #include <boost/bind.hpp>
-#include "conexao.h"
-#include "tipos.h"
-#include "saidas.h"
-#include "blobTratador.h"
-#include "marcaTratador.h"
+#include "connection.hpp"
+#include "tipos.hpp"
+#include "saidas.hpp"
+#include "blobTratador.hpp"
+#include "marcaTratador.hpp"
 
 using namespace std;
 using namespace boost;

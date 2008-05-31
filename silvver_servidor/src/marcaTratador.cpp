@@ -1,4 +1,4 @@
-#include "marcaTratador.h"
+#include "marcaTratador.hpp"
 
 mutex MarcaTratador::mutexInstanciacao;
 auto_ptr<MarcaTratador> MarcaTratador::instanciaUnica;

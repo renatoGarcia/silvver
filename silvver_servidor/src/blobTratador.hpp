@@ -3,14 +3,14 @@
     Efetua a conex�o do servidor
 **************************************************************************************/
 
-#ifndef BLOBTRATADOR_H
-#define BLOBTRATADOR_H
+#ifndef BLOBTRATADOR_HPP
+#define BLOBTRATADOR_HPP
 
 #include <limits.h>
 #include <map>
 #include <vector>
 #include <boost/thread/mutex.hpp>
-#include "tipos.h"
+#include "tipos.hpp"
 
 using namespace std;
 using namespace verlab;

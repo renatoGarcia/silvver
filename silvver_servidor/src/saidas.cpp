@@ -1,4 +1,4 @@
-#include "saidas.h"
+#include "saidas.hpp"
 
 auto_ptr<Saidas> Saidas::instanciaUnica;
 mutex Saidas::mutexInstanciacao;
