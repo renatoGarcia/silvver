@@ -44,39 +44,52 @@ Connection::initialize()
 }
 
 void
-Connection::receive(void *msg, int tamanho)
+Connection::receive(void *msg, unsigned length, int waitTime)
 {
-  int bytes_recebidos;
+  this->tv.tv_sec = waitTime;
+  FD_ZERO(&this->fdSet);
+  FD_SET(this->connectionSocket, &this->fdSet);
+  if(waitTime != INFINITE)
+  {
+    select(this->connectionSocket+1, &this->fdSet, NULL, NULL, &this->tv);
+  }
+  else
+  {
+    select(this->connectionSocket+1, NULL, NULL, NULL, &this->tv);
+  }
 
-  bytes_recebidos = recvfrom(this->connectionSocket,
-                             (char*) msg,
-                             tamanho,
-                             0,
-                             (struct sockaddr*)&SenderAddr,
-                             &SenderAddrSize);
+  if(FD_ISSET(this->connectionSocket , &this->fdSet))
+  {
+    int bytes_recebidos;
 
-//   if ( bytes_recebidos == -1 )
-//     printf("Erro d: A mensagem nao foi recebida corretamente.\n"/*,
-//                                                                   WSAGetLastError()*/ );
-//   if ( bytes_recebidos != tamanho )
-//     printf("O tamanho do dado recebido (%d) nao corresponde com o"
-//            " esperado (%d).\n", bytes_recebidos, tamanho);
+    bytes_recebidos = recvfrom(this->connectionSocket,
+                               (char*) msg,
+                               length,
+                               0,
+                               (struct sockaddr*)&SenderAddr,
+                               &SenderAddrSize);
 
-  return;
+    //   if ( bytes_recebidos == -1 )
+    //     printf("Erro d: A mensagem nao foi recebida corretamente.\n"/*,
+    //                                                                   WSAGetLastError()*/ );
+    //   if ( bytes_recebidos != length )
+    //     printf("O length do dado recebido (%d) nao corresponde com o"
+    //            " esperado (%d).\n", bytes_recebidos, length);
+  }
 }
 
 void
-Connection::send(void *msg, int tamanho)
+Connection::send(void *msg, int length)
 {
   int bytes_enviados;
 
-  bytes_enviados = sendto(connectionSocket,(char*) msg, tamanho,
+  bytes_enviados = sendto(connectionSocket,(char*) msg, length,
                           0,(struct sockaddr*)&SenderAddr,
                           sizeof(SenderAddr));
 
 //   if ( bytes_enviados == -1 )
 // //     printf("Impossivel enviar dados\n");
-//   if ( bytes_enviados != tamanho )
+//   if ( bytes_enviados != length )
 //     printf("Dados nao foram enviados corretamente\n");
 
   return;

@@ -45,7 +45,7 @@ private:
   /// Porta livre que será utilizada no próximo pedido de conexão.
   unsigned portaLivre;
 
-  boost::scoped_ptr<Entradas> entradas;
+  boost::scoped_ptr<Inputs> inputs;
 
   boost::scoped_ptr<Saidas> saidas;
 

@@ -1,42 +1,42 @@
 #include "entradas.hpp"
 #include <iostream>
 
-mutex Entradas::mutexInstanciacao;
-auto_ptr<Entradas> Entradas::instanciaUnica;
+mutex Inputs::mutexInstanciacao;
+auto_ptr<Inputs> Inputs::instanciaUnica;
 
-Entradas* Entradas::Instanciar()
+Inputs* Inputs::Instanciar()
 {
   mutex::scoped_lock lock(mutexInstanciacao);
   if( instanciaUnica.get()==0 )
-      instanciaUnica.reset(new Entradas());
+      instanciaUnica.reset(new Inputs());
 
   return instanciaUnica.get();
 }
 
-Entradas::Entradas()
+Inputs::Inputs()
 {
   saidas = Saidas::Instanciar();
 }
 
-void Entradas::AdicionarEntrada(Connection *conexao)
+void Inputs::AdicionarEntrada(Connection *conexao)
 {
   char msg[3];
-  TipoDado tipoDado;
+  DataType dataType;
 
   conexao->receive( msg,sizeof(msg) );
   cout << "Confirma conexao: " << msg << endl;
 
-  conexao->receive( &tipoDado,sizeof(TipoDado) );
-  cout << "Tipo de dado: " << tipoDado2string(tipoDado) << endl << endl;
+  conexao->receive( &dataType,sizeof(DataType) );
+  cout << "Tipo de dado: " << tipoDado2string(dataType) << endl << endl;
 
-  switch(tipoDado)
+  switch(dataType)
   {
     case CORES:
-      threadCliente.push_back(new thread(bind(&Entradas::ClienteBlobCam,
+      threadCliente.push_back(new thread(bind(&Inputs::ClienteBlobCam,
                                               this,conexao)));
       break;
     case MARCAS:
-      threadCliente.push_back(new thread(bind(&Entradas::ClienteMarcaCam,
+      threadCliente.push_back(new thread(bind(&Inputs::ClienteMarcaCam,
                                               this,conexao)));
       break;
     default:
@@ -44,7 +44,7 @@ void Entradas::AdicionarEntrada(Connection *conexao)
   }
 }
 
-string Entradas::tipoDado2string(TipoDado td)
+string Inputs::tipoDado2string(DataType td)
 {
   string str;
   switch(td)
@@ -62,7 +62,7 @@ string Entradas::tipoDado2string(TipoDado td)
   return str;
 }
 
-void Entradas::ClienteBlobCam(Entradas *objeto, Connection *conexao)
+void Inputs::ClienteBlobCam(Inputs *objeto, Connection *conexao)
 {
   char msgOK[3] = "OK";
 
@@ -79,11 +79,11 @@ void Entradas::ClienteBlobCam(Entradas *objeto, Connection *conexao)
   }
 }
 
-void Entradas::ClienteMarcaCam(Entradas *objeto, Connection *conexao)
+void Inputs::ClienteMarcaCam(Inputs *objeto, Connection *conexao)
 {
   char msgOK[3] = "OK";
 
-  MarcaTratador *tratador = MarcaTratador::Instanciar();
+  MarkerProcessor *processor = MarkerProcessor::instantiate();
 
   conexao->send(msgOK,sizeof(msgOK));
 
@@ -92,8 +92,8 @@ void Entradas::ClienteMarcaCam(Entradas *objeto, Connection *conexao)
   while(true)
   {
     conexao->receive( &pacote,sizeof(pacote) );
-    tratador->EntregarPacotes(pacote);
-    tratador->Localizar(resultados);
+    processor->EntregarPacotes(pacote);
+    processor->localize(resultados);
     objeto->saidas->ReceberEstado(resultados);
   }
 }

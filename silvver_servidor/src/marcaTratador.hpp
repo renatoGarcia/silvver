@@ -1,10 +1,5 @@
-#include <iostream>
-/**************************************************************************************
-
-*************************************************************************************/
-
-#ifndef MARCATRATADOR_HPP
-#define MARCATRATADOR_HPP
+#ifndef MARKER_PROCESSOR_HPP
+#define MARKER_PROCESSOR_HPP
 
 #include <map>
 #include <vector>
@@ -15,15 +10,25 @@ using namespace std;
 using namespace verlab;
 using namespace boost;
 
-class MarcaTratador
+class MarkerProcessor
 {
+public:
+
+    static MarkerProcessor* instantiate();
+
+    void EntregarPacotes(Pacote<Ente> &pacote);
+
+    // Calcula a configuraçãoo dos robôs, usando os dados atualmente
+    // disponíveis no map armazenador.
+    void localize(vector<Ente> &vecRobos);
+
 private:
 
-    static auto_ptr<MarcaTratador> instanciaUnica;
+    static auto_ptr<MarkerProcessor> instanciaUnica;
     static mutex mutexInstanciacao;
-    MarcaTratador();
+    MarkerProcessor();
 
-    typedef map< unsigned,vector<Ente> > TMapa;
+    typedef map<unsigned,vector<Ente> > TMapa;
 
     // Armazenara os ultimos entes obtidos de cada marcaCamera, onde
     // a chave e um identificador destas.
@@ -31,15 +36,6 @@ private:
 
     mutex mutexArmazenador;
 
-public:
-
-    static MarcaTratador* Instanciar();
-
-    void EntregarPacotes(Pacote<Ente> &pacote);
-
-    // Calcula a configura��o dos rob�s, usando os dados atualmente
-    // dispon�veis no map armazenador.
-    void Localizar(vector<Ente> &vecRobos);
 };
 
 #endif

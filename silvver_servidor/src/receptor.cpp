@@ -11,7 +11,7 @@ Receptionist::Receptionist()
   ,RECEPCIONISTA_PORTA(12000)
 {
   this->portaLivre = 12001;
-  this->entradas.reset(Entradas::Instanciar());
+  this->inputs.reset(Inputs::Instanciar());
   this->saidas.reset(Saidas::Instanciar());
   ftime(&this->tempoInicial);
 }
@@ -56,7 +56,7 @@ Receptionist::operator()()
 
   while(!this->stopReceptionist)
   {
-    connection.receive( msg,sizeof(msg) );// Recebe a primeira mensagem
+    connection.receive(msg, sizeof(msg), 1);// Recebe a primeira mensagem
 
     if( strcmp(msg,"TP") == 0 ) //Tempo Atual
     {
@@ -72,7 +72,7 @@ Receptionist::operator()()
 
       connection.send( &this->portaLivre,sizeof(this->portaLivre) );
 
-      this->entradas->AdicionarEntrada( conexaoEntrada );
+      this->inputs->AdicionarEntrada( conexaoEntrada );
 
       this->portaLivre++;
     }
@@ -102,5 +102,6 @@ Receptionist::operator()()
     {
       std::cerr << "Unknown message: " << msg[0] << msg[1] << std::endl;
     }
+    msg[0]=0;msg[1]=0;msg[2]=0;
   }
 }

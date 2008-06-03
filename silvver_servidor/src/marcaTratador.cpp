@@ -1,22 +1,23 @@
+#include <iostream>
 #include "marcaTratador.hpp"
 
-mutex MarcaTratador::mutexInstanciacao;
-auto_ptr<MarcaTratador> MarcaTratador::instanciaUnica;
+mutex MarkerProcessor::mutexInstanciacao;
+auto_ptr<MarkerProcessor> MarkerProcessor::instanciaUnica;
 
-MarcaTratador* MarcaTratador::Instanciar()
+MarkerProcessor* MarkerProcessor::instantiate()
 {
     mutex::scoped_lock lock(mutexInstanciacao);
     if( instanciaUnica.get()==0 )
-        instanciaUnica.reset(new MarcaTratador);
+        instanciaUnica.reset(new MarkerProcessor);
 
     return instanciaUnica.get();
 }
 
-MarcaTratador::MarcaTratador()
+MarkerProcessor::MarkerProcessor()
 {
 }
 
-void MarcaTratador::EntregarPacotes(Pacote<Ente> &pacote)
+void MarkerProcessor::EntregarPacotes(Pacote<Ente> &pacote)
 {
   vector<Ente> vecEnte;
   int idBlobCam = pacote.GetCameraId();
@@ -28,7 +29,7 @@ void MarcaTratador::EntregarPacotes(Pacote<Ente> &pacote)
 
 }
 
-void MarcaTratador::Localizar(vector<Ente> &vecRobos)
+void MarkerProcessor::localize(vector<Ente> &vecRobos)
 {
   vecRobos.clear();
   vector<Ente> vecEnteTemp;

@@ -20,6 +20,8 @@
 #define SOCKET int
 #endif
 
+#define INFINITE -1
+
 class Connection
 {
 public:
@@ -29,9 +31,9 @@ public:
   void initialize();
 
   // Envia mensagem: msg � a mensagem e tamanho � o tamanho (sizeof) da mensagem
-  void send(void *msg, int tamanho);
+  void send(void *msg, int length);
 
-  void receive(void *msg, int tamanho);
+  void receive(void *msg, unsigned length, int waitTime=INFINITE);
 
 private:
 
@@ -53,6 +55,11 @@ private:
 #ifdef HAVE_LINUX_SOCKETS
   socklen_t SenderAddrSize;
 #endif
+
+  struct timeval tv;
+
+  fd_set fdSet;
+
 
 };
 
