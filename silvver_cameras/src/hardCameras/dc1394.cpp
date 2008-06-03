@@ -210,7 +210,7 @@ DC1394::initialize()
 }
 
 void
-DC1394::captureFrame(IplImage* iplImage)
+DC1394::captureFrame(IplImage* &iplImage)
 {
   // Capture one frame
   if (dc1394_dma_single_capture(&(this->dc1394Camera)) != DC1394_SUCCESS)

@@ -1,54 +1,87 @@
 #include "pseudoCamera.hpp"
+#include <iostream>
+#include <boost/thread/thread.hpp>
+#include <boost/thread/xtime.hpp>
+#include <boost/thread/mutex.hpp>
+
 
 extern boost::mutex mutexCout;
 
-PseudoCamera::PseudoCamera(uint64 UID, int totalImagens,
-                           unsigned frequencia,
-                           const char* diretorio)
-  :HardCamera(UID, HardCamera::RESOLUTION_640x480, HardCamera::FR_30)
-{
-  this->endImagem = diretorio;
-  this->imagemAtual = 1;
-  this->totalImagens = 1000;//totalImagens;
-  this->atraso = (int)((1.0/(double)frequencia)*1.0e9);
-}
+PseudoCamera::PseudoCamera(uint64 UID,
+                           FrameRate frameRate,
+                           Resolution resolution,
+                           std::string imagesPath)
+  :HardCamera(UID, resolution, frameRate)
+  ,PATH(imagesPath)
+{}
 
 PseudoCamera::~PseudoCamera()
 {}
 
-void PseudoCamera::initialize()
-{}
+void
+PseudoCamera::initialize()
+{
+  if(!bfs::is_directory(this->PATH))
+  {
+    throw OpenCameraFailed("Path for images in PseudoCamera don't is a directory");
+  }
+
+  switch(this->frameRate)
+  {
+  case HardCamera::FR_7_5:
+    this->delay = (unsigned)((1.0/7.5)*1.0e9);
+    break;
+  case HardCamera::FR_15:
+    this->delay = (unsigned)((1.0/15.0)*1.0e9);
+    break;
+  case HardCamera::FR_30:
+    this->delay = (unsigned)((1.0/30.0)*1.0e9);
+    break;
+  default:
+    throw OpenCameraFailed("Frame Rate don't allowed");
+  }
+
+  this->dirIterator = bfs::directory_iterator(this->PATH);
+
+ }
 
 void PseudoCamera::saveFrame()
 {}
 
-void PseudoCamera::captureFrame(IplImage *iplImage)
+void PseudoCamera::captureFrame(IplImage* &iplImage)
 {
   boost::xtime xt;
   boost::xtime_get(&xt, boost::TIME_UTC);
-  xt.nsec += this->atraso;
-  boost::thread::sleep(xt);
+  xt.nsec += this->delay;
 
-  // Limpa a IplImage recebida para o retorno
-  cvReleaseImage( &iplImage );
-
-  std::ostringstream s1;
-
-  if(this->imagemAtual > this->totalImagens )
+  bool imageLoaded = false;
+  while(!imageLoaded)
   {
-    boost::mutex::scoped_lock lock(mutexCout);
-    std::cout << "A pseudoCamera terminou" << std::endl;
-    return;
+    if(this->dirIterator == this->endIterator)
+    {
+      return;
+    }
+
+    if(bfs::is_directory(dirIterator->status()))
+    {
+      this->dirIterator++;
+      continue;
+    }
+
+    cvReleaseImage( &iplImage );
+    iplImage = cvLoadImage(dirIterator->path().file_string().c_str(),
+                           CV_LOAD_IMAGE_COLOR);
+    if(iplImage == NULL)
+    {
+      std::cerr << "Error on load image " << dirIterator->path() << std::endl;
+      this->dirIterator++;
+      continue;
+    }
+    imageLoaded = true;
+    this->dirIterator++;
   }
 
-  //--------------------------------------------------------
-  s1 << this->endImagem << this->imagemAtual << ".bmp";
-  std::cout << "---------------------" <<std::endl << std::endl
-            << s1.str() << std::endl;
-  //--------------------------------------------------------
-  iplImage = cvLoadImage( s1.str().c_str(), CV_LOAD_IMAGE_COLOR );
-
-  this->imagemAtual++;
+  boost::thread::sleep(xt);
 
 }
 

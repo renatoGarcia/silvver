@@ -19,7 +19,7 @@ CameraConfig::CameraConfig(const CameraConfig& camConfig)
   this->H = camConfig.H;
   this->serial = camConfig.serial;
   this->frameRate = camConfig.frameRate;
-  this->diretorio = camConfig.diretorio;
+  this->imagesPath = camConfig.imagesPath;
   this->modeloFisico = camConfig.modeloFisico;
   this->modeloAbstrato = camConfig.modeloAbstrato;
 }
@@ -116,6 +116,18 @@ CameraConfigExtractor::lerDadosCameras(const std::string arquivoConfiguracao)
       continue;
     }
 
+    std::string modeloAbstrato =
+      lerConteudoElemento<std::string, 1>(hElemCamera.
+                                          FirstChildElement("modelo_abstrato").
+                                          ToElement()).at(0);
+    if(modeloAbstrato == "BLOB" )
+    {
+      tempCamConf.modeloAbstrato = CameraConfig::BLOB;
+    }
+    else
+    {
+      tempCamConf.modeloAbstrato = CameraConfig::MARCO;
+    }
 
     std::string modeloFisico =
       lerConteudoElemento<std::string, 1>(hElemCamera.
@@ -138,26 +150,19 @@ CameraConfigExtractor::lerDadosCameras(const std::string arquivoConfiguracao)
       throw std::invalid_argument("Unknown hardware camera: " + modeloFisico);
     }
 
-
-    std::string modeloAbstrato =
-      lerConteudoElemento<std::string, 1>(hElemCamera.
-                                          FirstChildElement("modelo_abstrato").
-                                          ToElement()).at(0);
-    if(modeloAbstrato == "BLOB" )
+    if(tempCamConf.modeloFisico == CameraConfig::PseudoCam)
     {
-      tempCamConf.modeloAbstrato = CameraConfig::BLOB;
+      tempCamConf.imagesPath =
+        lerConteudoElemento<std::string, 1>(hElemCamera.
+                                            FirstChildElement("path").
+                                            ToElement()).at(0);
     }
-    else
-    {
-      tempCamConf.modeloAbstrato = CameraConfig::MARCO;
-    }
-
 
     tempCamConf.serial =
       lerConteudoElemento<uint64, 1>(hElemCamera.
                                      FirstChildElement("serial").
                                      ToElement()).at(0);
-    std::cout << tempCamConf.serial << std::endl;
+
     tempCamConf.resolucao =
       lerConteudoElemento<unsigned, 2>(hElemCamera.
                                        FirstChildElement("resolucao").
@@ -186,6 +191,7 @@ CameraConfigExtractor::lerDadosCameras(const std::string arquivoConfiguracao)
       lerConteudoElemento<double, 1>(hElemCamera.
                                      FirstChildElement("alfa_c").
                                      ToElement()).at(0);
+
 
     vecCameraConfig.push_back(tempCamConf);
   }

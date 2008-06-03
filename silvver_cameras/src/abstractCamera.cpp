@@ -86,9 +86,9 @@ AbstractCamera::AbstractCamera(CameraConfig cameraConfig, std::string serverIP,
 #endif
   case CameraConfig::PseudoCam:
     this->hardCamera.reset(new PseudoCamera(cameraConfig.serial,
-                                            733,
-                                            cameraConfig.frameRate,
-                                            cameraConfig.diretorio.c_str()));
+                                            frameRate,
+                                            resolution,
+                                            cameraConfig.imagesPath));
     break;
   default:
     throw std::invalid_argument("HardCamera include headers non accessible");

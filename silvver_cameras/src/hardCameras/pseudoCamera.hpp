@@ -3,37 +3,35 @@
 
 #include "../hardCamera.hpp"
 #include <string>
-#include <sstream>
-#include <iostream>
-#include <boost/thread/thread.hpp>
-#include <boost/thread/xtime.hpp>
-#include <boost/thread/mutex.hpp>
+#include <boost/filesystem.hpp>
+
+namespace bfs = boost::filesystem;
 
 class PseudoCamera : public HardCamera
 {
-private:
-
-  std::string endImagem;
-
-  int imagemAtual;
-
-  int totalImagens;
-
-  // Tempo que pseudoCamera ficará ociosa para simular uma dada frequência
-  int atraso;
-
 public:
 
-  PseudoCamera(uint64 UID, int totalImagens,
-               unsigned frequencia,const char* diretorio);
+  PseudoCamera(uint64 UID,
+               HardCamera::FrameRate frameRate,
+               HardCamera::Resolution resolution,
+               std::string imagesPath);
 
-  ~PseudoCamera();
+  virtual ~PseudoCamera();
 
   virtual void initialize();
 
   virtual void saveFrame();
 
-  virtual void captureFrame(IplImage *iplImage);
+  virtual void captureFrame(IplImage* &iplImage);
+
+private:
+
+  const bfs::path PATH;
+
+  bfs::directory_iterator dirIterator, endIterator;
+
+  // Tempo que pseudoCamera ficará ociosa para simular uma dada frequência
+  unsigned delay;
 
 };
 

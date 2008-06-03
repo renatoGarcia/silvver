@@ -23,11 +23,11 @@ public:
          HardCamera::Resolution resolution,
          Format format = F_VGA_NONCOMPRESSED);
 
-  ~DC1394();
+  virtual ~DC1394();
 
   virtual void initialize();
 
-  virtual void captureFrame(IplImage* iplImage);
+  virtual void captureFrame(IplImage* &iplImage);
 
   // Grava a última imagem da câmera no disco
   virtual void saveFrame();

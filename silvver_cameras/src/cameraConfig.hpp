@@ -20,12 +20,12 @@ class CameraConfig
 public:
 
   enum enumModeloFisico{PGR,
-                    DC1394,
-                    PseudoCam
+                        DC1394,
+                        PseudoCam
   }modeloFisico;
 
   enum enumModeloAbstrato{BLOB  = 103,
-                      MARCO = 104
+                          MARCO = 104
   }modeloAbstrato;
 
   float frameRate;
@@ -39,7 +39,7 @@ public:
 
   boost::array<double,9> H;
 
-  std::string diretorio;
+  std::string imagesPath;
 
   CameraConfig();
 
