@@ -70,11 +70,12 @@ void Inputs::ClienteBlobCam(Inputs *objeto, Connection *conexao)
 
   conexao->send(msgOK,sizeof(msgOK));
 
-  Pacote<Marca> pacote;
+  unsigned port = conexao->getPort();
+  Package<Blob> pacote;
   while(true)
   {
     conexao->receive( &pacote,sizeof(pacote) );
-    tratador->EntregarPacotes(pacote);
+    tratador->EntregarPacotes(pacote, port);
     //saidas->
   }
 }
@@ -87,12 +88,13 @@ void Inputs::ClienteMarcaCam(Inputs *objeto, Connection *conexao)
 
   conexao->send(msgOK,sizeof(msgOK));
 
-  Pacote<Ente> pacote;
+  unsigned port = conexao->getPort();
+  Package<Ente> pacote;
   vector<Ente> resultados;
   while(true)
   {
     conexao->receive( &pacote,sizeof(pacote) );
-    processor->EntregarPacotes(pacote);
+    processor->EntregarPacotes(pacote, port);
     processor->localize(resultados);
     objeto->saidas->ReceberEstado(resultados);
   }

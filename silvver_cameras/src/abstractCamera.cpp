@@ -164,13 +164,13 @@ AbstractCamera::updateFrame()
 }
 
 void
-AbstractCamera::localize(Posicao &posicao)
+AbstractCamera::localize(Position &position)
 {
 
   //------------------------------------- Parâmetros Intrínsecos
   double xc[2];
-  xc[0] = posicao.x;
-  xc[1] = posicao.y;
+  xc[0] = position.x;
+  xc[1] = position.y;
   double x[2];
   double x_distort[2];
   x_distort[0] = (xc[0] - cc0)/fc0;
@@ -189,15 +189,15 @@ AbstractCamera::localize(Posicao &posicao)
     x[0] = (x_distort[0] - delta_x[0])/k_radial;
     x[1] = (x_distort[1] - delta_x[1])/k_radial;
   }
-  posicao.x = x[0]*fc0 + cc0;
-  posicao.y = x[1]*fc1 + cc1;
+  position.x = x[0]*fc0 + cc0;
+  position.y = x[1]*fc1 + cc1;
 
   //------------------------------------- Parâmetros Extrínsecos
 
   double escala,xPixel,yPixel,xMundo,yMundo;
 
-  xPixel = posicao.x;
-  yPixel = posicao.y;
+  xPixel = position.x;
+  yPixel = position.y;
 
   escala = H20*xPixel + H21*yPixel + H22;
   xMundo = (H00*xPixel +
@@ -207,7 +207,7 @@ AbstractCamera::localize(Posicao &posicao)
             H11*yPixel +
             H12) / escala;
 
-  posicao.x = xMundo;
-  posicao.y = yMundo;
+  position.x = xMundo;
+  position.y = yMundo;
 
 }

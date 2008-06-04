@@ -18,28 +18,27 @@ COR_COMUM(1)
 {
 }
 
-void BlobTratador::EntregarPacotes(Pacote<Marca> &pacote)
+void BlobTratador::EntregarPacotes(Package<Blob> &pacote, unsigned id)
 {
-  vector<Marca> vecMarca;
-  int idBlobCam = pacote.GetCameraId();
+  vector<Blob> vecBlob;
 
-  pacote.Desempacotar(vecMarca);
+  pacote.unpack(vecBlob);
 
   mutex::scoped_lock lock(mutexArmazenador);
-  armazenador[idBlobCam] = vecMarca;
+  armazenador[id] = vecBlob;
 }
 
 void BlobTratador::Localizar(vector<Ente> &vecRobo)
 {
   vecRobo.clear();
 
-  vector<Marca> vecCorUnica,vecCorComum;
+  vector<Blob> vecCorUnica,vecCorComum;
 
   if ( SepararCores(vecCorUnica,vecCorComum) ) return;
   EliminarDuplos(vecCorUnica,vecCorComum);
   if ( CasarParesDeCor(vecCorUnica,vecCorComum) ) return;
 
-  vector<Marca>::iterator iteCorUnica,iteCorComum,fimCorUnica,fimCorComum;
+  vector<Blob>::iterator iteCorUnica,iteCorComum,fimCorUnica,fimCorComum;
   iteCorUnica = vecCorUnica.begin();
   iteCorComum = vecCorComum.begin();
   fimCorUnica = vecCorUnica.end();
@@ -51,33 +50,33 @@ void BlobTratador::Localizar(vector<Ente> &vecRobo)
   }
 }
 
-int BlobTratador::SepararCores(vector<Marca> &vecCorUnica,vector<Marca> &vecCorComum)
+int BlobTratador::SepararCores(vector<Blob> &vecCorUnica,vector<Blob> &vecCorComum)
 {
   vecCorUnica.clear();
   vecCorComum.clear();
 
-  vector<Marca> vecMarca;
+  vector<Blob> vecBlob;
 
-  //---------------Copia as marcas de todas as blobCameras para vecMarca
+  //---------------Copia as marcas de todas as blobCameras para vecBlob
   TMapa::iterator iteMapa,fimMapa;
   iteMapa = armazenador.begin();
   fimMapa = armazenador.end();
   for(mutex::scoped_lock lock(mutexArmazenador);iteMapa != fimMapa; iteMapa++)
   {
-    vecMarca.insert(vecMarca.end(),iteMapa->second.begin(),iteMapa->second.end());
+    vecBlob.insert(vecBlob.end(),iteMapa->second.begin(),iteMapa->second.end());
   }
   //--------------------------------
 
-  vector<Marca>::iterator iteVecMarca,fimVecMarca;
-  iteVecMarca = vecMarca.begin();
-  fimVecMarca = vecMarca.end();
-  Marca marca;
+  vector<Blob>::iterator iteVecBlob,fimVecBlob;
+  iteVecBlob = vecBlob.begin();
+  fimVecBlob = vecBlob.end();
+  Blob marca;
 
-  for(;iteVecMarca != fimVecMarca; iteVecMarca++)
+  for(;iteVecBlob != fimVecBlob; iteVecBlob++)
   {
-    marca = *iteVecMarca;
+    marca = *iteVecBlob;
 
-    if(iteVecMarca->id == COR_COMUM)
+    if(iteVecBlob->id == COR_COMUM)
     {
       vecCorComum.push_back(marca);
     }
@@ -90,9 +89,9 @@ int BlobTratador::SepararCores(vector<Marca> &vecCorUnica,vector<Marca> &vecCorC
   return 0;
 }
 
-void BlobTratador::EliminarDuplos(vector<Marca> &vecCorUnica,vector<Marca> &vecCorComum)
+void BlobTratador::EliminarDuplos(vector<Blob> &vecCorUnica,vector<Blob> &vecCorComum)
 {
-  vector<Marca>::iterator itePrimeiro,iteSegundo;
+  vector<Blob>::iterator itePrimeiro,iteSegundo;
 
   double distancia;
 
@@ -102,10 +101,10 @@ void BlobTratador::EliminarDuplos(vector<Marca> &vecCorUnica,vector<Marca> &vecC
   {
     for(iteSegundo=itePrimeiro+1; iteSegundo<vecCorUnica.end(); iteSegundo++)
     {
-      distancia = itePrimeiro->CalcularDistancia(*iteSegundo);
+      distancia = itePrimeiro->findDistance(*iteSegundo);
       if(distancia < DISTANCIA_FUSAO)
       {
-        itePrimeiro->Fundir(*iteSegundo);
+        itePrimeiro->fuse(*iteSegundo);
         vecCorUnica.erase(iteSegundo);
       }
     }
@@ -117,23 +116,23 @@ void BlobTratador::EliminarDuplos(vector<Marca> &vecCorUnica,vector<Marca> &vecC
   {
     for(iteSegundo=itePrimeiro+1; iteSegundo<vecCorComum.end(); iteSegundo++)
     {
-      distancia = itePrimeiro->CalcularDistancia(*iteSegundo);
+      distancia = itePrimeiro->findDistance(*iteSegundo);
       if(distancia < DISTANCIA_FUSAO)
       {
-        itePrimeiro->Fundir(*iteSegundo);
+        itePrimeiro->fuse(*iteSegundo);
         vecCorUnica.erase(iteSegundo);
       }
     }
   }
 }
 
-int BlobTratador::CasarParesDeCor(vector<Marca> &vecCorUnica,vector<Marca> &vecCorComum)
+int BlobTratador::CasarParesDeCor(vector<Blob> &vecCorUnica,vector<Blob> &vecCorComum)
 {
   if( (vecCorUnica.size()!= vecCorComum.size()) || vecCorUnica.empty() ) return -1;
 
   double distancia,distanciaMinima;
-  Marca marcaTemporaria;
-  vector<Marca>::iterator iteCorUnica,
+  Blob marcaTemporaria;
+  vector<Blob>::iterator iteCorUnica,
                           iteCorComum1,
                           iteCorComum2,
                           fimVecCorUnica,
@@ -150,7 +149,7 @@ int BlobTratador::CasarParesDeCor(vector<Marca> &vecCorUnica,vector<Marca> &vecC
     iteCorComum2 = iteCorComum1;
     for(distanciaMinima=LONG_MAX; iteCorComum2!=fimVecCorComum; iteCorComum2++ )
     {
-      distancia = iteCorUnica->CalcularDistancia(*iteCorComum2);
+      distancia = iteCorUnica->findDistance(*iteCorComum2);
       if(distancia<distanciaMinima)
       {
         parCorUnica = iteCorComum2;

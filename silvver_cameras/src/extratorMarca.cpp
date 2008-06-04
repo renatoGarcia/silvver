@@ -104,26 +104,26 @@ ExtratorMarca::ExtrairMarcas(IplImage *imgEntrada,
     switch(marker_info[marca].dir)
     {
     case 0:
-      mP.verticeRef = Posicao(marker_info[marca].vertex[1][0],marker_info[marca].vertex[1][1]);
-      mP.verticeSec = Posicao(marker_info[marca].vertex[0][0],marker_info[marca].vertex[0][1]);
+      mP.verticeRef = Position(marker_info[marca].vertex[1][0],marker_info[marca].vertex[1][1]);
+      mP.verticeSec = Position(marker_info[marca].vertex[0][0],marker_info[marca].vertex[0][1]);
       break;
     case 1:
-      mP.verticeRef = Posicao(marker_info[marca].vertex[0][0],marker_info[marca].vertex[0][1]);
-      mP.verticeSec = Posicao(marker_info[marca].vertex[3][0],marker_info[marca].vertex[3][1]);
+      mP.verticeRef = Position(marker_info[marca].vertex[0][0],marker_info[marca].vertex[0][1]);
+      mP.verticeSec = Position(marker_info[marca].vertex[3][0],marker_info[marca].vertex[3][1]);
       break;
     case 2:
-      mP.verticeRef = Posicao(marker_info[marca].vertex[3][0],marker_info[marca].vertex[3][1]);
-      mP.verticeSec = Posicao(marker_info[marca].vertex[2][0],marker_info[marca].vertex[2][1]);
+      mP.verticeRef = Position(marker_info[marca].vertex[3][0],marker_info[marca].vertex[3][1]);
+      mP.verticeSec = Position(marker_info[marca].vertex[2][0],marker_info[marca].vertex[2][1]);
       break;
     case 3:
-      mP.verticeRef = Posicao(marker_info[marca].vertex[2][0],marker_info[marca].vertex[2][1]);
-      mP.verticeSec = Posicao(marker_info[marca].vertex[1][0],marker_info[marca].vertex[1][1]);
+      mP.verticeRef = Position(marker_info[marca].vertex[2][0],marker_info[marca].vertex[2][1]);
+      mP.verticeSec = Position(marker_info[marca].vertex[1][0],marker_info[marca].vertex[1][1]);
       break;
     }
-    mP.centro.x    = marker_info[marca].pos[0];
-    mP.centro.y    = marker_info[marca].pos[1];
-    mP.centro.id   = marker_info[marca].id;
-    mP.centro.peso = marker_info[marca].cf;
+    mP.centro.x     = marker_info[marca].pos[0];
+    mP.centro.y     = marker_info[marca].pos[1];
+    mP.centro.id    = marker_info[marca].id;
+    mP.centro.weigh = marker_info[marca].cf;
 
     // Retira as marcas cuja confiança for menor que 50%
     if(mP.centro.id>=0 && marker_info[marca].cf>0.5)

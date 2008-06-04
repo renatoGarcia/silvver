@@ -43,8 +43,8 @@ void Saidas::ReceberEstado(const vector<Ente> &vecRobo)
 
   for(iteEnte = vecRobo.begin(); iteEnte < vecRobo.end(); iteEnte++)
   {
-    *arqLog << iteEnte->id << '\t' << iteEnte->tempo << '\t'
-            << iteEnte->x  << '\t' << iteEnte->y << '\t' << iteEnte->teta <<  endl;
+    *arqLog << iteEnte->id << '\t' << iteEnte->x  << '\t'
+            << iteEnte->y << '\t' << iteEnte->theta <<  endl;
 
     //Caso exista um cliente com o mesmo id do Ente apontado por iteEnte envia a pose para ele.
     if(clientes.find(iteEnte->id) != clientes.end())

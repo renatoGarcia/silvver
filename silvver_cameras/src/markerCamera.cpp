@@ -21,7 +21,7 @@ MarkerCamera::operator()()
   this->extratorMarca->Iniciar();
 
   std::vector<Ente> vecEnte;
-  Pacote<Ente> pacote(UID);
+  Package<Ente> pacote;
   std::vector<MarkerPontos> vecMarkerPontos;
   std::vector<MarkerPontos>::iterator iteMarkerPontos;
   double teta;
@@ -39,13 +39,12 @@ MarkerCamera::operator()()
       this->localize(iteMarkerPontos->verticeRef);
       this->localize(iteMarkerPontos->verticeSec);
 
-      iteMarkerPontos->centro.setTempo(0);
-      teta = iteMarkerPontos->verticeRef.CalcularAngulo(iteMarkerPontos->verticeSec);
+      teta = iteMarkerPontos->verticeRef.findAngle(iteMarkerPontos->verticeSec);
 
       vecEnte.push_back( Ente(iteMarkerPontos->centro,teta) );
     }
 
-    pacote.Empacotar(vecEnte);
+    pacote.pack(vecEnte);
     this->connection->send(&pacote,sizeof(pacote));
   }
 }

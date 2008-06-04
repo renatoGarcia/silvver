@@ -35,6 +35,11 @@ public:
 
   void receive(void *msg, unsigned length, int waitTime=INFINITE);
 
+  inline unsigned getPort()
+  {
+    return this->port;
+  }
+
 private:
 
   const unsigned port;

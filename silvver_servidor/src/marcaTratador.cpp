@@ -17,16 +17,15 @@ MarkerProcessor::MarkerProcessor()
 {
 }
 
-void MarkerProcessor::EntregarPacotes(Pacote<Ente> &pacote)
+void
+MarkerProcessor::EntregarPacotes(Package<Ente> &pacote, unsigned id)
 {
   vector<Ente> vecEnte;
-  int idBlobCam = pacote.GetCameraId();
 
-  pacote.Desempacotar(vecEnte);
+  pacote.unpack(vecEnte);
 
   mutex::scoped_lock lock(mutexArmazenador);
-  armazenador[idBlobCam] = vecEnte;
-
+  armazenador[id] = vecEnte;
 }
 
 void MarkerProcessor::localize(vector<Ente> &vecRobos)
@@ -46,6 +45,7 @@ void MarkerProcessor::localize(vector<Ente> &vecRobos)
   if(vecRobos.size() > 0)
   {
     std::cout << vecRobos.size() << std::endl;
+    std::cout << vecRobos.at(0).x << std::endl;
   }
   //---------------Verifica se há um mesmo robô reportado por duas câmeras diferentes
   vector<Ente>::iterator itePrimeiro,iteSegundo;
@@ -56,7 +56,7 @@ void MarkerProcessor::localize(vector<Ente> &vecRobos)
     {
       if(iteSegundo->id == itePrimeiro->id)
       {
-        itePrimeiro->Fundir(*iteSegundo);
+        itePrimeiro->fuse(*iteSegundo);
         vecRobos.erase(iteSegundo);
       }
     }

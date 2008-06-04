@@ -2,14 +2,14 @@
 #define SAIDAS_HPP
 
 #include <map>
-#include "tipos.hpp"
+#include "silverTypes.hpp"
 #include <boost/thread/mutex.hpp>
 #include "connection.hpp"
 #include <fstream>
 
 using namespace std;
 using namespace boost;
-using namespace verlab;
+using namespace silver;
 
 /** Implementa o envio das poses desejadas a cada cliente.
  * A classe Saidas mantem um registro de todos os clientes,

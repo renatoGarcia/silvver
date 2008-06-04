@@ -7,7 +7,7 @@
 #include "abstractCamera.hpp"
 #include "extratorMarca.hpp"
 
-using namespace silvver;
+using namespace silver;
 
 /// Implementa uma câmera abstrata que filma marcos.
 class MarkerCamera : public AbstractCamera

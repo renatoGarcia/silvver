@@ -6,14 +6,14 @@
 #include <boost/thread/thread.hpp>
 #include <boost/bind.hpp>
 #include "connection.hpp"
-#include "tipos.hpp"
+#include "silverTypes.hpp"
 #include "saidas.hpp"
 #include "blobTratador.hpp"
 #include "marcaTratador.hpp"
 
 using namespace std;
 using namespace boost;
-using namespace verlab;
+using namespace silver;
 
 
 /** Gerencia o conjunto de clientes que fornecem dados de entrada ao silvver-servidor.

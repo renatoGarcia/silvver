@@ -4,37 +4,37 @@
 #include <map>
 #include <vector>
 #include <boost/thread/mutex.hpp>
-#include "tipos.hpp"
+#include "silverTypes.hpp"
 
 using namespace std;
-using namespace verlab;
+using namespace silver;
 using namespace boost;
 
 class MarkerProcessor
 {
 public:
 
-    static MarkerProcessor* instantiate();
+  static MarkerProcessor* instantiate();
 
-    void EntregarPacotes(Pacote<Ente> &pacote);
+  void EntregarPacotes(Package<Ente> &pacote, unsigned id);
 
-    // Calcula a configuraçãoo dos robôs, usando os dados atualmente
-    // disponíveis no map armazenador.
-    void localize(vector<Ente> &vecRobos);
+  // Calcula a configuraçãoo dos robôs, usando os dados atualmente
+  // disponíveis no map armazenador.
+  void localize(vector<Ente> &vecRobos);
 
 private:
 
-    static auto_ptr<MarkerProcessor> instanciaUnica;
-    static mutex mutexInstanciacao;
-    MarkerProcessor();
+  static auto_ptr<MarkerProcessor> instanciaUnica;
+  static mutex mutexInstanciacao;
+  MarkerProcessor();
 
-    typedef map<unsigned,vector<Ente> > TMapa;
+  typedef map<unsigned,vector<Ente> > TMapa;
 
-    // Armazenara os ultimos entes obtidos de cada marcaCamera, onde
-    // a chave e um identificador destas.
-    TMapa armazenador;
+  // Armazenara os ultimos entes obtidos de cada marcaCamera, onde
+  // a chave e um identificador destas.
+  TMapa armazenador;
 
-    mutex mutexArmazenador;
+  mutex mutexArmazenador;
 
 };
 

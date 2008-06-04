@@ -16,7 +16,7 @@ silvver_cameras_SOURCES = cameraConfig.cpp \
                           main.cpp \
                           markerCamera.cpp \
                           markerCamera.hpp \
-                          silvver_tipos.hpp \
+                          silverTypes.hpp \
                           timer.hpp \
                           cmdline.h \
                           cmdline.c \

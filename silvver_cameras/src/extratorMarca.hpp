@@ -6,16 +6,16 @@
 #include <opencv/cv.h>
 #include <vector>
 #include <boost/scoped_ptr.hpp>
-#include "silvver_tipos.hpp"
+#include "silverTypes.hpp"
 
-using namespace silvver;
+using namespace silver;
 
 // Estrutura para manter os pontos de interece de uma marca encontrada
 struct MarkerPontos
 {
-  Posicao verticeRef;
-  Posicao verticeSec;
-  Marca centro;
+  Position verticeRef;
+  Position verticeSec;
+  Blob centro;
 };
 
 class MyLogger : public ARToolKitPlus::Logger

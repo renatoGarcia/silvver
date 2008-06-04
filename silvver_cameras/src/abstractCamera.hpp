@@ -5,12 +5,12 @@
 #include <boost/scoped_ptr.hpp>
 #include <boost/noncopyable.hpp>
 #include <boost/thread/mutex.hpp>
-#include "silvver_tipos.hpp"
+#include "silverTypes.hpp"
 #include "hardCamera.hpp"
 #include "cameraConfig.hpp"
 #include "connection.hpp"
 
-using namespace silvver;
+using namespace silver;
 
 // Classe base para as câmeras abstratas, como blobCamera e marcoCamera
 class AbstractCamera : boost::noncopyable
@@ -50,7 +50,7 @@ protected:
   void updateFrame();
 
   // Converte a posição das coordenadas em pixels para as coordenadas do mundo
-  void localize(Posicao &posicao);
+  void localize(Position &position);
 
 private:
   /// Evita a criação e iniciação simultânea das câmeras.
