@@ -1,0 +1,23 @@
+PROJECT_NAME      = "Silvver-cliente"
+PROJECT_NUMBER    = 0.1
+OUTPUT_LANGUAGE   = Brazilian
+OUTPUT_DIRECTORY  = doc/doxygen/implementacao
+GENERATE_TAGFILE  = example.tag
+
+GENERATE_LATEX    = YES
+COMPACT_LATEX	  = YES
+PAPER_TYPE	  = a4
+USE_PDFLATEX	  = YES
+LATEX_HIDE_INDICES= YES
+
+GENERATE_MAN      = NO
+GENERATE_RTF      = NO
+CASE_SENSE_NAMES  = NO
+INPUT             = ./src/marco.h ./src/conexao.h
+INPUT_ENCODING    = UTF8
+
+QUIET             = YES
+JAVADOC_AUTOBRIEF = YES
+
+EXTRACT_PRIVATE   = YES
+EXTRACT_ALL       = YES

@@ -1,0 +1,82 @@
+#                                               -*- Autoconf -*-
+# Process this file with autoconf to produce a configure script.
+
+AC_PREREQ(2.61)
+AC_INIT([silvver_cameras], [0.2], [fgarcia.renato@gmail.com])
+AM_INIT_AUTOMAKE([-Wall -Werror foreign])
+AC_CONFIG_SRCDIR([src/hardCamera.hpp])
+AC_CONFIG_HEADER([config.h])
+AC_LANG([C++])
+
+dnl ========================================================================
+dnl === Optional new path to headers
+dnl ========================================================================
+
+AC_ARG_WITH(artoolkitplus-dir,
+     [AC_HELP_STRING([--with-artoolkitplus-dir=<dir>],
+     [use arToolKitPlus library in directory <dir>])])
+
+if test "$with_artoolkitplus_dir" != ""; then
+     ARTOOLKITPLUS_DIR="-I$with_artoolkitplus_dir"
+fi
+AC_SUBST(ARTOOLKITPLUS_DIR)
+
+dnl ========================================================================
+dnl === Checks for programs.
+dnl ========================================================================
+
+AC_PROG_CXX
+AC_PROG_CC
+
+dnl ========================================================================
+dnl === Checks for libraries.
+dnl ========================================================================
+
+AC_CHECK_LIB([boost_thread], [sleep])
+AC_CHECK_LIB([boost_filesystem], [main])
+AC_CHECK_LIB([cv], [cvReleaseImage])
+AC_CHECK_LIB([highgui], [cvLoadImage])
+AC_CHECK_LIB([ARToolKitPlus], [main])
+
+dnl ========================================================================
+dnl === Checks for header files.                                           =
+dnl ========================================================================
+
+save_CPPFLAGS="$CPPFLAGS"
+CPPFLAGS="$ARTOOLKITPLUS_DIR $CPPFLAGS"
+AC_CHECK_HEADERS([ARToolKitPlus/TrackerSingleMarkerImpl.h],
+                 [],[AC_MSG_ERROR([ARToolKitPlus headers were not found])])
+CPPFLAGS="$save_CPPFLAGS"
+
+AC_CHECK_HEADERS([opencv/cv.h opencv/highgui.h],
+                 [],[AC_MSG_ERROR([OpenCV headers were not found])])
+
+AC_CHECK_HEADERS([pgrflycapture.h pgrflycaptureplus.h],
+                 [AC_DEFINE([HAVE_PGRFLYCAPTURE_HEADERS],[1],[Cameras dragonFly])] [compile_pgr=true],
+		 [compile_pgr=false])
+AM_CONDITIONAL([COMPILE_PGR], [test $compile_pgr = true])
+
+AC_CHECK_HEADERS([libdc1394/dc1394_control.h],
+                 [compile_dc1394=true],
+                 [compile_dc1394=false])
+AM_CONDITIONAL([COMPILE_DC1394], [test $compile_dc1394 = true])
+
+
+dnl ====
+AC_CHECK_HEADERS([limits.h sys/timeb.h])
+
+AC_CHECK_HEADERS([arpa/inet.h netdb.h netinet/in.h sys/socket.h],
+                 [AC_DEFINE([HAVE_LINUX_SOCKETS],[1],[def])])
+
+AC_CHECK_HEADERS([winsock2.h],
+                 [AC_DEFINE([HAVE_WINDOWS_SOCKETS],[1],[def])] )
+
+dnl ========================================================================
+dnl === Checks for library functions.
+dnl ========================================================================
+
+AC_CHECK_FUNCS([ftime socket])
+
+AC_CONFIG_FILES([Makefile
+                 src/Makefile])
+AC_OUTPUT

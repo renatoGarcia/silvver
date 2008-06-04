@@ -1,0 +1,28 @@
+PROJECT_NAME      = "Silvver-servidor"
+PROJECT_NUMBER    = 0.1
+OUTPUT_LANGUAGE   = Brazilian
+OUTPUT_DIRECTORY  = doc/doxygen/
+GENERATE_TAGFILE  = doxygen.tag
+
+EXTRACT_PRIVATE	  = YES
+HIDE_UNDOC_MEMBERS= NO
+
+GENERATE_LATEX    = YES
+COMPACT_LATEX	  = YES
+PAPER_TYPE	  = a4
+USE_PDFLATEX	  = YES
+LATEX_HIDE_INDICES= YES
+
+GENERATE_MAN      = NO
+GENERATE_RTF      = NO
+CASE_SENSE_NAMES  = NO
+INPUT             = ./src/Receptor.h ./src/entradas.h
+INPUT_ENCODING    = UTF8
+
+# The EXAMPLE_PATH tag can be used to specify one or more files or 
+# directories that contain example code fragments that are included (see 
+# the \include command).
+#EXAMPLE_PATH      = doc/cliente.cpp
+
+QUIET             = YES
+JAVADOC_AUTOBRIEF = YES
