@@ -7,7 +7,7 @@ AM_INIT_AUTOMAKE([-Wall -Werror foreign])
 AM_PROG_LIBTOOL
 AC_PROG_INSTALL
 
-AC_CONFIG_SRCDIR([src/marco.cpp])
+AC_CONFIG_SRCDIR([src/target.cpp])
 AC_CONFIG_HEADER([config.h])
 
 dnl ========================================================================

@@ -5,7 +5,7 @@
 *  de onde o programa silver-servidor está sendo executado.                     *
 ********************************************************************************/
 
-#include <silvver_cliente.h>
+#include <target.hpp>
 #include <iostream>
 #include <stdlib.h>
 #include <string.h>
@@ -26,16 +26,17 @@ int main(int argc,char **argv)
     strncpy(ip,argv[2],16);
   }
 
-  Marco marco(ip,id);
+  Target target(ip,id);
   cout << "Conectando com o servidor..." << endl;
-  marco.conectar();
+  target.connect();
   cout << "Conectado."<< endl << endl;
 
   double x,y,teta;
 
-  for(int i=500; i>0; i--)
+//   for(int i=500; i>0; i--)
+  while(true)
   {
-    marco.getPose(x,y,teta);
+    target.getPose(x,y,teta);
     cout << "X: " << x << "\tY: " << y << "\tTeta: " << teta << endl;
   }
 

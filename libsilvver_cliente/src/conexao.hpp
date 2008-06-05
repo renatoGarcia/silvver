@@ -7,8 +7,8 @@
 #define CONEXAO_H
 
 #include <string>
-#include <unistd.h> //TODO: Verificar compatibilidade com windows para o uso
-                    //      de select()
+#include <unistd.h>
+
 #ifdef HAVE_CONFIG_H
 #include <config.h>
 #endif
