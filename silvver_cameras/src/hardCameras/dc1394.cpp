@@ -101,7 +101,6 @@ DC1394::initialize()
   {
     dc1394_get_camera_info(this->raw1394Handle, cameraNodes[cameraIndex],
                            &cameraInfo);
-
     if(cameraInfo.euid_64 == this->UID)
     {
       break;
@@ -138,17 +137,16 @@ DC1394::initialize()
   unsigned int channel;
   unsigned int speed;
   if ( dc1394_get_iso_channel_and_speed( this->raw1394Handle,
-                                         cameraNodes[0],
+                                         cameraNodes[cameraIndex],
                                          &channel,
                                          &speed ) !=DC1394_SUCCESS )
   {
     throw OpenCameraFailed("Unable to get the iso channel number");
   }
-
   // note: format, mode, frameRate and bytesPerPixel are all defined as globals 
   // in the header
   int e = dc1394_dma_setup_capture( this->raw1394Handle,
-                                    cameraNodes[0],
+                                    cameraNodes[cameraIndex],
                                     channel,
                                     this->format,
                                     this->mode,
@@ -163,7 +161,6 @@ DC1394::initialize()
     throw OpenCameraFailed("Unable to setup camera");
   }
   this->bDc1394CameraCreated = true;
-
 
 
   /*-----------------------------------------------------------------------
@@ -182,7 +179,7 @@ DC1394::initialize()
    *-----------------------------------------------------------------------*/
   quadlet_t qValue;
   GetCameraControlRegister( this->raw1394Handle,
-                            cameraNodes[0],
+                            cameraNodes[cameraIndex],
                             0x1040,         /* Bayer Tile Mapping register */
                             &qValue );
 
