@@ -14,6 +14,9 @@ HardCamera::HardCamera(uint64 UID,
   }
 }
 
+HardCamera::~HardCamera()
+{}
+
 void
 HardCamera::createIplImage(IplImage* &iplImage)
 {

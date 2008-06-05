@@ -41,7 +41,7 @@ public:
       :runtime_error(whatArg){}
   };
 
-  //virtual ~HardCamera()=0;
+  virtual ~HardCamera()=0;
   virtual void initialize() = 0;
   void createIplImage(IplImage* &iplImage);
   virtual void saveFrame() = 0;
