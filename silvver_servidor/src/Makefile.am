@@ -5,15 +5,17 @@ silver_servidor_SOURCES = blobTratador.cpp \
      blobTratador.hpp \
      connection.cpp \
      connection.hpp \
-     entradas.cpp \
-     entradas.hpp \
+     inputs.cpp \
+     inputs.hpp \
      main.cpp \
-     marcaTratador.cpp \
-     marcaTratador.hpp \
-     receptor.cpp \
-     receptor.hpp \
+     markerProcessor.cpp \
+     markerProcessor.hpp \
+     receptionist.cpp \
+     receptionist.hpp \
      saidas.cpp \
      saidas.hpp \
+     cameraControllers.cpp \
+     cameraControllers.hpp \
      cmdline.h \
      cmdline.c \
      silverTypes.hpp

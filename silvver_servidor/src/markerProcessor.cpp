@@ -1,5 +1,5 @@
 #include <iostream>
-#include "marcaTratador.hpp"
+#include "markerProcessor.hpp"
 
 mutex MarkerProcessor::mutexInstanciacao;
 auto_ptr<MarkerProcessor> MarkerProcessor::instanciaUnica;
@@ -18,7 +18,7 @@ MarkerProcessor::MarkerProcessor()
 }
 
 void
-MarkerProcessor::EntregarPacotes(Package<Ente> &pacote, unsigned id)
+MarkerProcessor::deliverPackage(Package<Ente> &pacote, unsigned id)
 {
   vector<Ente> vecEnte;
 

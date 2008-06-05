@@ -1,4 +1,4 @@
-#include "receptor.hpp"
+#include "receptionist.hpp"
 #include <iostream>
 #include "cmdline.h"
 #include <boost/scoped_ptr.hpp>

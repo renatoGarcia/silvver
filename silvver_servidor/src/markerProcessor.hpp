@@ -16,7 +16,7 @@ public:
 
   static MarkerProcessor* instantiate();
 
-  void EntregarPacotes(Package<Ente> &pacote, unsigned id);
+  void deliverPackage(Package<Ente> &pacote, unsigned id);
 
   // Calcula a configuraçãoo dos robôs, usando os dados atualmente
   // disponíveis no map armazenador.

@@ -3,7 +3,7 @@
 
 #include <boost/thread/thread.hpp>
 #include <boost/scoped_ptr.hpp>
-#include "entradas.hpp"
+#include "inputs.hpp"
 #include "saidas.hpp"
 #include <sys/timeb.h>
 
@@ -23,9 +23,6 @@ public:
   /// Inicia a escuta por pedidos de conexão.
   void run();
 
-  /// Encerra a escuta por pedidos de conexão.
-  int FecharRecepcionista();
-
   /** Método que tratará de todos os pedidos de conexão ao silvver-servidor.
    * Este método ouvirá a porta dada por RECEPCIONISTA_PORTA, criará uma conexão permanente
    * para o novo cliente, e encaminhará a nova conexão para uma classe apropriada.
@@ -37,23 +34,23 @@ private:
   bool stopReceptionist;
 
   /// Tempo do sistema no instante inicial da execução do silvver-servidor, serve como referência para sincronizar as câmeras.
-  struct timeb tempoInicial;
+  struct timeb startTime;
 
   /// Porta onde o método Recepcionista ouvirá os pedidos de conexão. O valor padrão é 12000.
-  const unsigned RECEPCIONISTA_PORTA;
+  const unsigned RECECPTIONIST_PORT;
 
   /// Porta livre que será utilizada no próximo pedido de conexão.
-  unsigned portaLivre;
+  unsigned freePort;
 
   boost::scoped_ptr<Inputs> inputs;
 
-  boost::scoped_ptr<Saidas> saidas;
+  boost::scoped_ptr<Saidas> outputs;
 
   /// Thread onde onde será executado o método Recepcionista.
-  boost::scoped_ptr<boost::thread> thRecepcionista;
+  boost::scoped_ptr<boost::thread> thReceptionist;
 
   /// Retorna em segundos o tempo transcorrido desde a instanciação do receptor.
-  double tempoDecorrido();
+  double elapsedTime();
 
 };
 
