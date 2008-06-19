@@ -1,3 +1,6 @@
+#include <iostream>
+using namespace std;
+
 #include "dc1394.hpp"
 #include <boost/lexical_cast.hpp>
 #include <fstream>
@@ -143,14 +146,15 @@ DC1394::initialize()
   {
     throw OpenCameraFailed("Unable to get the iso channel number");
   }
+
   // note: format, mode, frameRate and bytesPerPixel are all defined as globals 
   // in the header
   int e = dc1394_dma_setup_capture( this->raw1394Handle,
                                     cameraNodes[cameraIndex],
-                                    channel,
+                                    cameraIndex,
                                     this->format,
                                     this->mode,
-                                    SPEED_400,
+                                    speed,
                                     dc1394FrameRate,
                                     8,	// number of buffers
                                     1,	// drop frames
