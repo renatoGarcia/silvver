@@ -49,12 +49,12 @@ void PseudoCamera::saveFrame()
 {}
 
 void PseudoCamera::captureFrame(IplImage* &iplImage)
-{
-  boost::xtime xt;
-  boost::xtime_get(&xt, boost::TIME_UTC);
-  xt.nsec += this->delay;
+{std::cout << "1" << std::endl;
+  boost::xtime xt;std::cout << "2" << std::endl;
+  boost::xtime_get(&xt, boost::TIME_UTC);std::cout << "3" << std::endl;
+  xt.nsec += this->delay;std::cout << "4" << std::endl;
 
-  bool imageLoaded = false;
+  bool imageLoaded = false;std::cout << "5" << std::endl;
   while(!imageLoaded)
   {
     if(this->dirIterator == this->endIterator)

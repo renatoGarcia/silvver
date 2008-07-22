@@ -4,8 +4,10 @@ MarkerCamera::MarkerCamera(CameraConfig cameraConfig, std::string serverIP,
                            unsigned connectionPort)
   :AbstractCamera(cameraConfig, serverIP, connectionPort)
 {
-  this->extratorMarca.reset(new ExtratorMarca(cameraConfig.resolucao.at(0),
-                                              cameraConfig.resolucao.at(1)));
+  this->targetType = AbstractCamera::ARTP_MARK;
+
+  this->extratorMarca.reset(new ExtratorMarca(cameraConfig.resolution.at(0),
+                                              cameraConfig.resolution.at(1)));
 }
 
 MarkerCamera::~MarkerCamera()
@@ -15,8 +17,6 @@ void
 MarkerCamera::operator()()
 {
   this->connect();
-
-  this->startHardCamera();
 
   this->extratorMarca->Iniciar();
 

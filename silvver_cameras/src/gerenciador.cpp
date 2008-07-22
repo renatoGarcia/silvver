@@ -4,12 +4,9 @@
 extern boost::mutex mutexCout;
 
 Gerenciador::Gerenciador(int portaRecepcionista, std::string ipServidor,
-                         std::vector<CameraConfig> &vecCameraConfig)
+                         Scene scene)
 {
-  this->vecCameraConfig.resize( vecCameraConfig.size() );
-  copy( vecCameraConfig.begin(), vecCameraConfig.end(),
-        this->vecCameraConfig.begin() );
-
+  this->scene = scene;
   this->portaRecepcionista = portaRecepcionista;
   this->ipServidor = ipServidor;
 
@@ -31,14 +28,27 @@ Gerenciador::RodarGerenciador()
   this->conexaoRecepcionista->receive((char*)&tempoInicial,
                                       sizeof(tempoInicial) );
 
-  BOOST_FOREACH(CameraConfig camConf, this->vecCameraConfig)
+  BOOST_FOREACH(CameraConfig camConf, this->scene.vecCameraConfig)
   {
-    ConectarCamera(camConf);
+    if(this->scene.vecARTPMarks.empty() == false)
+    {
+      ConectarCamera(camConf, this->scene.vecARTPMarks,
+                     AbstractCamera::ARTP_MARK);
+    }
+
+    if(this->scene.vecColorBlobs.empty() == false)
+    {
+      ConectarCamera(camConf, this->scene.vecColorBlobs,
+                     AbstractCamera::COLOR_BLOB);
+    }
+
   }
 }
 
 void
-Gerenciador::ConectarCamera(const CameraConfig &cameraConfig)
+Gerenciador::ConectarCamera(CameraConfig &cameraConfig,
+                            const std::vector<TargetConfig> &vecTargets,
+                            AbstractCamera::TargetType targetType)
 {
   char msgPT[3] = "PT";
   unsigned portaConectar;
@@ -52,9 +62,9 @@ Gerenciador::ConectarCamera(const CameraConfig &cameraConfig)
   {boost::mutex::scoped_lock lock(mutexCout);
    std::cout << "PORTA: " << portaConectar << std::endl;}
 
-  switch(cameraConfig.modeloAbstrato)
+  switch(targetType)
   {
-  case CameraConfig::MARCO:
+  case AbstractCamera::ARTP_MARK:
     {
       this->vecAbstractCamera.push_back(boost::shared_ptr<AbstractCamera>
                                         (new MarkerCamera
@@ -66,7 +76,7 @@ Gerenciador::ConectarCamera(const CameraConfig &cameraConfig)
                                             (*vecAbstractCamera.back()))));
       break;
     }
-  case CameraConfig::BLOB:
+  case AbstractCamera::COLOR_BLOB:
     break;
   }
 }

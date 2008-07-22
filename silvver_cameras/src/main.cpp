@@ -1,9 +1,8 @@
 #include <iostream>
 #include <string>
-#include <vector>
 #include <boost/scoped_ptr.hpp>
 #include "gerenciador.hpp"
-#include "cameraConfig.hpp"
+#include "xmlParser.hpp"
 #include "cmdline.h"
 
 // Mutex para controlar a escrita na saida padrão
@@ -17,14 +16,14 @@ int main(int argc, char **argv)
 
   std::string serverIP(args_info.ip_servidor_arg);
   int portaRecepcionista = args_info.porta_recepcionista_arg;
-  std::string xmlConfigCameras = args_info.cameras_config_arg;
+  std::string xmlFile = args_info.cameras_config_arg;
 
-  std::vector<CameraConfig> vecCameraConfig;
-  CameraConfigExtractor camConfExtractor;
+  Scene scene;
+  XmlParser xmlParser;
 
-  vecCameraConfig = camConfExtractor.lerDadosCameras(xmlConfigCameras);
+  scene = xmlParser.parseFile(xmlFile);
 
-  Gerenciador gerenciador(portaRecepcionista,serverIP,vecCameraConfig);
+  Gerenciador gerenciador(portaRecepcionista,serverIP,scene);
 
   gerenciador.RodarGerenciador();
 

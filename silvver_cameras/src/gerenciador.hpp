@@ -10,15 +10,16 @@
 #include <boost/foreach.hpp>
 #include "abstractCamera.hpp"
 #include "markerCamera.hpp"
-#include "cameraConfig.hpp"
+#include "xmlParser.hpp"
 #include "connection.hpp"
 #include "timer.hpp"
 
 class Gerenciador
 {
 private:
+
   /// Conjunto das estruturas de configuração de todas as câmeras.
-  std::vector<CameraConfig> vecCameraConfig;
+  Scene scene;
 
   /// Threads nas quais os métodos controladores das câmeras serão executados.
   std::vector< boost::shared_ptr< boost::thread > > thCamera;
@@ -37,14 +38,16 @@ private:
   boost::scoped_ptr<Timer> timer;
 
   // Inicia a câmera abstrata descrita por cameraConfig
-  void ConectarCamera(const CameraConfig &cameraConfig);
+  void ConectarCamera(CameraConfig &cameraConfig,
+                      const std::vector<TargetConfig> &vecTargets,
+                      AbstractCamera::TargetType targetType);
 
   std::vector< boost::shared_ptr<AbstractCamera> > vecAbstractCamera;
 
  public:
 
   Gerenciador(int portaRecepcionista, std::string ipServidor,
-	      std::vector<CameraConfig> &vecCameraConfig);
+	      Scene scene);
 
   /// Inicia todas as câmeras abstradas contidas no vetod vecCameraConfig.
   void RodarGerenciador();

@@ -7,7 +7,8 @@
 #include <boost/thread/mutex.hpp>
 #include "silverTypes.hpp"
 #include "hardCamera.hpp"
-#include "cameraConfig.hpp"
+#include "hardCameraFactory.hpp"
+#include "xmlParser.hpp"
 #include "connection.hpp"
 
 using namespace silver;
@@ -16,6 +17,11 @@ using namespace silver;
 class AbstractCamera : boost::noncopyable
 {
 public:
+
+  enum TargetType{
+    COLOR_BLOB = 103,
+    ARTP_MARK  = 104
+  };
 
   virtual void operator()() = 0;
 
@@ -26,6 +32,8 @@ public:
   virtual ~AbstractCamera();
 
 protected:
+
+  TargetType targetType;
 
   IplImage *actualFrame;
 
@@ -65,7 +73,7 @@ private:
          H20, H21, H22;
 
   // Hardware que fará a captura das imagens.
-  boost::scoped_ptr<HardCamera> hardCamera;
+  HardCamera* hardCamera;
 
   // Número de imagens processadas, usado para calcular a taxa média
   // de quadros por segundo.

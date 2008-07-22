@@ -1,6 +1,4 @@
 #include "abstractCamera.hpp"
-#include <stdexcept>
-#include "hardCameras/modelos.hpp"
 
 // Mutex usado para escrever na saída padrão. Declarado em main.cpp.
 extern boost::mutex mutexCout;
@@ -37,65 +35,15 @@ AbstractCamera::AbstractCamera(CameraConfig cameraConfig, std::string serverIP,
   this->frameCounter = 0;
   this->frameRate = 0;
 
-  this->UID = cameraConfig.serial;
+  this->UID = cameraConfig.uid;
 
   this->connection.reset(new Connection(serverIP, connectionPort));
 
   this->stopping = false;
 
-  HardCamera::Resolution resolution;
-  if(cameraConfig.resolucao.at(0)==640 && cameraConfig.resolucao.at(1)==480)
-  {
-    resolution = HardCamera::RESOLUTION_640x480;
-  }
-
-  HardCamera::FrameRate frameRate;
-  if(cameraConfig.frameRate == 7.5)
-  {
-    frameRate = HardCamera::FR_7_5;
-  }
-  else if(cameraConfig.frameRate == 15)
-  {
-    frameRate = HardCamera::FR_15;
-  }
-  else if(cameraConfig.frameRate == 30)
-  {
-    frameRate = HardCamera::FR_30;
-  }
-  else
-  {
-    throw std::invalid_argument("Frame Rate not allowed");
-  }
-
-  switch(this->cameraConfig.modeloFisico)
-  {
-#ifdef HAVE_PGRFLYCAPTURE_HEADERS
-  case CameraConfig::PGR:
-    this->hardCamera.reset(new PGR(cameraConfig.frameRate,
-                                   cameraConfig.diretorio.c_str(),
-                                   tempoInicial));
-    break;
-#endif
-#ifdef HAVE_LIBDC1394_DC1394_CONTROL_H
-  case CameraConfig::DC1394:
-    this->hardCamera.reset(new DC1394(0,
-                                      cameraConfig.serial,
-                                      frameRate,
-                                      resolution));
-    break;
-#endif
-  case CameraConfig::PseudoCam:
-    this->hardCamera.reset(new PseudoCamera(cameraConfig.serial,
-                                            frameRate,
-                                            resolution,
-                                            cameraConfig.imagesPath));
-    break;
-  default:
-    throw std::invalid_argument("HardCamera include headers non accessible");
-  }
+  this->hardCamera = HardCameraFactory::createHardCamera(cameraConfig);
 
   this->hardCamera->createIplImage(actualFrame);
-
 }
 
 AbstractCamera::~AbstractCamera()
@@ -115,7 +63,7 @@ AbstractCamera::connect()
 
   // Envia a terceira mensagem ao recepcionista, informando o código
   // do dado que será transmitido
-  int tipoDado = cameraConfig.modeloAbstrato;
+  int tipoDado = this->targetType;
   this->connection->send(&tipoDado,sizeof(tipoDado));
 
   char msg[3];
@@ -123,15 +71,8 @@ AbstractCamera::connect()
   this->connection->receive(msg,sizeof(msg));
 
   {boost::mutex::scoped_lock lock(mutexCout);
-    std::cout << "Conecção câmera: " << cameraConfig.serial << " " << msg << std::endl;
+    std::cout << "Conecção câmera: " << cameraConfig.uid << " " << msg << std::endl;
   }
-}
-
-void
-AbstractCamera::startHardCamera()
-{
-  boost::mutex::scoped_lock lock(mutexStartHardCamera);
-  this->hardCamera->initialize();
 }
 
 void
