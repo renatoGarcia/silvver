@@ -3,6 +3,7 @@
 
 #include <opencv/cv.h>
 #include <boost/scoped_ptr.hpp>
+#include <boost/shared_ptr.hpp>
 #include <boost/noncopyable.hpp>
 #include <boost/thread/mutex.hpp>
 #include "silverTypes.hpp"
@@ -73,7 +74,7 @@ private:
          H20, H21, H22;
 
   // Hardware que fará a captura das imagens.
-  HardCamera* hardCamera;
+  boost::shared_ptr<HardCamera> hardCamera;
 
   // Número de imagens processadas, usado para calcular a taxa média
   // de quadros por segundo.

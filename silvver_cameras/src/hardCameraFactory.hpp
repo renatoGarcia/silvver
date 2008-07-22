@@ -20,13 +20,14 @@ public:
       :logic_error(whatArg){}
   };
 
-  static HardCamera* createHardCamera(CameraConfig cameraConfig);
+  static boost::shared_ptr<HardCamera>
+  createHardCamera(CameraConfig cameraConfig);
 
 private:
 
   HardCameraFactory();
 
-  static std::map < uint64,/*boost::shared_ptr<HardCamera>*/HardCamera* > createdHardCameras;
+  static std::map < uint64,boost::shared_ptr<HardCamera> > createdHardCameras;
 
   static boost::mutex mutexCameraCreate;
 

@@ -13,7 +13,7 @@
  #include "hardCameras/dc1394.hpp"
 #endif
 
-std::map < uint64,/*boost::shared_ptr<HardCamera>*/HardCamera* >
+std::map < uint64,boost::shared_ptr<HardCamera> >
 HardCameraFactory::createdHardCameras;
 
 boost::mutex
@@ -22,31 +22,19 @@ HardCameraFactory::mutexCameraCreate;
 HardCameraFactory::HardCameraFactory()
 {}
 
-HardCamera*
+boost::shared_ptr<HardCamera>
 HardCameraFactory::createHardCamera(CameraConfig cameraConfig)
 {
   boost::mutex::scoped_lock lock(HardCameraFactory::mutexCameraCreate);
 
-//   boost::shared_ptr<HardCamera> hardCameraPtr =
-//     HardCameraFactory::createdHardCameras[cameraConfig.uid];
+  boost::shared_ptr<HardCamera> hardCameraPtr =
+    HardCameraFactory::createdHardCameras[cameraConfig.uid];
 
-//   // Se já criado
-//   if(hardCameraPtr)
-//   {
-//     return hardCameraPtr.get();
-//   }
-
-  std::map < uint64,HardCamera* >::iterator iteHardCamera =
-    HardCameraFactory::createdHardCameras.find(cameraConfig.uid);
-
-  // Se já criado
-  if(iteHardCamera != HardCameraFactory::createdHardCameras.end())
+  // if hardCamera already created
+  if(hardCameraPtr)
   {
-    return HardCameraFactory::createdHardCameras[cameraConfig.uid];
+    return hardCameraPtr;
   }
-
-  HardCamera* hardCameraPtr;
-
 
   HardCamera::FrameRate frameRate;
   if(cameraConfig.frameRate == 7.5)
@@ -88,20 +76,14 @@ HardCameraFactory::createHardCamera(CameraConfig cameraConfig)
 
   if(cameraConfig.hardware == "pseudocamera")
   {
-//     hardCameraPtr.reset(new PseudoCamera(cameraConfig.uid, frameRate,
-//                                          resolution, cameraConfig.imagesPath))
-
-    hardCameraPtr = new PseudoCamera(cameraConfig.uid, frameRate,
-                                     resolution, cameraConfig.imagesPath);
+    hardCameraPtr.reset(new PseudoCamera(cameraConfig.uid, frameRate,
+                                         resolution, cameraConfig.imagesPath));
   }
 #ifdef HAVE_LIBDC1394_DC1394_CONTROL_H
   else if(cameraConfig.hardware == "dc1394")
   {
-//     hardCameraPtr.reset(new DC1394(0, cameraConfig.uid,
-//                                    frameRate, resolution));
-
-    hardCameraPtr = new DC1394(0, cameraConfig.uid,
-                               frameRate, resolution);
+    hardCameraPtr.reset(new DC1394(0, cameraConfig.uid,
+                                   frameRate, resolution));
   }
 #endif
   else
