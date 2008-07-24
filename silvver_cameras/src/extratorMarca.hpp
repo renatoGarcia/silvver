@@ -15,7 +15,7 @@ struct MarkerPontos
 {
   Position verticeRef;
   Position verticeSec;
-  Blob centro;
+  Ente centro;
 };
 
 class MyLogger : public ARToolKitPlus::Logger

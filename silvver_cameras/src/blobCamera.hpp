@@ -1,38 +1,31 @@
-/**************************************************************************************
-    Esta classe implementa uma câmera que filma blobs. Ele tem como objetivo
-    retornar um vector de CvConnectedComp com os blobs das cores encontradas.
-**************************************************************************************/
+#ifndef BLOBCAMERA_HPP
+#define BLOBCAMERA_HPP
 
-#ifndef BLOBCAMERA_H
-#define BLOBCAMERA_H
-
-#include <vector>
 #include <string>
-
-#include "camera.hpp"
+#include <boost/scoped_ptr.hpp>
+#include "abstractCamera.hpp"
 #include "filtro.hpp"
 #include "blobExtractor.hpp"
 
-using namespace silvver;
+using namespace silver;
 
-class BlobCamera : public Camera
+class BlobCamera : public AbstractCamera
 {
-private:
-
-    IplImage *imgTrabalho;
-
-    Filtro *filtro;
-
-    BlobExtractor *blobExtractor;
-
 public:
 
-    BlobCamera(const CameraConfig& camConfig,double tempoInicial);
+  BlobCamera(CameraConfig camConfig, std::string serverIP,
+             unsigned connectionPort);
 
-    ~BlobCamera();
+  virtual ~BlobCamera();
 
-    int Iniciar();
+  int Iniciar();
 
-    void ProcessarImagem(std::vector<Marca> &vecMarca);
+  virtual void operator()();
+
+private:
+
+  boost::scoped_ptr<Filtro> filtro;
+
+  boost::scoped_ptr<BlobExtractor> blobExtractor;
 };
 #endif

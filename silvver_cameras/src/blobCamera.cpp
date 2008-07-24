@@ -1,23 +1,19 @@
 #include "blobCamera.hpp"
+#include <vector>
 
-BlobCamera::BlobCamera(const CameraConfig& camConfig,double tempoInicial)
- :Camera(camConfig,tempoInicial)
+BlobCamera::BlobCamera(CameraConfig cameraConfig, std::string serverIP,
+                       unsigned connectionPort)
+  :AbstractCamera(camConfig, serverIP, connectionPort)
 {
-  filtro        = new Filtro();
-  blobExtractor = new BlobExtractor();
-  imgTrabalho   = cvCreateImage( cvSize(camConfig.resolucao[0],camConfig.resolucao[1]), IPL_DEPTH_8U, 1 );
+  this->filtro.reset(new Filtro());
+  this->blobExtractor.reset.(new BlobExtractor());
 }
 
 BlobCamera::~BlobCamera()
-{
-  cvReleaseImage(&imgTrabalho);
-  delete filtro;
-  delete blobExtractor;
-}
+{}
 
 int BlobCamera::Iniciar()
 {
-  filtro->Iniciar();
   try
   {
     Camera::Iniciar();
@@ -31,10 +27,27 @@ int BlobCamera::Iniciar()
   return configuracao.serial;
 }
 
-void BlobCamera::ProcessarImagem(std::vector<Marca> &vecMarca)
+void
+BlobCamera::operator()()
 {
-  double tempoAbsoluto;
+  this->connect();
 
+  this->startHardCamera();
+
+  this->filtro->Iniciar();
+
+  std::vector<silver::Blob> vecBlob;
+  silver::Package<silver::Blob> package;
+  while(!stopping)
+  {
+    vecBlob.clear();
+    this->updateFrame();
+
+    this->blobExtractor->
+  }
+
+
+  //--------- VELHO
   vecMarca.clear();
   tempoAbsoluto = Camera::CapturarImagem();
 

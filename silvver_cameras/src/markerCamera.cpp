@@ -24,7 +24,7 @@ MarkerCamera::operator()()
   Package<Ente> pacote;
   std::vector<MarkerPontos> vecMarkerPontos;
   std::vector<MarkerPontos>::iterator iteMarkerPontos;
-  double teta;
+  double theta;
   while(!stopping)
   {
     vecEnte.clear();
@@ -39,9 +39,10 @@ MarkerCamera::operator()()
       this->localize(iteMarkerPontos->verticeRef);
       this->localize(iteMarkerPontos->verticeSec);
 
-      teta = iteMarkerPontos->verticeRef.findAngle(iteMarkerPontos->verticeSec);
+      theta = iteMarkerPontos->verticeRef.findAngle(iteMarkerPontos->verticeSec);
 
-      vecEnte.push_back( Ente(iteMarkerPontos->centro,teta) );
+      iteMarkerPontos->centro.theta = theta;
+      vecEnte.push_back(iteMarkerPontos->centro);
     }
 
     pacote.pack(vecEnte);

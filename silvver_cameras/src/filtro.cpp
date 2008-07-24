@@ -1,11 +1,9 @@
 #include "filtro.hpp"
+#include <cstring>
 
 Filtro::Filtro()
 {
-  for(int i=0;i<256;i++)
-    for(int j=0;j<256;j++)
-      for(int k=0;k<256;k++)
-	yuvLUT[i][j][k] = 0;
+  memset(this->yuvLUT, '\0', 256*256*256);
   numCores = 1;
 }
 
