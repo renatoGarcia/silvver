@@ -76,9 +76,16 @@ AbstractCamera::connect()
 }
 
 void
+AbstractCamera::run()
+{
+  this->runThread.reset(new boost::thread(boost::ref(*this)));
+}
+
+void
 AbstractCamera::stop()
 {
   this->stopping = true;
+  this->runThread->join();
 }
 
 void

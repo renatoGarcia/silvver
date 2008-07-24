@@ -1,8 +1,6 @@
 #include <iostream>
 #include <string>
-#include <boost/scoped_ptr.hpp>
 #include "gerenciador.hpp"
-#include "xmlParser.hpp"
 #include "cmdline.h"
 
 // Mutex para controlar a escrita na saida padrão
@@ -18,14 +16,8 @@ int main(int argc, char **argv)
   int portaRecepcionista = args_info.porta_recepcionista_arg;
   std::string xmlFile = args_info.cameras_config_arg;
 
-  Scene scene;
-  XmlParser xmlParser;
-
-  scene = xmlParser.parseFile(xmlFile);
-
-  Gerenciador gerenciador(portaRecepcionista,serverIP,scene);
-
-  gerenciador.RodarGerenciador();
+  SceneMounter sceneMounter(portaRecepcionista,serverIP,xmlFile);
+  sceneMounter.mount();
 
   std::string command;
   while(true)
@@ -39,7 +31,7 @@ int main(int argc, char **argv)
     }
   }
 
-  gerenciador.PararGerenciador();
+  sceneMounter.dismount();
 
   std::cout << "Fim do Programa" << std::endl;
 

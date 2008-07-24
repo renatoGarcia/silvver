@@ -5,6 +5,8 @@
 #include <boost/scoped_ptr.hpp>
 #include <boost/shared_ptr.hpp>
 #include <boost/noncopyable.hpp>
+#include <boost/ref.hpp>
+#include <boost/thread/thread.hpp>
 #include <boost/thread/mutex.hpp>
 #include "silverTypes.hpp"
 #include "hardCamera.hpp"
@@ -24,11 +26,15 @@ public:
     ARTP_MARK  = 104
   };
 
-  virtual void operator()() = 0;
-
-//   int TaxaQuadros();
+  void run();
 
   void stop();
+
+  virtual void operator()() = 0;
+
+  boost::scoped_ptr<boost::thread> runThread;
+
+//   int TaxaQuadros();
 
   virtual ~AbstractCamera();
 
@@ -62,6 +68,7 @@ protected:
   void localize(Position &position);
 
 private:
+
   /// Evita a criação e iniciação simultânea das câmeras.
   static boost::mutex mutexStartHardCamera;
 
