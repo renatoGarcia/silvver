@@ -192,7 +192,7 @@ namespace silver
     bool collide(Position point)
     {
       if((point.x >= lowestVertex.x) && (point.y >= lowestVertex.y)
-         && (point.x <= highestVertex.x) && (poin.y <= highestVertex.y))
+         && (point.x <= highestVertex.x) && (point.y <= highestVertex.y))
       {
         return true;
       }
