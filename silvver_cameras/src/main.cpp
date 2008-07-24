@@ -1,6 +1,6 @@
 #include <iostream>
 #include <string>
-#include "gerenciador.hpp"
+#include "sceneMounter.hpp"
 #include "cmdline.h"
 
 // Mutex para controlar a escrita na saida padrão

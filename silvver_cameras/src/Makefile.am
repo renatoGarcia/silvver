@@ -9,8 +9,8 @@ silver_cameras_SOURCES = xmlParser.cpp \
                          connection.hpp \
                          extratorMarca.cpp \
                          extratorMarca.hpp \
-                         gerenciador.cpp \
-                         gerenciador.hpp \
+                         sceneMounter.cpp \
+                         sceneMounter.hpp \
                          hardCamera.cpp \
                          hardCamera.hpp \
                          hardCameraFactory.cpp \

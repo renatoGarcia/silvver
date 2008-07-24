@@ -1,4 +1,4 @@
-#include "gerenciador.hpp"
+#include "sceneMounter.hpp"
 
 // Mutex usado para escrever na saída padrão. Declarado em main.cpp.
 extern boost::mutex mutexCout;
