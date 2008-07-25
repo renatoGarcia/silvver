@@ -23,9 +23,9 @@ Inputs::addInput(Connection *connection)
   switch(dataType)
   {
     case BLOB:
-      this->blobControllers.push_back(boost::shared_ptr<BlobCameraController>
-                                      (new BlobCameraController(connection)));
-      blobControllers.back()->run();
+//       this->blobControllers.push_back(boost::shared_ptr<BlobCameraController>
+//                                       (new BlobCameraController(connection)));
+//       blobControllers.back()->run();
       break;
     case MARKER:
       this->markerControllers.push_back(boost::shared_ptr<MarkerCameraController>

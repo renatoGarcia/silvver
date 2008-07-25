@@ -7,7 +7,7 @@
 #include "connection.hpp"
 #include "silverTypes.hpp"
 #include "saidas.hpp"
-#include "blobTratador.hpp"
+// #include "blobTratador.hpp"
 #include "markerProcessor.hpp"
 
 using namespace silver;
@@ -40,30 +40,30 @@ private:
 
 //-----------------------------------------------------------
 
-class BlobCameraController
-{
-public:
+// class BlobCameraController
+// {
+// public:
 
-  BlobCameraController(Connection* connection);
+//   BlobCameraController(Connection* connection);
 
-  ~BlobCameraController();
+//   ~BlobCameraController();
 
-  void run();
+//   void run();
 
-  void operator()();
+//   void operator()();
 
-private:
-  bool stopping;
+// private:
+//   bool stopping;
 
-  boost::scoped_ptr<boost::thread> th;
+//   boost::scoped_ptr<boost::thread> th;
 
-  boost::scoped_ptr<Connection> connection;
+//   boost::scoped_ptr<Connection> connection;
 
-  unsigned connectionPort;
+//   unsigned connectionPort;
 
-  BlobTratador *processor;
+//   BlobTratador *processor;
 
-  Saidas *saidas;
-};
+//   Saidas *saidas;
+// };
 
 #endif

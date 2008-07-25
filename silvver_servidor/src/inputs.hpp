@@ -38,7 +38,7 @@ private:
 
   std::vector< boost::shared_ptr<MarkerCameraController> > markerControllers;
 
-  std::vector< boost::shared_ptr<BlobCameraController> > blobControllers;
+//   std::vector< boost::shared_ptr<BlobCameraController> > blobControllers;
 
   std::string tipoDado2string(DataType td);
 

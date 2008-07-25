@@ -46,7 +46,9 @@ void BlobTratador::Localizar(vector<Ente> &vecRobo)
 
   for(;(iteCorUnica!=fimCorUnica) && (iteCorComum!=fimCorComum);iteCorUnica++,iteCorComum++)
   {
-    vecRobo.push_back( Ente(*iteCorComum,*iteCorUnica,false) );
+    // Deverá ser descomente se se for realmente usar esta classe para
+    // localizar os robos no esquema de duas cores em uma papel.
+    // vecRobo.push_back( Ente(*iteCorComum,*iteCorUnica,false) );
   }
 }
 
