@@ -3,61 +3,32 @@
 
 BlobCamera::BlobCamera(CameraConfig cameraConfig, std::string serverIP,
                        unsigned connectionPort)
-  :AbstractCamera(camConfig, serverIP, connectionPort)
+  :AbstractCamera(cameraConfig, serverIP, connectionPort)
 {
-  this->filtro.reset(new Filtro());
-  this->blobExtractor.reset.(new BlobExtractor());
+  this->targetType = AbstractCamera::COLOR_BLOB;
+
+//   this->filtro.reset(new Filtro());
+//   this->blobExtractor.reset.(new BlobExtractor());
 }
 
 BlobCamera::~BlobCamera()
 {}
-
-int BlobCamera::Iniciar()
-{
-  try
-  {
-    Camera::Iniciar();
-  }
-  catch(std::string erro)
-  {
-    std::cout << "Erro: " << erro << std::endl;
-    abort();
-  }
-
-  return configuracao.serial;
-}
 
 void
 BlobCamera::operator()()
 {
   this->connect();
 
-  this->startHardCamera();
-
-  this->filtro->Iniciar();
+//   this->filtro->Iniciar();
 
   std::vector<silver::Blob> vecBlob;
-  silver::Package<silver::Blob> package;
+  silver::Package<silver::Blob> package;std::cout << "Um\n";
   while(!stopping)
-  {
+  {std::cout << "dois\n";
     vecBlob.clear();
     this->updateFrame();
 
-    this->blobExtractor->
+//     this->blobExtractor->
   }
-
-
-  //--------- VELHO
-  vecMarca.clear();
-  tempoAbsoluto = Camera::CapturarImagem();
-
-  filtro->FiltrarYUVImagem(Camera::imgCamera, imgTrabalho);
-  blobExtractor->ExtrairBlobs(imgTrabalho, vecMarca);
-
-  std::vector<Marca>::iterator iteVecMarca = vecMarca.begin();
-  std::cout << vecMarca.size() << "  !!!" << std::endl;
-  for(;iteVecMarca<vecMarca.end();iteVecMarca++)
-  {
-    Camera::Localizar(*iteVecMarca);
-  }
+  std::cout << "tres\n";
 }

@@ -27,13 +27,13 @@ HardCameraFactory::createHardCamera(CameraConfig cameraConfig)
 {
   boost::mutex::scoped_lock lock(HardCameraFactory::mutexCameraCreate);
 
-  boost::shared_ptr<HardCamera> hardCameraPtr =
-    HardCameraFactory::createdHardCameras[cameraConfig.uid];
+  std::map< uint64,boost::shared_ptr<HardCamera> >::iterator
+    iteHardCamera = HardCameraFactory::createdHardCameras.find(cameraConfig.uid);
 
   // if hardCamera already created
-  if(hardCameraPtr)
+  if(iteHardCamera != HardCameraFactory::createdHardCameras.end())
   {
-    return hardCameraPtr;
+    return iteHardCamera->second;
   }
 
   HardCamera::FrameRate frameRate;
@@ -74,6 +74,8 @@ HardCameraFactory::createHardCamera(CameraConfig cameraConfig)
                                );
   }
 
+  boost::shared_ptr<HardCamera> hardCameraPtr;
+
   if(cameraConfig.hardware == "pseudocamera")
   {
     hardCameraPtr.reset(new PseudoCamera(cameraConfig.uid, frameRate,
@@ -93,6 +95,10 @@ HardCameraFactory::createHardCamera(CameraConfig cameraConfig)
   }
 
   hardCameraPtr->initialize();
+
+  HardCameraFactory::createdHardCameras.
+    insert(std::pair< uint64,boost::shared_ptr<HardCamera> >
+           (cameraConfig.uid, hardCameraPtr));
 
   return hardCameraPtr;
 }

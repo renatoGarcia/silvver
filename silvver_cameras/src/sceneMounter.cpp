@@ -76,7 +76,12 @@ SceneMounter::constructAbstractCamera(CameraConfig &cameraConfig,
       break;
     }
   case AbstractCamera::COLOR_BLOB:
-    break;
+    {
+      abstractCameraPtr.reset(new BlobCamera(cameraConfig,
+                                             this->serverIP,
+                                             connectionPort));
+      break;
+    }
   }
 
   this->vecAbstractCamera.push_back(abstractCameraPtr);
