@@ -5,6 +5,8 @@ silver_servidor_SOURCES = connection.cpp \
                           connection.hpp \
                           inputs.cpp \
                           inputs.hpp \
+                          inputFactory.cpp \
+                          inputFactory.hpp \
                           main.cpp \
                           markerProcessor.cpp \
                           markerProcessor.hpp \
@@ -12,8 +14,10 @@ silver_servidor_SOURCES = connection.cpp \
                           receptionist.hpp \
                           saidas.cpp \
                           saidas.hpp \
-                          cameraControllers.cpp \
-                          cameraControllers.hpp \
+                          artpMarkInput.cpp \
+                          artpMarkInput.hpp \
+                          colorBlobInput.cpp \
+                          colorBlobInput.hpp \
                           cmdline.h \
                           cmdline.c \
                           silverTypes.hpp

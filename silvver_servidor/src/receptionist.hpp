@@ -3,8 +3,11 @@
 
 #include <boost/thread/thread.hpp>
 #include <boost/scoped_ptr.hpp>
+#include <boost/shared_ptr.hpp>
 #include "inputs.hpp"
+#include "artpMarkInput.hpp"
 #include "saidas.hpp"
+#include <map>
 #include <sys/timeb.h>
 
 extern bool verbose;
@@ -42,7 +45,7 @@ private:
   /// Porta livre que será utilizada no próximo pedido de conexão.
   unsigned freePort;
 
-  boost::scoped_ptr<Inputs> inputs;
+  std::map<unsigned, boost::shared_ptr<Inputs> > mapInputs;
 
   boost::scoped_ptr<Saidas> outputs;
 

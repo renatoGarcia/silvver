@@ -4,43 +4,36 @@
 #include <vector>
 #include <string>
 #include <boost/shared_ptr.hpp>
-#include <boost/foreach.hpp>
+#include <boost/scoped_ptr.hpp>
+#include <boost/thread.hpp>
 #include "connection.hpp"
-#include "cameraControllers.hpp"
+#include "saidas.hpp"
 
-using namespace silver;
-
-class MarkerCameraControl;
-
-/** Gerencia o conjunto de clientes que fornecem dados de entrada ao silvver-servidor.
- * Para cada tipo de dado de entrada deverá haver um método para tratá-lo.
- * Atualmente todos os clientes que fornecem dados de entrada são câmeras, e os tipos de dados
- * aceitos são a pose de marcos geométricos e a posição de blobs de cor.
- */
 class Inputs
 {
 public:
 
-  enum DataType
-  {
-    BLOB   = 103,
-    MARKER = 104
-  };
+  Inputs(boost::shared_ptr<Connection> connection);
 
-  Inputs();
+  virtual ~Inputs();
 
-  ~Inputs();
+  void confirmConnect();
 
-  /// Recebe um objeto da classe conexão onde se encontram informações sobre um novo cliente e inicia o tratamento dos dados que serão recebidos.
-  void addInput(Connection *connection);
+  void run();
 
-private:
+  virtual void operator()()=0;
 
-  std::vector< boost::shared_ptr<MarkerCameraController> > markerControllers;
+protected:
 
-//   std::vector< boost::shared_ptr<BlobCameraController> > blobControllers;
+  boost::shared_ptr<Connection> connection;
 
-  std::string tipoDado2string(DataType td);
+  bool stopping;
+
+  boost::scoped_ptr<boost::thread> runThread;
+
+  unsigned connectionPort;
+
+  Saidas *saidas;
 
 };
 

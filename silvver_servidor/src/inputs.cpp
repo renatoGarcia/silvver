@@ -1,57 +1,56 @@
 #include "inputs.hpp"
 #include <iostream>
+#include <boost/ref.hpp>
 
-Inputs::Inputs()
-{}
+Inputs::Inputs(boost::shared_ptr<Connection> connection)
+  :connection(connection)
+  ,stopping(false)
+{
+  this->saidas = Saidas::Instanciar();
+  this->connectionPort = connection->getPort();
+}
 
 Inputs::~Inputs()
-{}
+{
+  this->stopping = true;
+  if(this->runThread)
+  {
+    this->runThread->join();
+  }
+}
 
 void
-Inputs::addInput(Connection *connection)
+Inputs::run()
 {
-  char msg[3];
-  DataType dataType;
-
-  connection->receive(msg, sizeof(msg));
-  std::cout << "Confirma conexao: " << msg << std::endl;
-
-  connection->receive( &dataType,sizeof(DataType) );
-  std::cout << "Tipo de dado: " << tipoDado2string(dataType)
-            << std::endl << std::endl;
-
-  switch(dataType)
+  if(!this->runThread)
   {
-    case BLOB:
-//       this->blobControllers.push_back(boost::shared_ptr<BlobCameraController>
-//                                       (new BlobCameraController(connection)));
-//       blobControllers.back()->run();
-      break;
-    case MARKER:
-      this->markerControllers.push_back(boost::shared_ptr<MarkerCameraController>
-                                        (new MarkerCameraController(connection)));
-      markerControllers.back()->run();
-      break;
-    default:
-      break;
+    this->runThread.reset(new boost::thread(boost::ref(*this)));
   }
 }
 
-std::string
-Inputs::tipoDado2string(DataType td)
+void
+Inputs::confirmConnect()
 {
-  std::string str;
-  switch(td)
-  {
-    case BLOB:
-      str = "cores";
-      break;
-    case MARKER:
-      str = "marcas";
-      break;
-    default:
-      str = "tipo não identificado";
-      break;
-  }
-  return str;
+  char msgOK[3] = "OK";
+
+  this->connection->send(msgOK,sizeof(msgOK));
 }
+
+// std::string
+// Inputs::tipoDado2string(DataType td)
+// {
+//   std::string str;
+//   switch(td)
+//   {
+//     case COLOR_BLOB:
+//       str = "cores";
+//       break;
+//     case ARTP_MARK:
+//       str = "marcas";
+//       break;
+//     default:
+//       str = "tipo não identificado";
+//       break;
+//   }
+//   return str;
+// }

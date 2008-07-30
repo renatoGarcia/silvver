@@ -2,6 +2,7 @@
 #include "connection.hpp"
 #include <boost/ref.hpp>
 #include <iostream>
+#include "inputFactory.hpp"
 
 extern bool verbose;
 #define VERBOSE_PRINT(msg) if(verbose)cout<<msg;
@@ -11,7 +12,6 @@ Receptionist::Receptionist()
   ,RECECPTIONIST_PORT(12000)
 {
   this->freePort = 12001;
-  this->inputs.reset(new Inputs());
   this->outputs.reset(Saidas::Instanciar());
   ftime(&this->startTime);
 }
@@ -62,12 +62,28 @@ Receptionist::operator()()
     else if(strcmp(msg,"PT") == 0) //Nova camera
     {
       VERBOSE_PRINT("Receive message: PT (new camera)\n");
-      Connection *inputConnection = new Connection(this->freePort);
+
+      boost::shared_ptr<Connection>
+        inputConnection(new Connection(this->freePort));
       inputConnection->initialize();
 
       connection.send(&this->freePort,sizeof(this->freePort));
 
-      this->inputs->addInput(inputConnection);
+      char msg[3];
+      inputConnection->receive(msg, sizeof(msg));
+      std::cout << "Confirma conexao: " << msg << std::endl;
+
+      InputTypes inputType;
+      inputConnection->receive( &inputType,sizeof(InputTypes) );
+
+      boost::shared_ptr<Inputs> input =
+        InputFactory::createInput(inputType, inputConnection);
+
+      input->confirmConnect();
+      input->run();
+
+      this->mapInputs.insert(std::pair< unsigned,boost::shared_ptr<Inputs> >
+                             (this->freePort, input));
 
       this->freePort++;
     }
@@ -95,7 +111,7 @@ Receptionist::operator()()
     }
     else
     {
-      std::cerr << "Unknown message: " << msg[0] << msg[1] << std::endl;
+//       std::cerr << "Unknown message: " << msg[0] << msg[1] << std::endl;
     }
     msg[0]=0;msg[1]=0;msg[2]=0;
   }
