@@ -20,6 +20,8 @@ silver_cameras_SOURCES = xmlParser.cpp \
                          markerCamera.hpp \
                          blobCamera.hpp \
                          blobCamera.cpp \
+                         blobExtractor.hpp \
+                         blobExtractor.cpp \
                          silverTypes.hpp \
                          timer.hpp \
                          cmdline.h \

@@ -6,6 +6,7 @@
 #include <libdc1394/dc1394_control.h>
 #include <sys/time.h>
 #include <string>
+#include <boost/thread/mutex.hpp>
 #include "conversions.h"
 
 #define NUMERO_BUFFERS 4
@@ -50,6 +51,8 @@ private:
   int bytesPerPixel;
 
   bayer_pattern_t pattern;
+
+  boost::mutex mutexCaptureFrame;
 };
 
 #endif

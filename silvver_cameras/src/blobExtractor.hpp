@@ -4,22 +4,38 @@ IplImage em formato GREY (uma camada e 8 bits/pixel) e retorna um vector de
 CvConnectedComp. Cada item desse vetor corresponde a um grupo de pixels com uma
 mesma tonalidade, e cuja área é maior que uma área mínima preestabelecida.
 **************************************************************************************/
-#ifndef BLOBEXTRACTOR_HPP
-#define BLOBEXTRACTOR_HPP
+#ifndef COLOR_BLOB_EXTRACTOR_HPP
+#define COLOR_BLOB_EXTRACTOR_HPP
 
 #include <opencv/cv.h>
 #include <vector>
-#include "silvver_tipos.hpp"
+#include "silverTypes.hpp"
+#include <string>
+#include <fstream>
 
-using namespace silvver;
-
-class BlobExtractor
+class ColorBlobExtractor
 {
-private:
-    int areaMinima; // Área mínima para que um blob seja reportado.
 public:
-    BlobExtractor(int minArea=100);
-    void ExtrairBlobs(IplImage *imgEntrada,std::vector<Marca> &vectorMarca);
+
+  ColorBlobExtractor(int areaThreshold=100);
+
+  void extract(IplImage *imgEntrada,
+               std::vector<silver::Blob> &vectorBlob);
+
+  void init();
+
+private:
+  void FiltrarYUVImagem(IplImage *imagemYUV,IplImage *imagemRetorno);
+
+  int areaThreshold; // Área mínima para que um blob seja reportado.
+
+  unsigned char yuvLUT[256][256][256];
+
+  // Número de cores diferentes que estão sendo representadas.
+  int numCores;
+
+  void CarregarYUVLUT(std::ifstream *streamYUV);
+
 };
 
 #endif

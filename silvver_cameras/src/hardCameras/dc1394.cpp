@@ -213,6 +213,8 @@ DC1394::initialize()
 void
 DC1394::captureFrame(IplImage* &iplImage)
 {
+  boost::mutex::scoped_lock lock(this->mutexCaptureFrame);
+
   // Capture one frame
   if (dc1394_dma_single_capture(&(this->dc1394Camera)) != DC1394_SUCCESS)
   {
@@ -225,7 +227,7 @@ DC1394::captureFrame(IplImage* &iplImage)
     src = new unsigned char[this->frameSize];
     if(!src)
     {
-    throw CaptureImageError("Could not allocate copy buffer for color conversion");
+      throw CaptureImageError("Could not allocate copy buffer for color conversion");
     }
     unsigned char* captureBuffer =
       (unsigned char*) this->dc1394Camera.capture_buffer;

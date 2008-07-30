@@ -7,8 +7,7 @@ BlobCamera::BlobCamera(CameraConfig cameraConfig, std::string serverIP,
 {
   this->targetType = AbstractCamera::COLOR_BLOB;
 
-//   this->filtro.reset(new Filtro());
-//   this->blobExtractor.reset.(new BlobExtractor());
+  this->colorBlobExtractor.reset(new ColorBlobExtractor());
 }
 
 BlobCamera::~BlobCamera()
@@ -19,16 +18,14 @@ BlobCamera::operator()()
 {
   this->connect();
 
-//   this->filtro->Iniciar();
-
   std::vector<silver::Blob> vecBlob;
-  silver::Package<silver::Blob> package;std::cout << "Um\n";
-  while(!stopping)
-  {std::cout << "dois\n";
+  silver::Package<silver::Blob> package;
+  while(!this->stopping)
+  {
     vecBlob.clear();
     this->updateFrame();
 
-//     this->blobExtractor->
+    this->colorBlobExtractor->extract(this->actualFrame, vecBlob);
   }
   std::cout << "tres\n";
 }

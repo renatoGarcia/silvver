@@ -4,8 +4,7 @@
 #include <string>
 #include <boost/scoped_ptr.hpp>
 #include "abstractCamera.hpp"
-// #include "filtro.hpp"
-// #include "blobExtractor.hpp"
+#include "blobExtractor.hpp"
 
 class BlobCamera : public AbstractCamera
 {
@@ -22,8 +21,6 @@ public:
 
 private:
 
-//   boost::scoped_ptr<Filtro> filtro;
-
-//   boost::scoped_ptr<BlobExtractor> blobExtractor;
+  boost::scoped_ptr<ColorBlobExtractor> colorBlobExtractor;
 };
 #endif
