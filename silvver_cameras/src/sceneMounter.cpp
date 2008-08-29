@@ -30,27 +30,24 @@ SceneMounter::mount()
   this->receptionistConnection->receive((char*)&tempoInicial,
                                         sizeof(tempoInicial) );
 
-  BOOST_FOREACH(CameraConfig camConf, scene.vecCameraConfig)
+  std::pair< std::string, std::vector<TargetConfig> > targetTypeGroup;
+  CameraConfig cameraConfig;
+  BOOST_FOREACH(targetTypeGroup, scene.targets)
   {
-    if(scene.vecARTPMarks.empty() == false)
+    BOOST_FOREACH(cameraConfig, scene.vecCameraConfig)
     {
-      this->constructAbstractCamera(camConf, scene.vecARTPMarks,
-                                    AbstractCamera::ARTP_MARK);
+      this->constructAbstractCamera(targetTypeGroup.first,
+                                    targetTypeGroup.second,
+                                    cameraConfig);
     }
-
-    if(scene.vecColorBlobs.empty() == false)
-    {
-      this->constructAbstractCamera(camConf, scene.vecColorBlobs,
-                                    AbstractCamera::COLOR_BLOB);
-    }
-
   }
+
 }
 
 void
-SceneMounter::constructAbstractCamera(CameraConfig &cameraConfig,
+SceneMounter::constructAbstractCamera(std::string targetType,
                                       const std::vector<TargetConfig> &vecTargets,
-                                      AbstractCamera::TargetType targetType)
+                                      CameraConfig &cameraConfig)
 {
   char msgPT[3] = "PT";
   unsigned connectionPort;
@@ -66,22 +63,23 @@ SceneMounter::constructAbstractCamera(CameraConfig &cameraConfig,
    std::cout << "PORTA: " << connectionPort << std::endl;}
 
   boost::shared_ptr<AbstractCamera> abstractCameraPtr;
-  switch(targetType)
+  if(targetType == "artp_mark")
   {
-  case AbstractCamera::ARTP_MARK:
-    {
-      abstractCameraPtr.reset(new MarkerCamera(cameraConfig,
-                                               this->serverIP,
-                                               connectionPort));
-      break;
-    }
-  case AbstractCamera::COLOR_BLOB:
-    {
-      abstractCameraPtr.reset(new BlobCamera(cameraConfig,
+    abstractCameraPtr.reset(new MarkerCamera(cameraConfig,
                                              this->serverIP,
                                              connectionPort));
-      break;
-    }
+  }
+  else if(targetType == "color_blob")
+  {
+    abstractCameraPtr.reset(new BlobCamera(vecTargets,
+                                           cameraConfig,
+                                           this->serverIP,
+                                           connectionPort));
+
+  }
+  else
+  {
+    throw std::invalid_argument("Camera abstrata desconhecida: " + targetType);
   }
 
   this->vecAbstractCamera.push_back(abstractCameraPtr);

@@ -4,6 +4,7 @@
 #include "../hardCamera.hpp"
 #include <string>
 #include <boost/filesystem.hpp>
+#include <boost/thread/mutex.hpp>
 
 namespace bfs = boost::filesystem;
 
@@ -33,6 +34,7 @@ private:
   // Tempo que pseudoCamera ficará ociosa para simular uma dada frequência
   unsigned delay;
 
+  boost::mutex mutexCaptureFrame;
 };
 
 #endif

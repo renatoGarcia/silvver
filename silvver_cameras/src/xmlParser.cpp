@@ -13,7 +13,7 @@ XmlParser::readElementText(const TiXmlElement *element)
     throw std::invalid_argument("Elemento requisitado para ler conteúdo não encontrado.");
   }
 
-  // A lib TinyXml trata de colocar todos os itens separados por espaços.
+  // A lib TinyXml já cuida de colocar todos os itens separados por espaços.
   boost::char_separator<char> separator(" ");
   boost::array<Type, nItens> returnArray;
 
@@ -148,6 +148,7 @@ XmlParser::parseFile(std::string xmlFile)
   TiXmlHandle hTargetsBase(hRoot.FirstChildElement("targets"));
   TiXmlHandle hElemTarget(NULL);
   TargetConfig target;
+  std::string targetType;
   int targetNum;
   for(targetNum=0,hElemTarget=hTargetsBase.ChildElement(targetNum);
       hElemTarget.ToElement()!=NULL;
@@ -161,19 +162,10 @@ XmlParser::parseFile(std::string xmlFile)
                                   FirstChildElement("uid").
                                   ToElement()).at(0);
 
-    if(hElemTarget.ToElement()->ValueStr() == "ARTP_marker")
-    {
-      scene.vecARTPMarks.push_back(target);
-    }
-    else if(hElemTarget.ToElement()->ValueStr() == "color_blob")
-    {
-      scene.vecColorBlobs.push_back(target);
-    }
-    else
-    {
-      throw XmlLoad_error("Unknown target type: " +
-                          hElemTarget.ToElement()->ValueStr());
-    }
+    targetType = hElemTarget.ToElement()->ValueStr();
+    boost::to_lower(targetType);
+
+    scene.targets[targetType].push_back(target);
   }
 
   return scene;

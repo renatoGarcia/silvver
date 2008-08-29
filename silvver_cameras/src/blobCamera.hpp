@@ -10,7 +10,9 @@ class BlobCamera : public AbstractCamera
 {
 public:
 
-  BlobCamera(CameraConfig camConfig, std::string serverIP,
+  BlobCamera(const std::vector<TargetConfig> &vecTargets,
+             CameraConfig camConfig,
+             std::string serverIP,
              unsigned connectionPort);
 
   virtual ~BlobCamera();

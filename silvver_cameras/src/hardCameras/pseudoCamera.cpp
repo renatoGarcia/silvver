@@ -50,6 +50,8 @@ void PseudoCamera::saveFrame()
 
 void PseudoCamera::captureFrame(IplImage* &iplImage)
 {
+  boost::mutex::scoped_lock lock(this->mutexCaptureFrame);
+
   boost::xtime xt;
   boost::xtime_get(&xt, boost::TIME_UTC);
   xt.nsec += this->delay;

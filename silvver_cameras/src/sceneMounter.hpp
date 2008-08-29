@@ -3,6 +3,7 @@
 
 #include <vector>
 #include <string>
+#include <stdexcept>
 #include <boost/thread/thread.hpp>
 #include <boost/shared_ptr.hpp>
 #include <boost/scoped_ptr.hpp>
@@ -50,9 +51,9 @@ private:
   boost::scoped_ptr<Timer> timer;
 
   // Inicia a câmera abstrata descrita por cameraConfig
-  void constructAbstractCamera(CameraConfig &cameraConfig,
+  void constructAbstractCamera(std::string targetType,
                                const std::vector<TargetConfig> &vecTargets,
-                               AbstractCamera::TargetType targetType);
+                               CameraConfig &cameraConfig);
 
   std::vector< boost::shared_ptr<AbstractCamera> > vecAbstractCamera;
 };

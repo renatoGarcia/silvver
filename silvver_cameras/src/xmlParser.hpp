@@ -46,8 +46,7 @@ public:
 
   std::vector<CameraConfig> vecCameraConfig;
 
-  std::vector<TargetConfig> vecColorBlobs;
-  std::vector<TargetConfig> vecARTPMarks;
+  std::map< std::string, std::vector<TargetConfig> > targets;
 };
 
 class XmlParser
