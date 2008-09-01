@@ -21,6 +21,7 @@ dnl ========================================================================
 
 AC_CHECK_LIB([boost_thread], [sleep])
 AC_CHECK_LIB([boost_filesystem], [main])
+AC_CHECK_LIB([boost_program_options], [main])
 AC_CHECK_LIB([cv], [cvReleaseImage])
 AC_CHECK_LIB([highgui], [cvLoadImage])
 AC_CHECK_LIB([ARToolKitPlus], [main])

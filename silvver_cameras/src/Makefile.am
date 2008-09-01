@@ -24,8 +24,6 @@ silver_cameras_SOURCES = xmlParser.cpp \
                          blobExtractor.cpp \
                          silverTypes.hpp \
                          timer.hpp \
-                         cmdline.h \
-                         cmdline.c \
                          hardCameras/modelos.hpp \
                          hardCameras/pseudoCamera.cpp \
                          hardCameras/pseudoCamera.hpp \

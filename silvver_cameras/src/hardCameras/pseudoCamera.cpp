@@ -43,7 +43,7 @@ PseudoCamera::initialize()
 
   this->dirIterator = bfs::directory_iterator(this->PATH);
 
- }
+}
 
 void PseudoCamera::saveFrame()
 {}

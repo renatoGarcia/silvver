@@ -3,11 +3,10 @@
 
 #include <vector>
 #include <string>
-#include <stdexcept>
-#include <boost/thread/thread.hpp>
+// #include <stdexcept>
+// #include <boost/thread/thread.hpp>
 #include <boost/shared_ptr.hpp>
 #include <boost/scoped_ptr.hpp>
-#include <boost/foreach.hpp>
 #include "abstractCamera.hpp"
 #include "markerCamera.hpp"
 #include "blobCamera.hpp"

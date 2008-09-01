@@ -5,16 +5,11 @@
 #include <boost/scoped_ptr.hpp>
 #include <boost/shared_ptr.hpp>
 #include <boost/noncopyable.hpp>
-#include <boost/ref.hpp>
 #include <boost/thread/thread.hpp>
-#include <boost/thread/mutex.hpp>
 #include "silverTypes.hpp"
 #include "hardCamera.hpp"
-#include "hardCameraFactory.hpp"
 #include "xmlParser.hpp"
 #include "connection.hpp"
-
-using namespace silver;
 
 // Classe base para as câmeras abstratas, como blobCamera e marcoCamera
 class AbstractCamera : boost::noncopyable
@@ -42,7 +37,7 @@ protected:
 
   TargetType targetType;
 
-  IplImage *actualFrame;
+  IplImage *currentFrame;
 
   /// Conexao com o servidor, usada para enviar as localizações
   boost::scoped_ptr<Connection> connection;
@@ -51,6 +46,8 @@ protected:
 
   unsigned long UID;
 
+  /** When this variable become True, the loop in operator() method implemented
+   *  by a derivate class must exit */
   bool stopping;
 
   AbstractCamera(CameraConfig cameraConfig, std::string serverIP,
@@ -65,12 +62,9 @@ protected:
   void updateFrame();
 
   // Converte a posição das coordenadas em pixels para as coordenadas do mundo
-  void localize(Position &position);
+  void localize(silver::Position &position);
 
 private:
-
-  /// Evita a criação e iniciação simultânea das câmeras.
-  static boost::mutex mutexStartHardCamera;
 
   //Parâmetros intrínsecos e extrínsecos da câmera física.
   double cc0, cc1;

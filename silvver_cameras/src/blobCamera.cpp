@@ -28,7 +28,7 @@ BlobCamera::operator()()
     vecBlob.clear();
     this->updateFrame();
 
-    this->colorBlobExtractor->extract(this->actualFrame, vecBlob);
+    this->colorBlobExtractor->extract(this->currentFrame, vecBlob);
   }
   std::cout << "tres\n";
 }

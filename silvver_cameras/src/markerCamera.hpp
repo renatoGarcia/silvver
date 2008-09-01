@@ -7,14 +7,14 @@
 #include "abstractCamera.hpp"
 #include "extratorMarca.hpp"
 
-using namespace silver;
-
 /// Implementa uma câmera abstrata que filma marcos.
 class MarkerCamera : public AbstractCamera
 {
 public:
 
-  MarkerCamera(CameraConfig cameraConfig, std::string serverIP,
+  MarkerCamera(const std::vector<TargetConfig> &vecTargets,
+               CameraConfig cameraConfig,
+               std::string serverIP,
                unsigned connectionPort);
 
   virtual ~MarkerCamera();
@@ -23,7 +23,7 @@ public:
 
 private:
 
-  boost::scoped_ptr<ExtratorMarca> extratorMarca;
+  boost::scoped_ptr<MarkerExtractor> markerExtractor;
 };
 
 #endif

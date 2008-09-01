@@ -1,14 +1,25 @@
 #include "extratorMarca.hpp"
 #include <opencv/highgui.h>
 #include <ARToolKitPlus/TrackerSingleMarkerImpl.h>
+#include <boost/foreach.hpp>
 
-ExtratorMarca::ExtratorMarca(int largura, int altura)
+MarkerExtractor::MarkerExtractor(int width, int height,
+                                 const std::vector<TargetConfig> &targets)
 {
-  this->tracker.reset( new ARToolKitPlus::
-                       TrackerSingleMarkerImpl<16,16,64,50,50>(640,480) );
+  this->tracker.reset(new ARToolKitPlus::
+                      TrackerSingleMarkerImpl<16,16,64,50,50>(width,height));
+
+  int targetNum = 0;
+  BOOST_FOREACH(TargetConfig targetConfig, targets)
+  {
+    this->vecDescriptionFilePath.push_back(targetConfig.targetDefineFile);
+    this->idMap[targetNum] = targetConfig.uid;
+    targetNum++;
+  }
 }
 
-int ExtratorMarca::Iniciar()
+int
+MarkerExtractor::init()
 {
   if(!this->tracker->init("./data/no_distortion.cal",1000.0f, 7000.0f))
   {
@@ -38,55 +49,19 @@ int ExtratorMarca::Iniciar()
 
   tracker->setImageProcessingMode(ARToolKitPlus::IMAGE_FULL_RES);
 
-  tracker->addPattern("data/4x4patt/4x4_1.patt");
-  tracker->addPattern("data/4x4patt/4x4_2.patt");
-  tracker->addPattern("data/4x4patt/4x4_3.patt");
-  tracker->addPattern("data/4x4patt/4x4_4.patt");
-  tracker->addPattern("data/4x4patt/4x4_5.patt");
-//     tracker[numLogger]->addPattern("data/4x4patt/4x4_6.patt");
-//     tracker[numLogger]->addPattern("data/4x4patt/4x4_7.patt");
-//     tracker[numLogger]->addPattern("data/4x4patt/4x4_8.patt");
-//     tracker[numLogger]->addPattern("data/4x4patt/4x4_9.patt");
-//     tracker[numLogger]->addPattern("data/4x4patt/4x4_10.patt");
-//     tracker[numLogger]->addPattern("data/4x4patt/4x4_11.patt");
-//     tracker[numLogger]->addPattern("data/4x4patt/4x4_12.patt");
-//     tracker[numLogger]->addPattern("data/4x4patt/4x4_13.patt");
-//     tracker[numLogger]->addPattern("data/4x4patt/4x4_14.patt");
-//     tracker[numLogger]->addPattern("data/4x4patt/4x4_15.patt");
-//     tracker[numLogger]->addPattern("data/4x4patt/4x4_16.patt");
-//     tracker[numLogger]->addPattern("data/4x4patt/4x4_17.patt");
-//     tracker[numLogger]->addPattern("data/4x4patt/4x4_18.patt");
-//     tracker[numLogger]->addPattern("data/4x4patt/4x4_19.patt");
-//     tracker[numLogger]->addPattern("data/4x4patt/4x4_20.patt");
-//     tracker[numLogger]->addPattern("data/4x4patt/4x4_21.patt");
-//     tracker[numLogger]->addPattern("data/4x4patt/4x4_22.patt");
-//     tracker[numLogger]->addPattern("data/4x4patt/4x4_23.patt");
-//     tracker[numLogger]->addPattern("data/4x4patt/4x4_24.patt");
-//     tracker[numLogger]->addPattern("data/4x4patt/4x4_25.patt");
-//     tracker[numLogger]->addPattern("data/4x4patt/4x4_26.patt");
-//     tracker[numLogger]->addPattern("data/4x4patt/4x4_27.patt");
-//     tracker[numLogger]->addPattern("data/4x4patt/4x4_28.patt");
-//     tracker[numLogger]->addPattern("data/4x4patt/4x4_29.patt");
-//     tracker[numLogger]->addPattern("data/4x4patt/4x4_30.patt");
-//     tracker[numLogger]->addPattern("data/4x4patt/4x4_31.patt");
-//     tracker[numLogger]->addPattern("data/4x4patt/4x4_32.patt");
-//     tracker[numLogger]->addPattern("data/4x4patt/4x4_33.patt");
-//     tracker[numLogger]->addPattern("data/4x4patt/4x4_34.patt");
-//     tracker[numLogger]->addPattern("data/4x4patt/4x4_35.patt");
-//     tracker[numLogger]->addPattern("data/4x4patt/4x4_36.patt");
-//     tracker[numLogger]->addPattern("data/4x4patt/4x4_37.patt");
-//     tracker[numLogger]->addPattern("data/4x4patt/4x4_38.patt");
-//     tracker[numLogger]->addPattern("data/4x4patt/4x4_39.patt");
-//     tracker[numLogger]->addPattern("data/4x4patt/4x4_40.patt");
+  BOOST_FOREACH(std::string filePath, this->vecDescriptionFilePath)
+  {
+    tracker->addPattern(filePath.c_str());
+  }
 
-    return 0;
+  return 0;
 }
 
 void
-ExtratorMarca::ExtrairMarcas(IplImage *imgEntrada,
-                             std::vector<MarkerPontos> &vecMarkerPontos)
+MarkerExtractor::extract(IplImage *imgEntrada,
+                         std::vector<MarkerPoints> &vecMarkerPoints)
 {
-  vecMarkerPontos.clear();
+  vecMarkerPoints.clear();
 
   int totalMarca=0;
   ARToolKitPlus::ARMarkerInfo *marker_info;
@@ -97,38 +72,38 @@ ExtratorMarca::ExtrairMarcas(IplImage *imgEntrada,
     return ;
   }
 
-  MarkerPontos mP;
+  MarkerPoints mP;
 
   for(int marca=0; marca<totalMarca; marca++)
   {
     switch(marker_info[marca].dir)
     {
     case 0:
-      mP.verticeRef = Position(marker_info[marca].vertex[1][0],marker_info[marca].vertex[1][1]);
-      mP.verticeSec = Position(marker_info[marca].vertex[0][0],marker_info[marca].vertex[0][1]);
+      mP.verticeRef = silver::Position(marker_info[marca].vertex[1][0],marker_info[marca].vertex[1][1]);
+      mP.verticeSec = silver::Position(marker_info[marca].vertex[0][0],marker_info[marca].vertex[0][1]);
       break;
     case 1:
-      mP.verticeRef = Position(marker_info[marca].vertex[0][0],marker_info[marca].vertex[0][1]);
-      mP.verticeSec = Position(marker_info[marca].vertex[3][0],marker_info[marca].vertex[3][1]);
+      mP.verticeRef = silver::Position(marker_info[marca].vertex[0][0],marker_info[marca].vertex[0][1]);
+      mP.verticeSec = silver::Position(marker_info[marca].vertex[3][0],marker_info[marca].vertex[3][1]);
       break;
     case 2:
-      mP.verticeRef = Position(marker_info[marca].vertex[3][0],marker_info[marca].vertex[3][1]);
-      mP.verticeSec = Position(marker_info[marca].vertex[2][0],marker_info[marca].vertex[2][1]);
+      mP.verticeRef = silver::Position(marker_info[marca].vertex[3][0],marker_info[marca].vertex[3][1]);
+      mP.verticeSec = silver::Position(marker_info[marca].vertex[2][0],marker_info[marca].vertex[2][1]);
       break;
     case 3:
-      mP.verticeRef = Position(marker_info[marca].vertex[2][0],marker_info[marca].vertex[2][1]);
-      mP.verticeSec = Position(marker_info[marca].vertex[1][0],marker_info[marca].vertex[1][1]);
+      mP.verticeRef = silver::Position(marker_info[marca].vertex[2][0],marker_info[marca].vertex[2][1]);
+      mP.verticeSec = silver::Position(marker_info[marca].vertex[1][0],marker_info[marca].vertex[1][1]);
       break;
     }
     mP.centro.x     = marker_info[marca].pos[0];
     mP.centro.y     = marker_info[marca].pos[1];
-    mP.centro.id    = marker_info[marca].id;
+    mP.centro.id    = this->idMap[marker_info[marca].id];
     mP.centro.weigh = marker_info[marca].cf;
 
     // Retira as marcas cuja confiança for menor que 50%
     if(mP.centro.id>=0 && marker_info[marca].cf>0.5)
     {
-      vecMarkerPontos.push_back(mP);
+      vecMarkerPoints.push_back(mP);
     }
   }
 }

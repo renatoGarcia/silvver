@@ -1,5 +1,5 @@
-#ifndef EXTRATORMARCA_HPP
-#define EXTRATORMARCA_HPP
+#ifndef MARKER_EXTRACTOR_HPP
+#define MARKER_EXTRACTOR_HPP
 
 #include <ARToolKitPlus/TrackerSingleMarker.h>
 #include <iostream>
@@ -7,15 +7,16 @@
 #include <vector>
 #include <boost/scoped_ptr.hpp>
 #include "silverTypes.hpp"
+#include "xmlParser.hpp"
 
-using namespace silver;
+#define MAX_TARGETS 40
 
 // Estrutura para manter os pontos de interece de uma marca encontrada
-struct MarkerPontos
+struct MarkerPoints
 {
-  Position verticeRef;
-  Position verticeSec;
-  Ente centro;
+  silver::Position verticeRef;
+  silver::Position verticeSec;
+  silver::Ente centro;
 };
 
 class MyLogger : public ARToolKitPlus::Logger
@@ -26,8 +27,17 @@ class MyLogger : public ARToolKitPlus::Logger
     }
 };
 
-class ExtratorMarca
+class MarkerExtractor
 {
+public:
+
+  MarkerExtractor(int width, int height,
+                  const std::vector<TargetConfig> &targets);
+
+  int init();
+
+  void extract(IplImage *imgEntrada,
+               std::vector<MarkerPoints> &vecMarkerPoints);
 
 private:
 
@@ -35,14 +45,11 @@ private:
 
   boost::scoped_ptr<ARToolKitPlus::TrackerSingleMarker> tracker;
 
-public:
+  std::vector<std::string> vecDescriptionFilePath;
 
-  ExtratorMarca(int largura,int altura);
+  /// Translates the inner artkp id to silver id
+  int idMap[MAX_TARGETS];
 
-  int Iniciar();
-
-  void ExtrairMarcas(IplImage *imgEntrada,
-                     std::vector<MarkerPontos> &vecMarkerPontos);
 };
 
 #endif

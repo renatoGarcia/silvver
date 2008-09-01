@@ -1,13 +1,16 @@
 #include "markerCamera.hpp"
 
-MarkerCamera::MarkerCamera(CameraConfig cameraConfig, std::string serverIP,
+MarkerCamera::MarkerCamera(const std::vector<TargetConfig> &vecTargets,
+                           CameraConfig cameraConfig,
+                           std::string serverIP,
                            unsigned connectionPort)
   :AbstractCamera(cameraConfig, serverIP, connectionPort)
 {
   this->targetType = AbstractCamera::ARTP_MARK;
 
-  this->extratorMarca.reset(new ExtratorMarca(cameraConfig.resolution.at(0),
-                                              cameraConfig.resolution.at(1)));
+  this->markerExtractor.reset(new MarkerExtractor(cameraConfig.resolution.at(0),
+                                                  cameraConfig.resolution.at(1),
+                                                  vecTargets));
 }
 
 MarkerCamera::~MarkerCamera()
@@ -18,34 +21,34 @@ MarkerCamera::operator()()
 {
   this->connect();
 
-  this->extratorMarca->Iniciar();
+  this->markerExtractor->init();
 
-  std::vector<Ente> vecEnte;
-  Package<Ente> pacote;
-  std::vector<MarkerPontos> vecMarkerPontos;
-  std::vector<MarkerPontos>::iterator iteMarkerPontos;
+  std::vector<silver::Ente> vecEnte;
+  silver::Package<silver::Ente> package;
+  std::vector<MarkerPoints> vecMarkerPoints;
+  std::vector<MarkerPoints>::iterator iteMarkerPoints;
   double theta;
   while(!stopping)
   {
     vecEnte.clear();
     this->updateFrame();
 
-    this->extratorMarca->ExtrairMarcas(this->actualFrame, vecMarkerPontos);
+    this->markerExtractor->extract(this->currentFrame, vecMarkerPoints);
 
-    iteMarkerPontos = vecMarkerPontos.begin();
-    for(;iteMarkerPontos<vecMarkerPontos.end();iteMarkerPontos++)
+    iteMarkerPoints = vecMarkerPoints.begin();
+    for(;iteMarkerPoints<vecMarkerPoints.end();iteMarkerPoints++)
     {
-      this->localize(iteMarkerPontos->centro);
-      this->localize(iteMarkerPontos->verticeRef);
-      this->localize(iteMarkerPontos->verticeSec);
+      this->localize(iteMarkerPoints->centro);
+      this->localize(iteMarkerPoints->verticeRef);
+      this->localize(iteMarkerPoints->verticeSec);
 
-      theta = iteMarkerPontos->verticeRef.findAngle(iteMarkerPontos->verticeSec);
+      theta = iteMarkerPoints->verticeRef.findAngle(iteMarkerPoints->verticeSec);
 
-      iteMarkerPontos->centro.theta = theta;
-      vecEnte.push_back(iteMarkerPontos->centro);
+      iteMarkerPoints->centro.theta = theta;
+      vecEnte.push_back(iteMarkerPoints->centro);
     }
 
-    pacote.pack(vecEnte);
-    this->connection->send(&pacote,sizeof(pacote));
+    package.pack(vecEnte);
+    this->connection->send(&package,sizeof(package));
   }
 }

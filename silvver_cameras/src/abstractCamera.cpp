@@ -1,11 +1,13 @@
 #include "abstractCamera.hpp"
+#include "hardCameraFactory.hpp"
+#include <boost/ref.hpp>
+#include <boost/thread/mutex.hpp>
 
 // Mutex usado para escrever na saída padrão. Declarado em main.cpp.
 extern boost::mutex mutexCout;
 
-boost::mutex AbstractCamera::mutexStartHardCamera;
-
-AbstractCamera::AbstractCamera(CameraConfig cameraConfig, std::string serverIP,
+AbstractCamera::AbstractCamera(CameraConfig cameraConfig,
+                               std::string serverIP,
                                unsigned connectionPort)
 {
   this->cameraConfig = cameraConfig;
@@ -43,12 +45,12 @@ AbstractCamera::AbstractCamera(CameraConfig cameraConfig, std::string serverIP,
 
   this->hardCamera = HardCameraFactory::createHardCamera(cameraConfig);
 
-  this->hardCamera->createIplImage(actualFrame);
+  this->hardCamera->createIplImage(currentFrame);
 }
 
 AbstractCamera::~AbstractCamera()
 {
-  cvReleaseImage(&actualFrame);
+  cvReleaseImage(&currentFrame);
 }
 
 void
@@ -93,7 +95,7 @@ AbstractCamera::updateFrame()
 {
   try
   {
-    hardCamera->captureFrame(actualFrame);
+    hardCamera->captureFrame(currentFrame);
   }
   catch(/*runtime_error error*/...)
   {
@@ -112,7 +114,7 @@ AbstractCamera::updateFrame()
 }
 
 void
-AbstractCamera::localize(Position &position)
+AbstractCamera::localize(silver::Position &position)
 {
 
   //------------------------------------- Parâmetros Intrínsecos

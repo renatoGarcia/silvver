@@ -1,4 +1,5 @@
 #include "sceneMounter.hpp"
+#include <boost/foreach.hpp>
 
 // Mutex usado para escrever na saída padrão. Declarado em main.cpp.
 extern boost::mutex mutexCout;
@@ -32,8 +33,10 @@ SceneMounter::mount()
 
   std::pair< std::string, std::vector<TargetConfig> > targetTypeGroup;
   CameraConfig cameraConfig;
+  // Para cada tipo diferente de alvo
   BOOST_FOREACH(targetTypeGroup, scene.targets)
   {
+    // Constrói uma câmera abstrata para cada uma das câmeras físicas
     BOOST_FOREACH(cameraConfig, scene.vecCameraConfig)
     {
       this->constructAbstractCamera(targetTypeGroup.first,
@@ -65,7 +68,8 @@ SceneMounter::constructAbstractCamera(std::string targetType,
   boost::shared_ptr<AbstractCamera> abstractCameraPtr;
   if(targetType == "artp_mark")
   {
-    abstractCameraPtr.reset(new MarkerCamera(cameraConfig,
+    abstractCameraPtr.reset(new MarkerCamera(vecTargets,
+                                             cameraConfig,
                                              this->serverIP,
                                              connectionPort));
   }
