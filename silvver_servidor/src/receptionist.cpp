@@ -12,7 +12,7 @@ Receptionist::Receptionist(int port)
   ,RECECPTIONIST_PORT(port)
 {
   this->freePort = port+1;
-  this->outputs = Outputs::instantiate();
+  this->outputs = ClientsMap::instantiate();
   ftime(&this->startTime);
 }
 
@@ -90,7 +90,8 @@ Receptionist::operator()()
     else if(strcmp(msg,"SD") == 0 ) //Nova saída
     {
       VERBOSE_PRINT("Receive message: SD (connect client)\n");
-      Connection *outputConnection = new Connection(this->freePort);
+      boost::shared_ptr<Connection>
+        outputConnection(new Connection(this->freePort));
       outputConnection->initialize();
 
       connection.send(&this->freePort,sizeof(this->freePort));

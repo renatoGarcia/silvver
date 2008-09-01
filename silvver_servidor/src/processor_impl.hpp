@@ -2,11 +2,12 @@
 #define PROCESSOR_IMPL_HPP
 
 #include "processor.hpp"
+#include "outputs_impl.hpp"
 
 template <typename Tinput, typename Toutput>
 Processor<Tinput,Toutput>::Processor()
 {
-  this->outputs = Outputs::instantiate();
+  this->outputs.reset(new Outputs<Toutput>());
 }
 
 template <typename Tinput, typename Toutput>

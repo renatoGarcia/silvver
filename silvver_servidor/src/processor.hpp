@@ -28,7 +28,7 @@ protected:
 
 private:
 
-  boost::shared_ptr<Outputs> outputs;
+  boost::shared_ptr< Outputs<Toutput> > outputs;
 };
 
 

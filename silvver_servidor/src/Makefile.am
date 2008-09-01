@@ -1,7 +1,9 @@
 AM_CPPFLAGS = -Wall
 bin_PROGRAMS = silver_servidor
 
-silver_servidor_SOURCES = connection.cpp \
+silver_servidor_SOURCES = clientsMap.cpp \
+                          clientsMap.hpp \
+                          connection.cpp \
                           connection.hpp \
                           inputFactory.cpp \
                           inputFactory.hpp \
@@ -11,8 +13,8 @@ silver_servidor_SOURCES = connection.cpp \
                           main.cpp \
                           markerProcessor.cpp \
                           markerProcessor.hpp \
-                          outputs.cpp \
                           outputs.hpp \
+                          outputs_impl.hpp \
                           processorFactory.hpp \
                           processorFactory_impl.hpp \
                           processor.hpp \

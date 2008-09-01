@@ -5,7 +5,7 @@
 #include <boost/scoped_ptr.hpp>
 #include <boost/shared_ptr.hpp>
 #include "inputInterface.hpp"
-#include "outputs.hpp"
+#include "clientsMap.hpp"
 #include <map>
 #include <sys/timeb.h>
 
@@ -46,7 +46,7 @@ private:
 
   std::map<unsigned, boost::shared_ptr<InputInterface> > mapInputs;
 
-  boost::shared_ptr<Outputs> outputs;
+  boost::shared_ptr<ClientsMap> outputs;
 
   /// Thread onde onde será executado o método Recepcionista.
   boost::scoped_ptr<boost::thread> thReceptionist;
