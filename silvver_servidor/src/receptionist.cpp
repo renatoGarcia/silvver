@@ -5,14 +5,14 @@
 #include "inputFactory.hpp"
 
 extern bool verbose;
-#define VERBOSE_PRINT(msg) if(verbose)cout<<msg;
+#define VERBOSE_PRINT(msg) if(verbose)std::cout<<msg;
 
-Receptionist::Receptionist()
+Receptionist::Receptionist(int port)
   :stopReceptionist(false)
-  ,RECECPTIONIST_PORT(12000)
+  ,RECECPTIONIST_PORT(port)
 {
-  this->freePort = 12001;
-  this->outputs.reset(Saidas::Instanciar());
+  this->freePort = port+1;
+  this->outputs = Outputs::instantiate();
   ftime(&this->startTime);
 }
 
@@ -73,16 +73,16 @@ Receptionist::operator()()
       inputConnection->receive(msg, sizeof(msg));
       std::cout << "Confirma conexao: " << msg << std::endl;
 
-      InputTypes inputType;
-      inputConnection->receive( &inputType,sizeof(InputTypes) );
+      InputType inputType;
+      inputConnection->receive( &inputType,sizeof(InputType) );
 
-      boost::shared_ptr<Inputs> input =
+      boost::shared_ptr<InputInterface> input =
         InputFactory::createInput(inputType, inputConnection);
 
       input->confirmConnect();
       input->run();
 
-      this->mapInputs.insert(std::pair< unsigned,boost::shared_ptr<Inputs> >
+      this->mapInputs.insert(std::pair< unsigned,boost::shared_ptr<InputInterface> >
                              (this->freePort, input));
 
       this->freePort++;
@@ -95,7 +95,7 @@ Receptionist::operator()()
 
       connection.send(&this->freePort,sizeof(this->freePort));
 
-      this->outputs->AdicionarSaida(outputConnection);
+      this->outputs->addOutput(outputConnection);
 
       this->freePort++;
     }
@@ -105,9 +105,9 @@ Receptionist::operator()()
       int id;
       char OK[3] = "OK";
       connection.receive(&id,sizeof(id));
-      this->outputs->RetirarSaida(id);
+      this->outputs->removeOutput(id);
       connection.send(OK,sizeof(OK));
-      cout << "Retirado cliente id: " << id << endl;
+      std::cout << "Retirado cliente id: " << id << std::endl;
     }
     else
     {

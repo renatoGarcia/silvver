@@ -4,9 +4,8 @@
 #include <boost/thread/thread.hpp>
 #include <boost/scoped_ptr.hpp>
 #include <boost/shared_ptr.hpp>
-#include "inputs.hpp"
-#include "artpMarkInput.hpp"
-#include "saidas.hpp"
+#include "inputInterface.hpp"
+#include "outputs.hpp"
 #include <map>
 #include <sys/timeb.h>
 
@@ -19,7 +18,7 @@ extern bool verbose;
 class Receptionist
 {
 public:
-  Receptionist();
+  Receptionist(int port);
 
   ~Receptionist();
 
@@ -45,9 +44,9 @@ private:
   /// Porta livre que será utilizada no próximo pedido de conexão.
   unsigned freePort;
 
-  std::map<unsigned, boost::shared_ptr<Inputs> > mapInputs;
+  std::map<unsigned, boost::shared_ptr<InputInterface> > mapInputs;
 
-  boost::scoped_ptr<Saidas> outputs;
+  boost::shared_ptr<Outputs> outputs;
 
   /// Thread onde onde será executado o método Recepcionista.
   boost::scoped_ptr<boost::thread> thReceptionist;

@@ -20,6 +20,7 @@ dnl === Checks for libraries.
 dnl ========================================================================
 
 AC_CHECK_LIB([boost_thread], [sleep])
+AC_CHECK_LIB([boost_program_options], [main])
 
 dnl ========================================================================
 dnl === Checks for header files.                                           =

@@ -142,49 +142,67 @@ namespace silver
   };
 
   /*---------------------------BLOB------------------------*/
-//   class Blob: public Position
-//   {
-//   public:
-//     int id;
-//     float weigh;
-//   public:
-//     Blob()
-//       :Position()
-//     {
-//       this-> id   = 0;
-//       this-> weigh = 0.0;
-//     }
+  class Blob
+  {
+  private:
+    Position highestVertex;
+    Position lowestVertex;
 
-//     Blob(double x, double y, int id, float weigh)
-//       :Position(x,y)
-//     {
-//       this->id   = id;
-//       this->weigh = weigh;
-//     }
+  public:
+    Blob()
+    {}
 
-//     Blob(const Position &position, int id, float weigh)
-//       :Position(position)
-//     {
-//       this->id   = id;
-//       this->weigh = weigh;
-//     }
+    Blob(Position vertex1, Position vertex2)
+    {
+      double lowestX, lowestY, highestX, highestY;
 
-//     Blob(const Blob& blob)
-//       :Position(blob)
-//     {
-//       this->id    = blob.id;
-//       this->weigh = blob.weigh;
-//     }
+      if(vertex1.x >= vertex2.x)
+      {
+        highestX = vertex1.x;
+        lowestX  = vertex2.x;
+      }
+      else
+      {
+        highestX = vertex2.x;
+        lowestX  = vertex1.x;
+      }
 
-//     void fuse(const Blob& blob)
-//     {
-//       this->x     = (this->x * this->weigh + blob.x * blob.weigh)/
-//                     (this->weigh+blob.weigh);
-//       this->y     = (this->y * this->weigh + blob.y * blob.weigh)/
-//                     (this->weigh+blob.weigh);
-//       this->weigh = (this->weigh + blob.weigh)/2;
-//     }
-//   };
+      if(vertex1.y >= vertex2.y)
+      {
+        highestY = vertex1.y;
+        lowestY  = vertex2.y;
+      }
+      else
+      {
+        highestY = vertex2.y;
+        lowestY  = vertex1.y;
+      }
+
+      this->lowestVertex  = Position(lowestX, lowestY);
+      this->highestVertex = Position(highestX, highestY);
+    }
+
+    /** Verifica se um ponto colide com o blob
+     * 
+     * 
+     * @param point 
+     * 
+     * @return 
+     */
+    bool collide(Position point)
+    {
+      if((point.x >= lowestVertex.x) && (point.y >= lowestVertex.y)
+         && (point.x <= highestVertex.x) && (point.y <= highestVertex.y))
+      {
+        return true;
+      }
+      else
+      {
+        return false;
+      }
+    }
+
+  };
 
   /*------------------------PACKAGE--------------------------*/
 #define MAX_ITEMS 30

@@ -1,26 +1,55 @@
 #include "receptionist.hpp"
 #include <iostream>
-#include "cmdline.h"
 #include <boost/scoped_ptr.hpp>
+#include <boost/program_options.hpp>
 
-using namespace std;
+namespace po = boost::program_options;
 
 bool verbose;
 
 int main(int argc, char **argv)
 {
-  gengetopt_args_info args_info;
-  if (cmdline_parser (argc, argv, &args_info) != 0)
+  int receptionistPort;
+
+  po::options_description desc("silver_servidor 0.1\n\n"
+                               "Receive inforamation from silver_cameras and send to clients\n"
+                               "Usage: silver_servidor [OPTIONS]...\n\n"
+                               "Options list");
+  desc.add_options()
+    ("help,h", "Print this help message and exit")
+    ("version,V", "Print version and exit")
+    ("receptionist-port,p",
+     po::value<int>(&receptionistPort)->default_value(12000),
+     "Port where the receptionist will hear")
+    ("verbose,v", "verbose mode")
+    ;
+
+  po::variables_map vm;
+  po::store(po::parse_command_line(argc, argv, desc), vm);
+  po::notify(vm);
+
+  if(vm.count("help"))
+  {
+    std::cout << desc << std::endl;
     return 1;
+  }
 
-  // int portaRecepcionista = args_info.porta_recepcionista_arg;
-  verbose = args_info.verbose_flag;
+  if(vm.count("version"))
+  {
+    std::cout << "silver_servidor 0.1" << std::endl;
+    return 1;
+  }
 
-  boost::scoped_ptr<Receptionist> receptionist(new Receptionist());
+  if(vm.count("verbose"))
+  {
+    verbose = true;
+  }
+
+  boost::scoped_ptr<Receptionist> receptionist(new Receptionist(receptionistPort));
   receptionist->run();
 
   getchar();
-  cout << "Terminando..." << endl << endl;
+  std::cout << "Terminando..." << std::endl << std::endl;
 
   return 0;
 }

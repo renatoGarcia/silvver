@@ -4,37 +4,29 @@
 #include <map>
 #include <vector>
 #include <boost/thread/mutex.hpp>
+#include <boost/shared_ptr.hpp>
 #include "silverTypes.hpp"
+#include "processor.hpp"
 
-using namespace std;
-using namespace silver;
-using namespace boost;
-
-class MarkerProcessor
+class MarkerProcessor : public Processor<silver::Ente,silver::Ente>
 {
 public:
 
-  static MarkerProcessor* instantiate();
+  static boost::shared_ptr<MarkerProcessor> instantiate();
 
-  void deliverPackage(Package<Ente> &pacote, unsigned id);
+  void deliverPackage(silver::Package<silver::Ente> &pacote, unsigned id);
 
   // Calcula a configuraçãoo dos robôs, usando os dados atualmente
   // disponíveis no map armazenador.
-  void localize(vector<Ente> &vecRobos);
+  void localize(/*std::vector<silver::Ente> &vecRobos*/);
 
 private:
 
-  static auto_ptr<MarkerProcessor> instanciaUnica;
-  static mutex mutexInstanciacao;
+  static boost::shared_ptr<MarkerProcessor> singleInstance;
+  static boost::mutex instantiatingMutex;
   MarkerProcessor();
 
-  typedef map<unsigned,vector<Ente> > TMapa;
-
-  // Armazenara os ultimos entes obtidos de cada marcaCamera, onde
-  // a chave e um identificador destas.
-  TMapa armazenador;
-
-  mutex mutexArmazenador;
+  boost::mutex mutexArmazenador;
 
 };
 
