@@ -3,13 +3,14 @@
 #include <iostream>
 #include <boost/ref.hpp>
 
-Target::Target(std::string ip, int id, bool log, unsigned receptionistPort)
+Target::Target(std::string ip, unsigned id,
+               bool log, unsigned receptionistPort)
  :ID_ROBOT(id)
  ,IP_SERVIDOR(ip)
  ,RECEPTIONIST_PORT(receptionistPort)
 {
   connection.reset(new Conexao());
-  this->mutexActualPose.reset( new boost::mutex() );
+  this->mutexCurrentPose.reset( new boost::mutex() );
   this->finalizarThread = false;
 
   if(log)
@@ -56,8 +57,8 @@ Target::operator()()
 
     if(enteReceptor.id == this->ID_ROBOT) // Se o id do ente recebido é igual ao do robô.
     {
-      boost::mutex::scoped_lock lock( *(this->mutexActualPose) );
-      this->actualPose = Pose(enteReceptor.x, enteReceptor.y, enteReceptor.theta);
+      boost::mutex::scoped_lock lock( *(this->mutexCurrentPose) );
+      this->currentPose = Pose(enteReceptor.x, enteReceptor.y, enteReceptor.theta);
     }
     else
     {
@@ -104,15 +105,15 @@ Target::disconnect()
 Pose
 Target::getPose()
 {
-  boost::mutex::scoped_lock lock( *mutexActualPose );
-  return actualPose;
+  boost::mutex::scoped_lock lock( *mutexCurrentPose );
+  return currentPose;
 }
 
 void
 Target::getPose(double &x,double &y, double &theta)
 {
-  boost::mutex::scoped_lock lock( *mutexActualPose );
-  x    = actualPose.x;
-  y    = actualPose.y;
-  theta = actualPose.theta;
+  boost::mutex::scoped_lock lock( *mutexCurrentPose );
+  x     = currentPose.x;
+  y     = currentPose.y;
+  theta = currentPose.theta;
 }

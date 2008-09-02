@@ -5,8 +5,8 @@
  *
  */
 
-#ifndef MARCO_H
-#define MARCO_H
+#ifndef TARGET_H
+#define TARGET_H
 
 #include "conexao.hpp"
 #include "silverTypes.hpp"
@@ -28,7 +28,7 @@ public:
    * @param id Identificador único da marca que será localizada.
    * @param registrar Caso seja atribuido um valor true os dados recebidos serão registrados em um arquivo texto.
    */
-  Target(std::string ip, int id, bool log=false,
+  Target(std::string ip, unsigned id, bool log=false,
          unsigned receptionistPort=12000);
 
   /// Conecta o marco ao servidor.
@@ -56,14 +56,14 @@ private:
 
   /// Mutex para controlar a escrita e leitura na Pose ultimaPose.
   //  mutex mutexUltimaPose;
-  boost::scoped_ptr<boost::mutex> mutexActualPose;
+  boost::scoped_ptr<boost::mutex> mutexCurrentPose;
 
   /// Valor da última Pose do presente marco que foi localizada  pelas câmeras,
   /// e enviado através do Silvver-servidor.
-  Pose actualPose;
+  Pose currentPose;
 
   /// Número de identificação único do marco, que será usado para identificar o robô univocamente.
-  const int ID_ROBOT;
+  const unsigned ID_ROBOT;
 
   /// Endereço IP da máquina onde está sendo executado o Silvver-servidor.
   const std::string IP_SERVIDOR;
