@@ -24,11 +24,11 @@ public:
    *
    * @param id Identificador do cliente a ser retirado
    */
-  void removeOutput(int id);
+  void removeOutput(unsigned id);
 
-// private:
+  boost::shared_ptr<Connection> findClient(unsigned id);
 
-//   friend class Outputs;
+private:
 
   static boost::shared_ptr<ClientsMap> singleInstance;
   static boost::mutex instantiatingMutex;

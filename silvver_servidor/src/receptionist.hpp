@@ -33,7 +33,7 @@ public:
 
 private:
 
-  bool stopReceptionist;
+  bool stop;
 
   /// Tempo do sistema no instante inicial da execução do silvver-servidor, serve como referência para sincronizar as câmeras.
   struct timeb startTime;

@@ -71,4 +71,6 @@ MarkerProcessor::localize()
       }
     }
   }
+
+  this->sendToOutputs(vecRobos);
 }

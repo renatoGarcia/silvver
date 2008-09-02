@@ -8,7 +8,7 @@ extern bool verbose;
 #define VERBOSE_PRINT(msg) if(verbose)std::cout<<msg;
 
 Receptionist::Receptionist(int port)
-  :stopReceptionist(false)
+  :stop(false)
   ,RECECPTIONIST_PORT(port)
 {
   this->freePort = port+1;
@@ -18,7 +18,7 @@ Receptionist::Receptionist(int port)
 
 Receptionist::~Receptionist()
 {
-  this->stopReceptionist = true;
+  this->stop = true;
   this->thReceptionist->join();
 }
 
@@ -49,7 +49,7 @@ Receptionist::operator()()
   Connection connection(this->RECECPTIONIST_PORT);
   connection.initialize();
 
-  while(!this->stopReceptionist)
+  while(!this->stop)
   {
     connection.receive(msg, sizeof(msg), 1);// Recebe a primeira mensagem
 

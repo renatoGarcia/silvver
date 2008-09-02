@@ -16,18 +16,20 @@ template <typename Toutput>
 void
 Outputs<Toutput>::sendResults(const std::vector<Toutput> &vecResults)
 {
-  boost::mutex::scoped_lock lock(clientsMap->accessMap);
+  boost::shared_ptr<Connection> connectionPtr;
 
   BOOST_FOREACH(Toutput output, vecResults)
   {
+    connectionPtr.reset();
+
     *logFile << output.id << '\t' << output.x  << '\t'
              << output.y << '\t' << output.theta <<  std::endl;
 
-    //Caso exista um cliente com o mesmo id do Ente apontado por ite envia a pose para ele.
-    if(clientsMap->client.find(output.id) != clientsMap->client.end())
+    connectionPtr = this->clientsMap->findClient(output.id);
+
+    if(connectionPtr)
     {
-      clientsMap->client.find(output.id)->second->send((void*)&(output),
-                                                       sizeof(output) );
+      connectionPtr->send((void*)&(output), sizeof(output));
     }
   }
 

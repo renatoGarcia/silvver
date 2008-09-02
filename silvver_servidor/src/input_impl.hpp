@@ -55,31 +55,9 @@ Input<Type>::operator()()
   std::vector<Type> resultados;
   while(!this->stopping)
   {
-
-    this->connection->receive(&package, sizeof(package));
+    this->connection->receive(&package, sizeof(package),1);
     this->processor->deliverPackage(package, this->connectionPort);
-//     this->processor->localize(resultados);
-//     this->saidas->ReceberEstado(resultados);
   }
 }
-
-// std::string
-// Input::tipoDado2string(DataType td)
-// {
-//   std::string str;
-//   switch(td)
-//   {
-//     case COLOR_BLOB:
-//       str = "cores";
-//       break;
-//     case ARTP_MARK:
-//       str = "marcas";
-//       break;
-//     default:
-//       str = "tipo não identificado";
-//       break;
-//   }
-//   return str;
-// }
 
 #endif
