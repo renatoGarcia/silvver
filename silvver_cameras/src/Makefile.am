@@ -24,7 +24,6 @@ silver_cameras_SOURCES = xmlParser.cpp \
                          blobExtractor.cpp \
                          silverTypes.hpp \
                          timer.hpp \
-                         hardCameras/modelos.hpp \
                          hardCameras/pseudoCamera.cpp \
                          hardCameras/pseudoCamera.hpp \
                          tinyXml/tinystr.cpp \
@@ -43,5 +42,5 @@ if COMPILE_DC1394
 silver_cameras_SOURCES += hardCameras/dc1394.cpp \
                           hardCameras/dc1394.hpp \
                           hardCameras/conversions.cpp \
-                          hardCameras/conversions.hpp
+                          hardCameras/conversions.h
 endif
