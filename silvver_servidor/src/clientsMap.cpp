@@ -35,32 +35,49 @@ ClientsMap::addOutput(boost::shared_ptr<Connection> outputConnection)
   {
     boost::mutex::scoped_lock lock(this->accessMap);
 
-    this->client[clientId] = outputConnection;
+    TMultiMap::iterator it =
+      this->client.insert(std::pair< unsigned,boost::shared_ptr<Connection> >
+                          (clientId, outputConnection));
 
-    this->client.find(clientId)->second->send(OK,sizeof(OK));
+    it->second->send(OK,sizeof(OK));
   }
 
 }
 
 void
-ClientsMap::removeOutput(unsigned id)
+ClientsMap::removeOutput(unsigned idTarget, unsigned connectionPort)
 {
   boost::mutex::scoped_lock lock(this->accessMap);
 
-  this->client.erase(this->client.find(id));
+  std::pair< TMultiMap::iterator, TMultiMap::iterator >
+    range(this->client.equal_range(idTarget));
+
+  for(TMultiMap::iterator it = range.first;
+      it != range.second;
+      ++it)
+  {
+    if(it->second->getPort() == connectionPort)
+    {
+      this->client.erase(it);
+    }
+  }
 }
 
-boost::shared_ptr<Connection>
-ClientsMap::findClient(unsigned id)
+std::vector< boost::shared_ptr<Connection> >
+ClientsMap::findClient(unsigned idTarget)
 {
   boost::mutex::scoped_lock lock(this->accessMap);
 
-  boost::shared_ptr<Connection> connectionPtr;
-  //Caso exista um cliente com o mesmo id do Ente apontado por ite envia a pose para ele.
-  if(this->client.find(id) != this->client.end())
+  std::pair< TMultiMap::iterator, TMultiMap::iterator >
+    range(this->client.equal_range(idTarget));
+
+  std::vector< boost::shared_ptr<Connection> > vecConnection;
+  for(TMultiMap::iterator it = range.first;
+      it != range.second;
+      ++it)
   {
-    connectionPtr = this->client.find(id)->second;
+    vecConnection.push_back(it->second);
   }
 
-  return connectionPtr;
+  return vecConnection;
 }

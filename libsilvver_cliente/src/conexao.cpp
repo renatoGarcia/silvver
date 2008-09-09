@@ -1,54 +1,56 @@
 #include "conexao.hpp"
 #include <iostream>
 
-using namespace std;
-
-Conexao::Conexao()
+Connection::Connection(std::string pairIP, unsigned port)
+  :pairIP(pairIP)
+  ,port(port)
 {
   this->SenderAddrSize = sizeof(SenderAddr);
   TV.tv_sec = 0;
   TV.tv_usec = 100000;
 }
 
-Conexao::~Conexao()
+Connection::~Connection()
 {
-  close(SocketConexao);
+  close(SocketConnection);
 }
 
-int Conexao::Iniciar(int porta,const char *ip)
+void
+Connection::connect()
 {
-  int erro;
-
   #ifdef HAVE_WINDOWS_SOCKETS
+    int erro;
+
     WSADATA initialisation_win32;
 
     erro = WSAStartup(MAKEWORD(2,2),&initialisation_win32);
     if(erro)
     {
-      cerr << "Suporte a sockets indisponivel" << endl;
-      return 1;
+      std::cerr << "Suporte a sockets indisponivel" << std::endl;
+      return;
     }
   #endif
 
   // Criação do Socket para conexao UDP/IP
-  if( (SocketConexao = socket(AF_INET,SOCK_DGRAM,0)) <= 0 )
+  if( (SocketConnection = socket(AF_INET,SOCK_DGRAM,0)) <= 0 )
   {
-    cerr << "Erro ao criar o socket" << endl;
-    return 1;
+    std::cerr << "Erro ao criar o socket" << std::endl;
+    return;
   }
 
   // Iniciação do Cliente
-  infConexao.sin_family = AF_INET;            // Indica a utilização do IPv4
-  infConexao.sin_addr.s_addr = inet_addr(ip); // Endereço IP do servidor
-  infConexao.sin_port = htons(porta);         // Porta utiliazada
+  infConnection.sin_family = AF_INET;
+  infConnection.sin_addr.s_addr = inet_addr(this->pairIP.c_str());
+  infConnection.sin_port = htons(this->port);
 
   FD_ZERO(&master_readfds);
-  FD_SET(SocketConexao, &master_readfds);
+  FD_SET(SocketConnection, &master_readfds);
 
-  return 0;
+  return;
 }
 
-int Conexao::Receber(char *msg, int tamanho) throw(Excecoes)
+void
+Connection::receive(char *msg, int tamanho) throw(Excecoes)
 {
   int bytes_recebidos;
   fd_set readfds;
@@ -57,42 +59,39 @@ int Conexao::Receber(char *msg, int tamanho) throw(Excecoes)
   readfds = master_readfds;
   espera = TV;
 
-  select( SocketConexao+1, &readfds, NULL, NULL, &espera);
-  if( FD_ISSET(SocketConexao, &readfds) )
+  select(SocketConnection+1, &readfds, NULL, NULL, &espera);
+  if(FD_ISSET(SocketConnection, &readfds))
   {
-
-    bytes_recebidos = recvfrom(SocketConexao, msg, tamanho,
+    bytes_recebidos = recvfrom(SocketConnection, msg, tamanho,
 			       0, (struct sockaddr*)&SenderAddr,
 			       &SenderAddrSize);
 
     if ( bytes_recebidos == -1 )
-      cerr << "A mensagem nao foi recebida corretamente" << endl;
+      std::cerr << "A mensagem nao foi recebida corretamente" << std::endl;
     if ( bytes_recebidos != tamanho )
-      cerr << "O tamanho do dado recebido (" << bytes_recebidos
-	   << ") nao corresponde com o esperado (" << tamanho << ")" << endl;
+      std::cerr << "O tamanho do dado recebido (" << bytes_recebidos
+                << ") nao corresponde com o esperado (" << tamanho << ")"
+                << std::endl;
   }
   else
   {
     Excecoes ex = exc_tempoReceber;
     throw ex;
   }
-
-  return( bytes_recebidos );
 }
 
-int Conexao::Enviar(void *msg, int tamanho)const
+void
+Connection::send(void *msg, int tamanho)const
 {
   int bytes_enviados;
 
-
-  bytes_enviados=sendto(SocketConexao,(char*) msg, tamanho,
-                        0,(struct sockaddr*)&infConexao,
-                        sizeof(infConexao)                 );
+  bytes_enviados=sendto(SocketConnection,(char*) msg, tamanho,
+                        0,(struct sockaddr*)&infConnection,
+                        sizeof(infConnection)                 );
 
   if ( bytes_enviados == -1 )
     printf("Impossivel enviar dados\n");
   if ( bytes_enviados != tamanho )
     printf("Dados nao foram enviados corretamente\n");
 
-  return(bytes_enviados);
 }

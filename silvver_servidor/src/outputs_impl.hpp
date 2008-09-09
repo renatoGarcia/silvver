@@ -16,18 +16,17 @@ template <typename Toutput>
 void
 Outputs<Toutput>::sendResults(const std::vector<Toutput> &vecResults)
 {
+  std::vector< boost::shared_ptr<Connection> > vecConnection;
   boost::shared_ptr<Connection> connectionPtr;
 
   BOOST_FOREACH(Toutput output, vecResults)
   {
-    connectionPtr.reset();
-
     *logFile << output.id << '\t' << output.x  << '\t'
              << output.y << '\t' << output.theta <<  std::endl;
 
-    connectionPtr = this->clientsMap->findClient(output.id);
+    vecConnection = this->clientsMap->findClient(output.id);
 
-    if(connectionPtr)
+    BOOST_FOREACH(connectionPtr, vecConnection)
     {
       connectionPtr->send((void*)&(output), sizeof(output));
     }

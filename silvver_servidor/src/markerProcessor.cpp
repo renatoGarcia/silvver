@@ -51,11 +51,11 @@ MarkerProcessor::localize()
     iteMapa->second.clear();
   }
 
-  if(vecRobos.size() > 0)
-  {
-    std::cout << "ID: " << vecRobos.at(0).id << std::endl;
-    std::cout << "X: " << vecRobos.at(0).x << std::endl;
-  }
+//   if(vecRobos.size() > 0)
+//   {
+//     std::cout << "ID: " << vecRobos.at(0).id << std::endl;
+//     std::cout << "X: " << vecRobos.at(0).x << std::endl;
+//   }
 
   //---------------Verifica se há um mesmo robô reportado por duas câmeras diferentes
   std::vector<silver::Ente>::iterator itePrimeiro,iteSegundo;

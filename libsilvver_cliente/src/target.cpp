@@ -1,64 +1,85 @@
 #include "target.hpp"
-#include <sstream>
 #include <iostream>
 #include <boost/ref.hpp>
+#include <boost/lexical_cast.hpp>
 
-Target::Target(std::string ip, unsigned id,
+Target::Target(std::string serverIp, unsigned targetId,
                bool log, unsigned receptionistPort)
- :ID_ROBOT(id)
- ,IP_SERVIDOR(ip)
- ,RECEPTIONIST_PORT(receptionistPort)
+  :targetId(targetId)
+  ,serverIp(serverIp)
+  ,receptionistPort(receptionistPort)
+  ,stop(false)
 {
-  connection.reset(new Conexao());
   this->mutexCurrentPose.reset( new boost::mutex() );
-  this->finalizarThread = false;
 
   if(log)
   {
-    std::stringstream ssNome;
-    ssNome << ID_ROBOT << ".txt";
-    arqRegistro.reset( new std::ofstream(ssNome.str().c_str()) );
+    std::string fileName(boost::lexical_cast<std::string>(targetId) + ".log");
+    arqRegistro.reset(new std::ofstream(fileName.c_str()));
   }
 }
+
+Target::~Target()
+{
+  this->stop = true;
+  th->join();
+
+  char pedido[3] = "DC";
+  unsigned connectionPort = connection->getPort();
+
+  receptionistConnection->send((void*)pedido,sizeof(pedido) );
+  receptionistConnection->send((void*)&this->targetId,sizeof(this->targetId));
+  receptionistConnection->send((void*)&connectionPort,sizeof(connectionPort));
+
+  std::cout << "Desconectado" << std::endl;
+}
+
 
 void
 Target::makeConnection()
 {
-  unsigned int connectionPort;
-  Conexao receptionistConnection;
+  this->receptionistConnection.reset(new Connection(this->serverIp,
+                                                    this->receptionistPort));
 
-  receptionistConnection.Iniciar(this->RECEPTIONIST_PORT,IP_SERVIDOR.c_str());
-  receptionistConnection.Enviar((void*)"SD",sizeof("SD") );
-  receptionistConnection.Receber((char*)&connectionPort,sizeof(connectionPort));
-  std::cout << "Porta: " << connectionPort << std::endl;
+  unsigned port;
+
+  receptionistConnection->connect();
+  receptionistConnection->send((void*)"SD",sizeof("SD") );
+  receptionistConnection->receive((char*)&port,sizeof(port));
+  std::cout << "Porta: " << port << std::endl;
+
   char OK[3]="OK";
   char resposta[3];
-  connection->Iniciar(connectionPort,IP_SERVIDOR.c_str());
-  connection->Enviar(OK,sizeof(OK));
-  connection->Enviar((void*)&ID_ROBOT,sizeof(ID_ROBOT));
-  connection->Receber(resposta,sizeof(resposta));
+
+  this->connection.reset(new Connection(this->serverIp, port));
+  connection->connect();
+  connection->send(OK,sizeof(OK));
+  connection->send((void*)&this->targetId,sizeof(this->targetId));
+  connection->receive(resposta,sizeof(resposta));
   std::cout << "Resposta: " << resposta << std::endl;
 }
 
 void
 Target::operator()()
 {
-  Ente enteReceptor;
+  silver::Ente enteReceptor;
 
-  while( !this->finalizarThread )
+  while(!this->stop)
   {
     try
     {
-      this->connection->Receber((char*)&enteReceptor, sizeof(enteReceptor));
-    }catch(Conexao::Excecoes excecao){
-      if(excecao == Conexao::exc_tempoReceber)
+      this->connection->receive((char*)&enteReceptor, sizeof(enteReceptor));
+    }catch(Connection::Excecoes excecao){
+      if(excecao == Connection::exc_tempoReceber)
 	continue;
     }
 
-    if(enteReceptor.id == this->ID_ROBOT) // Se o id do ente recebido é igual ao do robô.
+    if(enteReceptor.id == this->targetId) // Se o id do ente recebido é igual ao do robô.
     {
       boost::mutex::scoped_lock lock( *(this->mutexCurrentPose) );
-      this->currentPose = Pose(enteReceptor.x, enteReceptor.y, enteReceptor.theta);
+      this->currentPose = silver::Pose(enteReceptor.x,
+                                       enteReceptor.y,
+                                       enteReceptor.theta);
     }
     else
     {
@@ -82,24 +103,6 @@ Target::connect()
 {
   makeConnection();
   th.reset(new boost::thread(boost::ref(*this)));
-}
-
-void
-Target::disconnect()
-{
-  this->finalizarThread = true;
-  th->join();
-
-  char resposta[3];
-  char pedido[3] = "DC";
-  int id = ID_ROBOT;
-  Conexao receptionistConnection;
-  receptionistConnection.Iniciar(this->RECEPTIONIST_PORT,IP_SERVIDOR.c_str());
-  receptionistConnection.Enviar((void*)pedido,sizeof(pedido) );
-  receptionistConnection.Enviar((void*)&id,sizeof(id) );
-  receptionistConnection.Receber((char*)resposta,sizeof(resposta));
-
-  std::cout << "Desconectado, resposta: " << resposta << std::endl;
 }
 
 Pose

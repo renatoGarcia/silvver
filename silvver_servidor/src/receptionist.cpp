@@ -103,12 +103,14 @@ Receptionist::operator()()
     else if(strcmp(msg,"DC") == 0) //Desconectar saída
     {
       VERBOSE_PRINT("Receive message: DC (disconnect client)\n");
-      int id;
-      char OK[3] = "OK";
-      connection.receive(&id,sizeof(id));
-      this->outputs->removeOutput(id);
-      connection.send(OK,sizeof(OK));
-      std::cout << "Retirado cliente id: " << id << std::endl;
+      unsigned targetId, connectionPort;
+
+      connection.receive(&targetId, sizeof(targetId));
+      connection.receive(&connectionPort, sizeof(connectionPort));
+      this->outputs->removeOutput(targetId, connectionPort);
+
+      std::cout << "Retirado cliente id: " << targetId
+                << " na porta: "<< connectionPort << std::endl;
     }
     else
     {

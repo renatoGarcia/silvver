@@ -4,7 +4,7 @@
 AC_PREREQ(2.61)
 AC_INIT([silver_servidor], [0.1])
 AM_INIT_AUTOMAKE([-Wall -Werror foreign])
-AC_CONFIG_SRCDIR([src/saidas.hpp])
+AC_CONFIG_SRCDIR([src/receptionist.hpp])
 AC_CONFIG_HEADER([config.h])
 AC_LANG([C++])
 

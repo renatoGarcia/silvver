@@ -1,12 +1,6 @@
-/** Cabeçalho da classe Conexao
- * @file   conexao.hpp
- *
- */
+#ifndef CONNECTION_HPP
+#define CONNECTION_HPP
 
-#ifndef CONEXAO_H
-#define CONEXAO_H
-
-#include <string>
 #include <unistd.h>
 
 #ifdef HAVE_CONFIG_H
@@ -26,16 +20,54 @@
 #define SOCKET int
 #endif
 
+#include <string>
+
 /// Implementa a conecção e encapsula a comunicação com o Silvver-servidor.
-class Conexao
+class Connection
 {
+public:
+
+  Connection(std::string pairIP, unsigned port);
+
+  ~Connection();
+
+  typedef enum excecoes{ exc_tempoReceber } Excecoes;
+
+  /** Inicia o socket SocketConnection. Utiliza o protocolo UDP/IP, e o associa à porta dada como
+   * como parâmetro.
+   * @return 1 em caso de erro, e 0 caso contrário.
+   */
+//   int Iniciar(int porta,const char *ip);
+  void connect();
+
+  /** Envia uma mensagem para o Silvver-servidor.
+   * @param tamanho Tamanho da mensagem em Bytes.
+   * @return O número de Bytes efetivamente enviados.
+   */
+  void send(void *msg, int tamanho)const;
+
+  /** Recebe uma mensagem de Silvver-servidor.
+   * @param tamanho Tamanho esperado em Bytes da mensagem a ser recebida.
+   * @return O número de Bytes da mensagem recebida.
+   */
+  void receive(char *msg, int tamanho) throw(Excecoes);
+
+  inline unsigned getPort() const
+  {
+    return this->port;
+  }
+
 private:
 
+  const std::string pairIP;
+
+  const unsigned port;
+
   /// Socket para comunicação com o servidor.
-  SOCKET SocketConexao;
+  SOCKET SocketConnection;
 
   // Define as caracteristicas do cliente
-  sockaddr_in infConexao;
+  sockaddr_in infConnection;
 
   // SenderAddr.sin_family conterá o endereço
   sockaddr_in SenderAddr;
@@ -50,32 +82,6 @@ private:
   #ifdef HAVE_LINUX_SOCKETS
   socklen_t SenderAddrSize;
   #endif
-
-public:
-
-  Conexao();
-
-  ~Conexao();
-
-  typedef enum excecoes{ exc_tempoReceber } Excecoes;
-
-  /** Inicia o socket SocketConexao. Utiliza o protocolo UDP/IP, e o associa à porta dada como
-   * como parâmetro.
-   * @return 1 em caso de erro, e 0 caso contrário.
-   */
-  int Iniciar(int porta,const char *ip);
-
-  /** Envia uma mensagem para o Silvver-servidor.
-   * @param tamanho Tamanho da mensagem em Bytes.
-   * @return O número de Bytes efetivamente enviados.
-   */
-  int Enviar(void *msg, int tamanho)const;
-
-  /** Recebe uma mensagem de Silvver-servidor.
-   * @param tamanho Tamanho esperado em Bytes da mensagem a ser recebida.
-   * @return O número de Bytes da mensagem recebida.
-   */
-  int Receber(char *msg, int tamanho) throw(Excecoes);
 };
 
 #endif

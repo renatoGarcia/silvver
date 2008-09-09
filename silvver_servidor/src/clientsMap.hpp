@@ -2,6 +2,7 @@
 #define CLIENTS_MAP_HPP
 
 #include <map>
+#include <vector>
 #include <boost/thread/mutex.hpp>
 #include <boost/shared_ptr.hpp>
 #include "connection.hpp"
@@ -24,11 +25,13 @@ public:
    *
    * @param id Identificador do cliente a ser retirado
    */
-  void removeOutput(unsigned id);
+  void removeOutput(unsigned idTarget, unsigned connectionPort);
 
-  boost::shared_ptr<Connection> findClient(unsigned id);
+  std::vector< boost::shared_ptr<Connection> > findClient(unsigned idTarget);
 
 private:
+
+  typedef std::multimap< unsigned,boost::shared_ptr<Connection> > TMultiMap;
 
   static boost::shared_ptr<ClientsMap> singleInstance;
   static boost::mutex instantiatingMutex;
@@ -40,7 +43,7 @@ private:
   /**
    * A chave int é o id do alvo de interesse.
    */
-  std::map< unsigned,boost::shared_ptr<Connection> > client;
+  TMultiMap client;
 
 };
 

@@ -8,14 +8,15 @@
 #include <target.hpp>
 #include <iostream>
 #include <stdlib.h>
-#include <string.h>
+#include <string>
 
 using namespace std;
 
 int main(int argc,char **argv)
 {
-  int id = 0;
-  char ip[16] = "127.0.0.1";
+  int id = 1;
+//   char ip[16] = "127.0.0.1";
+  std::string ip("127.0.0.1");
 
   if(argc>1)
   {
@@ -23,7 +24,7 @@ int main(int argc,char **argv)
   }
   if(argc>2)
   {
-    strncpy(ip,argv[2],16);
+    ip = argv[2];
   }
 
   Target target(ip,id);
@@ -33,11 +34,12 @@ int main(int argc,char **argv)
 
   double x,y,teta;
 
-//   for(int i=500; i>0; i--)
-  while(true)
+  for(int i=10; i>0; i--)
+//   while(true)
   {
     target.getPose(x,y,teta);
     cout << "X: " << x << "\tY: " << y << "\tTeta: " << teta << endl;
+    system("sleep 0.5");
   }
 
   return 0;
