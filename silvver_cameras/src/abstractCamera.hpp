@@ -82,6 +82,15 @@ private:
   unsigned frameCounter;
   float frameRate;
 
+      /*double lutX[480][640];
+	double lutY[480][640];*/
+      double **lutX;
+      double **lutY;
+
+      int width;
+      int height;
+
+      bool useLut;
 };
 
 #endif

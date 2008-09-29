@@ -31,6 +31,10 @@ struct CameraConfig
   boost::array<double,9> H;
 
   std::string imagesPath;
+
+      boost::array<std::string,2> lut;
+
+      bool useLut;
 };
 
 struct TargetConfig

@@ -141,6 +141,17 @@ XmlParser::parseFile(std::string xmlFile)
                                 FirstChildElement("alpha_c").
                                 ToElement()).at(0);
 
+    try{
+       cameraConfig.lut =
+	  readElementText<std::string,2>(hElemCamera.
+					 FirstChildElement("lut").
+					 ToElement());
+       cameraConfig.useLut = true;
+    }
+    catch(std::invalid_argument)
+    {
+       cameraConfig.useLut = false;
+    }
 
     scene.vecCameraConfig.push_back(cameraConfig);
   }
