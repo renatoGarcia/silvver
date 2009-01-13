@@ -17,7 +17,7 @@ public:
                HardCamera::Resolution resolution,
                std::string imagesPath);
 
-  virtual ~PseudoCamera();
+  ~PseudoCamera();
 
   virtual void initialize();
 

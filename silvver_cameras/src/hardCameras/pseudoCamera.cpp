@@ -4,7 +4,6 @@
 #include <boost/thread/xtime.hpp>
 #include <boost/thread/mutex.hpp>
 
-
 extern boost::mutex mutexCout;
 
 PseudoCamera::PseudoCamera(uint64 UID,
@@ -70,7 +69,7 @@ void PseudoCamera::captureFrame(IplImage* &iplImage)
       continue;
     }
 
-    cvReleaseImage( &iplImage );
+    cvReleaseImage(&iplImage);
     iplImage = cvLoadImage(dirIterator->path().file_string().c_str(),
                            CV_LOAD_IMAGE_COLOR);
     if(iplImage == NULL)
@@ -84,6 +83,4 @@ void PseudoCamera::captureFrame(IplImage* &iplImage)
   }
 
   boost::thread::sleep(xt);
-
 }
-

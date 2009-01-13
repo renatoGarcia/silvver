@@ -42,10 +42,14 @@ public:
   };
 
   virtual ~HardCamera()=0;
-  virtual void initialize() = 0;
-  void createIplImage(IplImage* &iplImage);
-  virtual void saveFrame() = 0;
-  virtual void captureFrame(IplImage* &imgRetorno) = 0;
+
+  virtual void initialize()=0;
+
+  void createIplImage(IplImage* &iplImage) const;
+
+  virtual void saveFrame()=0;
+
+  virtual void captureFrame(IplImage* &imgRetorno)=0;
 
 protected:
 

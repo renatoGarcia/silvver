@@ -7,47 +7,47 @@
 // Mutex usado para escrever na saída padrão. Declarado em main.cpp.
 extern boost::mutex mutexCout;
 
-AbstractCamera::AbstractCamera(CameraConfig cameraConfig,
-                               std::string serverIP,
-                               unsigned connectionPort)
+AbstractCamera::AbstractCamera(const CameraConfig& cameraConfig,
+                               const std::string& serverIP,
+                               const unsigned connectionPort)
 {
-   this->useLut = cameraConfig.useLut;
+  this->useLut = cameraConfig.useLut;
 
-   if (this->useLut)
-   {
-      std::ifstream lutXFile(cameraConfig.lut.at(0).c_str());
-      std::ifstream lutYFile(cameraConfig.lut.at(1).c_str());
-      this->width = cameraConfig.resolution.at(0);
-      this->height = cameraConfig.resolution.at(1);
+  if (this->useLut)
+  {
+    std::ifstream lutXFile(cameraConfig.lut.at(0).c_str());
+    std::ifstream lutYFile(cameraConfig.lut.at(1).c_str());
+    this->width = cameraConfig.resolution.at(0);
+    this->height = cameraConfig.resolution.at(1);
 
-      lutX = new double*[this->height + 1];   
-      for (int i = 0; i < this->height + 1; i++)
-	 lutX[i] = new double[this->width + 1];
+    lutX = new double*[this->height + 1];
+    for (int i = 0; i < this->height + 1; i++)
+      lutX[i] = new double[this->width + 1];
 
-      lutY = new double*[this->height + 1];   
-      for (int i = 0; i < this->height + 1; i++)
-	 lutY[i] = new double[this->width + 1];
+    lutY = new double*[this->height + 1];
+    for (int i = 0; i < this->height + 1; i++)
+      lutY[i] = new double[this->width + 1];
 
-      for(int i = 0; i < this->height; i++)
-	 for (int j = 0; j < this->width; j++)
-	    lutXFile >> lutX[i][j];
+    for(int i = 0; i < this->height; i++)
+      for (int j = 0; j < this->width; j++)
+        lutXFile >> lutX[i][j];
 
-      for(int i = 0; i < this->height; i++)
-	 for (int j = 0; j < this->width ; j++)
-	    lutYFile >> lutY[i][j];
+    for(int i = 0; i < this->height; i++)
+      for (int j = 0; j < this->width ; j++)
+        lutYFile >> lutY[i][j];
 
-      // Preenchendo a "borda extra"
-      for(int i = 0; i < this->height; i++)
-      {
-	 lutX[i][this->width] = lutX[i][this->width-1];
-	 lutY[i][this->width] = lutY[i][this->width-1];
-      }
-      for(int j = 0; j < this->width; j++)
-      {
-	 lutX[this->height][j] = lutX[this->height-1][j];
-	 lutY[this->height][j] = lutY[this->height-1][j];
-      }
-   }
+    // Preenchendo a "borda extra"
+    for(int i = 0; i < this->height; i++)
+    {
+      lutX[i][this->width] = lutX[i][this->width-1];
+      lutY[i][this->width] = lutY[i][this->width-1];
+    }
+    for(int j = 0; j < this->width; j++)
+    {
+      lutX[this->height][j] = lutX[this->height-1][j];
+      lutY[this->height][j] = lutY[this->height-1][j];
+    }
+  }
 
   this->cameraConfig = cameraConfig;
 
@@ -145,7 +145,7 @@ AbstractCamera::updateFrame()
 {
   try
   {
-    hardCamera->captureFrame(currentFrame);
+    hardCamera->captureFrame(this->currentFrame);
   }
   catch(/*runtime_error error*/...)
   {
@@ -164,25 +164,25 @@ AbstractCamera::updateFrame()
 }
 
 void
-AbstractCamera::localize(silver::Position &position)
-{  
+AbstractCamera::localize(silver::Position &position) const
+{
    if (this->useLut)
    {
       double x = position.x;
       double y = position.y;
       double xFactor = x - floor(x);
-      double yFactor = y - floor(y);    
+      double yFactor = y - floor(y);
       int iX = floor(x);
       int iY = floor(y);
-      
+
       if (iY >=0 && iX >= 0 && iY < height && iX < width)
       {
-	 position.x = lutX[iY][iX] * (1-xFactor)*(1-yFactor) +	 
+	 position.x = lutX[iY][iX] * (1-xFactor)*(1-yFactor) +
 	           lutX[iY + 1][iX] * (1-xFactor)*(yFactor) +
 	           lutX[iY][iX + 1] * (xFactor)*(1-yFactor) +
 	           lutX[iY + 1][iX + 1] * (xFactor)*(yFactor);
 
-	 position.y = lutY[iY][iX] * (1-xFactor)*(1-yFactor) +	 
+	 position.y = lutY[iY][iX] * (1-xFactor)*(1-yFactor) +
 	           lutY[iY + 1][iX] * (1-xFactor)*(yFactor) +
 	           lutY[iY][iX + 1] * (xFactor)*(1-yFactor) +
 	           lutY[iY + 1][iX + 1] * (xFactor)*(yFactor);
@@ -199,7 +199,7 @@ AbstractCamera::localize(silver::Position &position)
       xc[0] = position.x;
       xc[1] = position.y;
       double x[2];
-      double x_distort[2]; 
+      double x_distort[2];
       x_distort[0] = (xc[0] - cc0)/fc0;
       x_distort[1] = (xc[1] - cc1)/fc1;
 

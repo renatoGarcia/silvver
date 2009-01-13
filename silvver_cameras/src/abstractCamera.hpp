@@ -25,7 +25,7 @@ public:
 
   void stop();
 
-  virtual void operator()() = 0;
+  virtual void operator()()=0;
 
   boost::scoped_ptr<boost::thread> runThread;
 
@@ -50,7 +50,8 @@ protected:
    *  by a derivate class must exit */
   bool stopping;
 
-  AbstractCamera(CameraConfig cameraConfig, std::string serverIP,
+  AbstractCamera(const CameraConfig& cameraConfig,
+                 const std::string& serverIP,
                  unsigned connectionPort);
 
   void connect();
@@ -62,7 +63,7 @@ protected:
   void updateFrame();
 
   // Converte a posição das coordenadas em pixels para as coordenadas do mundo
-  void localize(silver::Position &position);
+  void localize(silver::Position &position) const;
 
 private:
 

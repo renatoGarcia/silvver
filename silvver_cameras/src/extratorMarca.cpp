@@ -58,7 +58,7 @@ MarkerExtractor::init()
 }
 
 void
-MarkerExtractor::extract(IplImage *imgEntrada,
+MarkerExtractor::extract(const IplImage* const imgEntrada,
                          std::vector<MarkerPoints> &vecMarkerPoints)
 {
   vecMarkerPoints.clear();

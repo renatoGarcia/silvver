@@ -13,11 +13,11 @@ class MarkerCamera : public AbstractCamera
 public:
 
   MarkerCamera(const std::vector<TargetConfig> &vecTargets,
-               CameraConfig cameraConfig,
-               std::string serverIP,
+               const CameraConfig& cameraConfig,
+               const std::string& serverIP,
                unsigned connectionPort);
 
-  virtual ~MarkerCamera();
+  ~MarkerCamera();
 
   virtual void operator()();
 

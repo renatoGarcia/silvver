@@ -36,7 +36,7 @@ public:
 
   int init();
 
-  void extract(IplImage *imgEntrada,
+  void extract(const IplImage* const imgEntrada,
                std::vector<MarkerPoints> &vecMarkerPoints);
 
 private:
