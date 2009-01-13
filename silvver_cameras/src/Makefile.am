@@ -7,8 +7,6 @@ silver_cameras_SOURCES = xmlParser.cpp \
                          abstractCamera.hpp \
                          connection.cpp \
                          connection.hpp \
-                         extratorMarca.cpp \
-                         extratorMarca.hpp \
                          sceneMounter.cpp \
                          sceneMounter.hpp \
                          hardCamera.cpp \
@@ -18,6 +16,8 @@ silver_cameras_SOURCES = xmlParser.cpp \
                          main.cpp \
                          markerCamera.cpp \
                          markerCamera.hpp \
+                         markerExtractor.cpp \
+                         markerExtractor.hpp \
                          blobCamera.hpp \
                          blobCamera.cpp \
                          blobExtractor.hpp \

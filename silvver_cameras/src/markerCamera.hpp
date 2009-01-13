@@ -5,7 +5,7 @@
 #include <string>
 #include <boost/scoped_ptr.hpp>
 #include "abstractCamera.hpp"
-#include "extratorMarca.hpp"
+#include "markerExtractor.hpp"
 
 /// Implementa uma câmera abstrata que filma marcos.
 class MarkerCamera : public AbstractCamera

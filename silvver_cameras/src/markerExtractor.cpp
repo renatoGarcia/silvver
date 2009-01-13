@@ -1,4 +1,4 @@
-#include "extratorMarca.hpp"
+#include "markerExtractor.hpp"
 #include <opencv/highgui.h>
 #include <ARToolKitPlus/TrackerSingleMarkerImpl.h>
 #include <boost/foreach.hpp>
