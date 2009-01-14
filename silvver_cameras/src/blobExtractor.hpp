@@ -10,7 +10,7 @@ mesma tonalidade, e cuja área é maior que uma área mínima preestabelecida.
 #include <opencv/cv.h>
 #include <vector>
 #include "silverTypes.hpp"
-#include "xmlParser.hpp"
+#include "scene.hpp"
 #include <string>
 #include <fstream>
 

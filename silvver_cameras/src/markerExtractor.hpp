@@ -7,7 +7,7 @@
 #include <vector>
 #include <boost/scoped_ptr.hpp>
 #include "silverTypes.hpp"
-#include "xmlParser.hpp"
+#include "scene.hpp"
 
 #define MAX_TARGETS 40
 

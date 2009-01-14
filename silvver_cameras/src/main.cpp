@@ -39,33 +39,27 @@ int main(int argc, char **argv)
   if(vm.count("help"))
   {
     std::cout << desc << std::endl;
-    return 1;
   }
-
-  if(vm.count("version"))
+  else if(vm.count("version"))
   {
     std::cout << "silver_cameras 0.2" << std::endl;
-    return 1;
   }
-
-  SceneMounter sceneMounter(receptionistPort,serverIP,xmlFile);
-  sceneMounter.mount();
-
-  std::string command;
-  while(true)
+  else
   {
-    std::cout << ">";
-    std::getline(std::cin, command, '\n');
+    std::cout << "silver_cameras 0.2:" << std::endl << std::endl
+              << "Capture images with the cameras and process it" << std::endl
+              << "Press [enter] key to quit" << std::endl << std::endl
+              << "----------------------------------------------"
+              << std::endl << std::endl;
 
-    if(command == "q")
-    {
-      break;
-    }
+    SceneMounter sceneMounter(receptionistPort,serverIP,xmlFile);
+    sceneMounter.mount();
+
+    getchar();
+    std::cout << "Quitting..." << std::endl << std::endl;
+
+    sceneMounter.dismount();
   }
-
-  sceneMounter.dismount();
-
-  std::cout << "Fim do Programa" << std::endl;
 
   return 0;
 }

@@ -2,7 +2,7 @@
 #define HARDCAMERAFACTORY_HPP
 
 #include "hardCamera.hpp"
-#include "xmlParser.hpp"
+#include "scene.hpp"
 #include <boost/shared_ptr.hpp>
 #include <boost/thread/mutex.hpp>
 #include <map>

@@ -1,7 +1,8 @@
 AM_CPPFLAGS = -Wall
 bin_PROGRAMS = silver_cameras
 
-silver_cameras_SOURCES = xmlParser.cpp \
+silver_cameras_SOURCES = scene.hpp \
+                         xmlParser.cpp \
                          xmlParser.hpp \
                          abstractCamera.cpp \
                          abstractCamera.hpp \

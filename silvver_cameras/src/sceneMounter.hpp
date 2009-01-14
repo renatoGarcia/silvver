@@ -10,6 +10,7 @@
 #include "abstractCamera.hpp"
 #include "markerCamera.hpp"
 #include "blobCamera.hpp"
+#include "scene.hpp"
 #include "xmlParser.hpp"
 #include "connection.hpp"
 #include "timer.hpp"

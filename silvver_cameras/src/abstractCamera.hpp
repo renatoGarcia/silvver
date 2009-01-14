@@ -8,7 +8,7 @@
 #include <boost/thread/thread.hpp>
 #include "silverTypes.hpp"
 #include "hardCamera.hpp"
-#include "xmlParser.hpp"
+#include "scene.hpp"
 #include "connection.hpp"
 
 // Classe base para as câmeras abstratas, como blobCamera e marcoCamera

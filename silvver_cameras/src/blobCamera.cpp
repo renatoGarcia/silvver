@@ -1,6 +1,6 @@
 #include "blobCamera.hpp"
 #include <vector>
-#include "xmlParser.hpp"
+#include "scene.hpp"
 
 BlobCamera::BlobCamera(const std::vector<TargetConfig> &vecTargets,
                        CameraConfig cameraConfig,
