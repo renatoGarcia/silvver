@@ -3,8 +3,6 @@
 
 #include <vector>
 #include <string>
-// #include <stdexcept>
-// #include <boost/thread/thread.hpp>
 #include <boost/shared_ptr.hpp>
 #include <boost/scoped_ptr.hpp>
 #include "abstractCamera.hpp"
@@ -13,42 +11,38 @@
 #include "scene.hpp"
 #include "xmlParser.hpp"
 #include "connection.hpp"
-#include "timer.hpp"
 
 class SceneMounter
 {
  public:
 
-  SceneMounter(int receptionistPort, std::string serverIP,
-               std::string xmlSceneDescriptor);
+  /** sceneMounter class constructor.
+   *
+   * @param receptionistPort Port where the receptionist of silver-server is hearing.
+   * @param serverIP IP address where silver-server is running.
+   * @param xmlSceneDescriptor Path to XML file scene descriptor.
+   */
+  SceneMounter(const std::string& serverIP, const int receptionistPort,
+               const std::string& xmlSceneDescriptor);
 
-  /// Inicia todas as câmeras abstradas contidas no vetod vecCameraConfig.
+  /** Initialize all abstract cameras.
+   *
+   * The abstract cameras that will be initized are described in the scene
+   * descriptor XML file.
+   */
   void mount();
 
-  /// Fecha todas as câmeras abstratas, e prepara o gerenciador para terminar.
+  /// Close all opened abtract cameras
   void dismount();
 
 private:
 
-  XmlParser xmlParser;
+  const XmlParser xmlParser;
 
-  std::string xmlSceneDescriptor;
+  const std::string xmlSceneDescriptor;
 
-  /// Threads nas quais os métodos controladores das câmeras serão executados.
-//   std::vector< boost::shared_ptr< boost::thread > > thCamera;
-
-  /// Objeto da classe Conexao que se encontra que possui os dados para comunição com o recepcionista do silvver-servidor.
+  /// Connection with receptionist of silver-server
   boost::scoped_ptr<Connection> receptionistConnection;
-
-  // Porta para qual enviar a primeira mensagem, a fim de se
-  // descobrir em qual porta a BlobCamera deve se conectar
-  int receptionistPort;
-
-  // Endereço ip do servidor
-  std::string serverIP;
-
-  /// Timer que sincronizado com tempo do servidor
-  boost::scoped_ptr<Timer> timer;
 
   // Inicia a câmera abstrata descrita por cameraConfig
   void constructAbstractCamera(std::string targetType,

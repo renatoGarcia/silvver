@@ -23,16 +23,16 @@ public:
       runtime_error(whatArg){};
   };
 
-  Scene parseFile(std::string xmlFile);
+  Scene parseFile(const std::string& xmlFile) const;
 
 private:
 
   template <typename Type,int nItens>
-  boost::array<Type,nItens> readElementText(const TiXmlElement *element);
+  boost::array<Type,nItens> readElementText(const TiXmlElement *element) const;
 
   template <typename Type>
   Type readAttribute(const TiXmlElement *element,
-                     std::string attributeName);
+                     std::string attributeName) const;
 };
 
 #endif /* XML_PARSER_HPP */

@@ -32,7 +32,9 @@ silver_cameras_SOURCES = scene.hpp \
                          tinyXml/tinyxml.cpp \
                          tinyXml/tinyxmlerror.cpp \
                          tinyXml/tinyxml.h \
-                         tinyXml/tinyxmlparser.cpp
+                         tinyXml/tinyxmlparser.cpp \
+                         tsPrint.cpp \
+                         tsPrint.hpp
 
 if COMPILE_PGR
 silver_cameras_SOURCES += hardCameras/pgr.cpp \

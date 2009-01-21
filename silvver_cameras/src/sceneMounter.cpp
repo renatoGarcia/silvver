@@ -1,14 +1,12 @@
 #include "sceneMounter.hpp"
 #include <boost/foreach.hpp>
+#include "tsPrint.hpp"
 
-// Mutex usado para escrever na saída padrão. Declarado em main.cpp.
-extern boost::mutex mutexCout;
-
-SceneMounter::SceneMounter(int receptionistPort, std::string serverIP,
-                           std::string xmlSceneDescriptor)
-  :xmlSceneDescriptor(xmlSceneDescriptor)
-  ,receptionistPort(receptionistPort)
-  ,serverIP(serverIP)
+SceneMounter::SceneMounter(const std::string& serverIP,
+                           const int receptionistPort,
+                           const std::string& xmlSceneDescriptor)
+  :xmlParser()
+  ,xmlSceneDescriptor(xmlSceneDescriptor)
 {
   receptionistConnection.reset(new Connection(serverIP, receptionistPort));
 }
@@ -19,9 +17,7 @@ SceneMounter::mount()
   // Está aqui só para compilar, não é usado.
   double tempoInicial = 0;
 
-  Scene scene;
-  scene = xmlParser.parseFile(this->xmlSceneDescriptor);
-
+  Scene scene = this->xmlParser.parseFile(this->xmlSceneDescriptor);
   this->receptionistConnection->connect();
 
   char msgTP[3] = "TP";
@@ -53,6 +49,7 @@ SceneMounter::constructAbstractCamera(std::string targetType,
                                       CameraConfig &cameraConfig)
 {
   char msgPT[3] = "PT";
+  std::string serverIP = this->receptionistConnection->getPairIP();
   unsigned connectionPort;
 
   // Envia a primeira mensagem ao recepcionista, uma string "PT".
@@ -62,7 +59,7 @@ SceneMounter::constructAbstractCamera(std::string targetType,
   this->receptionistConnection->receive((char*)&connectionPort,
                                         sizeof(unsigned));
 
-  {boost::mutex::scoped_lock lock(mutexCout);
+  {PRINT_LOCK;
    std::cout << "PORTA: " << connectionPort << std::endl;}
 
   boost::shared_ptr<AbstractCamera> abstractCameraPtr;
@@ -70,14 +67,14 @@ SceneMounter::constructAbstractCamera(std::string targetType,
   {
     abstractCameraPtr.reset(new MarkerCamera(vecTargets,
                                              cameraConfig,
-                                             this->serverIP,
+                                             serverIP,
                                              connectionPort));
   }
   else if(targetType == "color_blob")
   {
     abstractCameraPtr.reset(new BlobCamera(vecTargets,
                                            cameraConfig,
-                                           this->serverIP,
+                                           serverIP,
                                            connectionPort));
 
   }

@@ -6,7 +6,7 @@
 
 template <typename Type,int nItens>
 boost::array<Type, nItens>
-XmlParser::readElementText(const TiXmlElement *element)
+XmlParser::readElementText(const TiXmlElement *element) const
 {
   if(element == NULL)
   {
@@ -50,7 +50,7 @@ XmlParser::readElementText(const TiXmlElement *element)
 template <typename Type>
 Type
 XmlParser::readAttribute(const TiXmlElement *element,
-                         std::string attributeName)
+                         std::string attributeName) const
 {
   if(element == NULL)
   {
@@ -68,7 +68,7 @@ XmlParser::readAttribute(const TiXmlElement *element,
 
 
 Scene
-XmlParser::parseFile(std::string xmlFile)
+XmlParser::parseFile(const std::string& xmlFile) const
 {
   Scene scene;
 

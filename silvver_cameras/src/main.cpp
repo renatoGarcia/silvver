@@ -1,12 +1,9 @@
 #include <iostream>
 #include <string>
-#include "sceneMounter.hpp"
 #include <boost/program_options.hpp>
+#include "sceneMounter.hpp"
 
 namespace po = boost::program_options;
-
-// Mutex para controlar a escrita na saida padrão
-boost::mutex mutexCout;
 
 int main(int argc, char **argv)
 {
@@ -52,7 +49,7 @@ int main(int argc, char **argv)
               << "----------------------------------------------"
               << std::endl << std::endl;
 
-    SceneMounter sceneMounter(receptionistPort,serverIP,xmlFile);
+    SceneMounter sceneMounter(serverIP,receptionistPort,xmlFile);
     sceneMounter.mount();
 
     getchar();

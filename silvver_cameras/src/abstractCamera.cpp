@@ -3,9 +3,7 @@
 #include <boost/ref.hpp>
 #include <boost/thread/mutex.hpp>
 #include <fstream>
-
-// Mutex usado para escrever na saída padrão. Declarado em main.cpp.
-extern boost::mutex mutexCout;
+#include "tsPrint.hpp"
 
 AbstractCamera::AbstractCamera(const CameraConfig& cameraConfig,
                                const std::string& serverIP,
@@ -122,9 +120,9 @@ AbstractCamera::connect()
   // Espera uma mensagem de confirmação
   this->connection->receive(msg,sizeof(msg));
 
-  {boost::mutex::scoped_lock lock(mutexCout);
-    std::cout << "Conecção câmera: " << cameraConfig.uid << " " << msg << std::endl;
-  }
+  {PRINT_LOCK;
+    std::cout << "Conecção câmera: " << cameraConfig.uid
+              << " " << msg << std::endl;}
 }
 
 void

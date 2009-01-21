@@ -32,6 +32,16 @@ public:
 
   void receive(char *msg, int tamanho);
 
+  std::string getPairIP() const
+  {
+    return this->pairIP;
+  }
+
+  unsigned getPort() const
+  {
+    return this->port;
+  }
+
 private:
 
   const std::string pairIP;
