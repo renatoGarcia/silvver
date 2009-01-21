@@ -1,12 +1,13 @@
 #include "sceneMounter.hpp"
 #include <boost/foreach.hpp>
 #include "tsPrint.hpp"
+#include "xmlParser.hpp"
+#include "abstractCameraFactory.hpp"
 
 SceneMounter::SceneMounter(const std::string& serverIP,
                            const int receptionistPort,
-                           const std::string& xmlSceneDescriptor)
-  :xmlParser()
-  ,xmlSceneDescriptor(xmlSceneDescriptor)
+                           const std::string& sceneDescriptorFile)
+  :sceneDescriptorFile(sceneDescriptorFile)
 {
   receptionistConnection.reset(new Connection(serverIP, receptionistPort));
 }
@@ -17,7 +18,8 @@ SceneMounter::mount()
   // Está aqui só para compilar, não é usado.
   double tempoInicial = 0;
 
-  Scene scene = this->xmlParser.parseFile(this->xmlSceneDescriptor);
+  const XmlParser xmlParser = XmlParser();
+  const Scene scene = xmlParser.parseFile(this->sceneDescriptorFile);
   this->receptionistConnection->connect();
 
   char msgTP[3] = "TP";
@@ -27,12 +29,15 @@ SceneMounter::mount()
   this->receptionistConnection->receive((char*)&tempoInicial,
                                         sizeof(tempoInicial) );
 
+  // The std::string is the name of target type, and the std::vector is
+  // the set of all the targets of that type.
   std::pair< std::string, std::vector<TargetConfig> > targetTypeGroup;
   CameraConfig cameraConfig;
-  // Para cada tipo diferente de alvo
+
+  // For each type of targets...
   BOOST_FOREACH(targetTypeGroup, scene.targets)
   {
-    // Constrói uma câmera abstrata para cada uma das câmeras físicas
+    // ...construct an abstract camera for each hardware camera
     BOOST_FOREACH(cameraConfig, scene.vecCameraConfig)
     {
       this->constructAbstractCamera(targetTypeGroup.first,
@@ -40,7 +45,6 @@ SceneMounter::mount()
                                     cameraConfig);
     }
   }
-
 }
 
 void
@@ -62,26 +66,13 @@ SceneMounter::constructAbstractCamera(std::string targetType,
   {PRINT_LOCK;
    std::cout << "PORTA: " << connectionPort << std::endl;}
 
-  boost::shared_ptr<AbstractCamera> abstractCameraPtr;
-  if(targetType == "artp_mark")
-  {
-    abstractCameraPtr.reset(new MarkerCamera(vecTargets,
-                                             cameraConfig,
-                                             serverIP,
-                                             connectionPort));
-  }
-  else if(targetType == "color_blob")
-  {
-    abstractCameraPtr.reset(new BlobCamera(vecTargets,
-                                           cameraConfig,
-                                           serverIP,
-                                           connectionPort));
-
-  }
-  else
-  {
-    throw std::invalid_argument("Camera abstrata desconhecida: " + targetType);
-  }
+  boost::shared_ptr<AbstractCamera> abstractCameraPtr =
+    boost::shared_ptr<AbstractCamera>
+    (AbstractCameraFactory::create(targetType,
+                                   vecTargets,
+                                   cameraConfig,
+                                   serverIP,
+                                   connectionPort));
 
   this->vecAbstractCamera.push_back(abstractCameraPtr);
 

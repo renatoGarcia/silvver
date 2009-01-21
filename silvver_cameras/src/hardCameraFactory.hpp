@@ -1,5 +1,5 @@
-#ifndef HARDCAMERAFACTORY_HPP
-#define HARDCAMERAFACTORY_HPP
+#ifndef HARD_CAMERA_FACTORY_HPP
+#define HARD_CAMERA_FACTORY_HPP
 
 #include "hardCamera.hpp"
 #include "scene.hpp"
@@ -9,7 +9,7 @@
 #include <string>
 #include <stdexcept>
 
-class HardCameraFactory
+class HardCameraFactory : public boost::noncopyable
 {
 public:
 
@@ -34,4 +34,4 @@ private:
 
 };
 
-#endif
+#endif /* HARD_CAMERA_FACTORY_HPP */

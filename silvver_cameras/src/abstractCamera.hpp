@@ -11,7 +11,7 @@
 #include "scene.hpp"
 #include "connection.hpp"
 
-// Classe base para as câmeras abstratas, como blobCamera e marcoCamera
+/// Abstract base class to all abstract cameras.
 class AbstractCamera : boost::noncopyable
 {
 public:

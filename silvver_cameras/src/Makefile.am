@@ -25,6 +25,8 @@ silver_cameras_SOURCES = scene.hpp \
                          blobExtractor.cpp \
                          silverTypes.hpp \
                          timer.hpp \
+                         abstractCameraFactory.cpp \
+                         abstractCameraFactory.hpp \
                          hardCameras/pseudoCamera.cpp \
                          hardCameras/pseudoCamera.hpp \
                          tinyXml/tinystr.cpp \
