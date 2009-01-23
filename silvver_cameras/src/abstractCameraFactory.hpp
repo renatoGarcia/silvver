@@ -13,8 +13,8 @@ public:
 
   static AbstractCamera*
   create(const std::string& targetType,
-         const std::vector<TargetConfig> &vecTargets,
-         const CameraConfig& cameraConfig,
+         const std::vector<scene::Target> &vecTargets,
+         const scene::Camera& cameraConfig,
          const std::string& serverIP,
          unsigned connectionPort);
 

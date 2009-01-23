@@ -42,7 +42,7 @@ protected:
   /// Conexao com o servidor, usada para enviar as localizações
   boost::scoped_ptr<Connection> connection;
 
-  CameraConfig cameraConfig;
+  scene::Camera cameraConfig;
 
   unsigned long UID;
 
@@ -50,7 +50,7 @@ protected:
    *  by a derivate class must exit */
   bool stopping;
 
-  AbstractCamera(const CameraConfig& cameraConfig,
+  AbstractCamera(const scene::Camera& cameraConfig,
                  const std::string& serverIP,
                  unsigned connectionPort);
 
@@ -67,13 +67,6 @@ protected:
 
 private:
 
-  //Parâmetros intrínsecos e extrínsecos da câmera física.
-  double cc0, cc1;
-  double fc0, fc1;
-  double kc0, kc1, kc2, kc3, kc4;
-  double H00, H01, H02,
-         H10, H11, H12,
-         H20, H21, H22;
 
   // Hardware que fará a captura das imagens.
   boost::shared_ptr<HardCamera> hardCamera;

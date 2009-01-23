@@ -3,10 +3,10 @@
 
 #include <vector>
 #include <string>
-#include <boost/shared_ptr.hpp>
-#include <boost/scoped_ptr.hpp>
-#include "abstractCamera.hpp"
-#include "connection.hpp"
+// #include <boost/shared_ptr.hpp>
+// #include <boost/scoped_ptr.hpp>
+// #include "abstractCamera.hpp"
+// #include "connection.hpp"
 #include "scene.hpp"
 
 class SceneMounter
@@ -36,15 +36,15 @@ private:
 
   const std::string sceneDescriptorFile;
 
-  /// Connection with receptionist of silver-server
-  boost::scoped_ptr<Connection> receptionistConnection;
+//   /// Connection with receptionist of silver-server
+//   boost::scoped_ptr<Connection> receptionistConnection;
 
-  // Initialize the abstract camera given by cameraConfig
-  void constructAbstractCamera(std::string targetType,
-                               const std::vector<TargetConfig> &vecTargets,
-                               CameraConfig &cameraConfig);
+//   // Initialize the abstract camera given by cameraConfig
+//   void constructAbstractCamera(std::string targetType,
+//                                const std::vector<scene::Target> &vecTargets,
+//                                scene::Camera &cameraConfig);
 
-  std::vector< boost::shared_ptr<AbstractCamera> > vecAbstractCamera;
+//   std::vector< boost::shared_ptr<AbstractCamera> > vecAbstractCamera;
 };
 
 #endif

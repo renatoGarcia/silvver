@@ -21,7 +21,7 @@ public:
   };
 
   static boost::shared_ptr<HardCamera>
-  createHardCamera(CameraConfig cameraConfig);
+  createHardCamera(scene::Camera cameraConfig);
 
 private:
 

@@ -1,16 +1,22 @@
 #include "xmlParser.hpp"
+
+#include <cstddef>
+
 #include <boost/foreach.hpp>
 #include <boost/tokenizer.hpp>
 #include <boost/lexical_cast.hpp>
 #include <boost/algorithm/string.hpp>
 
-template <typename Type,int nItens>
+using namespace scene;
+
+template <typename Type, int nItens>
 boost::array<Type, nItens>
-XmlParser::readElementText(const TiXmlElement *element) const
+XmlParser::readElementText(const TiXmlElement* const element) const
 {
-  if(element == NULL)
+  if (element == NULL)
   {
-    throw std::invalid_argument("Elemento requisitado para ler conteúdo não encontrado.");
+    throw std::invalid_argument("XML element pointer in readElementText "
+                                "method is NULL.");
   }
 
   // A lib TinyXml já cuida de colocar todos os itens separados por espaços.
@@ -18,7 +24,7 @@ XmlParser::readElementText(const TiXmlElement *element) const
   boost::array<Type, nItens> returnArray;
 
   std::string text(element->GetText());
-  boost::tokenizer<boost::char_separator<char> > tok(text, separator);
+  boost::tokenizer< boost::char_separator<char> > tok(text, separator);
   unsigned i = 0;
 
   BOOST_FOREACH(std::string item, tok)
@@ -29,19 +35,19 @@ XmlParser::readElementText(const TiXmlElement *element) const
     }
     catch(std::range_error e)
     {
-      throw XmlLoad_error("Excesso de itens no elemento " +
-                          element->ValueStr() + ". Esperado(s) " +
+      throw xmlLoad_error("Too much items in element " +
+                          element->ValueStr() + ". Expected " +
                           boost::lexical_cast<std::string>(nItens) +
-                          " item(s).");
+                          " items.");
     }
     i++;
   }
   if(i < returnArray.size())
   {
-    throw XmlLoad_error("Falta de itens no elemento " +
-                        element->ValueStr() + ". Esperado(s) " +
+    throw xmlLoad_error("Too few items in element " +
+                        element->ValueStr() + ". Expected " +
                         boost::lexical_cast<std::string>(nItens) +
-                        " item(s).");
+                        " items.");
   }
 
   return returnArray;
@@ -49,17 +55,18 @@ XmlParser::readElementText(const TiXmlElement *element) const
 
 template <typename Type>
 Type
-XmlParser::readAttribute(const TiXmlElement *element,
-                         std::string attributeName) const
+XmlParser::readAttribute(const TiXmlElement* const element,
+                         const std::string& attributeName) const
 {
   if(element == NULL)
   {
-    throw std::invalid_argument("Elemento requisitado para ler atributo não encontrado");
+    throw std::invalid_argument("XML element pointer in readAttribute "
+                                "method is NULL.");
   }
   if(element->Attribute(attributeName.c_str()) == NULL)
   {
-    throw std::invalid_argument("Atributo " + attributeName +
-                                " não encontrado no elemento " +
+    throw std::invalid_argument("Attribute " + attributeName +
+                                " don't found in element " +
                                 element->ValueStr() + ".");
   }
 
@@ -86,7 +93,7 @@ XmlParser::parseFile(const std::string& xmlFile) const
       hElemCamera.ToElement()!=NULL;
       cameraNum++,hElemCamera=hRoot.ChildElement("camera",cameraNum))
   {
-    CameraConfig cameraConfig;
+    Camera camera;
 
     if(readAttribute<std::string>(hElemCamera.ToElement(), "on")
        != "yes")
@@ -94,82 +101,89 @@ XmlParser::parseFile(const std::string& xmlFile) const
       continue;
     }
 
-    cameraConfig.hardware =
+    camera.hardware =
       readElementText<std::string,1>(hElemCamera.
                                      FirstChildElement("hardware").
                                      ToElement()).at(0);
-    boost::to_lower(cameraConfig.hardware);
-    if(cameraConfig.hardware == "pseudocamera")
+    boost::to_lower(camera.hardware);
+    if(camera.hardware == "pseudocamera")
     {
-      cameraConfig.imagesPath =
+      camera.imagesPath =
         readAttribute<std::string>(hElemCamera.
                                    FirstChildElement("hardware").
                                    ToElement(), "path");
     }
 
-    cameraConfig.uid =
-      readElementText<uint64,1>(hElemCamera.
-                                FirstChildElement("uid").
-                                ToElement()).at(0);
+    camera.uid =
+      readElementText<std::string,1>(hElemCamera.
+                                     FirstChildElement("uid").
+                                     ToElement()).at(0);
 
-    cameraConfig.resolution =
+    camera.resolution =
       readElementText<unsigned,2>(hElemCamera.
                                   FirstChildElement("resolution").
                                   ToElement());
-    cameraConfig.frameRate =
+    camera.frameRate =
       readElementText<float,1>(hElemCamera.
                                FirstChildElement("frame_rate").
                                ToElement()).at(0);
-    cameraConfig.H =
-      readElementText<double,9>(hElemCamera.
-                                FirstChildElement("matrix_h").
-                                ToElement());
-    cameraConfig.fc =
-      readElementText<double,2>(hElemCamera.
-                                FirstChildElement("focal_length").
-                                ToElement());
-    cameraConfig.cc =
-      readElementText<double,2>(hElemCamera.
-                                FirstChildElement("principal_point").
-                                ToElement());
-    cameraConfig.kc =
-      readElementText<double,5>(hElemCamera.
-                                FirstChildElement("radial_distortion").
-                                ToElement());
-    cameraConfig.alpha_c =
-      readElementText<double,1>(hElemCamera.
-                                FirstChildElement("alpha_c").
-                                ToElement()).at(0);
 
-    try{
-       cameraConfig.lut =
-	  readElementText<std::string,2>(hElemCamera.
-					 FirstChildElement("lut").
-					 ToElement());
-       cameraConfig.useLut = true;
-    }
-    catch(std::invalid_argument)
+    TiXmlElement* matrixHomography = hElemCamera.
+                                     FirstChildElement("matrix_homography").
+                                     ToElement();
+    TiXmlElement* lutHomography = hElemCamera.
+                                  FirstChildElement("lut_homography").
+                                  ToElement();
+    if (matrixHomography)
     {
-       cameraConfig.useLut = false;
+      camera.homography = MatrixHomography();
+
+      camera.getMatrixHomography().h =
+        readElementText<double,9>(matrixHomography->
+                                  FirstChildElement("matrix_h"));
+      camera.getMatrixHomography().fc =
+        readElementText<double,2>(matrixHomography->
+                                  FirstChildElement("focal_length"));
+      camera.getMatrixHomography().cc =
+        readElementText<double,2>(matrixHomography->
+                                  FirstChildElement("principal_point"));
+      camera.getMatrixHomography().kc =
+        readElementText<double,5>(matrixHomography->
+                                  FirstChildElement("radial_distortion"));
+      camera.getMatrixHomography().alpha_c =
+        readElementText<double,1>(matrixHomography->
+                                  FirstChildElement("alpha_c")).at(0);
+    }
+    else if (lutHomography)
+    {
+      camera.homography = LutHomography();
+
+      camera.getLutHomography().lut =
+        readElementText<std::string,2>(lutHomography->
+                                       FirstChildElement("lut"));
+    }
+    else
+    {
+      throw xmlLoad_error("Homography don't found in XML scene file");
     }
 
-    scene.vecCameraConfig.push_back(cameraConfig);
+    scene.vecCamera.push_back(camera);
   }
 
   TiXmlHandle hTargetsBase(hRoot.FirstChildElement("targets"));
   TiXmlHandle hElemTarget(NULL);
-  TargetConfig target;
+  Target target;
   std::string targetType;
   int targetNum;
-  for(targetNum=0,hElemTarget=hTargetsBase.ChildElement(targetNum);
-      hElemTarget.ToElement()!=NULL;
-      targetNum++,hElemTarget=hTargetsBase.ChildElement(targetNum))
+  for(targetNum = 0, hElemTarget = hTargetsBase.ChildElement(targetNum);
+      hElemTarget.ToElement() != NULL;
+      targetNum++, hElemTarget = hTargetsBase.ChildElement(targetNum))
   {
     target.targetDefineFile =
       readAttribute<std::string>(hElemTarget.ToElement(), "file");
 
     target.uid =
-      readElementText<unsigned,1>(hElemTarget.
+      readElementText<unsigned, 1>(hElemTarget.
                                   FirstChildElement("uid").
                                   ToElement()).at(0);
 

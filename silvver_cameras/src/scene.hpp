@@ -2,50 +2,68 @@
 #define SCENE_HPP
 
 #include <string>
-#include <boost/array.hpp>
 #include <map>
 #include <vector>
 
-typedef unsigned long long uint64;
+#include <boost/array.hpp>
+#include <boost/variant.hpp>
 
-struct CameraConfig
+namespace scene
 {
-  float frameRate;
-  std::string hardware;
-  uint64 uid;
-  boost::array<unsigned,2> resolution;
+  struct MatrixHomography
+  {
+    // Intrinsic parameters
+    boost::array<double,2> fc;     // Distância focal [pixels
+    boost::array<double,2> cc;     // Coordenadas do ponto principal [pixels
+    boost::array<double,5> kc;     // Coeficientes de distorção (radial e tangencial)
+    double alpha_c;   // Coeficiente de inclinação (ângulo entre os eixos de pixels x e y)
 
-  /// Path to input images for pseudoCamera
-  std::string imagesPath;
+    // Extrinsic parameters
+    boost::array<double,9> h;
+  };
 
-  //----------------------- Intrinsic parameters -----------------------//
-  boost::array<double,2> fc;     // Distância focal [pixels
-  boost::array<double,2> cc;     // Coordenadas do ponto principal [pixels
-  boost::array<double,5> kc;     // Coeficientes de distorção (radial e tangencial)
-  double alpha_c;   // Coeficiente de inclinação (ângulo entre os eixos de pixels x e y)
+  struct LutHomography
+  {
+    boost::array<std::string,2> lut;
+  };
 
-  // Extrinsic parameters
-  boost::array<double,9> H;
+  struct Camera
+  {
+    float frameRate;
+    std::string hardware;
+    std::string uid;
+    boost::array<unsigned,2> resolution;
 
-  boost::array<std::string,2> lut;
+    /// Path to input images for pseudoCamera
+    std::string imagesPath;
 
-  bool useLut;
-};
+    boost::variant<MatrixHomography,LutHomography> homography;
 
-struct TargetConfig
-{
-  std::string targetDefineFile;
+    // If homography isn't MatrixHomography type, it throws boost::bad_get
+    inline MatrixHomography& getMatrixHomography()
+    {
+      return boost::get<MatrixHomography>(this->homography);
+    }
 
-  unsigned uid;
-};
+    // If homography isn't LutHomography type, it throws boost::bad_get
+    inline LutHomography& getLutHomography()
+    {
+      return boost::get<LutHomography>(this->homography);
+    }
+  };
 
-class Scene
-{
-public:
+  struct Target
+  {
+    std::string targetDefineFile;
 
-  std::vector<CameraConfig> vecCameraConfig;
+    unsigned uid;
+  };
 
-  std::map< std::string, std::vector<TargetConfig> > targets;
-};
+  struct Scene
+  {
+    std::vector<Camera> vecCamera;
 
+    std::map< std::string, std::vector<Target> > targets;
+  };
+}
 #endif /* SCENE_HPP */

@@ -9,30 +9,32 @@
 
 #include <stdexcept>
 #include <string>
-#include "tinyXml/tinyxml.h"
+
 #include "scene.hpp"
+#include "tinyXml/tinyxml.h"
 
 class XmlParser
 {
 public:
 
-  class XmlLoad_error : std::runtime_error
+  class xmlLoad_error : public std::logic_error
   {
   public:
-    XmlLoad_error(const std::string& whatArg):
-      runtime_error(whatArg){};
+    xmlLoad_error(const std::string& whatArg)
+      :logic_error(whatArg){};
   };
 
-  Scene parseFile(const std::string& xmlFile) const;
+  scene::Scene parseFile(const std::string& xmlFile) const;
 
 private:
 
-  template <typename Type,int nItens>
-  boost::array<Type,nItens> readElementText(const TiXmlElement *element) const;
+  template <typename Type, int nItens>
+  boost::array<Type, nItens>
+  readElementText(const TiXmlElement* const element) const;
 
   template <typename Type>
-  Type readAttribute(const TiXmlElement *element,
-                     std::string attributeName) const;
+  Type readAttribute(const TiXmlElement* const element,
+                     const std::string& attributeName) const;
 };
 
 #endif /* XML_PARSER_HPP */
