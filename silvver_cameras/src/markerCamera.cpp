@@ -1,7 +1,7 @@
 #include "markerCamera.hpp"
 
-MarkerCamera::MarkerCamera(const std::vector<TargetConfig> &vecTargets,
-                           const CameraConfig& cameraConfig,
+MarkerCamera::MarkerCamera(const std::vector<scene::Target> &vecTargets,
+                           const scene::Camera& cameraConfig,
                            const std::string& serverIP,
                            unsigned connectionPort)
   :AbstractCamera(cameraConfig, serverIP, connectionPort)

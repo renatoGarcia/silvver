@@ -18,7 +18,7 @@ class ColorBlobExtractor
 {
 public:
 
-  ColorBlobExtractor(const std::vector<TargetConfig> &vecTargets,
+  ColorBlobExtractor(const std::vector<scene::Target> &vecTargets,
                      int areaThreshold=100);
 
   void extract(IplImage *imgEntrada,

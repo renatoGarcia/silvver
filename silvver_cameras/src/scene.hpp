@@ -13,18 +13,18 @@ namespace scene
   struct MatrixHomography
   {
     // Intrinsic parameters
-    boost::array<double,2> fc;     // Distância focal [pixels
-    boost::array<double,2> cc;     // Coordenadas do ponto principal [pixels
-    boost::array<double,5> kc;     // Coeficientes de distorção (radial e tangencial)
+    boost::array<double, 2> fc;     // Distância focal [pixels
+    boost::array<double, 2> cc;     // Coordenadas do ponto principal [pixels
+    boost::array<double, 5> kc;     // Coeficientes de distorção (radial e tangencial)
     double alpha_c;   // Coeficiente de inclinação (ângulo entre os eixos de pixels x e y)
 
     // Extrinsic parameters
-    boost::array<double,9> h;
+    boost::array<double, 9> h;
   };
 
   struct LutHomography
   {
-    boost::array<std::string,2> lut;
+    boost::array<std::string, 2> lut;
   };
 
   struct Camera
@@ -32,12 +32,12 @@ namespace scene
     float frameRate;
     std::string hardware;
     std::string uid;
-    boost::array<unsigned,2> resolution;
+    boost::array<unsigned, 2> resolution;
 
     /// Path to input images for pseudoCamera
     std::string imagesPath;
 
-    boost::variant<MatrixHomography,LutHomography> homography;
+    boost::variant<MatrixHomography, LutHomography> homography;
 
     // If homography isn't MatrixHomography type, it throws boost::bad_get
     inline MatrixHomography& getMatrixHomography()

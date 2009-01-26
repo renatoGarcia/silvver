@@ -32,7 +32,7 @@ class MarkerExtractor
 public:
 
   MarkerExtractor(int width, int height,
-                  const std::vector<TargetConfig> &targets);
+                  const std::vector<scene::Target> &targets);
 
   int init();
 

@@ -12,8 +12,8 @@ class MarkerCamera : public AbstractCamera
 {
 public:
 
-  MarkerCamera(const std::vector<TargetConfig> &vecTargets,
-               const CameraConfig& cameraConfig,
+  MarkerCamera(const std::vector<scene::Target> &vecTargets,
+               const scene::Camera& cameraConfig,
                const std::string& serverIP,
                unsigned connectionPort);
 

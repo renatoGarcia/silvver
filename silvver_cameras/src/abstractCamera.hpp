@@ -2,6 +2,7 @@
 #define ABSTRACT_CAMERA_HPP
 
 #include <opencv/cv.h>
+#include <string>
 #include <boost/scoped_ptr.hpp>
 #include <boost/shared_ptr.hpp>
 #include <boost/noncopyable.hpp>
@@ -10,6 +11,7 @@
 #include "hardCamera.hpp"
 #include "scene.hpp"
 #include "connection.hpp"
+#include "homography.hpp"
 
 /// Abstract base class to all abstract cameras.
 class AbstractCamera : boost::noncopyable
@@ -42,9 +44,9 @@ protected:
   /// Conexao com o servidor, usada para enviar as localizações
   boost::scoped_ptr<Connection> connection;
 
-  scene::Camera cameraConfig;
+//   scene::Camera cameraConfig;
 
-  unsigned long UID;
+  std::string UID;
 
   /** When this variable become True, the loop in operator() method implemented
    *  by a derivate class must exit */
@@ -67,24 +69,15 @@ protected:
 
 private:
 
-
   // Hardware que fará a captura das imagens.
   boost::shared_ptr<HardCamera> hardCamera;
+
+  boost::scoped_ptr<const Homography> homography;
 
   // Número de imagens processadas, usado para calcular a taxa média
   // de quadros por segundo.
   unsigned frameCounter;
   float frameRate;
-
-      /*double lutX[480][640];
-	double lutY[480][640];*/
-      double **lutX;
-      double **lutY;
-
-      int width;
-      int height;
-
-      bool useLut;
 };
 
 #endif

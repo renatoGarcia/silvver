@@ -1,6 +1,6 @@
 #include "hardCamera.hpp"
 
-HardCamera::HardCamera(uint64 UID,
+HardCamera::HardCamera(std::string UID,
                        Resolution resolution,
                        FrameRate frameRate)
   :UID(UID)

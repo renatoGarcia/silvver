@@ -57,11 +57,11 @@ protected:
   unsigned frameSize;
   unsigned frameWidth, frameHeight;
 
-  const uint64 UID;
+  const std::string UID;
 
   FrameRate frameRate;
 
-  HardCamera(uint64 UID, Resolution resolution, FrameRate frameRate);
+  HardCamera(std::string UID, Resolution resolution, FrameRate frameRate);
 
 };
 

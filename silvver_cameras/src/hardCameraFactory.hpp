@@ -27,7 +27,7 @@ private:
 
   HardCameraFactory();
 
-  static std::map < uint64,boost::shared_ptr<HardCamera> > createdHardCameras;
+  static std::map < std::string, boost::shared_ptr<HardCamera> > createdHardCameras;
 
   static boost::mutex mutexCameraCreate;
 

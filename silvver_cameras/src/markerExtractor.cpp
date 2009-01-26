@@ -4,13 +4,13 @@
 #include <boost/foreach.hpp>
 
 MarkerExtractor::MarkerExtractor(int width, int height,
-                                 const std::vector<TargetConfig> &targets)
+                                 const std::vector<scene::Target> &targets)
 {
   this->tracker.reset(new ARToolKitPlus::
                       TrackerSingleMarkerImpl<16,16,64,50,50>(width,height));
 
   int targetNum = 0;
-  BOOST_FOREACH(TargetConfig targetConfig, targets)
+  BOOST_FOREACH(scene::Target targetConfig, targets)
   {
     this->vecDescriptionFilePath.push_back(targetConfig.targetDefineFile);
     this->idMap[targetNum] = targetConfig.uid;

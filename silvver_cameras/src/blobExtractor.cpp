@@ -4,7 +4,7 @@
 #include "blobExtractor.hpp"
 #include <cstring>
 
-ColorBlobExtractor::ColorBlobExtractor(const std::vector<TargetConfig> &vecTargets,
+ColorBlobExtractor::ColorBlobExtractor(const std::vector<scene::Target> &vecTargets,
                                        int areaThreshold)
   :areaThreshold(areaThreshold)
   ,numCores(1)

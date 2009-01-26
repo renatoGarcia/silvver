@@ -13,7 +13,7 @@
  #include "hardCameras/dc1394.hpp"
 #endif
 
-std::map < uint64,boost::shared_ptr<HardCamera> >
+std::map < std::string, boost::shared_ptr<HardCamera> >
 HardCameraFactory::createdHardCameras;
 
 boost::mutex
@@ -23,11 +23,11 @@ HardCameraFactory::HardCameraFactory()
 {}
 
 boost::shared_ptr<HardCamera>
-HardCameraFactory::createHardCamera(CameraConfig cameraConfig)
+HardCameraFactory::createHardCamera(scene::Camera cameraConfig)
 {
   boost::mutex::scoped_lock lock(HardCameraFactory::mutexCameraCreate);
 
-  std::map< uint64,boost::shared_ptr<HardCamera> >::iterator
+  std::map< std::string, boost::shared_ptr<HardCamera> >::iterator
     iteHardCamera = HardCameraFactory::createdHardCameras.find(cameraConfig.uid);
 
   // if hardCamera already created
@@ -97,7 +97,7 @@ HardCameraFactory::createHardCamera(CameraConfig cameraConfig)
   hardCameraPtr->initialize();
 
   HardCameraFactory::createdHardCameras.
-    insert(std::pair< uint64,boost::shared_ptr<HardCamera> >
+    insert(std::pair< std::string, boost::shared_ptr<HardCamera> >
            (cameraConfig.uid, hardCameraPtr));
 
   return hardCameraPtr;

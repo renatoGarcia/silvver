@@ -6,7 +6,7 @@
 
 extern boost::mutex mutexCout;
 
-PseudoCamera::PseudoCamera(uint64 UID,
+PseudoCamera::PseudoCamera(std::string UID,
                            FrameRate frameRate,
                            Resolution resolution,
                            std::string imagesPath)

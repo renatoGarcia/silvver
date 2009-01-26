@@ -12,7 +12,7 @@ class PseudoCamera : public HardCamera
 {
 public:
 
-  PseudoCamera(uint64 UID,
+  PseudoCamera(std::string UID,
                HardCamera::FrameRate frameRate,
                HardCamera::Resolution resolution,
                std::string imagesPath);

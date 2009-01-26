@@ -2,8 +2,8 @@
 #include <vector>
 #include "scene.hpp"
 
-BlobCamera::BlobCamera(const std::vector<TargetConfig> &vecTargets,
-                       CameraConfig cameraConfig,
+BlobCamera::BlobCamera(const std::vector<scene::Target> &vecTargets,
+                       scene::Camera cameraConfig,
                        std::string serverIP,
                        unsigned connectionPort)
   :AbstractCamera(cameraConfig, serverIP, connectionPort)
