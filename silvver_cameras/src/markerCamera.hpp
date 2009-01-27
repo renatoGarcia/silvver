@@ -3,7 +3,9 @@
 
 #include <vector>
 #include <string>
+
 #include <boost/scoped_ptr.hpp>
+
 #include "abstractCamera.hpp"
 #include "markerExtractor.hpp"
 
@@ -12,18 +14,18 @@ class MarkerCamera : public AbstractCamera
 {
 public:
 
-  MarkerCamera(const std::vector<scene::Target> &vecTargets,
+  MarkerCamera(const std::vector<scene::Target>& vecTargets,
                const scene::Camera& cameraConfig,
                const std::string& serverIP,
                unsigned connectionPort);
 
   ~MarkerCamera();
 
-  virtual void operator()();
-
 private:
 
-  boost::scoped_ptr<MarkerExtractor> markerExtractor;
+  virtual void operator()();
+
+  const boost::scoped_ptr<MarkerExtractor> markerExtractor;
 };
 
 #endif

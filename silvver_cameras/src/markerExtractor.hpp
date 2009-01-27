@@ -1,54 +1,78 @@
 #ifndef MARKER_EXTRACTOR_HPP
 #define MARKER_EXTRACTOR_HPP
 
-#include <ARToolKitPlus/TrackerSingleMarker.h>
-#include <iostream>
-#include <opencv/cv.h>
+#include <stdexcept>
+#include <string>
 #include <vector>
+
 #include <boost/scoped_ptr.hpp>
-#include "silverTypes.hpp"
+
+#include <ARToolKitPlus/TrackerSingleMarker.h>
+#include <opencv/cv.h>
+
 #include "scene.hpp"
-
-#define MAX_TARGETS 40
-
-// Estrutura para manter os pontos de interece de uma marca encontrada
-struct MarkerPoints
-{
-  silver::Position verticeRef;
-  silver::Position verticeSec;
-  silver::Ente centro;
-};
-
-class MyLogger : public ARToolKitPlus::Logger
-{
-    void artLog(const char* nStr)
-    {
-      std::clog << nStr << std::endl;
-    }
-};
+#include "silverTypes.hpp"
 
 class MarkerExtractor
 {
 public:
 
-  MarkerExtractor(int width, int height,
-                  const std::vector<scene::Target> &targets);
+  class initialize_error : public std::logic_error
+  {
+  public:
+    initialize_error(const std::string& what)
+      :logic_error(what)
+    {}
+  };
 
-  int init();
+  class detect_marker_error : public std::logic_error
+  {
+  public:
+    detect_marker_error(const std::string& what)
+      :logic_error(what)
+    {}
+  };
+
+  /// Struct to handle the interest points of a found marker
+  struct MarkerPoints
+  {
+    silver::Position verticeRef;
+    silver::Position verticeSec;
+    silver::Ente centro;
+  };
+
+  MarkerExtractor(int width, int height,
+                  const std::vector<scene::Target>& targets);
+
+  void initialize();
 
   void extract(const IplImage* const imgEntrada,
-               std::vector<MarkerPoints> &vecMarkerPoints);
+               std::vector<MarkerPoints>& vecMarkerPoints) const;
 
 private:
 
+  class MyLogger : public ARToolKitPlus::Logger
+  {
+  public:
+
+    void artLog(const char* const nStr)
+    {
+      this->message = nStr;
+    }
+
+    std::string message;
+  };
+
+  static const int MAX_TARGETS = 40;
+
   MyLogger logger;
 
-  boost::scoped_ptr<ARToolKitPlus::TrackerSingleMarker> tracker;
+  const boost::scoped_ptr<ARToolKitPlus::TrackerSingleMarker> tracker;
 
   std::vector<std::string> vecDescriptionFilePath;
 
   /// Translates the inner artkp id to silver id
-  int idMap[MAX_TARGETS];
+  boost::array<int, MAX_TARGETS> idMap;
 
 };
 

@@ -1,17 +1,16 @@
 #include "markerCamera.hpp"
 
+#include "silverTypes.hpp"
+
 MarkerCamera::MarkerCamera(const std::vector<scene::Target> &vecTargets,
                            const scene::Camera& cameraConfig,
                            const std::string& serverIP,
                            unsigned connectionPort)
   :AbstractCamera(cameraConfig, serverIP, connectionPort, silver::ARTP_MARK)
-{
-//   this->targetType = AbstractCamera::ARTP_MARK;
-
-  this->markerExtractor.reset(new MarkerExtractor(cameraConfig.resolution.at(0),
-                                                  cameraConfig.resolution.at(1),
-                                                  vecTargets));
-}
+  ,markerExtractor(new MarkerExtractor(cameraConfig.resolution.at(0),
+                                       cameraConfig.resolution.at(1),
+                                       vecTargets))
+{}
 
 MarkerCamera::~MarkerCamera()
 {}
@@ -21,14 +20,14 @@ MarkerCamera::operator()()
 {
   this->connect();
 
-  this->markerExtractor->init();
+  this->markerExtractor->initialize();
 
   std::vector<silver::Ente> vecEnte;
   silver::Package<silver::Ente> package;
-  std::vector<MarkerPoints> vecMarkerPoints;
-  std::vector<MarkerPoints>::iterator iteMarkerPoints;
+  std::vector<MarkerExtractor::MarkerPoints> vecMarkerPoints;
+  std::vector<MarkerExtractor::MarkerPoints>::iterator iteMarkerPoints;
   double theta;
-  while(!stopping)
+  while(!this->stopping)
   {
     vecEnte.clear();
     this->updateFrame();
