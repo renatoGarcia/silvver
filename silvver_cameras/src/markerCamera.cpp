@@ -35,13 +35,14 @@ MarkerCamera::operator()()
     this->markerExtractor->extract(this->currentFrame, vecMarkerPoints);
 
     iteMarkerPoints = vecMarkerPoints.begin();
-    for(;iteMarkerPoints<vecMarkerPoints.end();iteMarkerPoints++)
+    for (; iteMarkerPoints<vecMarkerPoints.end(); iteMarkerPoints++)
     {
       this->localize(iteMarkerPoints->centro);
       this->localize(iteMarkerPoints->verticeRef);
       this->localize(iteMarkerPoints->verticeSec);
 
-      theta = iteMarkerPoints->verticeRef.findAngle(iteMarkerPoints->verticeSec);
+      theta =
+        iteMarkerPoints->verticeRef.findAngle(iteMarkerPoints->verticeSec);
 
       iteMarkerPoints->centro.theta = theta;
       vecEnte.push_back(iteMarkerPoints->centro);

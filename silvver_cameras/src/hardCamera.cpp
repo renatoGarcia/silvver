@@ -1,18 +1,14 @@
 #include "hardCamera.hpp"
 
-HardCamera::HardCamera(std::string UID,
-                       Resolution resolution,
-                       FrameRate frameRate)
-  :UID(UID)
+HardCamera::HardCamera(const std::string& uid,
+                       const boost::array<unsigned, 2>& resolution,
+                       float frameRate)
+  :uid(uid)
+  ,frameSize(resolution.at(0) * resolution.at(1))
+  ,frameWidth(resolution.at(0))
+  ,frameHeight(resolution.at(1))
   ,frameRate(frameRate)
-{
-  if(resolution == HardCamera::RESOLUTION_640x480)
-  {
-    this->frameWidth = 640;
-    this->frameHeight = 480;
-    this->frameSize = 640 * 480;
-  }
-}
+{}
 
 HardCamera::~HardCamera()
 {}

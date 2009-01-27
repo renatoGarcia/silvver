@@ -1,68 +1,66 @@
-#ifndef HARDCAMERA_HPP
-#define HARDCAMERA_HPP
+#ifndef HARD_CAMERA_HPP
+#define HARD_CAMERA_HPP
+
+#include <stdexcept>
+#include <string>
+
+#include <boost/array.hpp>
 
 #include <opencv/cv.h>
 #include <opencv/highgui.h>
-#include <string>
-#include <stdexcept>
 
 class HardCamera
 {
 public:
 
-  enum Resolution{
-    RESOLUTION_640x480
-  };
-
-  enum FrameRate{
-    FR_7_5,
-    FR_15,
-    FR_30
-  };
-
-  class OpenCameraFailed : public std::runtime_error
+  class camera_parameter_error : public std::logic_error
   {
   public:
-    OpenCameraFailed(const std::string& whatArg)
+    camera_parameter_error(const std::string& whatArg)
+      :logic_error(whatArg){}
+  };
+
+  class open_camera_error : public std::runtime_error
+  {
+  public:
+    open_camera_error(const std::string& whatArg)
       :runtime_error(whatArg){}
   };
 
-  class CaptureImageError : public std::runtime_error
+  class capture_image_error : public std::runtime_error
   {
   public:
-    CaptureImageError(const std::string& whatArg)
+    capture_image_error(const std::string& whatArg)
       :runtime_error(whatArg){}
   };
 
-  class OpenFileError : public std::runtime_error
-  {
-  public:
-    OpenFileError(const std::string& whatArg)
-      :runtime_error(whatArg){}
-  };
-
-  virtual ~HardCamera()=0;
-
-  virtual void initialize()=0;
+  virtual ~HardCamera();
 
   void createIplImage(IplImage* &iplImage) const;
 
-  virtual void saveFrame()=0;
+  virtual void saveFrame() = 0;
 
-  virtual void captureFrame(IplImage* &imgRetorno)=0;
+  virtual void captureFrame(IplImage* &imgRetorno) = 0;
 
 protected:
 
-  /// Frame size in pixels
-  unsigned frameSize;
-  unsigned frameWidth, frameHeight;
+  HardCamera(const std::string& uid,
+             const boost::array<unsigned, 2>& resolution,
+             float frameRate);
 
-  const std::string UID;
+  const std::string uid;
 
-  FrameRate frameRate;
+  // Frame size measures in pixels.
+  const unsigned frameSize;
+  const unsigned frameWidth, frameHeight;
 
-  HardCamera(std::string UID, Resolution resolution, FrameRate frameRate);
+  const float frameRate;
 
+private:
+
+  friend class HardCameraFactory;
+
+  virtual void initialize() = 0;
 };
 
 #endif

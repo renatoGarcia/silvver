@@ -16,7 +16,7 @@ AbstractCamera::AbstractCamera(const scene::Camera& cameraConfig,
   ,stopping(false)
   ,targetType(targetType)
   ,uid(cameraConfig.uid)
-  ,hardCamera(HardCameraFactory::createHardCamera(cameraConfig))
+  ,hardCamera(HardCameraFactory::create(cameraConfig))
   ,frameCounter(0)
   ,frameRate(0)
 {

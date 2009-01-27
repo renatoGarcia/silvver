@@ -2,7 +2,10 @@
 #define PSEUDOCAMERA_HPP
 
 #include "../hardCamera.hpp"
+
 #include <string>
+
+#include <boost/array.hpp>
 #include <boost/filesystem.hpp>
 #include <boost/thread/mutex.hpp>
 
@@ -12,10 +15,10 @@ class PseudoCamera : public HardCamera
 {
 public:
 
-  PseudoCamera(std::string UID,
-               HardCamera::FrameRate frameRate,
-               HardCamera::Resolution resolution,
-               std::string imagesPath);
+  PseudoCamera(const std::string& uid,
+               const boost::array<unsigned, 2>& resolution,
+               float frameRate,
+               const std::string& imagesPath);
 
   ~PseudoCamera();
 

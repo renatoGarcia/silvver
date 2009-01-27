@@ -6,11 +6,11 @@
 
 extern boost::mutex mutexCout;
 
-PseudoCamera::PseudoCamera(std::string UID,
-                           FrameRate frameRate,
-                           Resolution resolution,
-                           std::string imagesPath)
-  :HardCamera(UID, resolution, frameRate)
+PseudoCamera::PseudoCamera(const std::string& uid,
+                           const boost::array<unsigned, 2>& resolution,
+                           float frameRate,
+                           const std::string& imagesPath)
+  :HardCamera(uid, resolution, frameRate)
   ,PATH(imagesPath)
 {}
 
@@ -22,26 +22,12 @@ PseudoCamera::initialize()
 {
   if(!bfs::is_directory(this->PATH))
   {
-    throw OpenCameraFailed("Path for images in PseudoCamera don't is a directory");
+    throw camera_parameter_error("Path for images in PseudoCamera don't is a directory");
   }
 
-  switch(this->frameRate)
-  {
-  case HardCamera::FR_7_5:
-    this->delay = (unsigned)((1.0/7.5)*1.0e9);
-    break;
-  case HardCamera::FR_15:
-    this->delay = (unsigned)((1.0/15.0)*1.0e9);
-    break;
-  case HardCamera::FR_30:
-    this->delay = (unsigned)((1.0/30.0)*1.0e9);
-    break;
-  default:
-    throw OpenCameraFailed("Frame Rate don't allowed");
-  }
+  this->delay = (unsigned)((1.0/this->frameRate)*1.0e9);
 
   this->dirIterator = bfs::directory_iterator(this->PATH);
-
 }
 
 void PseudoCamera::saveFrame()

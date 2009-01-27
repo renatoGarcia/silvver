@@ -9,7 +9,7 @@
 #include "abstractCamera.hpp"
 #include "markerExtractor.hpp"
 
-/// Implementa uma câmera abstrata que filma marcos.
+/// Implements an abstract camerata which look for artp markers
 class MarkerCamera : public AbstractCamera
 {
 public:
