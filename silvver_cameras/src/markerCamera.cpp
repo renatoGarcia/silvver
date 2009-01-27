@@ -4,9 +4,9 @@ MarkerCamera::MarkerCamera(const std::vector<scene::Target> &vecTargets,
                            const scene::Camera& cameraConfig,
                            const std::string& serverIP,
                            unsigned connectionPort)
-  :AbstractCamera(cameraConfig, serverIP, connectionPort)
+  :AbstractCamera(cameraConfig, serverIP, connectionPort, silver::ARTP_MARK)
 {
-  this->targetType = AbstractCamera::ARTP_MARK;
+//   this->targetType = AbstractCamera::ARTP_MARK;
 
   this->markerExtractor.reset(new MarkerExtractor(cameraConfig.resolution.at(0),
                                                   cameraConfig.resolution.at(1),
@@ -49,6 +49,6 @@ MarkerCamera::operator()()
     }
 
     package.pack(vecEnte);
-    this->connection->send(&package,sizeof(package));
+    this->serverConnection->send(&package,sizeof(package));
   }
 }

@@ -6,9 +6,9 @@ BlobCamera::BlobCamera(const std::vector<scene::Target> &vecTargets,
                        scene::Camera cameraConfig,
                        std::string serverIP,
                        unsigned connectionPort)
-  :AbstractCamera(cameraConfig, serverIP, connectionPort)
+  :AbstractCamera(cameraConfig, serverIP, connectionPort, silver::COLOR_BLOB)
 {
-  this->targetType = AbstractCamera::COLOR_BLOB;
+//   this->targetType = AbstractCamera::COLOR_BLOB;
 
   this->colorBlobExtractor.reset(new ColorBlobExtractor(vecTargets));
 }

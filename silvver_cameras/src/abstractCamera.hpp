@@ -1,52 +1,40 @@
 #ifndef ABSTRACT_CAMERA_HPP
 #define ABSTRACT_CAMERA_HPP
 
-#include <opencv/cv.h>
 #include <string>
+
+#include <boost/noncopyable.hpp>
 #include <boost/scoped_ptr.hpp>
 #include <boost/shared_ptr.hpp>
-#include <boost/noncopyable.hpp>
 #include <boost/thread/thread.hpp>
-#include "silverTypes.hpp"
-#include "hardCamera.hpp"
-#include "scene.hpp"
+
+#include <opencv/cv.h>
+
 #include "connection.hpp"
+#include "hardCamera.hpp"
 #include "homography.hpp"
+#include "scene.hpp"
+#include "silverTypes.hpp"
 
 /// Abstract base class to all abstract cameras.
 class AbstractCamera : boost::noncopyable
 {
 public:
 
-  enum TargetType{
-    COLOR_BLOB = 103,
-    ARTP_MARK  = 104
-  };
-
+  /// Start a new thread and run the operator() method.
   void run();
 
+  /// Stop the operator() method and the thread.
   void stop();
-
-  virtual void operator()()=0;
-
-  boost::scoped_ptr<boost::thread> runThread;
-
-//   int TaxaQuadros();
 
   virtual ~AbstractCamera();
 
 protected:
 
-  TargetType targetType;
-
   IplImage *currentFrame;
 
-  /// Conexao com o servidor, usada para enviar as localizações
-  boost::scoped_ptr<Connection> connection;
-
-//   scene::Camera cameraConfig;
-
-  std::string UID;
+  /// Connection with the silver-server used to send the target localizations.
+  const boost::scoped_ptr<Connection> serverConnection;
 
   /** When this variable become True, the loop in operator() method implemented
    *  by a derivate class must exit */
@@ -54,11 +42,10 @@ protected:
 
   AbstractCamera(const scene::Camera& cameraConfig,
                  const std::string& serverIP,
-                 unsigned connectionPort);
+                 unsigned connectionPort,
+                 silver::TargetType targetType);
 
   void connect();
-
-  void startHardCamera();
 
   // Atualiza a imagem em "*imgCamera", e retorna o instante no tempo em que elas foram capturadas.
   // Este tempo é dado em milisegundos, e é calculado levando em conta o "tempoInicial".
@@ -69,8 +56,19 @@ protected:
 
 private:
 
+  // This is here because boost::thread call the operator()
+  friend class boost::thread;
+
+  virtual void operator()()=0;
+
+  boost::scoped_ptr<boost::thread> runThread;
+
+  const silver::TargetType targetType;
+
+  const std::string uid;
+
   // Hardware que fará a captura das imagens.
-  boost::shared_ptr<HardCamera> hardCamera;
+  const boost::shared_ptr<HardCamera> hardCamera;
 
   boost::scoped_ptr<const Homography> homography;
 

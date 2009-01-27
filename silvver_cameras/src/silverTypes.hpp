@@ -3,7 +3,7 @@
  *
  * @brief Especificação dos tipos e constantes usados para a comunicação entre os módulos de silvver.
  *
- * Versão 0.2
+ * Versão 0.2.1
  */
 #ifndef SILVER_TYPES_HPP
 #define SILVER_TYPES_HPP
@@ -14,6 +14,10 @@
 
 namespace silver
 {
+  enum TargetType{
+    COLOR_BLOB = 103,
+    ARTP_MARK  = 104
+  };
 
   /*----------------------------POSITION---------------------*/
   class Position
