@@ -1,5 +1,5 @@
-#ifndef PSEUDOCAMERA_HPP
-#define PSEUDOCAMERA_HPP
+#ifndef PSEUDO_CAMERA_HPP
+#define PSEUDO_CAMERA_HPP
 
 #include "../hardCamera.hpp"
 
@@ -8,8 +8,6 @@
 #include <boost/array.hpp>
 #include <boost/filesystem.hpp>
 #include <boost/thread/mutex.hpp>
-
-namespace bfs = boost::filesystem;
 
 class PseudoCamera : public HardCamera
 {
@@ -22,20 +20,21 @@ public:
 
   ~PseudoCamera();
 
-  virtual void initialize();
+  void initialize();
 
-  virtual void saveFrame();
+  void saveFrame();
 
-  virtual void captureFrame(IplImage* &iplImage);
+  // Throw capture_image_error.
+  void captureFrame(IplImage* &iplImage);
 
 private:
 
-  const bfs::path PATH;
+  const boost::filesystem::path path;
 
-  bfs::directory_iterator dirIterator, endIterator;
+  boost::filesystem::directory_iterator dirIterator, endIterator;
 
   // Tempo que pseudoCamera ficará ociosa para simular uma dada frequência
-  unsigned delay;
+  const boost::posix_time::millisec delay;
 
   boost::mutex mutexCaptureFrame;
 };

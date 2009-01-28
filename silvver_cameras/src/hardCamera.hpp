@@ -5,11 +5,12 @@
 #include <string>
 
 #include <boost/array.hpp>
+#include <boost/noncopyable.hpp>
 
 #include <opencv/cv.h>
 #include <opencv/highgui.h>
 
-class HardCamera
+class HardCamera : public boost::noncopyable
 {
 public:
 

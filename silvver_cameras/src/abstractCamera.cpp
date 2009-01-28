@@ -83,9 +83,10 @@ AbstractCamera::updateFrame()
   {
     hardCamera->captureFrame(this->currentFrame);
   }
-  catch(/*runtime_error error*/...)
+  catch(const HardCamera::capture_image_error& exception)
   {
-  //   std::cout << error.what() << std::endl;
+    {PRINT_LOCK;
+      std::cerr << exception.what() << std::endl;}
     return;
   }
 
@@ -96,7 +97,6 @@ AbstractCamera::updateFrame()
 //     quadros = 0;
 //     timer->Start();
 //   }
-
 }
 
 void

@@ -1,17 +1,17 @@
 #include "pseudoCamera.hpp"
-#include <iostream>
-#include <boost/thread/thread.hpp>
-#include <boost/thread/xtime.hpp>
-#include <boost/thread/mutex.hpp>
 
-extern boost::mutex mutexCout;
+#include <boost/thread/thread.hpp>
+
+namespace bfs = boost::filesystem;
+namespace bpt = boost::posix_time;
 
 PseudoCamera::PseudoCamera(const std::string& uid,
                            const boost::array<unsigned, 2>& resolution,
                            float frameRate,
                            const std::string& imagesPath)
   :HardCamera(uid, resolution, frameRate)
-  ,PATH(imagesPath)
+  ,path(imagesPath)
+  ,delay((static_cast<long>((1.0 / this->frameRate) * 1.0e3)))
 {}
 
 PseudoCamera::~PseudoCamera()
@@ -20,33 +20,31 @@ PseudoCamera::~PseudoCamera()
 void
 PseudoCamera::initialize()
 {
-  if(!bfs::is_directory(this->PATH))
+  if(!bfs::is_directory(this->path))
   {
-    throw camera_parameter_error("Path for images in PseudoCamera don't is a directory");
+    throw camera_parameter_error(this->path.directory_string() +
+                                 " is not a directory");
   }
 
-  this->delay = (unsigned)((1.0/this->frameRate)*1.0e9);
-
-  this->dirIterator = bfs::directory_iterator(this->PATH);
+  this->dirIterator = bfs::directory_iterator(this->path);
 }
 
-void PseudoCamera::saveFrame()
+void
+PseudoCamera::saveFrame()
 {}
 
-void PseudoCamera::captureFrame(IplImage* &iplImage)
+void
+PseudoCamera::captureFrame(IplImage* &iplImage)
 {
   boost::mutex::scoped_lock lock(this->mutexCaptureFrame);
-
-  boost::xtime xt;
-  boost::xtime_get(&xt, boost::TIME_UTC);
-  xt.nsec += this->delay;
 
   bool imageLoaded = false;
   while(!imageLoaded)
   {
     if(this->dirIterator == this->endIterator)
     {
-      return;
+      boost::this_thread::sleep(this->delay);
+      throw capture_image_error("PseudoCamera: all images already read");
     }
 
     if(bfs::is_directory(dirIterator->status()))
@@ -60,13 +58,13 @@ void PseudoCamera::captureFrame(IplImage* &iplImage)
                            CV_LOAD_IMAGE_COLOR);
     if(iplImage == NULL)
     {
-      std::cerr << "Error on load image " << dirIterator->path() << std::endl;
       this->dirIterator++;
-      continue;
+      throw capture_image_error("Error loading image: " +
+                                dirIterator->path().file_string());
     }
     imageLoaded = true;
     this->dirIterator++;
   }
 
-  boost::thread::sleep(xt);
+  boost::this_thread::sleep(this->delay);
 }
