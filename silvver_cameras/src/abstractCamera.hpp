@@ -65,8 +65,6 @@ private:
 
   const silver::TargetType targetType;
 
-  const std::string uid;
-
   // Hardware que fará a captura das imagens.
   const boost::shared_ptr<HardCamera> hardCamera;
 

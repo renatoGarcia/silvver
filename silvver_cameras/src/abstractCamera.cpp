@@ -15,7 +15,6 @@ AbstractCamera::AbstractCamera(const scene::Camera& cameraConfig,
   ,serverConnection(new Connection(serverIP, connectionPort))
   ,stopping(false)
   ,targetType(targetType)
-  ,uid(cameraConfig.uid)
   ,hardCamera(HardCameraFactory::create(cameraConfig))
   ,frameCounter(0)
   ,frameRate(0)
@@ -57,10 +56,6 @@ AbstractCamera::connect()
   char msg[3];
   // Espera uma mensagem de confirmação
   this->serverConnection->receive(msg,sizeof(msg));
-
-  {PRINT_LOCK;
-    std::cout << "Conecção câmera: " << this->uid
-              << " " << msg << std::endl;}
 }
 
 void

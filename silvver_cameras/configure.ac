@@ -41,10 +41,15 @@ AC_CHECK_HEADERS([pgrflycapture.h pgrflycaptureplus.h],
 		 [compile_pgr=false])
 AM_CONDITIONAL([COMPILE_PGR], [test $compile_pgr = true])
 
-AC_CHECK_HEADERS([libdc1394/dc1394_control.h],
-                 [compile_dc1394=true],
-                 [compile_dc1394=false])
-AM_CONDITIONAL([COMPILE_DC1394], [test $compile_dc1394 = true])
+dnl AC_CHECK_HEADERS([libdc1394/dc1394_control.h],
+dnl                  [compile_dc1394=true],
+dnl                  [compile_dc1394=false])
+dnl AM_CONDITIONAL([COMPILE_DC1394], [test $compile_dc1394 = true])
+
+AC_CHECK_HEADERS([dc1394/dc1394.h],
+                 [compile_dc1394_2x=true],
+                 [compile_dc1394_2x=false])
+AM_CONDITIONAL([COMPILE_DC1394_2X], [test $compile_dc1394_2x = true])
 
 
 dnl ====
