@@ -6,6 +6,7 @@ silver_cameras_SOURCES = scene.hpp \
                          xmlParser.hpp \
                          abstractCamera.cpp \
                          abstractCamera.hpp \
+                         homography.cpp \
                          homography.hpp \
                          connection.cpp \
                          connection.hpp \

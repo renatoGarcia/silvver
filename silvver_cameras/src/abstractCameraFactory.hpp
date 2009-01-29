@@ -2,12 +2,13 @@
 #define ABSTRACT_CAMERA_FACTORY_HPP
 
 #include "abstractCamera.hpp"
-#include "scene.hpp"
-#include <boost/noncopyable.hpp>
+
 #include <vector>
 #include <string>
 
-class AbstractCameraFactory : public boost::noncopyable
+#include "scene.hpp"
+
+class AbstractCameraFactory
 {
 public:
 
@@ -21,7 +22,6 @@ public:
 private:
 
   AbstractCameraFactory();
-
 };
 
 

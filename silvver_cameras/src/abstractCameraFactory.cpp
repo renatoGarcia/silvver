@@ -1,6 +1,7 @@
 #include "abstractCameraFactory.hpp"
-#include "markerCamera.hpp"
+
 #include "blobCamera.hpp"
+#include "markerCamera.hpp"
 
 AbstractCamera*
 AbstractCameraFactory::create(const std::string& targetType,
@@ -9,27 +10,26 @@ AbstractCameraFactory::create(const std::string& targetType,
                               const std::string& serverIP,
                               unsigned connectionPort)
 {
-  AbstractCamera* ret;
+  AbstractCamera* abstractCamera;
 
   if(targetType == "artp_mark")
   {
-    ret = new MarkerCamera(vecTargets,
-                           cameraConfig,
-                           serverIP,
-                           connectionPort);
+    abstractCamera = new MarkerCamera(vecTargets,
+                                      cameraConfig,
+                                      serverIP,
+                                      connectionPort);
   }
   else if(targetType == "color_blob")
   {
-    ret = new BlobCamera(vecTargets,
-                         cameraConfig,
-                         serverIP,
-                         connectionPort);
-
+    abstractCamera = new BlobCamera(vecTargets,
+                                    cameraConfig,
+                                    serverIP,
+                                    connectionPort);
   }
   else
   {
     throw std::invalid_argument("Unknown target type: " + targetType);
   }
 
-  return ret;
+  return abstractCamera;
 }

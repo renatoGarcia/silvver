@@ -28,7 +28,7 @@ AbstractCamera::AbstractCamera(const scene::Camera& cameraConfig,
   else if (const scene::LutHomography* const lutHomography =
            boost::get<const scene::LutHomography>(&cameraConfig.homography))
   {
-    this->homography.reset(new Lut(*lutHomography));
+    this->homography.reset(new Lut(*lutHomography, cameraConfig.resolution));
   }
 
   this->hardCamera->createIplImage(this->currentFrame);
