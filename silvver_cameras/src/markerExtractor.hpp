@@ -36,9 +36,9 @@ public:
   /// Struct to handle the interest points of a found marker
   struct MarkerPoints
   {
-    silver::Position verticeRef;
-    silver::Position verticeSec;
-    silver::Ente centro;
+    silver::Position primaryVertex;
+    silver::Position secondaryVertex;
+    silver::Ente center;
   };
 
   MarkerExtractor(int width, int height,

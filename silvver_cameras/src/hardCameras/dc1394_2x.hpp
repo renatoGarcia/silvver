@@ -2,48 +2,43 @@
 #define DC1394_HPP
 
 #include "../hardCamera.hpp"
-
-#include <string>
-
-#include <boost/array.hpp>
-#include <boost/thread/mutex.hpp>
-
-#include <libdc1394/dc1394_control.h>
 #include <libraw1394/raw1394.h>
+#include <libdc1394/dc1394_control.h>
 #include <sys/time.h>
-
+#include <string>
+#include <boost/thread/mutex.hpp>
 #include "conversions.h"
+
+#define NUMERO_BUFFERS 4
 
 class DC1394: public HardCamera
 {
 public:
 
-  enum Format
-  {
-    F_VGA_NONCOMPRESSED = FORMAT_VGA_NONCOMPRESSED
+  enum Format{
+    F_VGA_NONCOMPRESSED = FORMAT_VGA_NONCOMPRESSED,
   };
 
-  DC1394(int nCard,
-         const std::string& uid,
-         const boost::array<unsigned, 2>& resolution,
-         float frameRate,
+  DC1394(int nCard, uint64 identifier,
+         HardCamera::FrameRate frameRate,
+         HardCamera::Resolution resolution,
          Format format = F_VGA_NONCOMPRESSED);
 
-  ~DC1394();
+  virtual ~DC1394();
 
-  void initialize();
+  virtual void initialize();
 
-  void captureFrame(IplImage* &iplImage);
+  virtual void captureFrame(IplImage* &iplImage);
 
   // Grava a última imagem da câmera no disco
-  void saveFrame();
+  virtual void saveFrame();
+
+  void createIplImage(IplImage* &iplImage);
 
 private:
 
-  static const int NUMERO_BUFFERS = 4;
-
-  const int nCard;
-  const std::string device;
+  int nCard;
+  std::string device;
 
   raw1394handle_t raw1394Handle;
   bool            bRaw1394HandleCreated;

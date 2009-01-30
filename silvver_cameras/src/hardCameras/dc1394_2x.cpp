@@ -1,30 +1,26 @@
 #include <iostream>
 using namespace std;
 
-#include "dc1394_1x.hpp"
-
-#include <cstddef>
+#include "dc1394_2x.hpp"
+#include <boost/lexical_cast.hpp>
 #include <fstream>
 #include <iostream>
 
-#include <boost/lexical_cast.hpp>
-
-DC1394::DC1394(int nCard,
-               const std::string& uid,
-               const boost::array<unsigned, 2>& resolution,
-               float frameRate,
-               Format format)
-  :HardCamera(uid, resolution, frameRate)
-  ,nCard(nCard)
-  ,device("/dev/video1394/" + boost::lexical_cast<std::string>(nCard))
-  ,bRaw1394HandleCreated(false)
-  ,bDc1394CameraCreated(false)
+DC1394::DC1394(int nCard, uint64 UID, FrameRate frameRate,
+               Resolution resolution, Format format)
+  :HardCamera(UID, resolution, frameRate)
 {
+  this->nCard = nCard;
+  this->device = "/dev/video1394/" + boost::lexical_cast<std::string>(nCard);
+
   this->mode = MODE_640x480_MONO;
   this->format = format;
 
   // if mode == MODE_640x40_MONO
   this->bytesPerPixel = 1;
+
+  this->bRaw1394HandleCreated = false;
+  this->bDc1394CameraCreated = false;
 }
 
 DC1394::~DC1394()
@@ -46,25 +42,26 @@ DC1394::~DC1394()
 void
 DC1394::initialize()
 {
-  this->raw1394Handle = dc1394_create_handle(this->nCard);
+  this->raw1394Handle = dc1394_create_handle( this->nCard );
   if(this->raw1394Handle == NULL)
   {
-    throw open_camera_error("Unable to aquire a raw1394 handle");
+    throw OpenCameraFailed("Unable to aquire a raw1394 handle\n\n"
+                           "Please check\n"
+                           "  - if the kernel modules `ieee1394',`raw1394' and `ohci1394' are loaded\n"
+                           "  - if you have read/write access to /dev/raw1394\n");
   }
-  else
-  {
-    this->bRaw1394HandleCreated = true;
-  }
+  this->bRaw1394HandleCreated = true;
 
   int numNodes;
   numNodes = raw1394_get_nodecount( this->raw1394Handle );
 
   nodeid_t* cameraNodes;
   int	    numCameras;
+  /* Note: set 3rd parameter to 0 if you do not want the camera details printed */
   cameraNodes = dc1394_get_camera_nodes(this->raw1394Handle, &numCameras, 0);
   if(numCameras < 1)
   {
-    throw open_camera_error("No cameras found");
+    throw OpenCameraFailed("No cameras found");
   }
 
   /*-----------------------------------------------------------------------
@@ -73,12 +70,29 @@ DC1394::initialize()
    *  http://linux1394.sourceforge.net/faq.html#DCbusmgmt
    *  and
    *  http://sourceforge.net/tracker/index.php?func=detail&aid=435107&group_id=8157&atid=108157
-   *  The quick solution is to add the parameter attempt_root=1 when loading
-   *  the OHCI driver as a module.
    *-----------------------------------------------------------------------*/
   if(cameraNodes[0] == numNodes-1)
   {
-    throw open_camera_error("Your camera is the highest numbered node");
+    std::cerr << "\nSorry, your camera is the highest numbered node\n"
+              << "of the bus, and has therefore become the root node.\n"
+              << "The root node is responsible for maintaining \n"
+              << "the timing of isochronous transactions on the IEEE \n"
+              << "1394 bus.  However, if the root node is not cycle master \n"
+              << "capable (it doesn't have to be), then isochronous \n"
+              << "transactions will not work.  The host controller card is \n"
+              << "cycle master capable, however, most cameras are not.\n"
+              << "\n"
+              << "The quick solution is to add the parameter \n"
+              << "attempt_root=1 when loading the OHCI driver as a \n"
+              << "module.  So please do (as root):\n"
+              << "\n"
+              << "   rmmod ohci1394\n"
+              << "   insmod ohci1394 attempt_root=1\n"
+              << "\n"
+              << "for more information see the FAQ at \n"
+              << "http://linux1394.sourceforge.net/faq.html#DCbusmgmt\n"
+              << std::endl;
+    throw OpenCameraFailed("Your camera is the highest numbered node");
   }
 
   /*-----------------------------------------------------------------------
@@ -90,7 +104,7 @@ DC1394::initialize()
   {
     dc1394_get_camera_info(this->raw1394Handle, cameraNodes[cameraIndex],
                            &cameraInfo);
-    if(boost::lexical_cast<std::string>(cameraInfo.euid_64) == this->uid)
+    if(cameraInfo.euid_64 == this->UID)
     {
       break;
     }
@@ -104,21 +118,23 @@ DC1394::initialize()
    *  setup capture
    *-----------------------------------------------------------------------*/
   int dc1394FrameRate;
-  if (this->frameRate == 7.5)
+  switch(this->frameRate)
   {
+  case HardCamera::FR_7_5:
     dc1394FrameRate = FRAMERATE_7_5;
-  }
-  else if (this->frameRate == 15.0)
-  {
+    break;
+
+  case HardCamera::FR_15:
     dc1394FrameRate = FRAMERATE_15;
-  }
-  else if (this->frameRate == 30.0)
-  {
+    break;
+
+  case HardCamera::FR_30:
     dc1394FrameRate = FRAMERATE_30;
-  }
-  else
-  {
-    throw open_camera_error("Frame Rate don't allowed");
+    break;
+
+  default:
+    throw OpenCameraFailed("Frame Rate don't allowed");
+
   }
 
   unsigned int channel;
@@ -128,7 +144,7 @@ DC1394::initialize()
                                          &channel,
                                          &speed ) !=DC1394_SUCCESS )
   {
-    throw open_camera_error("Unable to get the iso channel number");
+    throw OpenCameraFailed("Unable to get the iso channel number");
   }
 
   // note: format, mode, frameRate and bytesPerPixel are all defined as globals 
@@ -146,7 +162,7 @@ DC1394::initialize()
                                     &(this->dc1394Camera));
   if ( e != DC1394_SUCCESS )
   {
-    throw open_camera_error("Unable to setup camera");
+    throw OpenCameraFailed("Unable to setup camera");
   }
   this->bDc1394CameraCreated = true;
 
@@ -158,7 +174,7 @@ DC1394::initialize()
                                       this->dc1394Camera.node)
        != DC1394_SUCCESS )
   {
-    throw open_camera_error("Unable to start camera iso transmission");
+    throw OpenCameraFailed("Unable to start camera iso transmission");
   }
 
 
@@ -186,9 +202,9 @@ DC1394::initialize()
     this->pattern = BAYER_PATTERN_GBRG;
     break;
   case 0x59595959:      /* YYYY = BW */
-    throw open_camera_error("Camera is black and white");
+    throw OpenCameraFailed("Camera is black and white");
   default:
-    throw open_camera_error("Camera BAYER_TILE_MAPPING register has an unexpected value");
+    throw OpenCameraFailed("Camera BAYER_TILE_MAPPING register has an unexpected value");
   }
 
   return;
@@ -202,7 +218,7 @@ DC1394::captureFrame(IplImage* &iplImage)
   // Capture one frame
   if (dc1394_dma_single_capture(&(this->dc1394Camera)) != DC1394_SUCCESS)
   {
-    throw capture_image_error("Unable to capture a frame");
+    throw CaptureImageError("Unable to capture a frame");
   }
 
   unsigned char* src = (unsigned char*) this->dc1394Camera.capture_buffer;
@@ -211,7 +227,7 @@ DC1394::captureFrame(IplImage* &iplImage)
     src = new unsigned char[this->frameSize];
     if(!src)
     {
-      throw capture_image_error("Could not allocate copy buffer for color conversion");
+      throw CaptureImageError("Could not allocate copy buffer for color conversion");
     }
     unsigned char* captureBuffer =
       (unsigned char*) this->dc1394Camera.capture_buffer;
@@ -241,13 +257,13 @@ DC1394::saveFrame()
    *-----------------------------------------------------------------------*/
   if (dc1394_dma_single_capture( &(this->dc1394Camera) ) != DC1394_SUCCESS)
   {
-    throw capture_image_error("Unable to capture a frame");
+    throw CaptureImageError("Unable to capture a frame");
   }
 
   unsigned char* rgbBuffer = new unsigned char[3 * frameSize];
   if(!rgbBuffer)
   {
-    throw capture_image_error("Could not allocate RGB buffer for color conversion");
+    throw CaptureImageError("Could not allocate RGB buffer for color conversion");
   }
 
   unsigned char* src = (unsigned char*) this->dc1394Camera.capture_buffer;
@@ -256,7 +272,7 @@ DC1394::saveFrame()
     src = new unsigned char[this->frameSize];
     if(!src)
     {
-    throw capture_image_error("Could not allocate copy buffer for color conversion");
+    throw CaptureImageError("Could not allocate copy buffer for color conversion");
     }
     unsigned char* captureBuffer =
       (unsigned char*) this->dc1394Camera.capture_buffer;

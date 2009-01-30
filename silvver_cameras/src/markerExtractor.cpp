@@ -66,13 +66,13 @@ MarkerExtractor::extract(const IplImage* const imgEntrada,
 {
   vecMarkerPoints.clear();
 
-  int totalMarca=0;
+  int nMarkers=0;
   ARToolKitPlus::ARMarkerInfo *marker_info;
 
   if (tracker->arDetectMarker((ARToolKitPlus::ARUint8*)imgEntrada->imageData,
                               100,
                               &marker_info,
-                              &totalMarca)
+                              &nMarkers)
       < 0 )
   {
     throw detect_marker_error("Error in arDetectMarker method.");
@@ -80,47 +80,49 @@ MarkerExtractor::extract(const IplImage* const imgEntrada,
 
   MarkerPoints mP;
 
-  for(int marca=0; marca<totalMarca; marca++)
+  for (int marker = 0; marker < nMarkers; marker++)
   {
-    switch(marker_info[marca].dir)
+    // If the marker was not identified or its confidence is lower than 50%
+    if ((marker_info[marker].id < 0) || (marker_info[marker].cf<0.5))
+    {
+      continue;
+    }
+
+    switch(marker_info[marker].dir)
     {
     case 0:
-      mP.verticeRef = silver::Position(marker_info[marca].vertex[1][0],
-                                       marker_info[marca].vertex[1][1]);
-      mP.verticeSec = silver::Position(marker_info[marca].vertex[0][0],
-                                       marker_info[marca].vertex[0][1]);
+      mP.primaryVertex   = silver::Position(marker_info[marker].vertex[1][0],
+                                            marker_info[marker].vertex[1][1]);
+      mP.secondaryVertex = silver::Position(marker_info[marker].vertex[0][0],
+                                            marker_info[marker].vertex[0][1]);
       break;
     case 1:
-      mP.verticeRef = silver::Position(marker_info[marca].vertex[0][0],
-                                       marker_info[marca].vertex[0][1]);
-      mP.verticeSec = silver::Position(marker_info[marca].vertex[3][0],
-                                       marker_info[marca].vertex[3][1]);
+      mP.primaryVertex   = silver::Position(marker_info[marker].vertex[0][0],
+                                            marker_info[marker].vertex[0][1]);
+      mP.secondaryVertex = silver::Position(marker_info[marker].vertex[3][0],
+                                            marker_info[marker].vertex[3][1]);
       break;
     case 2:
-      mP.verticeRef = silver::Position(marker_info[marca].vertex[3][0],
-                                       marker_info[marca].vertex[3][1]);
-      mP.verticeSec = silver::Position(marker_info[marca].vertex[2][0],
-                                       marker_info[marca].vertex[2][1]);
+      mP.primaryVertex   = silver::Position(marker_info[marker].vertex[3][0],
+                                            marker_info[marker].vertex[3][1]);
+      mP.secondaryVertex = silver::Position(marker_info[marker].vertex[2][0],
+                                            marker_info[marker].vertex[2][1]);
       break;
     case 3:
-      mP.verticeRef = silver::Position(marker_info[marca].vertex[2][0],
-                                       marker_info[marca].vertex[2][1]);
-      mP.verticeSec = silver::Position(marker_info[marca].vertex[1][0],
-                                       marker_info[marca].vertex[1][1]);
+      mP.primaryVertex   = silver::Position(marker_info[marker].vertex[2][0],
+                                            marker_info[marker].vertex[2][1]);
+      mP.secondaryVertex = silver::Position(marker_info[marker].vertex[1][0],
+                                            marker_info[marker].vertex[1][1]);
       break;
     default:
       throw detect_marker_error("Invalid marker direction.");
       break;
     }
-    mP.centro.x     = marker_info[marca].pos[0];
-    mP.centro.y     = marker_info[marca].pos[1];
-    mP.centro.id    = this->idMap.at(marker_info[marca].id);
-    mP.centro.weigh = marker_info[marca].cf;
+    mP.center.x     = marker_info[marker].pos[0];
+    mP.center.y     = marker_info[marker].pos[1];
+    mP.center.id    = this->idMap.at(marker_info[marker].id);
+    mP.center.weigh = marker_info[marker].cf;
 
-    // Drop the marks which confidence is lower than 50%
-    if (mP.centro.id>=0 && marker_info[marca].cf>0.5)
-    {
-      vecMarkerPoints.push_back(mP);
-    }
+    vecMarkerPoints.push_back(mP);
   }
 }

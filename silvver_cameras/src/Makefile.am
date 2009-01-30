@@ -45,16 +45,16 @@ silver_cameras_SOURCES += hardCameras/pgr.cpp \
                           hardCameras/pgr.hpp
 endif
 
-# if COMPILE_DC1394_1X
-# silver_cameras_SOURCES += hardCameras/dc1394_1x.cpp \
-#                           hardCameras/dc1394_1x.hpp \
-#                           hardCameras/conversions.cpp \
-#                           hardCameras/conversions.h
-# endif
-
-if COMPILE_DC1394_2X
-silver_cameras_SOURCES += hardCameras/dc1394_2x.cpp \
-                          hardCameras/dc1394_2x.hpp \
+if COMPILE_DC1394_1X
+silver_cameras_SOURCES += hardCameras/dc1394_1x.cpp \
+                          hardCameras/dc1394_1x.hpp \
                           hardCameras/conversions.cpp \
                           hardCameras/conversions.h
 endif
+
+# if COMPILE_DC1394_2X
+# silver_cameras_SOURCES += hardCameras/dc1394_2x.cpp \
+#                           hardCameras/dc1394_2x.hpp \
+#                           hardCameras/conversions.cpp \
+#                           hardCameras/conversions.h
+# endif
