@@ -10,10 +10,12 @@
 #endif
 #ifdef HAVE_LIBDC1394_DC1394_CONTROL_H
  #include "hardCameras/dc1394_1x.hpp"
+ #define HAVE_DC1394
 #endif
-// #ifdef HAVE_DC1394_DC1394_H
-//  #include "hardCameras/dc1394_2x.hpp"
-// #endif
+#ifdef HAVE_DC1394_DC1394_H
+ #include "hardCameras/dc1394_2x.hpp"
+ #define HAVE_DC1394
+#endif
 
 std::map < std::string, boost::shared_ptr<HardCamera> >
 HardCameraFactory::createdHardCameras;
@@ -46,7 +48,7 @@ HardCameraFactory::create(const scene::Camera& cameraConfig)
                                            cameraConfig.frameRate,
                                            cameraConfig.imagesPath));
     }
-#ifdef HAVE_LIBDC1394_DC1394_CONTROL_H
+#ifdef HAVE_DC1394
     else if (cameraConfig.hardware == "dc1394")
     {
       hardCameraPtr.reset(new DC1394(0, cameraConfig.uid,

@@ -37,15 +37,16 @@ MarkerCamera::operator()()
     iteMarkerPoints = vecMarkerPoints.begin();
     for (; iteMarkerPoints<vecMarkerPoints.end(); iteMarkerPoints++)
     {
-      this->localize(iteMarkerPoints->centro);
-      this->localize(iteMarkerPoints->verticeRef);
-      this->localize(iteMarkerPoints->verticeSec);
+      this->localize(iteMarkerPoints->center);
+      this->localize(iteMarkerPoints->primaryVertex);
+      this->localize(iteMarkerPoints->secondaryVertex);
 
       theta =
-        iteMarkerPoints->verticeRef.findAngle(iteMarkerPoints->verticeSec);
+        iteMarkerPoints->primaryVertex.findAngle(iteMarkerPoints->
+                                                 secondaryVertex);
 
-      iteMarkerPoints->centro.theta = theta;
-      vecEnte.push_back(iteMarkerPoints->centro);
+      iteMarkerPoints->center.theta = theta;
+      vecEnte.push_back(iteMarkerPoints->center);
     }
 
     package.pack(vecEnte);

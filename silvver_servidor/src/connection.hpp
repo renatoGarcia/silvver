@@ -6,6 +6,7 @@
 #endif
 
 #include <fcntl.h>
+#include <cstddef>
 
 #ifdef HAVE_WINDOWS_SOCKETS
 #include <winsock2.h>
