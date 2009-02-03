@@ -1,4 +1,5 @@
 lib_LTLIBRARIES = libsilvver_cliente.la
+AM_CPPFLAGS = -Wall
 
 libsilvver_cliente_la_SOURCES = conexao.cpp \
      conexao.hpp \

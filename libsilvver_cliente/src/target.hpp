@@ -1,92 +1,46 @@
-/** Cabeçalho interno da classe marco
- * @file   marco.hpp
- *
- * @brief  Este é o documento de cabeçalho utilizado internamente pelo silvver-cliente.
- *
- */
-
 #ifndef TARGET_HPP
 #define TARGET_HPP
 
-#include "conexao.hpp"
-#include "silverTypes.hpp"
-#include <boost/scoped_ptr.hpp>
-#include <boost/thread/thread.hpp>
-#include <boost/thread/mutex.hpp>
+#include <memory>
 #include <string>
-#include <fstream>
 
-using namespace silver;
+#include "silverTypes.hpp"
 
-/// Representa um alvo o qual será localizado pelo Silvver.
+/// Reprents a target looked by Silver.
 class Target
 {
 public:
 
-  /** Construtor da classe marco aaa
-   * @param serverIp Endereço IP da máquina onde está sendo executado o silvver-servidor.
-   * @param targetId Identificador único da marca que será localizada.
-   * @param registrar Caso seja atribuido um valor true os dados recebidos serão registrados em um arquivo texto.
+  /** Target class constructor.
+   * @param targetId Target identifier.
+   * @param log True to save the received poses in a text file.
+   * @param serverIp IP address of silver-server.
+   * @param receptionistPort Port number of silver-server receptionist.
    */
-  Target(std::string serverIp, unsigned targetId, bool log=false,
+  Target(unsigned targetId,
+         bool log=false,
+         const std::string& serverIp="127.0.0.1",
          unsigned receptionistPort=12000);
 
-  ~Target();
+  ~Target() throw();
 
-  /// Conecta o marco ao servidor.
+  /// Connect to the silver-server.
   void connect();
 
-  /** Retorna a última pose recebida do servidor.
-   * @param x Coordenada x da pose, valor dado em metros.
-   * @param y Coordenada y da pose, valor dado em metros.
-   * @param teta Ângulo da pose, valor dado em radianos.
+  /** Get the last received pose.
+   * @param x X coordinate [m].
+   * @param y Y coordinate [m].
+   * @param theta Angle of pose [rad].
    */
-  void getPose(double &x,double &y, double &theta);
+  void getPose(double &x, double &y, double &theta);
 
-  /** Retorna um objeto do tipo Pose representando a última pose recebida do servidor.
-   */
-  Pose getPose();
-
-  /// Método que ficará continuamente esperando pelas mensagens do Silvver-servidor contendo a pose atual.
-  /// Ele será executado em uma thread própria.
-  void operator()();
+  /// Return the last received silver::Pose.
+  silver::Pose getPose();
 
 private:
 
-  /// Mutex para controlar a escrita e leitura na Pose ultimaPose.
-  //  mutex mutexUltimaPose;
-  boost::scoped_ptr<boost::mutex> mutexCurrentPose;
-
-  /// Valor da última Pose do presente marco que foi localizada  pelas câmeras,
-  /// e enviado através do Silvver-servidor.
-  Pose currentPose;
-
-  /// Número de identificação único do marco, que será usado para identificar o robô univocamente.
-  const unsigned targetId;
-
-  /// Endereço IP da máquina onde está sendo executado o Silvver-servidor.
-  const std::string serverIp;
-
-  /// Porta onde o recepcionista do servidor estará ligado.
-  const unsigned receptionistPort;
-
-  /// Porta que será usada para a comunicação permanente com o Silvver-servidor.
-  /// Seu valor será dado pelo mesmo quando requisitada a conexão.
-  boost::scoped_ptr<Connection> receptionistConnection;
-
-  boost::scoped_ptr<Connection> connection;
-
-  /// Thread onde será executado o método ouvirServidor.
-  boost::scoped_ptr<boost::thread> th;
-
-  /// Envia um pedido de conexão ao recepcionista do Silvver-servidor, e a cria ao receber a resposta.
-  void makeConnection();
-
-  /// Sinalizador utilizado para terminar a função ouvirServidor.
-  bool stop;
-
-  boost::scoped_ptr<std::ofstream> arqRegistro;
-
+  class CheshireCat;
+  std::auto_ptr<CheshireCat> smile;
 };
 
 #endif

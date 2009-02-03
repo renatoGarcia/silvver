@@ -22,7 +22,6 @@
 
 #include <string>
 
-/// Implementa a conecção e encapsula a comunicação com o Silvver-servidor.
 class Connection
 {
 public:
@@ -52,7 +51,12 @@ public:
    */
   void receive(char *msg, int tamanho) throw(Excecoes);
 
-  inline unsigned getPort() const
+  std::string getPairIP() const
+  {
+    return this->pairIP;
+  }
+
+  unsigned getPort() const
   {
     return this->port;
   }

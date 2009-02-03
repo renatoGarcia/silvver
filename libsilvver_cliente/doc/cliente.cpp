@@ -15,7 +15,6 @@ using namespace std;
 int main(int argc,char **argv)
 {
   int id = 1;
-//   char ip[16] = "127.0.0.1";
   std::string ip("127.0.0.1");
 
   if(argc>1)
@@ -27,7 +26,7 @@ int main(int argc,char **argv)
     ip = argv[2];
   }
 
-  Target target(ip,id);
+  Target target(id,false,ip);
   cout << "Conectando com o servidor..." << endl;
   target.connect();
   cout << "Conectado."<< endl << endl;

@@ -1,16 +1,73 @@
 #include "target.hpp"
-#include <iostream>
-#include <boost/ref.hpp>
-#include <boost/lexical_cast.hpp>
 
-Target::Target(std::string serverIp, unsigned targetId,
-               bool log, unsigned receptionistPort)
-  :targetId(targetId)
-  ,serverIp(serverIp)
-  ,receptionistPort(receptionistPort)
-  ,stop(false)
+#include <iostream>
+#include <fstream>
+
+#include <boost/lexical_cast.hpp>
+#include <boost/ref.hpp>
+#include <boost/scoped_ptr.hpp>
+#include <boost/thread/thread.hpp>
+#include <boost/thread/mutex.hpp>
+
+#include "conexao.hpp"
+
+class Target::CheshireCat
 {
-  this->mutexCurrentPose.reset( new boost::mutex() );
+public:
+
+  ~CheshireCat();
+
+private:
+
+  friend class Target;
+  friend class boost::thread;
+
+  CheshireCat(unsigned targetId, bool log,
+              const std::string& serverIp,
+              unsigned receptionistPort);
+
+  /// Envia um pedido de conexão ao recepcionista do Silvver-servidor, e a cria ao receber a resposta.
+  void makeConnection();
+
+  /// Stop the thread and close the connection with the receptionist.
+  void close();
+
+  /// Método que ficará continuamente esperando pelas mensagens do Silvver-servidor contendo a pose atual.
+  /// Ele será executado em uma thread própria.
+  void operator()();
+
+  const unsigned targetId;
+
+  /// Synchronize the write and read in currentPose.
+  boost::mutex mutexCurrentPose;
+
+  /// Value of last received Pose.
+  silver::Pose currentPose;
+
+  boost::scoped_ptr<Connection> receptionist;
+
+  boost::scoped_ptr<Connection> connection;
+
+  boost::scoped_ptr<boost::thread> th;
+
+  /// Sinalizador utilizado para terminar a função ouvirServidor.
+  bool stop;
+
+  bool closed;
+
+  boost::scoped_ptr<std::ofstream> arqRegistro;
+};
+
+Target::CheshireCat::CheshireCat(unsigned targetId,
+                                 bool log,
+                                 const std::string& serverIp,
+                                 unsigned receptionistPort)
+  :targetId(targetId)
+  ,receptionist(new Connection(serverIp, receptionistPort))
+  ,stop(false)
+  ,closed(false)
+{
+  this->receptionist->connect();
 
   if(log)
   {
@@ -19,39 +76,50 @@ Target::Target(std::string serverIp, unsigned targetId,
   }
 }
 
-Target::~Target()
+void Target::CheshireCat::close()
 {
   this->stop = true;
-  th->join();
+  this->th->join();
 
   char pedido[3] = "DC";
   unsigned connectionPort = connection->getPort();
 
-  receptionistConnection->send((void*)pedido,sizeof(pedido) );
-  receptionistConnection->send((void*)&this->targetId,sizeof(this->targetId));
-  receptionistConnection->send((void*)&connectionPort,sizeof(connectionPort));
+  receptionist->send((void*)pedido,sizeof(pedido) );
+  receptionist->send((void*)&this->targetId,sizeof(this->targetId));
+  receptionist->send((void*)&connectionPort,sizeof(connectionPort));
 
-  std::cout << "Desconectado" << std::endl;
+  this->closed = true;
 }
 
+Target::CheshireCat::~CheshireCat()
+{
+  if(!this->closed)
+  {
+    try
+    {
+      this->close();
+    }
+    catch(...)
+    {
+      std::cerr << "Error on closing Target" << std::endl;
+    }
+  }
+}
 
 void
-Target::makeConnection()
+Target::CheshireCat::makeConnection()
 {
-  this->receptionistConnection.reset(new Connection(this->serverIp,
-                                                    this->receptionistPort));
-
   unsigned port;
 
-  receptionistConnection->connect();
-  receptionistConnection->send((void*)"SD",sizeof("SD") );
-  receptionistConnection->receive((char*)&port,sizeof(port));
+  receptionist->send((void*)"SD",sizeof("SD") );
+  receptionist->receive((char*)&port,sizeof(port));
   std::cout << "Porta: " << port << std::endl;
 
   char OK[3]="OK";
   char resposta[3];
 
-  this->connection.reset(new Connection(this->serverIp, port));
+  this->connection.reset(new Connection(this->receptionist->getPairIP(),
+                                        port));
   connection->connect();
   connection->send(OK,sizeof(OK));
   connection->send((void*)&this->targetId,sizeof(this->targetId));
@@ -60,7 +128,7 @@ Target::makeConnection()
 }
 
 void
-Target::operator()()
+Target::CheshireCat::operator()()
 {
   silver::Ente enteReceptor;
 
@@ -74,9 +142,9 @@ Target::operator()()
 	continue;
     }
 
-    if(enteReceptor.id == this->targetId) // Se o id do ente recebido é igual ao do robô.
+    if((unsigned)enteReceptor.id == this->targetId) // Se o id do ente recebido é igual ao do robô.
     {
-      boost::mutex::scoped_lock lock( *(this->mutexCurrentPose) );
+      boost::mutex::scoped_lock lock(this->mutexCurrentPose);
       this->currentPose = silver::Pose(enteReceptor.x,
                                        enteReceptor.y,
                                        enteReceptor.theta);
@@ -101,22 +169,32 @@ Target::operator()()
 void
 Target::connect()
 {
-  makeConnection();
-  th.reset(new boost::thread(boost::ref(*this)));
+  smile->makeConnection();
+  smile->th.reset(new boost::thread(boost::ref(*smile)));
 }
 
-Pose
+silver::Pose
 Target::getPose()
 {
-  boost::mutex::scoped_lock lock( *mutexCurrentPose );
-  return currentPose;
+  boost::mutex::scoped_lock lock(smile->mutexCurrentPose);
+  return smile->currentPose;
 }
 
 void
 Target::getPose(double &x,double &y, double &theta)
 {
-  boost::mutex::scoped_lock lock( *mutexCurrentPose );
-  x     = currentPose.x;
-  y     = currentPose.y;
-  theta = currentPose.theta;
+  boost::mutex::scoped_lock lock(smile->mutexCurrentPose);
+  x     = smile->currentPose.x;
+  y     = smile->currentPose.y;
+  theta = smile->currentPose.theta;
 }
+
+Target::Target(unsigned targetId,
+               bool log,
+               const std::string& serverIp,
+               unsigned receptionistPort)
+  :smile(new CheshireCat(targetId, log, serverIp, receptionistPort))
+{}
+
+Target::~Target() throw()
+{}
