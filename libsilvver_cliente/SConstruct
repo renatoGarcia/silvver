@@ -1,0 +1,88 @@
+#!/bin/env python
+
+from os.path import abspath
+
+env = Environment(CPPPATH = [abspath('../common')])
+
+opts = Options()
+
+if env['PLATFORM'] == 'win32':
+    opts.AddOptions(PathOption('prefix',
+                               'Installation prefix',
+                               'C:\\\\Syx', PathOption.PathAccept))
+    env['bindir'] = env['datadir'] = env['rootdir'] = env['libdir'] = '$prefix'
+    env['includedir'] = '$prefix\\\\include'
+    env['docdir'] = '$prefix\\\\doc'
+else:
+    opts.AddOptions(
+        PathOption('prefix',
+                   'Installation prefix',
+                   '/usr/local', PathOption.PathAccept),
+        PathOption('datadir',
+                   'Installation prefix for machine-independent data',
+                   '$prefix/share', PathOption.PathAccept),
+        PathOption('docdir',
+                   'Installation prefix for documentation',
+                   '$datadir/doc', PathOption.PathAccept),
+        PathOption('libdir',
+                   'Installation prefix for object code libraries',
+                   '$exec_prefix/lib', PathOption.PathAccept),
+        PathOption('includedir',
+                   'Installation prefix for C header files',
+                   '$prefix/include', PathOption.PathAccept))
+
+opts.Update (env)
+Help(opts.GenerateHelpText(env))
+
+#=======================================================
+#==== System Configuration
+#=======================================================
+
+conf = Configure(env)
+#-------------------------------------------------------
+print '\n' + 'Mandatory libraries...'
+#-------------------------------------------------------
+lib_headers = [['boost_thread', 'boost/thread/thread.hpp', 'CXX']]
+
+for [lib, header, language] in lib_headers:
+    if not conf.CheckLibWithHeader(lib, header, language):
+        print 'Did not find', lib, 'library'
+        exit(1)
+
+#-------------------------------------------------------
+print '\n' + 'Mandatory headers...'
+#-------------------------------------------------------
+headers = [['boost/lexical_cast.hpp', 'CXX'],
+           ['boost/ref.hpp', 'CXX'],
+           ['boost/scoped_ptr.hpp', 'CXX'],
+           ['sys/timeb.h', 'C'],
+           ['time.h', 'C']]
+for [header, lang] in headers:
+    if not conf.CheckHeader(header, language=lang):
+        print 'Did not find the', header, 'header.'
+        exit(1)
+
+if env['PLATFORM'] == 'win32':
+    net_headers = [['winsock2.h', 'C']]
+    for [header, lang] in net_headers:
+        if not conf.CheckHeader(header, language=lang):
+            print 'Did not find the', header, 'header.'
+            exit(1)
+    env.Append(CXXFLAGS = '-DHAVE_WINDOWS_SOCKETS')
+
+else:
+    net_headers = [['sys/socket.h', 'C'],
+                   ['unistd.h', 'C'],
+                   ['netdb.h', 'C'],
+                   ['netinet/in.h', 'C'],
+                   ['arpa/inet.h', 'C']]
+    for [header, lang] in net_headers:
+        if not conf.CheckHeader(header, language=lang):
+            print 'Did not find the', header, 'header.'
+            exit(1)
+    env.Append(CXXFLAGS = '-DHAVE_LINUX_SOCKETS')
+
+env = conf.Finish()
+
+Export('env', 'opts')
+SConscript('src/SConscript', build_dir='build', duplicate=0)

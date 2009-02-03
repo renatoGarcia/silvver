@@ -1,6 +1,6 @@
 CXX = g++
-LIB_FLAG = -lsilvver_cliente
-CPP_FLAGS = -I../src -L../src/.libs
+LIB_FLAG = -lsilver_client
+CPP_FLAGS = -I../src -I../../common -L../build
 
 all: cliente
 	$(CXX) cliente.o $(LIB_FLAG) $(CPP_FLAGS) -o cliente
