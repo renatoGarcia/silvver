@@ -9,7 +9,7 @@
 #include <boost/thread/thread.hpp>
 #include <boost/thread/mutex.hpp>
 
-#include "conexao.hpp"
+#include "connection.ipp"
 
 class Target::CheshireCat
 {
@@ -27,14 +27,12 @@ private:
               unsigned receptionistPort);
 
   /// Envia um pedido de conexão ao recepcionista do Silvver-servidor, e a cria ao receber a resposta.
-  void makeConnection();
+  void connect();
 
   /// Stop the thread and close the connection with the receptionist.
-  void close();
+  void disconnect();
 
-  /// Método que ficará continuamente esperando pelas mensagens do Silvver-servidor contendo a pose atual.
-  /// Ele será executado em uma thread própria.
-  void operator()();
+  void updatePose();
 
   const unsigned targetId;
 
@@ -44,16 +42,14 @@ private:
   /// Value of last received Pose.
   silver::Pose currentPose;
 
-  boost::scoped_ptr<Connection> receptionist;
+  /// Will holds an Ente until convert it safely to currentPose locking
+  /// mutexCurrentPose.
+  silver::Ente lastEnte;
 
   boost::scoped_ptr<Connection> connection;
 
-  boost::scoped_ptr<boost::thread> th;
-
-  /// Sinalizador utilizado para terminar a função ouvirServidor.
-  bool stop;
-
-  bool closed;
+  bool connected;
+  bool neverConnected;
 
   boost::scoped_ptr<std::ofstream> arqRegistro;
 };
@@ -63,12 +59,10 @@ Target::CheshireCat::CheshireCat(unsigned targetId,
                                  const std::string& serverIp,
                                  unsigned receptionistPort)
   :targetId(targetId)
-  ,receptionist(new Connection(serverIp, receptionistPort))
-  ,stop(false)
-  ,closed(false)
+  ,connection(new Connection(serverIp, receptionistPort))
+  ,connected(false)
+  ,neverConnected(true)
 {
-  this->receptionist->connect();
-
   if(log)
   {
     std::string fileName(boost::lexical_cast<std::string>(targetId) + ".log");
@@ -76,28 +70,13 @@ Target::CheshireCat::CheshireCat(unsigned targetId,
   }
 }
 
-void Target::CheshireCat::close()
-{
-  this->stop = true;
-  this->th->join();
-
-  char pedido[3] = "DC";
-  unsigned connectionPort = connection->getPort();
-
-  receptionist->send((void*)pedido,sizeof(pedido) );
-  receptionist->send((void*)&this->targetId,sizeof(this->targetId));
-  receptionist->send((void*)&connectionPort,sizeof(connectionPort));
-
-  this->closed = true;
-}
-
 Target::CheshireCat::~CheshireCat()
 {
-  if(!this->closed)
+  if(this->connected)
   {
     try
     {
-      this->close();
+      this->disconnect();
     }
     catch(...)
     {
@@ -107,70 +86,66 @@ Target::CheshireCat::~CheshireCat()
 }
 
 void
-Target::CheshireCat::makeConnection()
+Target::CheshireCat::connect()
 {
-  unsigned port;
+  this->connection->connect(this->targetId);
+  this->connected = true;
 
-  receptionist->send((void*)"SD",sizeof("SD") );
-  receptionist->receive((char*)&port,sizeof(port));
-  std::cout << "Porta: " << port << std::endl;
-
-  char OK[3]="OK";
-  char resposta[3];
-
-  this->connection.reset(new Connection(this->receptionist->getPairIP(),
-                                        port));
-  connection->connect();
-  connection->send(OK,sizeof(OK));
-  connection->send((void*)&this->targetId,sizeof(this->targetId));
-  connection->receive(resposta,sizeof(resposta));
-  std::cout << "Resposta: " << resposta << std::endl;
+  if(this->neverConnected)
+  {
+    // This method needs be called just in the first time that connect is
+    // called. In the next times that connect is called, the method updatePose
+    // alread called the connection->asyncRead.
+    this->connection->asyncRead(this->lastEnte,
+                                boost::bind(&Target::CheshireCat::updatePose,
+                                            this));
+    this->neverConnected = false;
+  }
 }
 
 void
-Target::CheshireCat::operator()()
+Target::CheshireCat::disconnect()
 {
-  silver::Ente enteReceptor;
+  this->connection->disconnect(this->targetId);
+  this->connected = false;
+}
 
-  while(!this->stop)
+void
+Target::CheshireCat::updatePose()
+{
+  if((unsigned)this->lastEnte.id == this->targetId)
   {
-    try
-    {
-      this->connection->receive((char*)&enteReceptor, sizeof(enteReceptor));
-    }catch(Connection::Excecoes excecao){
-      if(excecao == Connection::exc_tempoReceber)
-	continue;
-    }
-
-    if((unsigned)enteReceptor.id == this->targetId) // Se o id do ente recebido é igual ao do robô.
     {
       boost::mutex::scoped_lock lock(this->mutexCurrentPose);
-      this->currentPose = silver::Pose(enteReceptor.x,
-                                       enteReceptor.y,
-                                       enteReceptor.theta);
-    }
-    else
-    {
-      std::cerr << "Recebido pacote com ente com id errado." << std::endl
-                << "Id recebido: " << enteReceptor.id << std::endl << std::endl;
-      continue;
+      this->currentPose = silver::Pose(lastEnte.x,
+                                       lastEnte.y,
+                                       lastEnte.theta);
     }
 
     if(this->arqRegistro)
     {
-      *(this->arqRegistro) << enteReceptor.id   << '\t'
-                           << enteReceptor.x    << '\t'
-                           << enteReceptor.y    << '\t'
-                           << enteReceptor.theta << std::endl;
+      *(this->arqRegistro) << lastEnte.id   << '\t'
+                           << lastEnte.x    << '\t'
+                           << lastEnte.y    << '\t'
+                           << lastEnte.theta << std::endl;
     }
   }
+
+  this->connection->asyncRead(this->lastEnte,
+                              boost::bind(&Target::CheshireCat::updatePose,
+                                          this));
 }
 
 void
 Target::connect()
 {
-  smile->makeConnection();
-  smile->th.reset(new boost::thread(boost::ref(*smile)));
+  smile->connect();
+}
+
+void
+Target::disconnect()
+{
+  smile->disconnect();
 }
 
 silver::Pose

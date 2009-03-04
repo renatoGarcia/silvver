@@ -1,15 +1,14 @@
-AM_CPPFLAGS = -Wall
+AM_CPPFLAGS = -Wall -pthread -I../../common
 bin_PROGRAMS = silver_servidor
 
 silver_servidor_SOURCES = clientsMap.cpp \
                           clientsMap.hpp \
-                          connection.cpp \
-                          connection.hpp \
                           inputFactory.cpp \
                           inputFactory.hpp \
                           input.hpp \
                           input_impl.hpp \
                           inputInterface.hpp \
+                          ioConnection.cpp \
                           main.cpp \
                           markerProcessor.cpp \
                           markerProcessor.hpp \

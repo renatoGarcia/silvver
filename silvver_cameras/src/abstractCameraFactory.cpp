@@ -7,8 +7,7 @@ AbstractCamera*
 AbstractCameraFactory::create(const std::string& targetType,
                               const std::vector<scene::Target> &vecTargets,
                               const scene::Camera& cameraConfig,
-                              const std::string& serverIP,
-                              unsigned connectionPort)
+                              boost::shared_ptr<Connection> connection)
 {
   AbstractCamera* abstractCamera;
 
@@ -16,15 +15,13 @@ AbstractCameraFactory::create(const std::string& targetType,
   {
     abstractCamera = new MarkerCamera(vecTargets,
                                       cameraConfig,
-                                      serverIP,
-                                      connectionPort);
+                                      connection);
   }
   else if(targetType == "color_blob")
   {
     abstractCamera = new BlobCamera(vecTargets,
                                     cameraConfig,
-                                    serverIP,
-                                    connectionPort);
+                                    connection);
   }
   else
   {

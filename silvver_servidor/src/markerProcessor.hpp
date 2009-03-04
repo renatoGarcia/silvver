@@ -14,7 +14,7 @@ public:
 
   static boost::shared_ptr<MarkerProcessor> instantiate();
 
-  void deliverPackage(silver::Package<silver::Ente> &pacote, unsigned id);
+  void deliverPackage(std::vector<silver::Ente> &pacote, unsigned id);
 
   // Calcula a configuraçãoo dos robôs, usando os dados atualmente
   // disponíveis no map armazenador.

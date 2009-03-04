@@ -45,7 +45,8 @@ int main(int argc, char **argv)
     verbose = true;
   }
 
-  boost::scoped_ptr<Receptionist> receptionist(new Receptionist(receptionistPort));
+  boost::scoped_ptr<Receptionist>
+    receptionist(new Receptionist(receptionistPort));
   receptionist->run();
 
   getchar();

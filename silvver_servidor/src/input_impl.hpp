@@ -4,60 +4,36 @@
 #include "input.hpp"
 #include "processorFactory_impl.hpp"
 #include <iostream>
-#include <boost/ref.hpp>
+#include <vector>
+#include <boost/bind.hpp>
 #include "silverTypes.hpp"
 
 template <typename Type>
-Input<Type>::Input(boost::shared_ptr<Connection> connection,
-                     ProcessorType processorType)
+Input<Type>::Input(boost::shared_ptr<IoConnection> connection,
+                   ProcessorType processorType)
   :InputInterface()
   ,connection(connection)
-  ,stopping(false)
+  ,connectionPort(connection->getLocalPort())
+  ,processor(ProcessorFactory<Type>::createProcessor(processorType))
 {
-  this->connectionPort = connection->getPort();
-  this->processor = ProcessorFactory<Type>::createProcessor(processorType);
+  this->connection->asyncReceive(this->inputs,
+                                 boost::bind(&Input<Type>::handleReceive,
+                                             this));
 }
 
 template <typename Type>
 Input<Type>::~Input()
-{
-  this->stopping = true;
-  if(this->runThread)
-  {
-    this->runThread->join();
-  }
-}
+{}
 
 template <typename Type>
 void
-Input<Type>::run()
+Input<Type>::handleReceive()
 {
-  if(!this->runThread)
-  {
-    this->runThread.reset(new boost::thread(boost::ref(*this)));
-  }
-}
+  this->processor->deliverPackage(this->inputs, this->connectionPort);
 
-template <typename Type>
-void
-Input<Type>::confirmConnect()
-{
-  char msgOK[3] = "OK";
-
-  this->connection->send(msgOK,sizeof(msgOK));
-}
-
-template <typename Type>
-void
-Input<Type>::operator()()
-{
-  silver::Package<Type> package;
-  std::vector<Type> resultados;
-  while(!this->stopping)
-  {
-    this->connection->receive(&package, sizeof(package),1);
-    this->processor->deliverPackage(package, this->connectionPort);
-  }
+  this->connection->asyncReceive(this->inputs,
+                                 boost::bind(&Input<Type>::handleReceive,
+                                             this));
 }
 
 #endif

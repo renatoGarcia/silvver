@@ -1,35 +1,31 @@
 #include "receptionist.hpp"
-#include "connection.hpp"
+#include "streamConnection.ipp"
+#include "ioConnection.ipp"
 #include <boost/ref.hpp>
 #include <iostream>
 #include "inputFactory.hpp"
+#include <boost/bind.hpp>
+#include <boost/shared_ptr.hpp>
 
 extern bool verbose;
 #define VERBOSE_PRINT(msg) if(verbose)std::cout<<msg;
 
-Receptionist::Receptionist(int port)
-  :stop(false)
-  ,RECECPTIONIST_PORT(port)
+namespace ba = boost::asio;
+namespace bip = boost::asio::ip;
+
+boost::asio::io_service Receptionist::ioService;
+
+Receptionist::Receptionist(unsigned localPort)
+  :acceptor(Receptionist::ioService,
+            bip::tcp::endpoint(bip::tcp::v4(), localPort))
 {
-  this->freePort = port+1;
   this->outputs = ClientsMap::instantiate();
-  ftime(&this->startTime);
 }
 
 Receptionist::~Receptionist()
 {
-  this->stop = true;
+  this->ioService.stop();
   this->thReceptionist->join();
-}
-
-double
-Receptionist::elapsedTime()
-{
-  struct timeb instantTime;
-  ftime(&instantTime);
-
-  return( (double)(instantTime.time - startTime.time) +
-          (double)(instantTime.millitm - startTime.millitm)/1000 );
 }
 
 void
@@ -37,6 +33,13 @@ Receptionist::run()
 {
   if(!this->thReceptionist)
   {
+    StreamConnection::pointer connection =
+      StreamConnection::create(Receptionist::ioService);
+    this->acceptor.async_accept(connection->getSocket(),
+                                boost::bind(&Receptionist::handleAccept,
+                                            this,
+                                            connection));
+
     thReceptionist.reset(new boost::thread(boost::ref(*this)));
   }
 }
@@ -44,78 +47,79 @@ Receptionist::run()
 void
 Receptionist::operator()()
 {
-  char msg[3];
+  Receptionist::ioService.run();
+}
 
-  Connection connection(this->RECECPTIONIST_PORT);
-  connection.initialize();
+void
+Receptionist::handleAccept(StreamConnection::pointer connection)
+{
+  this->currentReception = connection;
+  connection->asyncRead(this->request,
+                        boost::bind(&Receptionist::handleRead,
+                                    this));
 
-  while(!this->stop)
+  StreamConnection::pointer newConnection =
+    StreamConnection::create(Receptionist::ioService);
+  this->acceptor.async_accept(newConnection->getSocket(),
+                              boost::bind(&Receptionist::handleAccept,
+                                          this,
+                                          newConnection));
+}
+
+void
+Receptionist::handleRead()
+{
+  boost::apply_visitor(*this, this->request);
+}
+
+void
+Receptionist::operator()(NullRequest& request) const
+{}
+
+void
+Receptionist::operator()(AddOutput& request) const
+{
+  std::cout << "AddOutput. id: " << request.targetId << std::endl;
+  boost::shared_ptr<IoConnection>
+    ioConnection(new IoConnection(this->currentReception->getRemoteIp(),
+                                  request.localPort));
+
+  this->currentReception->write(ioConnection->getLocalPort());
+
+  this->outputs->addOutput(request, ioConnection);
+}
+
+void
+Receptionist::operator()(DelOutput& request) const
+{
+  std::cout << "DelOutput" << std::endl;
+  this->outputs->removeOutput(request.targetId, request.localPort);
+}
+
+void
+Receptionist::operator()(AddCamera& request)
+{
+  std::cout << "AddCamera" << std::endl;
+
+  boost::shared_ptr<IoConnection>
+    ioConnection(new IoConnection(this->currentReception->getRemoteIp(),
+                                  request.localPort));
+
+  this->currentReception->write(ioConnection->getLocalPort());
+
+  boost::shared_ptr<InputInterface> input =
+    InputFactory::createInput(request.targetType, ioConnection);
+
+  this->mapInputs.insert(std::pair< unsigned,boost::shared_ptr<InputInterface> >
+                         ((unsigned)ioConnection->getRemotePort(), input));
+}
+
+void
+Receptionist::operator()(DelCamera& request)
+{
+  std::cout << "DelCamera" << std::endl;
+  if (this->mapInputs.erase(request.localPort) != 1)
   {
-    connection.receive(msg, sizeof(msg), 1);// Recebe a primeira mensagem
-
-    if(strcmp(msg,"TP") == 0) //Tempo Atual
-    {
-      VERBOSE_PRINT("Receive message: TP (actual time)\n");
-      double instantTime = this->elapsedTime();
-      connection.send(&instantTime, sizeof(instantTime));
-    }
-    else if(strcmp(msg,"PT") == 0) //Nova camera
-    {
-      VERBOSE_PRINT("Receive message: PT (new camera)\n");
-
-      boost::shared_ptr<Connection>
-        inputConnection(new Connection(this->freePort));
-      inputConnection->initialize();
-
-      connection.send(&this->freePort,sizeof(this->freePort));
-
-      char msg[3];
-      inputConnection->receive(msg, sizeof(msg));
-      std::cout << "Confirma conexao: " << msg << std::endl;
-
-      InputType inputType;
-      inputConnection->receive( &inputType,sizeof(InputType) );
-
-      boost::shared_ptr<InputInterface> input =
-        InputFactory::createInput(inputType, inputConnection);
-
-      input->confirmConnect();
-      input->run();
-
-      this->mapInputs.insert(std::pair< unsigned,boost::shared_ptr<InputInterface> >
-                             (this->freePort, input));
-
-      this->freePort++;
-    }
-    else if(strcmp(msg,"SD") == 0 ) //Nova saída
-    {
-      VERBOSE_PRINT("Receive message: SD (connect client)\n");
-      boost::shared_ptr<Connection>
-        outputConnection(new Connection(this->freePort));
-      outputConnection->initialize();
-
-      connection.send(&this->freePort,sizeof(this->freePort));
-
-      this->outputs->addOutput(outputConnection);
-
-      this->freePort++;
-    }
-    else if(strcmp(msg,"DC") == 0) //Desconectar saída
-    {
-      VERBOSE_PRINT("Receive message: DC (disconnect client)\n");
-      unsigned targetId, connectionPort;
-
-      connection.receive(&targetId, sizeof(targetId));
-      connection.receive(&connectionPort, sizeof(connectionPort));
-      this->outputs->removeOutput(targetId, connectionPort);
-
-      std::cout << "Retirado cliente id: " << targetId
-                << " na porta: "<< connectionPort << std::endl;
-    }
-    else
-    {
-//       std::cerr << "Unknown message: " << msg[0] << msg[1] << std::endl;
-    }
-    msg[0]=0;msg[1]=0;msg[2]=0;
+    std::cerr << "Unknown camera delete request" << std::endl;
   }
 }

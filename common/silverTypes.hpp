@@ -14,18 +14,14 @@
 
 namespace silver
 {
-  enum TargetType{
-    COLOR_BLOB = 103,
-    ARTP_MARK  = 104
-  };
-
   /*----------------------------POSITION---------------------*/
   class Position
   {
   public:
+
     double x;
     double y;
-  public:
+
     Position()
       :x(0.0)
       ,y(0.0)
@@ -59,6 +55,7 @@ namespace silver
     {
       return(atan2(position.y - this->y, position.x - this->x));
     }
+
   };
 
   /*----------------------------POSE------------------------*/
@@ -242,6 +239,6 @@ namespace silver
     unsigned short getUsedItems(){return usedItems;}
   };
 
-}//namespace silver
+} // namespace silver
 
 #endif

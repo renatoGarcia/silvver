@@ -5,10 +5,9 @@ class InputInterface
 {
 public:
 
-  virtual void confirmConnect()=0;
+  virtual ~InputInterface(){}
 
-  virtual void run()=0;
-
+//   virtual void run()=0;
 };
 
 #endif

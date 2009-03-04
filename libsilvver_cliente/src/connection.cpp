@@ -13,6 +13,7 @@ namespace bip = boost::asio::ip;
 boost::asio::io_service Connection::ioService;
 boost::scoped_ptr<boost::thread> Connection::th;
 boost::once_flag Connection::onceFlag = BOOST_ONCE_INIT;
+boost::asio::io_service::work Connection::work(Connection::ioService);
 
 void
 Connection::runIoService()
@@ -20,20 +21,12 @@ Connection::runIoService()
   Connection::ioService.run();
 }
 
-// void
-// Connection::makeNewThread()
-// {
-//   Connection::th.reset(new boost::thread(Connection::runIoService));
-// }
-
 Connection::Connection(const std::string& serverIp, unsigned receptionistPort)
   :receptionistSocket(Connection::ioService)
   ,receptionistEP(bip::address::from_string(serverIp), receptionistPort)
-  ,outputSocket(Connection::ioService, bip::udp::endpoint())
+  ,inputSocket(Connection::ioService, bip::udp::endpoint())
+  ,inboundData(UPD_MAX_LENGTH)
 {
-//   boost::call_once(Connection::onceFlag,
-//                    Connection::makeNewThread);
-
   boost::call_once(Connection::onceFlag,
                    boost::bind(&boost::scoped_ptr<boost::thread>::reset,
                                &Connection::th,
@@ -42,48 +35,51 @@ Connection::Connection(const std::string& serverIp, unsigned receptionistPort)
 
 Connection::~Connection()
 {
-  if(this->outputSocket.is_open())
+  if(this->inputSocket.is_open())
   {
     try
     {
-      this->disconnect();
+      std::cerr << "Destructing connection without call disconet"
+                << " before."
+                << std::endl;
+      this->inputSocket.shutdown(bip::udp::socket::shutdown_both);
+      this->inputSocket.close();
     }
     catch(...)
-    {
-      std::cerr << "Error on closing the connection with server" << std::endl;
-    }
+    {}
   }
 }
 
 void
-Connection::connect(const std::string& targetType)
+Connection::connect(unsigned targetId)
 {
   this->receptionistSocket.connect(this->receptionistEP);
 
-  Request request = AddCamera(targetType,
-                              this->outputSocket.local_endpoint().port());
+  Request request = AddOutput(targetId,
+                              this->inputSocket.local_endpoint().port());
   this->writeToReceptionist(request);
 
   unsigned short remotePort;
   this->readFromReceptionist(remotePort);
 
-  this->outputSocket.connect(bip::udp::endpoint(this->receptionistEP.address(),
-                                                remotePort));
+  this->inputSocket.connect(bip::udp::endpoint(this->receptionistEP.address(),
+                                               remotePort));
 
   this->receptionistSocket.shutdown(bip::tcp::socket::shutdown_both);
   this->receptionistSocket.close();
 }
 
 void
-Connection::disconnect()
+Connection::disconnect(unsigned targetId)
 {
   this->receptionistSocket.connect(this->receptionistEP);
 
-  Request request = DelCamera(this->outputSocket.local_endpoint().port());
+  Request request = DelOutput(targetId,
+                              this->inputSocket.local_endpoint().port());
   this->writeToReceptionist(request);
 
-  this->outputSocket.shutdown(bip::udp::socket::shutdown_both);
-  this->outputSocket.close();
+  this->inputSocket.shutdown(bip::udp::socket::shutdown_both);
+  this->inputSocket.close();
 
   this->receptionistSocket.shutdown(bip::tcp::socket::shutdown_both);
   this->receptionistSocket.close();

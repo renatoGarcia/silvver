@@ -5,7 +5,6 @@
 #include <string>
 
 #include <boost/shared_ptr.hpp>
-#include <boost/scoped_ptr.hpp>
 
 #include "abstractCamera.hpp"
 #include "connection.hpp"
@@ -21,7 +20,7 @@ public:
    * @param serverIP IP address where silver-server is running.
    * @param sceneDescriptorFile Path to XML file scene descriptor.
    */
-  SceneMounter(const std::string& serverIP, const int receptionistPort,
+  SceneMounter(const std::string& serverIp, const int receptionistPort,
                const std::string& sceneDescriptorFile);
 
   /** Initialize all abstract cameras.
@@ -38,13 +37,13 @@ private:
 
   const std::string sceneDescriptorFile;
 
-  /// Connection with receptionist of silver-server
-  boost::scoped_ptr<Connection> receptionistConnection;
+  const std::string serverIp;
+  const unsigned receptionistPort;
 
   // Initialize the abstract camera given by cameraConfig
-  void constructAbstractCamera(std::string targetType,
+  void constructAbstractCamera(const std::string& targetType,
                                const std::vector<scene::Target> &vecTargets,
-                               scene::Camera &cameraConfig);
+                               scene::Camera& cameraConfig);
 
   std::vector< boost::shared_ptr<AbstractCamera> > vecAbstractCamera;
 };

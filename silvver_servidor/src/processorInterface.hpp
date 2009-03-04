@@ -1,14 +1,14 @@
 #ifndef PROCESSOR_INTERFACE_HPP
 #define PROCESSOR_INTERFACE_HPP
 
-#include "silverTypes.hpp"
+#include <vector>
 
 template <typename Tinput>
 class ProcessorInterface
 {
 public:
 
-  virtual void deliverPackage(silver::Package<Tinput> &package, unsigned id)=0;
+  virtual void deliverPackage(std::vector<Tinput>& package, unsigned id)=0;
 
 };
 

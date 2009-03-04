@@ -1,12 +1,12 @@
 #include "markerCamera.hpp"
 
+#include "connection.ipp"
 #include "silverTypes.hpp"
 
 MarkerCamera::MarkerCamera(const std::vector<scene::Target> &vecTargets,
                            const scene::Camera& cameraConfig,
-                           const std::string& serverIP,
-                           unsigned connectionPort)
-  :AbstractCamera(cameraConfig, serverIP, connectionPort, silver::ARTP_MARK)
+                           boost::shared_ptr<Connection> connection)
+  :AbstractCamera(cameraConfig, connection)
   ,markerExtractor(new MarkerExtractor(cameraConfig.resolution.at(0),
                                        cameraConfig.resolution.at(1),
                                        vecTargets))
@@ -18,8 +18,6 @@ MarkerCamera::~MarkerCamera()
 void
 MarkerCamera::operator()()
 {
-  this->connect();
-
   this->markerExtractor->initialize();
 
   std::vector<silver::Ente> vecEnte;
@@ -49,7 +47,6 @@ MarkerCamera::operator()()
       vecEnte.push_back(iteMarkerPoints->center);
     }
 
-    package.pack(vecEnte);
-    this->serverConnection->send(&package,sizeof(package));
+    this->serverConnection->send(vecEnte);
   }
 }

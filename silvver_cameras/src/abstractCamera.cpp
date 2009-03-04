@@ -8,13 +8,10 @@
 #include "tsPrint.hpp"
 
 AbstractCamera::AbstractCamera(const scene::Camera& cameraConfig,
-                               const std::string& serverIP,
-                               unsigned connectionPort,
-                               silver::TargetType targetType)
+                               boost::shared_ptr<Connection> connection)
   :currentFrame(NULL)
-  ,serverConnection(new Connection(serverIP, connectionPort))
+  ,serverConnection(connection)
   ,stopping(false)
-  ,targetType(targetType)
   ,hardCamera(HardCameraFactory::create(cameraConfig))
   ,frameCounter(0)
   ,frameRate(0)
@@ -36,26 +33,6 @@ AbstractCamera::AbstractCamera(const scene::Camera& cameraConfig,
 AbstractCamera::~AbstractCamera()
 {
   cvReleaseImage(&currentFrame);
-}
-
-void
-AbstractCamera::connect()
-{
-  this->serverConnection->connect();
-
-  // Envia a segunda mensagem ao recepcionista("OK"), informando que
-  // a conexao foi criada
-  char msgOK[3] = "OK";
-  this->serverConnection->send(msgOK,sizeof(msgOK));
-
-  // Envia a terceira mensagem ao recepcionista, informando o código
-  // do dado que será transmitido
-  int tipoDado = this->targetType;
-  this->serverConnection->send(&tipoDado,sizeof(tipoDado));
-
-  char msg[3];
-  // Espera uma mensagem de confirmação
-  this->serverConnection->receive(msg,sizeof(msg));
 }
 
 void

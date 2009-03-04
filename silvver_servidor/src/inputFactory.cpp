@@ -1,5 +1,6 @@
 #include "inputFactory.hpp"
 #include "input_impl.hpp"
+#include "ioConnection.ipp"
 #include <boost/lexical_cast.hpp>
 #include "silverTypes.hpp"
 #include "processorFactory.hpp"
@@ -8,18 +9,18 @@ InputFactory::InputFactory()
 {}
 
 boost::shared_ptr<InputInterface>
-InputFactory::createInput(InputType inputType,
-                            boost::shared_ptr<Connection> connection)
+InputFactory::createInput(TargetType targetType,
+                          boost::shared_ptr<IoConnection> connection)
 {
   boost::shared_ptr<InputInterface> returnPtr;
 
-  switch(inputType)
+  switch(targetType.state)
   {
-  case ARTP_MARK:
+  case TargetType::ARTP_MARK:
     {
       ProcessorType t = MARKER;
       returnPtr.reset(new Input<silver::Ente>(connection,
-                                             t));
+                                              t));
       break;
     }
 //   case COLOR_BLOB:
@@ -30,8 +31,8 @@ InputFactory::createInput(InputType inputType,
 //     }
   default:
     {
-      throw std::invalid_argument("Unknown inputType code: " +
-                                  boost::lexical_cast<std::string>(inputType));
+//       throw std::invalid_argument("Unknown inputType code: " +
+//                                   boost::lexical_cast<std::string>(inputType));
     }
   }
 

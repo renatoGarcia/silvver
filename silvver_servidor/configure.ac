@@ -21,6 +21,8 @@ dnl ========================================================================
 
 AC_CHECK_LIB([boost_thread], [sleep])
 AC_CHECK_LIB([boost_program_options], [main])
+AC_CHECK_LIB([boost_system], [main])
+AC_CHECK_LIB([boost_serialization], [main])
 
 dnl ========================================================================
 dnl === Checks for header files.                                           =

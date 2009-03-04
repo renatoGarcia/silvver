@@ -5,7 +5,7 @@
 #include <boost/shared_ptr.hpp>
 #include <boost/scoped_ptr.hpp>
 #include <boost/thread.hpp>
-#include "connection.hpp"
+#include "ioConnection.hpp"
 #include "processor.hpp"
 #include "processorFactory.hpp"
 
@@ -14,28 +14,22 @@ class Input : public InputInterface
 {
 public:
 
-  Input(boost::shared_ptr<Connection> connection,
+  Input(boost::shared_ptr<IoConnection> connection,
         ProcessorType processorType);
 
-  virtual ~Input();
-
-  virtual void confirmConnect();
-
-  virtual void run();
-
-  void operator()();
+  ~Input();
 
 private:
 
-  boost::shared_ptr<Connection> connection;
+  std::vector<Type> inputs;
 
-  bool stopping;
-
-  boost::scoped_ptr<boost::thread> runThread;
+  boost::shared_ptr<IoConnection> connection;
 
   unsigned connectionPort;
 
   boost::shared_ptr< ProcessorInterface<Type> > processor;
+
+  void handleReceive();
 };
 
 #endif

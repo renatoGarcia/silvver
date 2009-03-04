@@ -1,70 +1,68 @@
 #ifndef CONNECTION_HPP
 #define CONNECTION_HPP
 
-#ifdef HAVE_CONFIG_H
-#include <config.h>
-#endif
-
-#ifdef HAVE_WINDOWS_SOCKETS
-#include <winsock.h>
-#include <stdio.h>
-#endif
-
-#ifdef HAVE_LINUX_SOCKETS
-#include <sys/socket.h>
-#include <netdb.h>
-#include <netinet/in.h>
-#include <arpa/inet.h>
-#define SOCKET int
-#endif
-
 #include <string>
+
+#include <silverTypes.hpp>
+#include <iostream>
+#include <boost/array.hpp>
+#include <boost/asio.hpp>
+#include <boost/archive/text_iarchive.hpp>
+#include <boost/archive/text_oarchive.hpp>
+#include <boost/thread/thread.hpp>
+#include <boost/thread/once.hpp>
+#include <boost/scoped_ptr.hpp>
+#include <boost/tuple/tuple.hpp>
+#include <boost/bind.hpp>
+
+#include "scene.hpp"
 
 class Connection
 {
 public:
 
-  Connection(std::string pairIP, unsigned port);
+  Connection(const std::string& serverIp, unsigned receptionistPort);
 
-  void connect();
+  ~Connection();
 
-  void send(void *msg, int tamanho)const;
+  void connect(const std::string& targetType);
 
-  void receive(char *msg, int tamanho);
+  void disconnect();
 
-  std::string getPairIP() const
-  {
-    return this->pairIP;
-  }
-
-  unsigned getPort() const
-  {
-    return this->port;
-  }
+  template <typename T>
+  void send(const T& t);
 
 private:
 
-  const std::string pairIP;
+  friend class boost::thread;
 
-  const unsigned port;
+  static const unsigned HEADER_LENGTH = 8;
 
-  // Socket para comunicação com o servidor.
-  SOCKET SocketConnection;
+  static boost::asio::io_service ioService;
 
-  // Define as caracteristicas do cliente
-  sockaddr_in infConnection;
+  static boost::scoped_ptr<boost::thread> th;
 
-  // SenderAddr.sin_family conterá o endereço
-  sockaddr_in SenderAddr;
+  static boost::once_flag onceFlag;
 
-  // Tamanhos em bytes de sockaddr_in SenderAddr.
-  #ifdef HAVE_WINDOWS_SOCKETS
-  int SenderAddrSize;
-  #endif
-  #ifdef HAVE_LINUX_SOCKETS
-  socklen_t SenderAddrSize;
-  #endif
+//   static void makeNewThread();
 
+  static void runIoService();
+
+  boost::asio::ip::tcp::socket receptionistSocket;
+
+  const boost::asio::ip::tcp::endpoint receptionistEP;
+
+  boost::asio::ip::udp::socket outputSocket;
+
+//   char inboundHeader[HEADER_LENGTH];
+
+//   std::vector<char> inboundData;
+
+  template <typename T>
+  void writeToReceptionist(const T& t);
+
+  template <typename T>
+  void readFromReceptionist(T& t);
 };
 
-#endif
+#endif // CONNECTION_HPP

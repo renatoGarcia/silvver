@@ -6,8 +6,10 @@
 #include <boost/shared_ptr.hpp>
 #include "inputInterface.hpp"
 #include "clientsMap.hpp"
+#include "streamConnection.hpp"
 #include <map>
-#include <sys/timeb.h>
+#include <boost/asio.hpp>
+#include <request.hpp>
 
 extern bool verbose;
 
@@ -18,31 +20,38 @@ extern bool verbose;
 class Receptionist
 {
 public:
-  Receptionist(int port);
+  Receptionist(unsigned localPort);
 
   ~Receptionist();
 
-  /// Inicia a escuta por pedidos de conexão.
   void run();
 
-  /** Método que tratará de todos os pedidos de conexão ao silvver-servidor.
-   * Este método ouvirá a porta dada por RECEPCIONISTA_PORTA, criará uma conexão permanente
-   * para o novo cliente, e encaminhará a nova conexão para uma classe apropriada.
-   */
   void operator()();
+
+  // Necessary for boost::apply_visitor function to receive a Receptionist
+  // object as an argument. With this typedef, the Receptionist class fulfills
+  // the requirements of a "static visitor" boost::variant concept.
+  typedef void result_type;
+
+  // Visitors of the boost::variant Request type.
+  void operator()(NullRequest& request) const;
+  void operator()(AddOutput& request) const;
+  void operator()(DelOutput& request) const;
+  void operator()(AddCamera& request);
+  void operator()(DelCamera& request);
 
 private:
 
-  bool stop;
+  static boost::asio::io_service ioService;
 
-  /// Tempo do sistema no instante inicial da execução do silvver-servidor, serve como referência para sincronizar as câmeras.
-  struct timeb startTime;
+  boost::asio::ip::tcp::acceptor acceptor;
 
-  /// Porta onde o método Recepcionista ouvirá os pedidos de conexão. O valor padrão é 12000.
-  const unsigned RECECPTIONIST_PORT;
+  StreamConnection::pointer currentReception;
+  Request request;
 
-  /// Porta livre que será utilizada no próximo pedido de conexão.
-  unsigned freePort;
+  void handleAccept(StreamConnection::pointer connection);
+
+  void handleRead();
 
   std::map<unsigned, boost::shared_ptr<InputInterface> > mapInputs;
 
@@ -50,10 +59,6 @@ private:
 
   /// Thread onde onde será executado o método Recepcionista.
   boost::scoped_ptr<boost::thread> thReceptionist;
-
-  /// Retorna em segundos o tempo transcorrido desde a instanciação do receptor.
-  double elapsedTime();
-
 };
 
 #endif

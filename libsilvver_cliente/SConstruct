@@ -85,4 +85,4 @@ else:
 env = conf.Finish()
 
 Export('env', 'opts')
-SConscript('src/SConscript', build_dir='build', duplicate=0)
+SConscript('./src/SConscript', build_dir='./build', duplicate=0)

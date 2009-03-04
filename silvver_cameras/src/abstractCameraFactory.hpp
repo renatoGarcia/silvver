@@ -6,6 +6,7 @@
 #include <vector>
 #include <string>
 
+#include "connection.hpp"
 #include "scene.hpp"
 
 class AbstractCameraFactory
@@ -16,8 +17,7 @@ public:
   create(const std::string& targetType,
          const std::vector<scene::Target> &vecTargets,
          const scene::Camera& cameraConfig,
-         const std::string& serverIP,
-         unsigned connectionPort);
+         boost::shared_ptr<Connection> connection);
 
 private:
 

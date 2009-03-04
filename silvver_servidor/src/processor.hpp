@@ -12,7 +12,7 @@ class Processor : public ProcessorInterface<Tinput>
 {
 public:
 
-  virtual void deliverPackage(silver::Package<Tinput> &package, unsigned id)=0;
+  virtual void deliverPackage(std::vector<Tinput>& package, unsigned id)=0;
 
 protected:
 

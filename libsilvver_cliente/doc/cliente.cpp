@@ -14,7 +14,7 @@ using namespace std;
 
 int main(int argc,char **argv)
 {
-  int id = 1;
+  int id = 7;
   std::string ip("127.0.0.1");
 
   if(argc>1)
@@ -33,8 +33,8 @@ int main(int argc,char **argv)
 
   double x,y,teta;
 
-  for(int i=10; i>0; i--)
-//   while(true)
+//  for(int i=10; i>0; i--)
+   while(true)
   {
     target.getPose(x,y,teta);
     cout << "X: " << x << "\tY: " << y << "\tTeta: " << teta << endl;

@@ -1,7 +1,7 @@
 Import('env', 'opts')
 
 sources = Split("""target.cpp
-                   conexao.cpp""")
+                   connection.cpp""")
 
 env.StaticLibrary('silver_client', sources)
 env.SharedLibrary('silver_client', sources)

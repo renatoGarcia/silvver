@@ -1,5 +1,6 @@
 #include "clientsMap.hpp"
 #include <iostream>
+#include "ioConnection.ipp"
 
 boost::shared_ptr<ClientsMap> ClientsMap::singleInstance;
 boost::mutex ClientsMap::instantiatingMutex;
@@ -20,32 +21,18 @@ ClientsMap::ClientsMap()
 {}
 
 void
-ClientsMap::addOutput(boost::shared_ptr<Connection> outputConnection)
+ClientsMap::addOutput(AddOutput& request,
+                      boost::shared_ptr<IoConnection> outputConnection)
 {
-  char msg[3];
-  char OK[3] = "OK";
-  int clientId;
+//   std::cout << "ID: " << clientId << std::endl;
+  boost::mutex::scoped_lock lock(this->accessMap);
 
-  outputConnection->receive(msg,sizeof(msg)); //Deverá receber como resposta a mensagem "OK".
-  std::cout << "Confirma conexao: " << msg << std::endl;
-
-  outputConnection->receive( &clientId,sizeof(int) );
-  std::cout << "ID: " << clientId << std::endl;
-
-  {
-    boost::mutex::scoped_lock lock(this->accessMap);
-
-    TMultiMap::iterator it =
-      this->client.insert(std::pair< unsigned,boost::shared_ptr<Connection> >
-                          (clientId, outputConnection));
-
-    it->second->send(OK,sizeof(OK));
-  }
-
+  this->client.insert(std::pair< unsigned, boost::shared_ptr<IoConnection> >
+                      (request.targetId, outputConnection));
 }
 
 void
-ClientsMap::removeOutput(unsigned idTarget, unsigned connectionPort)
+ClientsMap::removeOutput(unsigned idTarget, unsigned remotePort)
 {
   boost::mutex::scoped_lock lock(this->accessMap);
 
@@ -56,14 +43,14 @@ ClientsMap::removeOutput(unsigned idTarget, unsigned connectionPort)
       it != range.second;
       ++it)
   {
-    if(it->second->getPort() == connectionPort)
+    if(it->second->getRemotePort() == remotePort)
     {
       this->client.erase(it);
     }
   }
 }
 
-std::vector< boost::shared_ptr<Connection> >
+std::vector< boost::shared_ptr<IoConnection> >
 ClientsMap::findClient(unsigned idTarget)
 {
   boost::mutex::scoped_lock lock(this->accessMap);
@@ -71,7 +58,7 @@ ClientsMap::findClient(unsigned idTarget)
   std::pair< TMultiMap::iterator, TMultiMap::iterator >
     range(this->client.equal_range(idTarget));
 
-  std::vector< boost::shared_ptr<Connection> > vecConnection;
+  std::vector< boost::shared_ptr<IoConnection> > vecConnection;
   for(TMultiMap::iterator it = range.first;
       it != range.second;
       ++it)

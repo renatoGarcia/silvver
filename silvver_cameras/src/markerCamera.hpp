@@ -5,8 +5,10 @@
 #include <string>
 
 #include <boost/scoped_ptr.hpp>
+#include <boost/shared_ptr.hpp>
 
 #include "abstractCamera.hpp"
+#include "connection.hpp"
 #include "markerExtractor.hpp"
 
 /// Implements an abstract camerata which look for artp markers
@@ -16,8 +18,7 @@ public:
 
   MarkerCamera(const std::vector<scene::Target>& vecTargets,
                const scene::Camera& cameraConfig,
-               const std::string& serverIP,
-               unsigned connectionPort);
+               boost::shared_ptr<Connection> connection);
 
   ~MarkerCamera();
 

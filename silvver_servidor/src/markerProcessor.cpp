@@ -21,15 +21,11 @@ MarkerProcessor::MarkerProcessor()
 }
 
 void
-MarkerProcessor::deliverPackage(silver::Package<silver::Ente> &pacote,
+MarkerProcessor::deliverPackage(std::vector<silver::Ente> &pacote,
                                 unsigned id)
 {
-  std::vector<silver::Ente> vecEnte;
-
-  pacote.unpack(vecEnte);
-
   boost::mutex::scoped_lock lock(mutexArmazenador);
-  armazenador[id] = vecEnte;
+  armazenador[id] = pacote;
 
   this->localize();
 }

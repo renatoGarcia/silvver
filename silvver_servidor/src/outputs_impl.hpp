@@ -3,6 +3,7 @@
 
 #include "outputs.hpp"
 #include <boost/foreach.hpp>
+#include "ioConnection.ipp"
 
 template <typename Toutput>
 Outputs<Toutput>::Outputs()
@@ -16,8 +17,8 @@ template <typename Toutput>
 void
 Outputs<Toutput>::sendResults(const std::vector<Toutput> &vecResults)
 {
-  std::vector< boost::shared_ptr<Connection> > vecConnection;
-  boost::shared_ptr<Connection> connectionPtr;
+  std::vector< boost::shared_ptr<IoConnection> > vecConnection;
+  boost::shared_ptr<IoConnection> connectionPtr;
 
   BOOST_FOREACH(Toutput output, vecResults)
   {
@@ -28,10 +29,9 @@ Outputs<Toutput>::sendResults(const std::vector<Toutput> &vecResults)
 
     BOOST_FOREACH(connectionPtr, vecConnection)
     {
-      connectionPtr->send((void*)&(output), sizeof(output));
+      connectionPtr->send(output);
     }
   }
-
 }
 
 #endif

@@ -80,7 +80,8 @@ lib_headers = [['ARToolKitPlus', 'ARToolKitPlus/TrackerSingleMarker.h', 'CXX'],
                ['highgui', 'opencv/highgui.h', 'C'],
                ['boost_filesystem', 'boost/filesystem.hpp', 'CXX'],
                ['boost_program_options', 'boost/program_options.hpp', 'CXX'],
-               ['boost_thread', 'boost/thread/thread.hpp', 'CXX']]
+               ['boost_thread', 'boost/thread/thread.hpp', 'CXX'],
+               ['boost_serialization', 'boost/serialization/serialization.hpp', 'CXX']]
 
 for [lib, header, language] in lib_headers:
     if not conf.CheckLibWithHeader(lib, header, language):

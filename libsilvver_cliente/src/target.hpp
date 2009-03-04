@@ -27,6 +27,8 @@ public:
   /// Connect to the silver-server.
   void connect();
 
+  void disconnect();
+
   /** Get the last received pose.
    * @param x X coordinate [m].
    * @param y Y coordinate [m].

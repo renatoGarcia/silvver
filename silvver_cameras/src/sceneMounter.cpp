@@ -5,31 +5,21 @@
 #include "tsPrint.hpp"
 #include "xmlParser.hpp"
 #include "abstractCameraFactory.hpp"
+#include <request.hpp>
 
-SceneMounter::SceneMounter(const std::string& serverIP,
+SceneMounter::SceneMounter(const std::string& serverIp,
                            const int receptionistPort,
                            const std::string& sceneDescriptorFile)
   :sceneDescriptorFile(sceneDescriptorFile)
-{
-  receptionistConnection.reset(new Connection(serverIP, receptionistPort));
-}
+  ,serverIp(serverIp)
+  ,receptionistPort(receptionistPort)
+{}
 
 void
 SceneMounter::mount()
 {
-  // Está aqui só para compilar, não é usado.
-  double tempoInicial = 0;
-
   const XmlParser xmlParser = XmlParser();
   const scene::Scene scene = xmlParser.parseFile(this->sceneDescriptorFile);
-  this->receptionistConnection->connect();
-
-  char msgTP[3] = "TP";
-  this->receptionistConnection->send((void*)msgTP, sizeof(msgTP));
-
-  // Recebe o tempo atual no silvver-servidor.
-  this->receptionistConnection->receive((char*)&tempoInicial,
-                                        sizeof(tempoInicial) );
 
   // The std::string is the name of target type, and the std::vector is
   // the set of all the targets of that type.
@@ -50,31 +40,20 @@ SceneMounter::mount()
 }
 
 void
-SceneMounter::constructAbstractCamera(std::string targetType,
+SceneMounter::constructAbstractCamera(const std::string& targetType,
                                       const std::vector<scene::Target>& vecTargets,
-                                      scene::Camera &cameraConfig)
+                                      scene::Camera& cameraConfig)
 {
-  char msgPT[3] = "PT";
-  std::string serverIP = this->receptionistConnection->getPairIP();
-  unsigned connectionPort;
+  boost::shared_ptr<Connection>
+    connection(new Connection(this->serverIp, this->receptionistPort));
 
-  // Envia a primeira mensagem ao recepcionista, uma string "PT".
-  this->receptionistConnection->send((void*)msgPT, sizeof(msgPT));
+  connection->connect(targetType);
 
-  // Recebe como resposta a porta na qual a câmera deverá se conectar.
-  this->receptionistConnection->receive((char*)&connectionPort,
-                                        sizeof(unsigned));
-
-  {PRINT_LOCK;
-   std::cout << "PORTA: " << connectionPort << std::endl;}
-
-  boost::shared_ptr<AbstractCamera> abstractCameraPtr =
-    boost::shared_ptr<AbstractCamera>
-    (AbstractCameraFactory::create(targetType,
-                                   vecTargets,
-                                   cameraConfig,
-                                   serverIP,
-                                   connectionPort));
+  boost::shared_ptr<AbstractCamera>
+    abstractCameraPtr(AbstractCameraFactory::create(targetType,
+                                                    vecTargets,
+                                                    cameraConfig,
+                                                    connection));
 
   this->vecAbstractCamera.push_back(abstractCameraPtr);
 
