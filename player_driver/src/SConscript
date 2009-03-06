@@ -1,0 +1,8 @@
+Import('env', 'opts')
+
+sources = Split("""../../libsilvver_cliente/src/target.cpp
+                   ../../libsilvver_cliente/src/connection.cpp
+                   silverDriver2_0.cpp""")
+
+env.StaticLibrary('silver_player', sources)
+env.SharedLibrary('silver_player', sources)

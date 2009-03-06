@@ -4,7 +4,7 @@ from os.path import abspath
 from commands import getoutput
 
 env = Environment(CPPPATH = [abspath('../common'),
-                             abspath('../libsilvver_client/src')])
+                             abspath('../libsilvver_cliente/src')])
 
 env.ParseConfig("pkg-config playercore --cflags --libs")
 
