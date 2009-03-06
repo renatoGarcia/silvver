@@ -2,7 +2,15 @@
 #define CONNECTION_IPP
 
 #include "connection.hpp"
-#include <serializations.hpp>
+
+#include <sstream>
+
+#include <boost/archive/text_iarchive.hpp>
+#include <boost/archive/text_oarchive.hpp>
+#include <boost/asio/read.hpp>
+#include <boost/asio/write.hpp>
+
+#include "serializations.hpp"
 
 namespace bip = boost::asio::ip;
 

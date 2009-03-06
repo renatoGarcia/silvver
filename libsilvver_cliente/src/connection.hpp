@@ -2,15 +2,15 @@
 #define CONNECTION_HPP
 
 #include <string>
+#include <vector>
 
-#include <silverTypes.hpp>
-#include <iostream>
-#include <boost/array.hpp>
-#include <boost/asio.hpp>
-#include <boost/archive/text_iarchive.hpp>
-#include <boost/archive/text_oarchive.hpp>
+#include <boost/asio/ip/tcp.hpp>
+#include <boost/asio/ip/udp.hpp>
+#include <boost/asio/buffer.hpp>
+#include <boost/asio/placeholders.hpp>
 #include <boost/thread/thread.hpp>
 #include <boost/thread/once.hpp>
+#include <boost/ref.hpp>
 #include <boost/scoped_ptr.hpp>
 #include <boost/tuple/tuple.hpp>
 #include <boost/bind.hpp>

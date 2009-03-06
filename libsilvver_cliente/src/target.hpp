@@ -4,7 +4,7 @@
 #include <memory>
 #include <string>
 
-#include <silverTypes.hpp>
+#include "silverTypes.hpp"
 
 /// Reprents a target looked by Silver.
 class Target
@@ -45,4 +45,4 @@ private:
   std::auto_ptr<CheshireCat> smile;
 };
 
-#endif
+#endif // TARGET_HPP

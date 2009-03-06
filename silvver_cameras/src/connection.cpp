@@ -20,20 +20,11 @@ Connection::runIoService()
   Connection::ioService.run();
 }
 
-// void
-// Connection::makeNewThread()
-// {
-//   Connection::th.reset(new boost::thread(Connection::runIoService));
-// }
-
 Connection::Connection(const std::string& serverIp, unsigned receptionistPort)
   :receptionistSocket(Connection::ioService)
   ,receptionistEP(bip::address::from_string(serverIp), receptionistPort)
   ,outputSocket(Connection::ioService, bip::udp::endpoint())
 {
-//   boost::call_once(Connection::onceFlag,
-//                    Connection::makeNewThread);
-
   boost::call_once(Connection::onceFlag,
                    boost::bind(&boost::scoped_ptr<boost::thread>::reset,
                                &Connection::th,

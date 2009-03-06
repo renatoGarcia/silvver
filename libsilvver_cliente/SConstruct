@@ -52,35 +52,29 @@ for [lib, header, language] in lib_headers:
 #-------------------------------------------------------
 print '\n' + 'Mandatory headers...'
 #-------------------------------------------------------
-headers = [['boost/lexical_cast.hpp', 'CXX'],
+headers = [['boost/archive/text_iarchive.hpp', 'CXX'],
+           ['boost/archive/text_oarchive.hpp', 'CXX'],
+           ['boost/asio/buffer.hpp', 'CXX'],
+           ['boost/asio/ip/tcp.hpp', 'CXX'],
+           ['boost/asio/ip/udp.hpp', 'CXX'],
+           ['boost/asio/placeholders.hpp', 'CXX'],
+           ['boost/asio/read.hpp', 'CXX'],
+           ['boost/asio/write.hpp', 'CXX'],
+           ['boost/bind.hpp', 'CXX'],
+           ['boost/lexical_cast.hpp', 'CXX'],
            ['boost/ref.hpp', 'CXX'],
            ['boost/scoped_ptr.hpp', 'CXX'],
-           ['sys/timeb.h', 'C'],
-           ['time.h', 'C']]
+           ['boost/thread/mutex.hpp', 'CXX'],
+           ['boost/thread/once.hpp', 'CXX'],
+           ['boost/thread/thread.hpp', 'CXX'],
+           ['boost/tuple/tuple.hpp', 'CXX']]
+
 for [header, lang] in headers:
     if not conf.CheckHeader(header, language=lang):
         print 'Did not find the', header, 'header.'
         exit(1)
 
-if env['PLATFORM'] == 'win32':
-    net_headers = [['winsock2.h', 'C']]
-    for [header, lang] in net_headers:
-        if not conf.CheckHeader(header, language=lang):
-            print 'Did not find the', header, 'header.'
-            exit(1)
-    env.Append(CXXFLAGS = '-DHAVE_WINDOWS_SOCKETS')
-
-else:
-    net_headers = [['sys/socket.h', 'C'],
-                   ['unistd.h', 'C'],
-                   ['netdb.h', 'C'],
-                   ['netinet/in.h', 'C'],
-                   ['arpa/inet.h', 'C']]
-    for [header, lang] in net_headers:
-        if not conf.CheckHeader(header, language=lang):
-            print 'Did not find the', header, 'header.'
-            exit(1)
-    env.Append(CXXFLAGS = '-DHAVE_LINUX_SOCKETS')
+print
 
 env = conf.Finish()
 

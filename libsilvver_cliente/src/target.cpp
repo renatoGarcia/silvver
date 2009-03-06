@@ -1,12 +1,11 @@
 #include "target.hpp"
 
-#include <iostream>
 #include <fstream>
+#include <iostream>
 
+#include <boost/bind.hpp>
 #include <boost/lexical_cast.hpp>
-#include <boost/ref.hpp>
 #include <boost/scoped_ptr.hpp>
-#include <boost/thread/thread.hpp>
 #include <boost/thread/mutex.hpp>
 
 #include "connection.ipp"
@@ -20,7 +19,6 @@ public:
 private:
 
   friend class Target;
-  friend class boost::thread;
 
   CheshireCat(unsigned targetId, bool log,
               const std::string& serverIp,
@@ -63,7 +61,7 @@ Target::CheshireCat::CheshireCat(unsigned targetId,
   ,connected(false)
   ,neverConnected(true)
 {
-  if(log)
+  if (log)
   {
     std::string fileName(boost::lexical_cast<std::string>(targetId) + ".log");
     arqRegistro.reset(new std::ofstream(fileName.c_str()));
@@ -72,7 +70,7 @@ Target::CheshireCat::CheshireCat(unsigned targetId,
 
 Target::CheshireCat::~CheshireCat()
 {
-  if(this->connected)
+  if (this->connected)
   {
     try
     {
@@ -91,7 +89,7 @@ Target::CheshireCat::connect()
   this->connection->connect(this->targetId);
   this->connected = true;
 
-  if(this->neverConnected)
+  if (this->neverConnected)
   {
     // This method needs be called just in the first time that connect is
     // called. In the next times that connect is called, the method updatePose
@@ -113,7 +111,7 @@ Target::CheshireCat::disconnect()
 void
 Target::CheshireCat::updatePose()
 {
-  if((unsigned)this->lastEnte.id == this->targetId)
+  if ((unsigned)this->lastEnte.id == this->targetId)
   {
     {
       boost::mutex::scoped_lock lock(this->mutexCurrentPose);

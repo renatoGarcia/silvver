@@ -44,8 +44,6 @@ private:
 
   static boost::once_flag onceFlag;
 
-//   static void makeNewThread();
-
   static void runIoService();
 
   boost::asio::ip::tcp::socket receptionistSocket;
@@ -53,10 +51,6 @@ private:
   const boost::asio::ip::tcp::endpoint receptionistEP;
 
   boost::asio::ip::udp::socket outputSocket;
-
-//   char inboundHeader[HEADER_LENGTH];
-
-//   std::vector<char> inboundData;
 
   template <typename T>
   void writeToReceptionist(const T& t);

@@ -1,12 +1,8 @@
 #include "connection.ipp"
+
 #include <iostream>
-#include <string>
-#include <sstream>
-#include <boost/bind.hpp>
-#include <boost/lexical_cast.hpp>
-#include <boost/serialization/variant.hpp>
-#include <vector>
-#include <request.hpp>
+
+#include "request.hpp"
 
 namespace bip = boost::asio::ip;
 
