@@ -6,6 +6,7 @@
 #include <boost/bind.hpp>
 #include <boost/lexical_cast.hpp>
 #include <boost/scoped_ptr.hpp>
+#include <boost/thread/condition.hpp>
 #include <boost/thread/mutex.hpp>
 
 #include "connection.ipp"
@@ -37,8 +38,13 @@ private:
   /// Synchronize the write and read in currentPose.
   boost::mutex mutexCurrentPose;
 
+  boost::condition_variable newPoseCondition;
+
   /// Value of last received Pose.
   silver::Pose currentPose;
+
+  // Signalize a never returned/read currentPose.
+  bool currentPoseIsNew;
 
   /// Will holds an Ente until convert it safely to currentPose locking
   /// mutexCurrentPose.
@@ -47,7 +53,6 @@ private:
   boost::scoped_ptr<Connection> connection;
 
   bool connected;
-  bool neverConnected;
 
   boost::scoped_ptr<std::ofstream> arqRegistro;
 };
@@ -57,9 +62,9 @@ Target::CheshireCat::CheshireCat(unsigned targetId,
                                  const std::string& serverIp,
                                  unsigned receptionistPort)
   :targetId(targetId)
+  ,currentPoseIsNew(false)
   ,connection(new Connection(serverIp, receptionistPort))
   ,connected(false)
-  ,neverConnected(true)
 {
   if (log)
   {
@@ -89,16 +94,9 @@ Target::CheshireCat::connect()
   this->connection->connect(this->targetId);
   this->connected = true;
 
-  if (this->neverConnected)
-  {
-    // This method needs be called just in the first time that connect is
-    // called. In the next times that connect is called, the method updatePose
-    // alread called the connection->asyncRead.
-    this->connection->asyncRead(this->lastEnte,
+  this->connection->asyncRead(this->lastEnte,
                                 boost::bind(&Target::CheshireCat::updatePose,
                                             this));
-    this->neverConnected = false;
-  }
 }
 
 void
@@ -119,6 +117,9 @@ Target::CheshireCat::updatePose()
                                        lastEnte.y,
                                        lastEnte.theta);
     }
+
+    this->currentPoseIsNew = true;
+    this->newPoseCondition.notify_one();
 
     if(this->arqRegistro)
     {
@@ -146,17 +147,83 @@ Target::disconnect()
   smile->disconnect();
 }
 
+unsigned
+Target::getId()
+{
+  return smile->targetId;
+}
+
 silver::Pose
-Target::getPose()
+Target::getLastPose()
 {
   boost::mutex::scoped_lock lock(smile->mutexCurrentPose);
+
+  smile->currentPoseIsNew = false;
   return smile->currentPose;
 }
 
 void
-Target::getPose(double &x,double &y, double &theta)
+Target::getLastPose(double &x,double &y, double &theta)
 {
   boost::mutex::scoped_lock lock(smile->mutexCurrentPose);
+
+  smile->currentPoseIsNew = false;
+  x     = smile->currentPose.x;
+  y     = smile->currentPose.y;
+  theta = smile->currentPose.theta;
+}
+
+silver::Pose
+Target::getNewPose()
+{
+  boost::mutex::scoped_lock lock(smile->mutexCurrentPose);
+
+  if (!smile->currentPoseIsNew)
+  {
+    throw Target::old_pose_error("The current pose was read already");
+  }
+
+  smile->currentPoseIsNew = false;
+  return smile->currentPose;
+}
+
+void
+Target::getNewPose(double &x,double &y, double &theta)
+{
+  boost::mutex::scoped_lock lock(smile->mutexCurrentPose);
+
+  if (!smile->currentPoseIsNew)
+  {
+    throw Target::old_pose_error("The current pose was read already");
+  }
+
+  smile->currentPoseIsNew = false;
+  x     = smile->currentPose.x;
+  y     = smile->currentPose.y;
+  theta = smile->currentPose.theta;
+}
+
+silver::Pose
+Target::getNextPose()
+{
+  boost::mutex::scoped_lock lock(smile->mutexCurrentPose);
+
+  // Wait for updatePose function notifies a new pose.
+  smile->newPoseCondition.wait(lock);
+
+  smile->currentPoseIsNew = false;
+  return smile->currentPose;
+}
+
+void
+Target::getNextPose(double &x,double &y, double &theta)
+{
+  boost::mutex::scoped_lock lock(smile->mutexCurrentPose);
+
+  // Wait for updatePose function notifies a new pose.
+  smile->newPoseCondition.wait(lock);
+
+  smile->currentPoseIsNew = false;
   x     = smile->currentPose.x;
   y     = smile->currentPose.y;
   theta = smile->currentPose.theta;

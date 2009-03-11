@@ -2,7 +2,8 @@
 
 from os.path import abspath
 
-env = Environment(CPPPATH = [abspath('../common')])
+env = Environment(CPPPATH = [abspath('../common')],
+                  CPPFLAGS = ['-Wall', '-ggdb'])
 
 opts = Options()
 

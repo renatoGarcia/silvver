@@ -8,25 +8,34 @@ namespace bip = boost::asio::ip;
 
 boost::asio::io_service Connection::ioService;
 boost::scoped_ptr<boost::thread> Connection::th;
-boost::once_flag Connection::onceFlag = BOOST_ONCE_INIT;
+// boost::once_flag Connection::onceFlag = BOOST_ONCE_INIT;
 boost::asio::io_service::work Connection::work(Connection::ioService);
 
 void
 Connection::runIoService()
 {
-  Connection::ioService.run();
+  try
+  {
+    Connection::ioService.run();
+  }
+  // This system_error is threw when closing the udp socket, and there are any
+  // asynchronous send, receive or connect operations yet.
+  catch(boost::system::system_error& e)
+  {
+    std::cout << "Cocte" << std::endl;
+  }
 }
 
 Connection::Connection(const std::string& serverIp, unsigned receptionistPort)
   :receptionistSocket(Connection::ioService)
   ,receptionistEP(bip::address::from_string(serverIp), receptionistPort)
-  ,inputSocket(Connection::ioService, bip::udp::endpoint())
+  ,inputSocket(Connection::ioService)
   ,inboundData(UPD_MAX_LENGTH)
 {
-  boost::call_once(Connection::onceFlag,
-                   boost::bind(&boost::scoped_ptr<boost::thread>::reset,
-                               &Connection::th,
-                               new boost::thread(Connection::runIoService)));
+//   boost::call_once(Connection::onceFlag,
+//                    boost::bind(&boost::scoped_ptr<boost::thread>::reset,
+//                                &Connection::th,
+//                                new boost::thread(Connection::runIoService)));
 }
 
 Connection::~Connection()
@@ -35,9 +44,9 @@ Connection::~Connection()
   {
     try
     {
-      std::cerr << "Destructing connection without call disconet"
-                << " before."
-                << std::endl;
+//       std::cerr << "Destructing connection without call disconet"
+//                 << " before."
+//                 << std::endl;
       this->inputSocket.shutdown(bip::udp::socket::shutdown_both);
       this->inputSocket.close();
     }
@@ -49,6 +58,11 @@ Connection::~Connection()
 void
 Connection::connect(unsigned targetId)
 {
+  this->th.reset(new boost::thread(Connection::runIoService));
+
+  this->inputSocket.open(bip::udp::v4());
+  this->inputSocket.bind(bip::udp::endpoint());
+
   this->receptionistSocket.connect(this->receptionistEP);
 
   Request request = AddOutput(targetId,
@@ -68,6 +82,8 @@ Connection::connect(unsigned targetId)
 void
 Connection::disconnect(unsigned targetId)
 {
+  Connection::ioService.stop();
+
   this->receptionistSocket.connect(this->receptionistEP);
 
   Request request = DelOutput(targetId,

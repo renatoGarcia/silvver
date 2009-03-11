@@ -61,7 +61,7 @@ private:
 
   static boost::scoped_ptr<boost::thread> th;
 
-  static boost::once_flag onceFlag;
+//   static boost::once_flag onceFlag;
 
   static void runIoService();
 
