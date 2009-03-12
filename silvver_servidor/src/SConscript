@@ -1,0 +1,10 @@
+Import('env', 'opts')
+
+sources = Split("""clientsMap.cpp
+                   inputFactory.cpp
+                   ioConnection.cpp
+                   main.cpp
+                   markerProcessor.cpp
+                   receptionist.cpp""")
+
+env.Program('silver_server', sources)
