@@ -75,16 +75,16 @@ build_optional_flags = []
 #-------------------------------------------------------
 print '\n' + 'Mandatory libraries...'
 #-------------------------------------------------------
-lib_headers = [['ARToolKitPlus', 'ARToolKitPlus/TrackerSingleMarker.h', 'CXX'],
-               ['cv', 'opencv/cv.h', 'C'],
-               ['highgui', 'opencv/highgui.h', 'C'],
-               ['boost_filesystem', 'boost/filesystem.hpp', 'CXX'],
-               ['boost_program_options', 'boost/program_options.hpp', 'CXX'],
-               ['boost_thread', 'boost/thread/thread.hpp', 'CXX'],
-               ['boost_serialization', 'boost/serialization/serialization.hpp', 'CXX']]
+libraries = ['ARToolKitPlus',
+             'cv',
+             'highgui',
+             'boost_filesystem',
+             'boost_program_options',
+             'boost_thread',
+             'boost_serialization']
 
-for [lib, header, language] in lib_headers:
-    if not conf.CheckLibWithHeader(lib, header, language):
+for lib in libraries:
+    if not conf.CheckLib(lib):
         print 'Did not find', lib, 'library'
         exit(1)
 
@@ -110,31 +110,36 @@ if env['enable_libdc1394']:
 #-------------------------------------------------------
 print '\n' + 'Mandatory headers...'
 #-------------------------------------------------------
-if env['PLATFORM'] == 'win32':
-    net_headers = [['winsock2.h', 'C']]
-    for [header, lang] in net_headers:
-        if not conf.CheckHeader(header, language=lang):
-            print 'Did not find the', header, 'header.'
-            exit(1)
-    env.Append(CXXFLAGS = '-DHAVE_WINDOWS_SOCKETS')
 
-else:
-    net_headers = [['sys/socket.h', 'C'],
-                   ['netdb.h', 'C'],
-                   ['netinet/in.h', 'C'],
-                   ['arpa/inet.h', 'C']]
-    for [header, lang] in net_headers:
-        if not conf.CheckHeader(header, language=lang):
-            print 'Did not find the', header, 'header.'
-            exit(1)
-    env.Append(CXXFLAGS = '-DHAVE_LINUX_SOCKETS')
+headers = ['ARToolKitPlus/TrackerSingleMarker.h',
+           'ARToolKitPlus/TrackerSingleMarkerImpl.h',
+           'boost/algorithm/string.hpp',
+           'boost/archive/text_iarchive.hpp',
+           'boost/archive/text_oarchive.hpp',
+           'boost/array.hpp',
+           'boost/asio.hpp',
+           'boost/bind.hpp',
+           'boost/foreach.hpp',
+           'boost/lexical_cast.hpp',
+           'boost/noncopyable.hpp',
+           'boost/program_options.hpp',
+           'boost/ref.hpp',
+           'boost/scoped_ptr.hpp',
+           'boost/serialization/variant.hpp',
+           'boost/shared_ptr.hpp',
+           'boost/thread/mutex.hpp',
+           'boost/thread/once.hpp',
+           'boost/thread/thread.hpp',
+           'boost/tokenizer.hpp',
+           'boost/tuple/tuple.hpp',
+           'boost/variant.hpp',
+           'opencv/cv.h',
+           'opencv/highgui.h']
 
-    heards = [['sys/timeb.h', 'C'],
-              ['time.h', 'C']]
-    for [header, lang] in net_headers:
-        if not conf.CheckHeader(header, language=lang):
-            print 'Did not find the', header, 'header.'
-            exit(1)
+for header in headers:
+    if not conf.CheckCXXHeader(header):
+        print 'Did not find the', header, 'header.'
+        exit(1)
 
 print
 print 'Supported cameras:'
