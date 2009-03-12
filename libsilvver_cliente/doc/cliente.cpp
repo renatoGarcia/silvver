@@ -36,7 +36,7 @@ int main(int argc,char **argv)
 //  for(int i=10; i>0; i--)
    while(true)
   {
-    target.getPose(x,y,teta);
+    target.getLastPose(x,y,teta);
     cout << "X: " << x << "\tY: " << y << "\tTeta: " << teta << endl;
     system("sleep 0.5");
   }

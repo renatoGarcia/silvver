@@ -43,35 +43,37 @@ conf = Configure(env)
 #-------------------------------------------------------
 print '\n' + 'Mandatory libraries...'
 #-------------------------------------------------------
-lib_headers = [['boost_thread', 'boost/thread/thread.hpp', 'CXX']]
+libraries = ['boost_serialization',
+             'boost_system',
+             'boost_thread']
 
-for [lib, header, language] in lib_headers:
-    if not conf.CheckLibWithHeader(lib, header, language):
+for lib in libraries:
+    if not conf.CheckLib(lib):
         print 'Did not find', lib, 'library'
         exit(1)
 
 #-------------------------------------------------------
 print '\n' + 'Mandatory headers...'
 #-------------------------------------------------------
-headers = [['boost/archive/text_iarchive.hpp', 'CXX'],
-           ['boost/archive/text_oarchive.hpp', 'CXX'],
-           ['boost/asio/buffer.hpp', 'CXX'],
-           ['boost/asio/ip/tcp.hpp', 'CXX'],
-           ['boost/asio/ip/udp.hpp', 'CXX'],
-           ['boost/asio/placeholders.hpp', 'CXX'],
-           ['boost/asio/read.hpp', 'CXX'],
-           ['boost/asio/write.hpp', 'CXX'],
-           ['boost/bind.hpp', 'CXX'],
-           ['boost/lexical_cast.hpp', 'CXX'],
-           ['boost/ref.hpp', 'CXX'],
-           ['boost/scoped_ptr.hpp', 'CXX'],
-           ['boost/thread/mutex.hpp', 'CXX'],
-           ['boost/thread/once.hpp', 'CXX'],
-           ['boost/thread/thread.hpp', 'CXX'],
-           ['boost/tuple/tuple.hpp', 'CXX']]
+headers = ['boost/archive/text_iarchive.hpp',
+           'boost/archive/text_oarchive.hpp',
+           'boost/asio/buffer.hpp',
+           'boost/asio/ip/tcp.hpp',
+           'boost/asio/ip/udp.hpp',
+           'boost/asio/placeholders.hpp',
+           'boost/asio/read.hpp',
+           'boost/asio/write.hpp',
+           'boost/bind.hpp',
+           'boost/lexical_cast.hpp',
+           'boost/ref.hpp',
+           'boost/scoped_ptr.hpp',
+           'boost/thread/mutex.hpp',
+           'boost/thread/once.hpp',
+           'boost/thread/thread.hpp',
+           'boost/tuple/tuple.hpp']
 
-for [header, lang] in headers:
-    if not conf.CheckHeader(header, language=lang):
+for header in headers:
+    if not conf.CheckCXXHeader(header):
         print 'Did not find the', header, 'header.'
         exit(1)
 
