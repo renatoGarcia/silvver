@@ -3,10 +3,15 @@
 from os.path import abspath
 from commands import getoutput
 
+warnflags = ['-Wall']#, '-ansi', '-pedantic']
+
 env = Environment(CPPPATH = [abspath('../common'),
-                             abspath('../libsilvver_cliente/src')])
+                             abspath('../libsilvver_cliente/src')],
+                  CPPFLAGS = warnflags,
+                  LIBPATH = abspath('../libsilvver_cliente/build'))
 
 env.ParseConfig("pkg-config playercore --cflags --libs")
+env.ParseConfig("pkg-config silverclient --cflags --libs")
 
 opts = Options()
 
@@ -38,12 +43,6 @@ conf = Configure(env)
 #-------------------------------------------------------
 print '\n' + 'Mandatory libraries...'
 #-------------------------------------------------------
-lib_headers = [['boost_thread', 'boost/thread/thread.hpp', 'CXX']]
-
-for [lib, header, language] in lib_headers:
-    if not conf.CheckLibWithHeader(lib, header, language):
-        print 'Did not find', lib, 'library'
-        exit(1)
 
 #-------------------------------------------------------
 print '\n' + 'Mandatory headers...'
@@ -66,6 +65,7 @@ headers = [['boost/archive/text_iarchive.hpp', 'CXX'],
            ['boost/thread/once.hpp', 'CXX'],
            ['boost/thread/thread.hpp', 'CXX'],
            ['boost/tuple/tuple.hpp', 'CXX'],
+           ['target.hpp', 'CXX'],
            ['libplayercore/playercore.h', 'CXX']]
 
 for [header, lang] in headers:

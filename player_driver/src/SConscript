@@ -1,8 +1,16 @@
 Import('env', 'opts')
 
-sources = Split("""../../libsilvver_cliente/src/target.cpp
-                   ../../libsilvver_cliente/src/connection.cpp
-                   silverDriver2_0.cpp""")
+sources = Split("""silverDriver2_0.cpp""")
 
-env.StaticLibrary('silver_player', sources)
+# sources = Split("""silverDriver2_0.cpp""")
+
+# sources  = Split("""epuckCamera.cpp
+#                     epuckDriver2_0.cpp
+#                     epuckInterface.cpp
+#                     epuckIR.cpp
+#                     epuckLEDs.cpp
+#                     epuckPosition2d.cpp
+#                     serialPort.cpp""")
+
+# env.StaticLibrary('silver_player', sources)
 env.SharedLibrary('silver_player', sources)

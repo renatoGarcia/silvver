@@ -1,3 +1,6 @@
+#include <iostream>
+using namespace std;
+
 #include "silverDriver2_0.hpp"
 
 #include <cstddef>
@@ -19,14 +22,20 @@ SilverDriver2_0::SilverDriver2_0(ConfigFile* cf, int section)
   }
 
   int nTargets = cf->GetTupleCount(section, "targets");
+  std::cout << "Numero: " << nTargets << std::endl;
   int targetId;
   for (int i = 0; i < nTargets; ++i)
   {
     targetId = cf->ReadTupleInt(section, "targets", i, 0);
+    std::cout << "id: " << targetId << std::endl;
     this->targets.push_back(new Target(targetId,
                                        false,
-                                       cf->ReadString(section, "serverIp", "127.0.0.1"),
-                                       cf->ReadInt(section, "receptionistPort", 12000)));
+                                       cf->ReadString(section,
+                                                      "serverIp",
+                                                      "127.0.0.1"),
+                                       cf->ReadInt(section,
+                                                   "receptionistPort",
+                                                   12000)));
   }
 }
 
@@ -54,7 +63,6 @@ SilverDriver2_0::Subscribe(player_devaddr_t addr)
   {
     target.connect();
   }
-
   return Driver::Subscribe(addr);
 }
 
@@ -73,9 +81,37 @@ int
 SilverDriver2_0::ProcessMessage(MessageQueue* resp_queue,
                                 player_msghdr* hdr, void* data)
 {
-//   else
+  if(Message::MatchMessage(hdr, PLAYER_MSGTYPE_REQ,
+                           PLAYER_FIDUCIAL_REQ_GET_GEOM,
+                           this->fiducialAddr))
   {
-    PLAYER_ERROR("Epuck:: Unhandled message");
+    player_fiducial_geom_t fiducialGeom;
+    fiducialGeom.pose.px = 0;
+    fiducialGeom.pose.py = 0;
+    fiducialGeom.pose.pa = 0;
+    fiducialGeom.size.sw = 0;
+    fiducialGeom.size.sl = 0;
+    fiducialGeom.fiducial_size.sw = 0;
+    fiducialGeom.fiducial_size.sl = 0;
+
+    this->Publish(this->fiducialAddr,
+                  resp_queue,
+                  PLAYER_MSGTYPE_RESP_ACK,
+                  PLAYER_FIDUCIAL_REQ_GET_GEOM,
+                  (void*)&fiducialGeom,
+                  sizeof(fiducialGeom),
+                  NULL);
+
+    return 0;
+  }
+  else
+  {
+    cout << "Processando menssagen" << endl;
+    cout << "Type: " << (int)hdr->type
+         << " subtype: " << (int)hdr->subtype
+         << " inf: " << hdr->addr.interf
+         << endl;
+    PLAYER_ERROR("Silver:: Unhandled message");
     return -1;
   }
 }
@@ -83,8 +119,6 @@ SilverDriver2_0::ProcessMessage(MessageQueue* resp_queue,
 void
 SilverDriver2_0::Main()
 {
-  player_camera_data_t cameraData;
-
   while (true)
   {
     pthread_testcancel();
@@ -92,6 +126,41 @@ SilverDriver2_0::Main()
     if (this->InQueue->Empty() == false)
     {
       ProcessMessages();
+    }
+
+    system("sleep 0.1");
+
+    this->fiducialData.fiducials_count = 0;
+    double x, y, theta;
+
+    boost::ptr_vector<Target>::iterator ite = this->targets.begin();
+    boost::ptr_vector<Target>::iterator end = this->targets.end();
+    for (int i = 0; ite != end; ++ite)
+    {
+      try
+      {
+        ite->getNewPose(x, y, theta);
+      }
+      catch(const Target::old_pose_error& e)
+      {
+        continue;
+      }
+
+      this->fiducialData.fiducials_count++;
+      this->fiducialData.fiducials[i].id = ite->getId();
+      this->fiducialData.fiducials[i].pose.px = x;
+      this->fiducialData.fiducials[i].pose.py = y;
+      this->fiducialData.fiducials[i].pose.pz = 0;
+      this->fiducialData.fiducials[i].pose.proll = 0;
+      this->fiducialData.fiducials[i].pose.ppitch = 0;
+      this->fiducialData.fiducials[i].pose.pyaw = theta;
+      this->fiducialData.fiducials[i].upose.px = 0;
+      this->fiducialData.fiducials[i].upose.py = 0;
+      this->fiducialData.fiducials[i].upose.pz = 0;
+      this->fiducialData.fiducials[i].upose.proll = 0;
+      this->fiducialData.fiducials[i].upose.ppitch = 0;
+      this->fiducialData.fiducials[i].upose.pyaw = 0;
+      i++;
     }
 
     this->Publish(this->fiducialAddr, NULL,
@@ -110,7 +179,7 @@ SilverDriver2_0::SilverDriver2_0_Init(ConfigFile* cf, int section)
 void
 SilverDriver2_0::SilverDriver2_0_Register(DriverTable* table)
 {
-  table->AddDriver((char*)"epuck", SilverDriver2_0_Init);
+  table->AddDriver((char*)"silver", SilverDriver2_0_Init);
 }
 
 /*! \relates SilverDriver2_0
