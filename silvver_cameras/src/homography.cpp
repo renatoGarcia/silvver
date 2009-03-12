@@ -1,5 +1,7 @@
 #include "homography.hpp"
 
+//============================ MATRIX ============================//
+
 Matrix::Matrix(const scene::MatrixHomography& matrix)
 {
   this->cc0 = matrix.cc.at(0);
@@ -72,6 +74,8 @@ Matrix::transform2word(silver::Position& position) const
   position.y = yMundo;
 }
 
+//============================== LUT ==============================//
+
 Lut::Lut(const scene::LutHomography& lut,
          const boost::array<unsigned, 2>& resolution)
 {
@@ -133,14 +137,14 @@ Lut::transform2word(silver::Position& position) const
   if (iY >=0 && iX >= 0 && iY < height && iX < width)
   {
     position.x = lutX[iY][iX] * (1-xFactor)*(1-yFactor) +
-      lutX[iY + 1][iX] * (1-xFactor)*(yFactor) +
-      lutX[iY][iX + 1] * (xFactor)*(1-yFactor) +
-      lutX[iY + 1][iX + 1] * (xFactor)*(yFactor);
+                 lutX[iY + 1][iX] * (1-xFactor)*(yFactor) +
+                 lutX[iY][iX + 1] * (xFactor)*(1-yFactor) +
+                 lutX[iY + 1][iX + 1] * (xFactor)*(yFactor);
 
     position.y = lutY[iY][iX] * (1-xFactor)*(1-yFactor) +
-      lutY[iY + 1][iX] * (1-xFactor)*(yFactor) +
-      lutY[iY][iX + 1] * (xFactor)*(1-yFactor) +
-      lutY[iY + 1][iX + 1] * (xFactor)*(yFactor);
+                 lutY[iY + 1][iX] * (1-xFactor)*(yFactor) +
+                 lutY[iY][iX + 1] * (xFactor)*(1-yFactor) +
+                 lutY[iY + 1][iX + 1] * (xFactor)*(yFactor);
   }
   else
   {

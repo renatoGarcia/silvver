@@ -18,6 +18,8 @@ public:
   virtual void transform2word(silver::Position& position) const = 0;
 };
 
+//--------------------------- MATRIX ---------------------------//
+
 class Matrix : public Homography
 {
 public:
@@ -36,6 +38,8 @@ private:
          H10, H11, H12,
          H20, H21, H22;
 };
+
+//-------------------------- LUT --------------------------//
 
 class Lut : public Homography
 {
