@@ -1,6 +1,6 @@
 #!/bin/env python
 
-from string import maketrans
+from string import maketrans,split
 from os.path import abspath
 
 def makeHeaderDefine(environment, header_path):
@@ -60,16 +60,23 @@ else:
                    'Look for this version of dc1394 library','any',
                    allowed_values=('any', '1', '2')))
 
+    opts.Add('CPPPATH',
+             'Directories that the C++ preprocessor will search for '
+             'include directories. List only directories, do not list '
+             'options flags like -I in gcc. Multiples directories must be '
+             'quoted and delimited by a semicolon',
+             '')
+
     opts.Add('CPPFLAGS',
-             'C++ preprocessor flags, e.g. -I<include dir> if you '
-             'have headers in a nonstandard directory <include dir>',
+             'C++ preprocessor flags',
              '')
 
 env = Environment(options = opts,
-                  CPPPATH = [abspath('../common')],
                   CPPFLAGS = '${CPPFLAGS}')
 
-opts.Update (env)
+env['CPPPATH'] = env['CPPPATH'].split(';')
+env.Append(CPPPATH = [abspath('../common')])
+
 Help(opts.GenerateHelpText(env))
 
 #=======================================================
@@ -112,7 +119,7 @@ if env['enable_libdc1394']:
             makeHeaderDefine(env, header)
             build_optional_flags.append(lib)
             supported_cameras.append('Cameras conform to the IEEE ' +\
-                                     '1394-based Digital Camera Specification')
+                                         '1394-based Digital Camera Specification')
             break
         elif env['libdc1394_version'] != 'any':
             print 'Did not find the libdc1394 in version',
