@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<scene>
+
+  <!--camera perto dos robos-->
+  <camera on="yes">
+    <hardware path="/home/renato/Desktop/images"> pseudocamera </hardware>
+    <uid> 13 </uid>
+    <resolution> 640 480 </resolution>
+    <frame_rate> 30 </frame_rate>
+    <matrix_homography>
+      <focal_length> 530.09343 529.65974 </focal_length>
+      <principal_point> 341.69169 219.77290 </principal_point>
+      <radial_distortion> -0.41522 0.16578 0.00092 -0.0016 0.0 </radial_distortion>
+      <alpha_c> 0 </alpha_c>
+      <matrix_h>
+        464.485178075295         -1.62117313588784         -515584.865016658
+        1.15725915704035         -487.616251846144         -183362.360581648
+        -0.0528788316699424       -0.0349368682510112         -1124.32601978614
+      </matrix_h>
+    </matrix_homography>
+  </camera>
+
+  <targets>
+
+    <ARTP_mark file="data/4x4patt/4x4_1.patt">
+      <uid> 1 </uid>
+    </ARTP_mark>
+
+  </targets>
+
+
+</scene>
