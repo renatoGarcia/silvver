@@ -11,6 +11,8 @@
 
 #include "connection.ipp"
 
+namespace bpt = boost::posix_time;
+
 class Target::CheshireCat
 {
 public:
@@ -46,8 +48,8 @@ private:
   // Signalize a never returned/read currentPose.
   bool currentPoseIsNew;
 
-  /// Will holds an Ente until convert it safely to currentPose locking
-  /// mutexCurrentPose.
+  /// Will holds an Ente until convert it safely to
+  /// currentPose locking mutexCurrentPose.
   silver::Ente lastEnte;
 
   boost::scoped_ptr<Connection> connection;
@@ -162,71 +164,42 @@ Target::getLastPose()
   return smile->currentPose;
 }
 
-void
-Target::getLastPose(double &x,double &y, double &theta)
-{
-  boost::mutex::scoped_lock lock(smile->mutexCurrentPose);
-
-  smile->currentPoseIsNew = false;
-  x     = smile->currentPose.x;
-  y     = smile->currentPose.y;
-  theta = smile->currentPose.theta;
-}
-
 silver::Pose
-Target::getNewPose()
+Target::getNewPose(const boost::posix_time::time_duration& waitTime)
 {
   boost::mutex::scoped_lock lock(smile->mutexCurrentPose);
 
-  if (!smile->currentPoseIsNew)
+  while (!smile->currentPoseIsNew)
   {
-    throw Target::old_pose_error("The current pose was read already");
+    if (!smile->newPoseCondition.timed_wait(lock,
+                                            bpt::second_clock::universal_time() +
+                                            waitTime))
+    {
+      throw Target::time_expired_error("The wait time expired without a new "
+                                       "pose arrives");
+    }
   }
 
   smile->currentPoseIsNew = false;
   return smile->currentPose;
 }
 
-void
-Target::getNewPose(double &x,double &y, double &theta)
+silver::Pose
+Target::getNextPose(const boost::posix_time::time_duration& waitTime)
 {
   boost::mutex::scoped_lock lock(smile->mutexCurrentPose);
 
-  if (!smile->currentPoseIsNew)
+  // Wait for updatePose function notifies a new pose.
+  if (!smile->newPoseCondition.timed_wait(lock,
+                                          bpt::second_clock::universal_time() +
+                                          waitTime))
   {
-    throw Target::old_pose_error("The current pose was read already");
+    throw Target::time_expired_error("The wait time expired without the next "
+                                     "pose arrives");
   }
 
   smile->currentPoseIsNew = false;
-  x     = smile->currentPose.x;
-  y     = smile->currentPose.y;
-  theta = smile->currentPose.theta;
-}
-
-silver::Pose
-Target::getNextPose()
-{
-  boost::mutex::scoped_lock lock(smile->mutexCurrentPose);
-
-  // Wait for updatePose function notifies a new pose.
-  smile->newPoseCondition.wait(lock);
-
-  smile->currentPoseIsNew = false;
   return smile->currentPose;
-}
-
-void
-Target::getNextPose(double &x,double &y, double &theta)
-{
-  boost::mutex::scoped_lock lock(smile->mutexCurrentPose);
-
-  // Wait for updatePose function notifies a new pose.
-  smile->newPoseCondition.wait(lock);
-
-  smile->currentPoseIsNew = false;
-  x     = smile->currentPose.x;
-  y     = smile->currentPose.y;
-  theta = smile->currentPose.theta;
 }
 
 Target::Target(unsigned targetId,

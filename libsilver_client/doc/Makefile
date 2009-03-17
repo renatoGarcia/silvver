@@ -1,7 +1,7 @@
-LIB_FLAG = -lsilver_client
+LIB_FLAG = -lsilver_client -lboost_thread
 CPP_FLAGS = -I../src -I../../common -L../build
 
-OBJECTS = cliente
+OBJECTS = silver_client
 all: $(OBJECTS)
 
 clean:

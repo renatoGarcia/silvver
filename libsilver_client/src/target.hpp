@@ -5,6 +5,9 @@
 #include <stdexcept>
 #include <string>
 
+#include <boost/date_time/time_duration.hpp>
+#include <boost/date_time/posix_time/posix_time.hpp>
+
 #include "silverTypes.hpp"
 
 /// Reprents a target looked by Silver.
@@ -12,10 +15,10 @@ class Target
 {
 public:
 
-  class old_pose_error : public std::runtime_error
+  class time_expired_error : public std::runtime_error
   {
   public:
-    old_pose_error(const std::string& whatArg)
+    time_expired_error(const std::string& whatArg)
       :runtime_error(whatArg){}
   };
 
@@ -43,38 +46,18 @@ public:
    */
   unsigned getId();
 
-  /** Get the last received pose.
-   * @param x X coordinate [m].
-   * @param y Y coordinate [m].
-   * @param theta Angle of pose [rad].
-   */
-  void getLastPose(double &x, double &y, double &theta);
-
   /// Get the last received silver::Pose.
   silver::Pose getLastPose();
 
-  /** Get a never gotten pose or throw an old_pose_error exception.
-   * @param x X coordinate [m].
-   * @param y Y coordinate [m].
-   * @param theta Angle of pose [rad].
-   */
-  void getNewPose(double &x, double &y, double &theta);
-
   /// Get a never gotten pose or throw an old_pose_error exception.
-  silver::Pose getNewPose();
-
-  /** Get the next received pose.
-   * This function wait until a new Pose arrives and returns;
-   * @param x X coordinate [m].
-   * @param y Y coordinate [m].
-   * @param theta Angle of pose [rad].
-   */
-  void getNextPose(double &x, double &y, double &theta);
+  silver::Pose getNewPose(const boost::posix_time::time_duration&
+                          waitTime = boost::date_time::pos_infin);
 
   /** Return the next received silver::Pose.
    * This function wait until a new Pose arrives and returns;
    */
-  silver::Pose getNextPose();
+  silver::Pose getNextPose(const boost::posix_time::time_duration&
+                           waitTime = boost::date_time::pos_infin);
 
 private:
 

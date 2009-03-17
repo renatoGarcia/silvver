@@ -61,8 +61,6 @@ private:
 
   static boost::scoped_ptr<boost::thread> th;
 
-//   static boost::once_flag onceFlag;
-
   static void runIoService();
 
   boost::asio::ip::tcp::socket receptionistSocket;
