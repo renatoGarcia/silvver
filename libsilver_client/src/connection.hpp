@@ -15,6 +15,8 @@
 #include <boost/tuple/tuple.hpp>
 #include <boost/bind.hpp>
 
+/** Wrapper all network communication with silver-server.
+ */
 class Connection
 {
 public:
@@ -57,9 +59,11 @@ private:
   static const unsigned UPD_MAX_LENGTH = 8192;
 
   static boost::asio::io_service ioService;
-  static boost::asio::io_service::work work;
 
   static boost::scoped_ptr<boost::thread> th;
+
+  static boost::mutex runMutex;
+  static bool ioServiceRunning;
 
   static void runIoService();
 

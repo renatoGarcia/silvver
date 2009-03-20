@@ -8,19 +8,25 @@ namespace bip = boost::asio::ip;
 
 boost::asio::io_service Connection::ioService;
 boost::scoped_ptr<boost::thread> Connection::th;
-boost::asio::io_service::work Connection::work(Connection::ioService);
+boost::mutex Connection::runMutex;
+bool Connection::ioServiceRunning = false;
 
 void
 Connection::runIoService()
 {
-  try
+  boost::asio::io_service::work work(Connection::ioService);
+
+  while (true)
   {
-    Connection::ioService.run();
+    try
+    {
+      Connection::ioService.run();
+    }
+    // This system_error is threw when closing the udp socket, and there are
+    // any asynchronous send, receive or connect operations yet.
+    catch(boost::system::system_error& e)
+    {}
   }
-  // This system_error is threw when closing the udp socket, and there are
-  // any asynchronous send, receive or connect operations yet.
-  catch(boost::system::system_error& e)
-  {}
 }
 
 Connection::Connection(const std::string& serverIp, unsigned receptionistPort)
@@ -47,7 +53,15 @@ Connection::~Connection()
 void
 Connection::connect(unsigned targetId)
 {
-  this->th.reset(new boost::thread(Connection::runIoService));
+  if (!Connection::ioServiceRunning)
+  {
+    boost::mutex::scoped_lock lock(Connection::runMutex);
+    if (!Connection::ioServiceRunning)
+    {
+      Connection::th.reset(new boost::thread(Connection::runIoService));
+      Connection::ioServiceRunning = true;
+    }
+  }
 
   this->inputSocket.open(bip::udp::v4());
   this->inputSocket.bind(bip::udp::endpoint());
@@ -71,8 +85,6 @@ Connection::connect(unsigned targetId)
 void
 Connection::disconnect(unsigned targetId)
 {
-  Connection::ioService.stop();
-
   this->receptionistSocket.connect(this->receptionistEP);
 
   Request request = DelOutput(targetId,
