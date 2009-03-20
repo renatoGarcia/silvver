@@ -32,16 +32,22 @@ int main(int argc, const char **argv)
   }
 
   int i,j;
-  for (i = 0; i < 1500; ++i)
+  for (i = 0; i < 500; ++i)
   {
     playerc_client_read(client);
-/*     printf("n: %d\n", fiducial->fiducials_count); */
-    for(j = 0; j < fiducial->fiducials_count; j++)
+    for (j = 0; j < fiducial->fiducials_count; j++)
     {
-      if(fiducial->fiducials[j].id == 1)
-        printf("fiducial (x,y,theta): %d %f\n",
-               fiducial->fiducials[j].id, fiducial->fiducials[j].pose.px);
+      printf("fiducial (id, x,y,theta): %d %f %f %f\n",
+             fiducial->fiducials[j].id,
+             fiducial->fiducials[j].pose.px,
+             fiducial->fiducials[j].pose.py,
+             fiducial->fiducials[j].pose.pyaw);
     }
+    if (j != 0) /* If printed anything above */
+    {
+      printf("\n");
+    }
+    fflush(stdout);
   }
 
   /* Shutdown and tidy up */

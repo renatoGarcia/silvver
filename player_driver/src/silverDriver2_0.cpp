@@ -7,6 +7,7 @@ using namespace std;
 #include <string>
 
 #include <boost/foreach.hpp>
+#include <boost/date_time/time_duration.hpp>
 
 SilverDriver2_0::SilverDriver2_0(ConfigFile* cf, int section)
   :Driver(cf, section, true, PLAYER_MSGQUEUE_DEFAULT_MAXLEN)
@@ -131,7 +132,7 @@ SilverDriver2_0::Main()
     system("sleep 0.1");
 
     this->fiducialData.fiducials_count = 0;
-    double x, y, theta;
+    silver::Pose pose;
 
     boost::ptr_vector<Target>::iterator ite = this->targets.begin();
     boost::ptr_vector<Target>::iterator end = this->targets.end();
@@ -139,21 +140,21 @@ SilverDriver2_0::Main()
     {
       try
       {
-        ite->getNewPose(x, y, theta);
+        pose = ite->getNewPose(boost::posix_time::millisec(0));
       }
-      catch(const Target::old_pose_error& e)
+      catch(const Target::time_expired_error& e)
       {
         continue;
       }
 
       this->fiducialData.fiducials_count++;
       this->fiducialData.fiducials[i].id = ite->getId();
-      this->fiducialData.fiducials[i].pose.px = x;
-      this->fiducialData.fiducials[i].pose.py = y;
+      this->fiducialData.fiducials[i].pose.px = pose.x;
+      this->fiducialData.fiducials[i].pose.py = pose.y;
       this->fiducialData.fiducials[i].pose.pz = 0;
       this->fiducialData.fiducials[i].pose.proll = 0;
       this->fiducialData.fiducials[i].pose.ppitch = 0;
-      this->fiducialData.fiducials[i].pose.pyaw = theta;
+      this->fiducialData.fiducials[i].pose.pyaw = pose.theta;
       this->fiducialData.fiducials[i].upose.px = 0;
       this->fiducialData.fiducials[i].upose.py = 0;
       this->fiducialData.fiducials[i].upose.pz = 0;
