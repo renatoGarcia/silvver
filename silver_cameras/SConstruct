@@ -95,90 +95,92 @@ env['LIBPATH'] = env['LIBPATH'].split(';')
 
 Help(opts.GenerateHelpText(env))
 
+build_optional_flags = []
+if not env.GetOption('clean'):
 #=======================================================
 #==== System Configuration
 #=======================================================
+    conf = Configure(env)
 
-conf = Configure(env)
-
-supported_cameras = ['Pseudocamera']
-build_optional_flags = []
+    supported_cameras = ['Pseudocamera']
 #-------------------------------------------------------
-print '\n' + 'Mandatory libraries...'
+    print '\n' + 'Mandatory libraries...'
 #-------------------------------------------------------
-for lib in mandatory_libs:
-    if not conf.CheckLib(lib):
-        print 'Did not find', lib, 'library'
-        exit(1)
-
-#-------------------------------------------------------
-print '\n' + 'Optional libraries...'
-#-------------------------------------------------------
-if env['enable_libdc1394']:
-    lib_header_dc1394 = []
-    if env['libdc1394_version'] in ['1', 'any']:
-        lib_header_dc1394.append(['dc1394_control',
-                                  'libdc1394/dc1394_control.h'])
-    if env['libdc1394_version'] in ['2', 'any']:
-        lib_header_dc1394.append(['dc1394', 'dc1394/dc1394.h'])
-
-    for [lib, header] in lib_header_dc1394:
-        if not conf.CheckLib(lib) and env['libdc1394_version'] != 'any':
-            print 'Did not find the libdc1394 in version',
-            print env['libdc1394_version']
+    for lib in mandatory_libs:
+        if not conf.CheckLib(lib):
+            print 'Did not find', lib, 'library'
             exit(1)
-        elif not conf.CheckCXXHeader(header) and env['libdc1394_version'] != 'any':
-            print 'Did not find the headers of libdc1394 in version',
-            print env['libdc1394_version']
+
+#-------------------------------------------------------
+    print '\n' + 'Optional libraries...'
+#-------------------------------------------------------
+    if env['enable_libdc1394']:
+        lib_header_dc1394 = []
+        if env['libdc1394_version'] in ['1', 'any']:
+            lib_header_dc1394.append(['dc1394_control',
+                                      'libdc1394/dc1394_control.h'])
+        if env['libdc1394_version'] in ['2', 'any']:
+            lib_header_dc1394.append(['dc1394', 'dc1394/dc1394.h'])
+
+        for [lib, header] in lib_header_dc1394:
+            have_library = conf.CheckLib(lib)
+            have_header = conf.CheckCXXHeader(header)
+            if have_library and have_header:
+                makeHeaderDefine(env, header)
+                build_optional_flags.append(lib)
+                supported_cameras.append('Cameras conform to the IEEE ' +\
+                                             '1394-based Digital Camera Specification')
+                break
+            elif not have_library and env['libdc1394_version'] != 'any':
+                print 'Did not find the libdc1394 in version',
+                print env['libdc1394_version']
+                exit(1)
+            elif not have_header and env['libdc1394_version'] != 'any':
+                print 'Did not find the headers of libdc1394 in version',
+                print env['libdc1394_version']
+                exit(1)
+
+#-------------------------------------------------------
+    print '\n' + 'Mandatory headers...'
+#-------------------------------------------------------
+
+    headers = ['ARToolKitPlus/TrackerSingleMarker.h',
+               'ARToolKitPlus/TrackerSingleMarkerImpl.h',
+               'boost/algorithm/string.hpp',
+               'boost/archive/text_iarchive.hpp',
+               'boost/archive/text_oarchive.hpp',
+               'boost/array.hpp',
+               'boost/asio.hpp',
+               'boost/bind.hpp',
+               'boost/foreach.hpp',
+               'boost/lexical_cast.hpp',
+               'boost/noncopyable.hpp',
+               'boost/program_options.hpp',
+               'boost/ref.hpp',
+               'boost/scoped_ptr.hpp',
+               'boost/serialization/variant.hpp',
+               'boost/shared_ptr.hpp',
+               'boost/thread/mutex.hpp',
+               'boost/thread/once.hpp',
+               'boost/thread/thread.hpp',
+               'boost/tokenizer.hpp',
+               'boost/tuple/tuple.hpp',
+               'boost/variant.hpp',
+               'opencv/cv.h',
+               'opencv/highgui.h']
+
+    for header in headers:
+        if not conf.CheckCXXHeader(header):
+            print 'Did not find the', header, 'header.'
             exit(1)
-        else:
-            makeHeaderDefine(env, header)
-            build_optional_flags.append(lib)
-            supported_cameras.append('Cameras conform to the IEEE ' +\
-                                     '1394-based Digital Camera Specification')
-            break
 
-#-------------------------------------------------------
-print '\n' + 'Mandatory headers...'
-#-------------------------------------------------------
+    print
+    print 'Supported cameras:'
+    for camera in supported_cameras:
+        print '  * ' + camera
+    print
 
-headers = ['ARToolKitPlus/TrackerSingleMarker.h',
-           'ARToolKitPlus/TrackerSingleMarkerImpl.h',
-           'boost/algorithm/string.hpp',
-           'boost/archive/text_iarchive.hpp',
-           'boost/archive/text_oarchive.hpp',
-           'boost/array.hpp',
-           'boost/asio.hpp',
-           'boost/bind.hpp',
-           'boost/foreach.hpp',
-           'boost/lexical_cast.hpp',
-           'boost/noncopyable.hpp',
-           'boost/program_options.hpp',
-           'boost/ref.hpp',
-           'boost/scoped_ptr.hpp',
-           'boost/serialization/variant.hpp',
-           'boost/shared_ptr.hpp',
-           'boost/thread/mutex.hpp',
-           'boost/thread/once.hpp',
-           'boost/thread/thread.hpp',
-           'boost/tokenizer.hpp',
-           'boost/tuple/tuple.hpp',
-           'boost/variant.hpp',
-           'opencv/cv.h',
-           'opencv/highgui.h']
-
-for header in headers:
-    if not conf.CheckCXXHeader(header):
-        print 'Did not find the', header, 'header.'
-        exit(1)
-
-print
-print 'Supported cameras:'
-for camera in supported_cameras:
-    print '  * ' + camera
-print
-
-env = conf.Finish()
+    env = conf.Finish()
 
 Export('env', 'opts', 'build_optional_flags')
 SConscript('src/SConscript', build_dir='build', duplicate=0)
