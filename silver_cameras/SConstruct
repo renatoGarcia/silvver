@@ -8,6 +8,9 @@ def makeHeaderDefine(environment, header_path):
                   header_path.translate(maketrans('/.','__')).upper()
     environment.Append(CXXFLAGS = header_path)
 
+
+build_optional_flags = []
+
 mandatory_libs = ['ARToolKitPlus',
                   'cv',
                   'highgui',
@@ -95,7 +98,6 @@ env['LIBPATH'] = env['LIBPATH'].split(';')
 
 Help(opts.GenerateHelpText(env))
 
-build_optional_flags = []
 if not env.GetOption('clean'):
 #=======================================================
 #==== System Configuration
@@ -181,6 +183,10 @@ if not env.GetOption('clean'):
     print
 
     env = conf.Finish()
+
+else:
+    build_optional_flags.append('cleaning')
+
 
 Export('env', 'opts', 'build_optional_flags')
 SConscript('src/SConscript', build_dir='build', duplicate=0)

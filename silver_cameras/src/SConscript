@@ -1,5 +1,10 @@
 Import('env', 'opts', 'build_optional_flags')
 
+if 'cleaning' in build_optional_flags:
+    cleaning = True
+else:
+    cleaning = False
+
 sources = Split("""xmlParser.cpp
                    abstractCamera.cpp
                    homography.cpp
@@ -20,10 +25,10 @@ sources = Split("""xmlParser.cpp
                    tinyXml/tinyxmlparser.cpp
                    tsPrint.cpp""")
 
-if 'dc1394_control' in build_optional_flags:
+if 'dc1394_control' in build_optional_flags or cleaning:
     sources += ['hardCameras/dc1394_1x.cpp',
                 'hardCameras/conversions.cpp']
-elif 'dc1394' in build_optional_flags:
+elif 'dc1394' in build_optional_flags or cleaning:
     sources += ['hardCameras/dc1394_2x.cpp']
 
 env.Program('silver_camera', sources)
