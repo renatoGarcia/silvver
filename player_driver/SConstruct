@@ -3,9 +3,8 @@
 from os.path import abspath
 from commands import getoutput
 
-warnflags = ['-Wall']#, '-ansi', '-pedantic']
-
 mandatory_libs = ['silver_client']
+
 opts = Options()
 
 opts.AddOptions(
@@ -58,51 +57,52 @@ env.ParseConfig("pkg-config playercore --cflags --libs")
 
 Help(opts.GenerateHelpText(env))
 
+if not env.GetOption('clean') and not env.GetOption('help'):
 #=======================================================
 #==== System Configuration
 #=======================================================
 
-conf = Configure(env)
+    conf = Configure(env)
 #-------------------------------------------------------
-print '\n' + 'Mandatory libraries...'
+    print '\n' + 'Mandatory libraries...'
 #-------------------------------------------------------
-for lib in mandatory_libs:
-    if not conf.CheckLib(lib):
-        print 'Did not find', lib, 'library'
-        exit(1)
+    for lib in mandatory_libs:
+        if not conf.CheckLib(lib):
+            print 'Did not find', lib, 'library'
+            exit(1)
 
 #-------------------------------------------------------
-print '\n' + 'Mandatory headers...'
+    print '\n' + 'Mandatory headers...'
 #-------------------------------------------------------
-headers = [['boost/archive/text_iarchive.hpp', 'CXX'],
-           ['boost/archive/text_oarchive.hpp', 'CXX'],
-           ['boost/asio/buffer.hpp', 'CXX'],
-           ['boost/asio/ip/tcp.hpp', 'CXX'],
-           ['boost/asio/ip/udp.hpp', 'CXX'],
-           ['boost/asio/placeholders.hpp', 'CXX'],
-           ['boost/asio/read.hpp', 'CXX'],
-           ['boost/asio/write.hpp', 'CXX'],
-           ['boost/bind.hpp', 'CXX'],
-           ['boost/foreach.hpp', 'CXX'],
-           ['boost/lexical_cast.hpp', 'CXX'],
-           ['boost/ptr_container/ptr_vector.hpp', 'CXX'],
-           ['boost/ref.hpp', 'CXX'],
-           ['boost/scoped_ptr.hpp', 'CXX'],
-           ['boost/thread/mutex.hpp', 'CXX'],
-           ['boost/thread/once.hpp', 'CXX'],
-           ['boost/thread/thread.hpp', 'CXX'],
-           ['boost/tuple/tuple.hpp', 'CXX'],
-           ['target.hpp', 'CXX'],
-           ['libplayercore/playercore.h', 'CXX']]
+    headers = ['boost/archive/text_iarchive.hpp',
+               'boost/archive/text_oarchive.hpp',
+               'boost/asio/buffer.hpp',
+               'boost/asio/ip/tcp.hpp',
+               'boost/asio/ip/udp.hpp',
+               'boost/asio/placeholders.hpp',
+               'boost/asio/read.hpp',
+               'boost/asio/write.hpp',
+               'boost/bind.hpp',
+               'boost/foreach.hpp',
+               'boost/lexical_cast.hpp',
+               'boost/ptr_container/ptr_vector.hpp',
+               'boost/ref.hpp',
+               'boost/scoped_ptr.hpp',
+               'boost/thread/mutex.hpp',
+               'boost/thread/once.hpp',
+               'boost/thread/thread.hpp',
+               'boost/tuple/tuple.hpp',
+               'target.hpp',
+               'libplayercore/playercore.h']
 
-for [header, lang] in headers:
-    if not conf.CheckHeader(header, language=lang):
-        print 'Did not find the', header, 'header.'
-        exit(1)
+    for header in headers:
+        if not conf.CheckCXXHeader(header):
+            print 'Did not find the', header, 'header.'
+            exit(1)
 
-print
+    print
 
-env = conf.Finish()
+    env = conf.Finish()
 
 Export('env', 'opts')
 SConscript('./src/SConscript', build_dir='./build', duplicate=0)

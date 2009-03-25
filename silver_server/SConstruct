@@ -3,19 +3,23 @@
 from string import maketrans
 from os.path import abspath
 
-env = Environment(CPPPATH = [abspath('../common')])
+mandatory_libs = ['boost_program_options',
+                  'boost_serialization',
+                  'boost_system',
+                  'boost_thread']
 
 opts = Options()
 
-if env['PLATFORM'] == 'win32':
-    opts.AddOptions(PathOption('prefix',
-                               'Installation prefix',
-                               'C:\\\\Syx', PathOption.PathAccept))
-    env['bindir'] = env['datadir'] = env['rootdir'] = env['libdir'] = '$prefix'
-    env['plugindir'] = '$prefix\\\\lib'
-    env['imagepath'] = '$prefix\\\\default.sim'
-    env['includedir'] = '$prefix\\\\include'
-    env['docdir'] = '$prefix\\\\doc'
+if False: #env['PLATFORM'] == 'win32':
+    pass
+#     opts.AddOptions(PathOption('prefix',
+#                                'Installation prefix',
+#                                'C:\\\\Syx', PathOption.PathAccept))
+#     env['bindir'] = env['datadir'] = env['rootdir'] = env['libdir'] = '$prefix'
+#     env['plugindir'] = '$prefix\\\\lib'
+#     env['imagepath'] = '$prefix\\\\default.sim'
+#     env['includedir'] = '$prefix\\\\include'
+#     env['docdir'] = '$prefix\\\\doc'
 else:
     opts.AddOptions(
         PathOption('prefix',
@@ -34,54 +38,73 @@ else:
                    'Installation prefix for C header files',
                    '$prefix/include', PathOption.PathAccept))
 
-opts.Update(env)
+    opts.Add('CPPPATH',
+             'Directories that the C++ preprocessor will search for '
+             'include directories. List only directories, do not list '
+             'options flags like -I in gcc. Multiples directories must be '
+             'quoted and delimited by a semicolon',
+             '')
+
+    opts.Add('LIBPATH',
+             'The list of directories that will be searched for libraries. '
+             'List only directories, do not list options flags like -L in '
+             'gcc. Multiples directories must be quoted and delimited by '
+             'a semicolon',
+             '')
+
+    opts.Add('CPPFLAGS',
+             'C++ preprocessor flags',
+             '')
+
+env = Environment(options = opts,
+                  CPPFLAGS = '${CPPFLAGS}')
+
+env['CPPPATH'] = env['CPPPATH'].split(';')
+env.Append(CPPPATH = [abspath('../common')])
+
+env['LIBPATH'] = env['LIBPATH'].split(';')
+
 Help(opts.GenerateHelpText(env))
 
+if not env.GetOption('clean') and not env.GetOption('help'):
 #=======================================================
 #==== System Configuration
 #=======================================================
-
-conf = Configure(env)
+    conf = Configure(env)
+#-------------------------------------------------------
+    print '\n' + 'Mandatory libraries...'
+#-------------------------------------------------------
+    for lib in mandatory_libs:
+        if not conf.CheckLib(lib):
+            print 'Did not find', lib, 'library'
+            exit(1)
 
 #-------------------------------------------------------
-print '\n' + 'Mandatory libraries...'
+    print '\n' + 'Mandatory headers...'
 #-------------------------------------------------------
-libraries = ['boost_program_options',
-             'boost_serialization',
-             'boost_system',
-             'boost_thread']
+    headers = ['boost/asio.hpp',
+               'boost/bind.hpp',
+               'boost/enable_shared_from_this.hpp',
+               'boost/foreach.hpp',
+               'boost/lexical_cast.hpp',
+               'boost/program_options.hpp',
+               'boost/ref.hpp',
+               'boost/scoped_ptr.hpp',
+               'boost/shared_ptr.hpp',
+               'boost/thread.hpp',
+               'boost/thread/mutex.hpp',
+               'boost/thread/thread.hpp',
+               'boost/tuple/tuple.hpp',
+               'math.h']
 
-for lib in libraries:
-    if not conf.CheckLib(lib):
-        print 'Did not find', lib, 'library'
-        exit(1)
+    for header in headers:
+        if not conf.CheckCXXHeader(header):
+            print 'Did not find the', header, 'header.'
+            exit(1)
 
-#-------------------------------------------------------
-print '\n' + 'Mandatory headers...'
-#-------------------------------------------------------
-headers = ['boost/asio.hpp',
-           'boost/bind.hpp',
-           'boost/enable_shared_from_this.hpp',
-           'boost/foreach.hpp',
-           'boost/lexical_cast.hpp',
-           'boost/program_options.hpp',
-           'boost/ref.hpp',
-           'boost/scoped_ptr.hpp',
-           'boost/shared_ptr.hpp',
-           'boost/thread.hpp',
-           'boost/thread/mutex.hpp',
-           'boost/thread/thread.hpp',
-           'boost/tuple/tuple.hpp',
-           'math.h']
+    print
 
-for header in headers:
-    if not conf.CheckCXXHeader(header):
-        print 'Did not find the', header, 'header.'
-        exit(1)
-
-print
-
-env = conf.Finish()
+    env = conf.Finish()
 
 Export('env', 'opts')
 SConscript('src/SConscript', build_dir='build', duplicate=0)

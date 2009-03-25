@@ -98,7 +98,10 @@ env['LIBPATH'] = env['LIBPATH'].split(';')
 
 Help(opts.GenerateHelpText(env))
 
-if not env.GetOption('clean'):
+if env.GetOption('clean'):
+    build_optional_flags.append('cleaning')
+
+if not env.GetOption('clean') and not env.GetOption('help'):
 #=======================================================
 #==== System Configuration
 #=======================================================
@@ -183,9 +186,6 @@ if not env.GetOption('clean'):
     print
 
     env = conf.Finish()
-
-else:
-    build_optional_flags.append('cleaning')
 
 
 Export('env', 'opts', 'build_optional_flags')
