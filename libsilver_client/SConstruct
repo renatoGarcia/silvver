@@ -1,10 +1,18 @@
 #!/bin/env python
 
+import sys
+sys.path.insert(0, '../common')
+from sconsUtilities import *
+
 from os.path import abspath
 
-mandatory_libs = ['boost_serialization',
-                  'boost_system',
-                  'boost_thread']
+boost_libs = RelatedLibs('Boost',
+                         'boost',
+                         ['boost_serialization',
+                          'boost_system',
+                          'boost_thread'])
+
+mandatory_libs = RelatedLibsGroup([boost_libs])
 
 opts = Options()
 
@@ -34,6 +42,11 @@ else:
                    'Installation prefix for C header files',
                    '$prefix/include', PathOption.PathAccept))
 
+    for related_libs in mandatory_libs:
+        opts.Add('lib_' + related_libs.short_name + '_suffix',
+                 'Suffix of ' + related_libs.long_name + ' libraries.',
+                 '')
+
     opts.Add('CPPPATH',
              'Directories that the C++ preprocessor will search for '
              'include directories. List only directories, do not list '
@@ -55,6 +68,9 @@ else:
 env = Environment(options = opts,
                   CPPFLAGS = '${CPPFLAGS}')
 
+for related_libs in mandatory_libs:
+    related_libs.add_suffix(env['lib_' + related_libs.short_name + '_suffix'])
+
 env['CPPPATH'] = env['CPPPATH'].split(';')
 env.Append(CPPPATH = [abspath('../common')])
 
@@ -71,10 +87,11 @@ if not env.GetOption('clean') and not env.GetOption('help'):
 #-------------------------------------------------------
     print '\n' + 'Mandatory libraries...'
 #-------------------------------------------------------
-    for lib in mandatory_libs:
-        if not conf.CheckLib(lib):
-            print 'Did not find', lib, 'library'
-            exit(1)
+    for related_libs in mandatory_libs:
+        for lib in related_libs:
+            if not conf.CheckLib(lib):
+                print 'Did not find', lib, 'library'
+                exit(1)
 
 #-------------------------------------------------------
     print '\n' + 'Mandatory headers...'

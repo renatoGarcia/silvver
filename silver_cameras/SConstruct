@@ -1,23 +1,32 @@
 #!/bin/env python
 
+import sys
+sys.path.insert(0, '../common')
+from sconsUtilities import *
+
 from string import maketrans,split
 from os.path import abspath
 
-def makeHeaderDefine(environment, header_path):
-    header_path = '-DHAVE_' + \
-                  header_path.translate(maketrans('/.','__')).upper()
-    environment.Append(CXXFLAGS = header_path)
-
-
 build_optional_flags = []
 
-mandatory_libs = ['ARToolKitPlus',
-                  'cv',
-                  'highgui',
-                  'boost_filesystem',
-                  'boost_program_options',
-                  'boost_thread',
-                  'boost_serialization']
+boost_libs = RelatedLibs('Boost',
+                         'boost',
+                         ['boost_filesystem',
+                          'boost_program_options',
+                          'boost_thread',
+                          'boost_serialization'])
+
+artkp_libs = RelatedLibs('ARToolKitPlus',
+                         'artkp',
+                         ['ARToolKitPlus'])
+
+opencv_libs = RelatedLibs('OpenCv',
+                          'opencv',
+                          ['cv', 'highgui'])
+
+mandatory_libs = RelatedLibsGroup([boost_libs,
+                                   artkp_libs,
+                                   opencv_libs])
 
 opts = Options()
 
@@ -70,6 +79,11 @@ else:
                    'Look for this version of dc1394 library','any',
                    allowed_values=('any', '1', '2')))
 
+    for related_libs in mandatory_libs:
+        opts.Add('lib_' + related_libs.short_name + '_suffix',
+                 'Suffix of ' + related_libs.long_name + ' libraries.',
+                 '')
+
     opts.Add('CPPPATH',
              'Directories that the C++ preprocessor will search for '
              'include directories. List only directories, do not list '
@@ -91,6 +105,9 @@ else:
 env = Environment(options = opts,
                   CPPFLAGS = '${CPPFLAGS}')
 
+for related_libs in mandatory_libs:
+    related_libs.add_suffix(env['lib_' + related_libs.short_name + '_suffix'])
+
 env['CPPPATH'] = env['CPPPATH'].split(';')
 env.Append(CPPPATH = [abspath('../common')])
 
@@ -111,10 +128,11 @@ if not env.GetOption('clean') and not env.GetOption('help'):
 #-------------------------------------------------------
     print '\n' + 'Mandatory libraries...'
 #-------------------------------------------------------
-    for lib in mandatory_libs:
-        if not conf.CheckLib(lib):
-            print 'Did not find', lib, 'library'
-            exit(1)
+    for related_libs in mandatory_libs:
+        for lib in related_libs:
+            if not conf.CheckLib(lib):
+                print 'Did not find', lib, 'library'
+                exit(1)
 
 #-------------------------------------------------------
     print '\n' + 'Optional libraries...'

@@ -29,6 +29,10 @@ public:
 
   virtual ~AbstractCamera();
 
+  // It's the method which will be called when a new thread was created, and
+  // will make all camera work.
+  virtual void operator()()=0;
+
 protected:
 
   IplImage *currentFrame;
@@ -51,11 +55,6 @@ protected:
   void localize(silver::Position &position) const;
 
 private:
-
-  // This is here because boost::thread call the operator()
-  friend class boost::thread;
-
-  virtual void operator()()=0;
 
   boost::scoped_ptr<boost::thread> runThread;
 

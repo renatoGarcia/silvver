@@ -49,6 +49,8 @@ protected:
              const boost::array<unsigned, 2>& resolution,
              float frameRate);
 
+  // A string representing the uid of the hardware camera.
+  // It must be numbers in decimal base.
   const std::string uid;
 
   // Frame size measures in pixels.

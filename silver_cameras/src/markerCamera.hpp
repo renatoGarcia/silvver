@@ -22,9 +22,9 @@ public:
 
   ~MarkerCamera();
 
-private:
-
   virtual void operator()();
+
+private:
 
   const boost::scoped_ptr<MarkerExtractor> markerExtractor;
 };

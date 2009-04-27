@@ -31,7 +31,7 @@ namespace scene
   {
     float frameRate;
     std::string hardware;
-    std::string uid;
+    std::string uid; // This must be a decimal integer representation.
     boost::array<unsigned, 2> resolution;
 
     /// Path to input images for pseudoCamera
