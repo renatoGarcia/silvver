@@ -1,0 +1,236 @@
+#include <iostream>
+using namespace std;
+
+#include "cfParser.hpp"
+
+#include <boost/lexical_cast.hpp>
+
+CfParser::CfParser()
+{}
+
+template <typename Type, int nItens>
+boost::array<Type, nItens>
+CfParser::readArray(lua_State* L, std::string name)
+{
+  lua_getfield(L, -1, name.c_str());
+
+  if (lua_isnil(L, -1))
+  {
+    throw file_load_error("An instance of array <" + name +
+                          "> was don't found in config file");
+  }
+  if (!lua_istable(L, -1))
+  {
+    throw file_load_error("Field name <" + name + "> isn't an array");
+  }
+
+  boost::array<Type, nItens> returnArray;
+
+  // Put all items on stack
+  for (int i = 1; i <= nItens; ++i)
+  {
+    lua_pushnumber(L, i);
+    lua_gettable(L, -(i + 1));
+
+    if (lua_isnil(L, -1))
+    {
+      throw file_load_error("Index " +
+                            boost::lexical_cast<std::string>(i) +
+                            " from <" + name + "> array don't exists");
+    }
+    if (!lua_isstring(L, -1))
+    {
+      throw file_load_error("The index " +
+                            boost::lexical_cast<std::string>(i) +
+                            " from <" + name +
+                            "> array isn't a number or string");
+    }
+  }
+
+  // Convert all items on stack and put on boost::array
+  for (int i = -nItens; i < 0; ++i)
+  {
+    try
+    {
+      returnArray.at(nItens + i) =
+        boost::lexical_cast<Type>(lua_tostring(L, i));
+    }
+    catch (boost::bad_lexical_cast &)
+    {
+      throw file_load_error("The index " +
+                            boost::lexical_cast<std::string>(nItens+i+1) +
+                            " from <" + name + "> array " +
+                            "couldn't be converted to appropriated type");
+    }
+  }
+
+  lua_pop(L, nItens + 1);
+
+  return returnArray;
+}
+
+template <typename Type>
+Type
+CfParser::readValue(lua_State* L, std::string name)
+{
+  lua_getfield(L, -1, name.c_str());
+
+  if (lua_isnil(L, -1))
+  {
+    throw file_load_error("An instance of field <" + name +
+                          "> was don't found in config file");
+  }
+  if (!lua_isstring(L, -1))
+  {
+    throw file_load_error("Field name <" + name +
+                          "> isn't a number or string");
+  }
+
+  Type returnValue;
+  try
+  {
+    returnValue = boost::lexical_cast<Type>(lua_tostring(L, -1));
+  }
+  catch (boost::bad_lexical_cast &)
+  {
+    throw file_load_error("The field <" + name +
+                          "> couldn't be converted to the appropriated type");
+  }
+
+  lua_pop(L,1);
+
+  return returnValue;
+}
+
+bool
+CfParser::hasField(lua_State* L, std::string name)
+{
+  lua_getfield(L, -1, name.c_str());
+
+  if (lua_isnil(L, -1))
+  {
+    lua_pop(L, 1);
+    return false;
+  }
+  else
+  {
+    lua_pop(L, 1);
+    return true;
+  }
+}
+
+void
+CfParser::readCamera(lua_State* L)
+{
+  scene::Camera camera;
+
+  lua_getfield(L, -1, "hardware");
+  if (lua_isnil(L, -1))
+  {
+    throw file_load_error("An instance of field <hardware> "\
+                          "was don't found in config file");
+  }
+  if (lua_istable(L, -1)) // hardcamera is pseudocamera
+  {
+    camera.imagesPath = readValue<std::string>(L, "path");
+    lua_pop(L,1); // pop hardware table
+    camera.hardware = readArray<std::string, 1>(L, "hardware").at(0);
+  }
+  else
+  {
+    lua_pop(L,1); // pop hardware field
+    camera.hardware = readValue<std::string>(L, "hardware");
+  }
+
+  camera.uid = readValue<std::string>(L, "uid");
+  camera.resolution = readArray<unsigned, 2>(L, "resolution");
+  camera.frameRate = readValue<float>(L, "frame_rate");
+
+  if (hasField(L, "matrix_homography"))
+  {
+    scene::MatrixHomography mh;
+    lua_getfield(L, -1, "matrix_homography");
+
+    mh.fc = readArray<double, 2>(L, "focal_length");
+    mh.cc = readArray<double, 2>(L, "principal_point");
+    mh.kc = readArray<double, 5>(L, "radial_distortion");
+    mh.alpha_c = readValue<double>(L, "alpha_c");
+    mh.h = readArray<double, 9>(L, "matrix_h");
+
+    lua_pop(L,1); // pop matrix_homography
+    camera.homography = mh;
+  }
+  else if (hasField(L, "lut_homography"))
+  {
+    scene::LutHomography lh;
+    lua_getfield(L, -1, "lut_homography");
+
+    lh.lut = readArray<std::string, 2>(L, "lut");
+
+    lua_pop(L,1); // pop lut_homography
+    camera.homography = lh;
+  }
+  else
+  {
+    throw file_load_error("Don't found homography description "\
+                          "in camera table");
+  }
+
+  this->sc.vecCamera.push_back(camera);
+}
+
+scene::Scene
+CfParser::parseFile(const std::string& configFile)
+{
+  lua_State* L = lua_open();
+  luaL_openlibs(L);
+
+  if (luaL_dofile(L, configFile.c_str()))
+  {
+    throw std::invalid_argument("Error on loading config file, " +
+                                std::string(lua_tostring(L, -1)));
+  }
+
+  lua_getglobal(L, "scene");
+  if (!lua_istable(L, -1))
+  {
+    throw file_load_error("Don't found scene variable in config file");
+  }
+
+  lua_getfield(L, -1, "camera");
+  if (!lua_istable(L, -1))
+  {
+    throw file_load_error("Don't found camera variable in config file");
+  }
+
+  lua_pushnil(L);// first key
+  while (lua_next(L, -2) != 0)
+  {
+    readCamera(L);
+
+    // removes 'value', keeps 'key' for next iteration
+    lua_pop(L, 1);
+  }
+  lua_pop(L, 1); // pop camera field
+
+  if (hasField(L, "artp_target"))
+  {
+    lua_getfield(L, -1, "artp_target");
+
+    lua_pushnil(L);// first key
+    while (lua_next(L, -2) != 0)
+    {
+      scene::Target target;
+      target.targetDefineFile = readValue<std::string>(L, "patt_file");
+      target.uid = readValue<unsigned>(L, "uid");
+
+      this->sc.targets["artp_mark"].push_back(target);
+
+      // removes 'value', keeps 'key' for next iteration
+      lua_pop(L, 1);
+    }
+    lua_pop(L, 1); // pop artp_target field
+  }
+
+  return this->sc;
+}

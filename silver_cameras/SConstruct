@@ -4,7 +4,7 @@ import sys
 sys.path.insert(0, '../common')
 from sconsUtilities import *
 
-from string import maketrans,split
+from string import split
 from os.path import abspath
 
 build_optional_flags = []
@@ -112,6 +112,8 @@ env['CPPPATH'] = env['CPPPATH'].split(';')
 env.Append(CPPPATH = [abspath('../common')])
 
 env['LIBPATH'] = env['LIBPATH'].split(';')
+
+env.ParseConfig("pkg-config lua5.1 --cflags --libs")
 
 Help(opts.GenerateHelpText(env))
 

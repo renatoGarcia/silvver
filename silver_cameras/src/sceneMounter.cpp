@@ -3,7 +3,8 @@
 #include <boost/foreach.hpp>
 
 #include "tsPrint.hpp"
-#include "xmlParser.hpp"
+// #include "xmlParser.hpp"
+#include "cfParser.hpp"
 #include "abstractCameraFactory.hpp"
 #include <request.hpp>
 
@@ -18,8 +19,8 @@ SceneMounter::SceneMounter(const std::string& serverIp,
 void
 SceneMounter::mount()
 {
-  const XmlParser xmlParser = XmlParser();
-  const scene::Scene scene = xmlParser.parseFile(this->sceneDescriptorFile);
+  CfParser cfParser = CfParser();
+  const scene::Scene scene = cfParser.parseFile(this->sceneDescriptorFile);
 
   // The std::string is the name of target type, and the std::vector is
   // the set of all the targets of that type.
