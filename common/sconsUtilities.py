@@ -1,3 +1,5 @@
+from string import maketrans
+
 def makeHeaderDefine(environment, header_path):
     header_path = '-DHAVE_' + \
                   header_path.translate(maketrans('/.','__')).upper()

@@ -1,9 +1,17 @@
 #!/bin/env python
 
+import sys
+sys.path.insert(0, '../common')
+from sconsUtilities import *
+
 from os.path import abspath
 from commands import getoutput
 
-mandatory_libs = ['silver_client']
+silver_libs = RelatedLibs('Silver-client',
+                          'silver',
+                          ['silver_client'])
+
+mandatory_libs = RelatedLibsGroup([silver_libs])
 
 opts = Options()
 
@@ -23,6 +31,11 @@ opts.AddOptions(
     PathOption('includedir',
                'Installation prefix for C header files',
                '$prefix/include', PathOption.PathAccept))
+
+for related_libs in mandatory_libs:
+    opts.Add('lib_' + related_libs.short_name + '_suffix',
+             'Suffix of ' + related_libs.long_name + ' libraries.',
+             '')
 
 opts.Add('CPPPATH',
          'Directories that the C++ preprocessor will search for '
@@ -45,6 +58,9 @@ opts.Add('CPPFLAGS',
 env = Environment(options = opts,
                   CPPFLAGS = '${CPPFLAGS}')
 
+for related_libs in mandatory_libs:
+    related_libs.add_suffix(env['lib_' + related_libs.short_name + '_suffix'])
+
 env['CPPPATH'] = env['CPPPATH'].split(';')
 env.Append(CPPPATH = [abspath('../common'),
                       abspath('../libsilver_client/src')])
@@ -52,7 +68,7 @@ env.Append(CPPPATH = [abspath('../common'),
 env['LIBPATH'] = env['LIBPATH'].split(';')
 env.Append(LIBPATH = [abspath('../libsilver_client/build')])
 
-env.ParseConfig("pkg-config playercore --cflags --libs")
+# env.ParseConfig("pkg-config playercore --cflags --libs")
 # env.ParseConfig("pkg-config silverclient --cflags --libs")
 
 Help(opts.GenerateHelpText(env))
@@ -66,10 +82,11 @@ if not env.GetOption('clean') and not env.GetOption('help'):
 #-------------------------------------------------------
     print '\n' + 'Mandatory libraries...'
 #-------------------------------------------------------
-    for lib in mandatory_libs:
-        if not conf.CheckLib(lib):
-            print 'Did not find', lib, 'library'
-            exit(1)
+    for related_libs in mandatory_libs:
+        for lib in related_libs:
+            if not conf.CheckLib(lib):
+                print 'Did not find', lib, 'library'
+                exit(1)
 
 #-------------------------------------------------------
     print '\n' + 'Mandatory headers...'
