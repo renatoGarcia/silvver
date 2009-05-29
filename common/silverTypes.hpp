@@ -24,6 +24,7 @@ namespace silver
     Position(const Position& position)
       :x(position.x)
       ,y(position.y)
+      ,z(position.z)
     {}
   };
 
@@ -59,7 +60,7 @@ namespace silver
       ,uid(0)
     {}
 
-    Identity(const T& t, unsigned uid)
+    Identity(const T& t, const unsigned uid)
       :T(t)
       ,uid(uid)
     {}
