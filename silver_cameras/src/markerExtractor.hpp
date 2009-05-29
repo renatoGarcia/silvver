@@ -38,7 +38,7 @@ public:
   {
     silver::Position primaryVertex;
     silver::Position secondaryVertex;
-    silver::Ente center;
+    silver::Identity<silver::Pose> center;
   };
 
   MarkerExtractor(int width, int height,

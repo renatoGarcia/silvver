@@ -13,7 +13,12 @@
 
 namespace bpt = boost::posix_time;
 
-class Target::CheshireCat
+namespace silver
+{
+
+template<class U>
+class
+CheshireCat
 {
 public:
 
@@ -21,7 +26,7 @@ public:
 
 private:
 
-  friend class Target;
+  friend class Target<U>;
 
   CheshireCat(unsigned targetId, bool log,
               const std::string& serverIp,
@@ -33,24 +38,24 @@ private:
   /// Stop the thread and close the connection with the receptionist.
   void disconnect();
 
-  void updatePose();
+  void update();
 
   const unsigned targetId;
 
-  /// Synchronize the write and read in currentPose.
+  /// Synchronize the write and read in current.
   boost::mutex mutexCurrentPose;
 
   boost::condition_variable newPoseCondition;
 
   /// Value of last received Pose.
-  silver::Pose currentPose;
+  Identity<U> current;
 
-  // Signalize a never returned/read currentPose.
-  bool currentPoseIsNew;
+  // Signalize a never returned/read current.
+  bool currentIsNew;
 
   /// Will holds an Ente until convert it safely to
-  /// currentPose locking mutexCurrentPose.
-  silver::Ente lastEnte;
+  /// current locking mutexCurrentPose.
+  Identity<U> last;
 
   boost::scoped_ptr<Connection> connection;
 
@@ -59,12 +64,13 @@ private:
   boost::scoped_ptr<std::ofstream> arqRegistro;
 };
 
-Target::CheshireCat::CheshireCat(unsigned targetId,
-                                 bool log,
-                                 const std::string& serverIp,
-                                 unsigned receptionistPort)
+template<class U>
+CheshireCat<U>::CheshireCat(unsigned targetId,
+                            bool log,
+                            const std::string& serverIp,
+                            unsigned receptionistPort)
   :targetId(targetId)
-  ,currentPoseIsNew(false)
+  ,currentIsNew(false)
   ,connection(new Connection(serverIp, receptionistPort))
   ,connected(false)
 {
@@ -75,7 +81,8 @@ Target::CheshireCat::CheshireCat(unsigned targetId,
   }
 }
 
-Target::CheshireCat::~CheshireCat()
+template<class U>
+CheshireCat<U>::~CheshireCat()
 {
   if (this->connected)
   {
@@ -90,124 +97,140 @@ Target::CheshireCat::~CheshireCat()
   }
 }
 
+template<class U>
 void
-Target::CheshireCat::connect()
+CheshireCat<U>::connect()
 {
   this->connection->connect(this->targetId);
   this->connected = true;
 
-  this->connection->asyncRead(this->lastEnte,
-                                boost::bind(&Target::CheshireCat::updatePose,
-                                            this));
+  this->connection->asyncRead(this->last,
+                              boost::bind(&CheshireCat<U>::update,
+                                          this));
 }
 
+template<class U>
 void
-Target::CheshireCat::disconnect()
+CheshireCat<U>::disconnect()
 {
   this->connection->disconnect(this->targetId);
   this->connected = false;
 }
 
+template<class U>
 void
-Target::CheshireCat::updatePose()
+CheshireCat<U>::update()
 {
-  if ((unsigned)this->lastEnte.id == this->targetId)
+  if ((unsigned)this->last.uid == this->targetId)
   {
     {
       boost::mutex::scoped_lock lock(this->mutexCurrentPose);
-      this->currentPose = silver::Pose(lastEnte.x,
-                                       lastEnte.y,
-                                       lastEnte.theta);
+      this->current = this->last;
+
+      this->currentIsNew = true;
     }
 
-    this->currentPoseIsNew = true;
     this->newPoseCondition.notify_one();
 
     if(this->arqRegistro)
     {
-      *(this->arqRegistro) << lastEnte.id   << '\t'
-                           << lastEnte.x    << '\t'
-                           << lastEnte.y    << '\t'
-                           << lastEnte.theta << std::endl;
+      *(this->arqRegistro) << last.uid   << '\t'
+                           << last.x    << '\t'
+                           << last.y    << '\t'
+                           << last.yaw << std::endl;
     }
   }
 
-  this->connection->asyncRead(this->lastEnte,
-                              boost::bind(&Target::CheshireCat::updatePose,
+  this->connection->asyncRead(this->last,
+                              boost::bind(&CheshireCat<U>::update,
                                           this));
 }
 
+template<class T>
 void
-Target::connect()
+Target<T>::connect()
 {
   smile->connect();
 }
 
+template<class T>
 void
-Target::disconnect()
+Target<T>::disconnect()
 {
   smile->disconnect();
 }
 
+template<class T>
 unsigned
-Target::getId()
+Target<T>::getId()
 {
   return smile->targetId;
 }
 
-silver::Pose
-Target::getLastPose()
+template<class T>
+Identity<T>
+Target<T>::getLast()
 {
   boost::mutex::scoped_lock lock(smile->mutexCurrentPose);
 
-  smile->currentPoseIsNew = false;
-  return smile->currentPose;
+  smile->currentIsNew = false;
+  return smile->current;
 }
 
-silver::Pose
-Target::getNewPose(const boost::posix_time::time_duration& waitTime)
+template<class T>
+Identity<T>
+Target<T>::getNew(const boost::posix_time::time_duration& waitTime)
 {
   boost::mutex::scoped_lock lock(smile->mutexCurrentPose);
 
-  while (!smile->currentPoseIsNew)
+  while (!smile->currentIsNew)
   {
     if (!smile->newPoseCondition.timed_wait(lock,
                                             bpt::second_clock::universal_time() +
                                             waitTime))
     {
-      throw Target::time_expired_error("The wait time expired without a new "
-                                       "pose arrives");
+      throw typename
+        Target<T>::time_expired_error("The wait time expired without a new "
+                                      "pose arrives");
     }
   }
 
-  smile->currentPoseIsNew = false;
-  return smile->currentPose;
+  smile->currentIsNew = false;
+  return smile->current;
 }
 
-silver::Pose
-Target::getNextPose(const boost::posix_time::time_duration& waitTime)
+template<class T>
+Identity<T>
+Target<T>::getNext(const boost::posix_time::time_duration& waitTime)
 {
   boost::mutex::scoped_lock lock(smile->mutexCurrentPose);
 
-  // Wait for updatePose function notifies a new pose.
+  // Wait for update function notifies a new pose.
   if (!smile->newPoseCondition.timed_wait(lock,
                                           bpt::second_clock::universal_time() +
                                           waitTime))
   {
-    throw Target::time_expired_error("The wait time expired without the next "
-                                     "pose arrives");
+    throw typename
+      Target<T>::time_expired_error("The wait time expired without the next "
+                                    "pose arrives");
   }
 
-  smile->currentPoseIsNew = false;
-  return smile->currentPose;
+  smile->currentIsNew = false;
+  return smile->current;
 }
 
-Target::Target(unsigned targetId,
+template<class T>
+Target<T>::Target(unsigned targetId,
                bool log,
                const std::string& serverIp,
                unsigned receptionistPort)
-  :smile(new CheshireCat(targetId, log, serverIp, receptionistPort))
+  :smile(new CheshireCat<T>(targetId, log, serverIp, receptionistPort))
 {}
 
-Target::~Target() throw()
+template<class T>
+Target<T>::~Target() throw()
 {}
+
+template class Target<Pose>;
+
+} // End namespace silver

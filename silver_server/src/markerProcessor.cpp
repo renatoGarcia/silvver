@@ -16,12 +16,13 @@ MarkerProcessor::instantiate()
 }
 
 MarkerProcessor::MarkerProcessor()
-  :Processor<silver::Ente,silver::Ente>::Processor()
+  :Processor<silver::Identity<silver::Pose>,
+             silver::Identity<silver::Pose> >::Processor()
 {
 }
 
 void
-MarkerProcessor::deliverPackage(std::vector<silver::Ente> &pacote,
+MarkerProcessor::deliverPackage(std::vector<silver::Identity<silver::Pose> > &pacote,
                                 unsigned id)
 {
   boost::mutex::scoped_lock lock(mutexArmazenador);
@@ -33,10 +34,10 @@ MarkerProcessor::deliverPackage(std::vector<silver::Ente> &pacote,
 void
 MarkerProcessor::localize()
 {
-  std::vector<silver::Ente> vecRobos;
+  std::vector<silver::Identity<silver::Pose> > vecRobos;
 
-  std::vector<silver::Ente> vecEnteTemp;
-  std::vector<silver::Ente>::iterator iteEnteTemp;
+  std::vector<silver::Identity<silver::Pose> > vecEnteTemp;
+  std::vector<silver::Identity<silver::Pose> >::iterator iteEnteTemp;
 
   //---------------Copia os entes de todas as marcaCameras para vecEnte
   TMapa::iterator iteMapa = armazenador.begin();
@@ -54,15 +55,17 @@ MarkerProcessor::localize()
 //   }
 
   //---------------Verifica se há um mesmo robô reportado por duas câmeras diferentes
-  std::vector<silver::Ente>::iterator itePrimeiro,iteSegundo;
+  std::vector<silver::Identity<silver::Pose> >::iterator itePrimeiro,iteSegundo;
 
   for(itePrimeiro = vecRobos.begin(); itePrimeiro < vecRobos.end(); itePrimeiro++)
   {
     for(iteSegundo=itePrimeiro+1; iteSegundo < vecRobos.end(); iteSegundo++)
     {
-      if(iteSegundo->id == itePrimeiro->id)
+      if(iteSegundo->uid == itePrimeiro->uid)
       {
-        itePrimeiro->fuse(*iteSegundo);
+        itePrimeiro->x = (itePrimeiro->x + iteSegundo->x) / 2;
+        itePrimeiro->y = (itePrimeiro->y + iteSegundo->y) / 2;
+
         vecRobos.erase(iteSegundo);
       }
     }

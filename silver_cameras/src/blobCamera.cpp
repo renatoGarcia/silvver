@@ -16,14 +16,14 @@ BlobCamera::~BlobCamera()
 void
 BlobCamera::operator()()
 {
-  std::vector<silver::Blob> vecBlob;
-  silver::Package<silver::Blob> package;
-  while(!this->stopping)
-  {
-    vecBlob.clear();
-    this->updateFrame();
+//   std::vector<silver::Blob> vecBlob;
+//   silver::Package<silver::Blob> package;
+//   while(!this->stopping)
+//   {
+//     vecBlob.clear();
+//     this->updateFrame();
 
-    this->colorBlobExtractor->extract(this->currentFrame, vecBlob);
-  }
+//     this->colorBlobExtractor->extract(this->currentFrame, vecBlob);
+//   }
   std::cout << "tres\n";
 }

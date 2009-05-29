@@ -8,13 +8,16 @@
 #include "silverTypes.hpp"
 #include "processor.hpp"
 
-class MarkerProcessor : public Processor<silver::Ente,silver::Ente>
+class MarkerProcessor :
+  public Processor<silver::Identity<silver::Pose>,
+                   silver::Identity<silver::Pose> >
 {
 public:
 
   static boost::shared_ptr<MarkerProcessor> instantiate();
 
-  void deliverPackage(std::vector<silver::Ente> &pacote, unsigned id);
+  void deliverPackage(std::vector<silver::Identity<silver::Pose> > &pacote,
+                      unsigned id);
 
   // Calcula a configuraçãoo dos robôs, usando os dados atualmente
   // disponíveis no map armazenador.

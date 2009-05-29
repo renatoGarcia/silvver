@@ -1,5 +1,7 @@
 #include "homography.hpp"
 
+#include <cmath>
+
 //============================ MATRIX ============================//
 
 Matrix::Matrix(const scene::MatrixHomography& matrix)

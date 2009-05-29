@@ -19,7 +19,7 @@ InputFactory::createInput(TargetType targetType,
   case TargetType::ARTP_MARK:
     {
       ProcessorType t = MARKER;
-      returnPtr.reset(new Input<silver::Ente>(connection,
+      returnPtr.reset(new Input<silver::Identity<silver::Pose> >(connection,
                                               t));
       break;
     }

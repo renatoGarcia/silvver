@@ -120,8 +120,8 @@ MarkerExtractor::extract(const IplImage* const imgEntrada,
     }
     mP.center.x     = marker_info[marker].pos[0];
     mP.center.y     = marker_info[marker].pos[1];
-    mP.center.id    = this->idMap.at(marker_info[marker].id);
-    mP.center.weigh = marker_info[marker].cf;
+    mP.center.uid    = this->idMap.at(marker_info[marker].id);
+//     mP.center.weigh = marker_info[marker].cf;
 
     vecMarkerPoints.push_back(mP);
   }

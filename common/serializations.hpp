@@ -10,7 +10,7 @@ namespace boost
   namespace serialization
   {
 
-    template<typename Archive>
+    template<class Archive>
     void
     serialize(Archive& ar, silver::Position& position, const unsigned version)
     {
@@ -18,30 +18,31 @@ namespace boost
       ar & position.y;
     }
 
-    template<typename Archive>
+    template<class Archive>
     void
     serialize(Archive& ar, silver::Pose& pose, const unsigned version)
     {
       ar & boost::serialization::base_object<silver::Position>(pose);
-      ar & pose.theta;
+      ar & pose.yaw;
+      ar & pose.pitch;
+      ar & pose.roll;
     }
 
-    template<typename Archive>
+    template<class Archive, class T>
     void
-    serialize(Archive& ar, silver::Ente& ente, const unsigned version)
+    serialize(Archive& ar, silver::Identity<T>& id, const unsigned version)
     {
-      ar & boost::serialization::base_object<silver::Pose>(ente);
-      ar & ente.id;
-      ar & ente.weigh;
+      ar & boost::serialization::base_object<T>(id);
+      ar & id.uid;
     }
 
-    template<typename Archive>
-    void
-    serialize(Archive& ar, silver::Blob& blob, const unsigned version)
-    {
-      ar & blob.highestVertex;
-      ar & blob.lowestVertex;
-    }
+//     template<class Archive>
+//     void
+//     serialize(Archive& ar, silver::Blob& blob, const unsigned version)
+//     {
+//       ar & blob.highestVertex;
+//       ar & blob.lowestVertex;
+//     }
 
   } // namespace serialization
 } // namespace boost

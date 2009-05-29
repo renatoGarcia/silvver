@@ -22,10 +22,10 @@ Outputs<Toutput>::sendResults(const std::vector<Toutput> &vecResults)
 
   BOOST_FOREACH(Toutput output, vecResults)
   {
-    *logFile << output.id << '\t' << output.x  << '\t'
-             << output.y << '\t' << output.theta <<  std::endl;
+    *logFile << output.uid << '\t' << output.x  << '\t'
+             << output.y << '\t' << output.yaw <<  std::endl;
 
-    vecConnection = this->clientsMap->findClient(output.id);
+    vecConnection = this->clientsMap->findClient(output.uid);
 
     BOOST_FOREACH(connectionPtr, vecConnection)
     {

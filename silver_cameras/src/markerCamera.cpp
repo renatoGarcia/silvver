@@ -2,6 +2,7 @@
 
 #include "connection.ipp"
 #include "silverTypes.hpp"
+#include <math.h>
 
 MarkerCamera::MarkerCamera(const std::vector<scene::Target> &vecTargets,
                            const scene::Camera& cameraConfig,
@@ -20,11 +21,10 @@ MarkerCamera::operator()()
 {
   this->markerExtractor->initialize();
 
-  std::vector<silver::Ente> vecEnte;
-  silver::Package<silver::Ente> package;
+  std::vector<silver::Identity<silver::Pose> > vecEnte;
   std::vector<MarkerExtractor::MarkerPoints> vecMarkerPoints;
   std::vector<MarkerExtractor::MarkerPoints>::iterator iteMarkerPoints;
-  double theta;
+  double yaw;
   while(!this->stopping)
   {
     vecEnte.clear();
@@ -39,11 +39,11 @@ MarkerCamera::operator()()
       this->localize(iteMarkerPoints->primaryVertex);
       this->localize(iteMarkerPoints->secondaryVertex);
 
-      theta =
-        iteMarkerPoints->primaryVertex.findAngle(iteMarkerPoints->
-                                                 secondaryVertex);
+      yaw =
+        atan2(iteMarkerPoints->secondaryVertex.y - iteMarkerPoints->primaryVertex.y,
+              iteMarkerPoints->secondaryVertex.x - iteMarkerPoints->primaryVertex.x);
 
-      iteMarkerPoints->center.theta = theta;
+      iteMarkerPoints->center.yaw = yaw;
       vecEnte.push_back(iteMarkerPoints->center);
     }
 

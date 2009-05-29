@@ -1,4 +1,4 @@
-LIB_FLAG = -lsilver_client -lboost_thread
+LIB_FLAG = -lsilver_client -lboost_thread-mt
 CPP_FLAGS = -I../src -I../../common -L../build
 
 OBJECTS = silver_client

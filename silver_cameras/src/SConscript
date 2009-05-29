@@ -15,8 +15,6 @@ sources = Split("""cfParser.cpp
                    main.cpp
                    markerCamera.cpp
                    markerExtractor.cpp
-                   blobCamera.cpp
-                   blobExtractor.cpp
                    abstractCameraFactory.cpp
                    hardCameras/pseudoCamera.cpp
                    tsPrint.cpp""")

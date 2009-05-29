@@ -10,16 +10,18 @@
 #include <silverTypes.hpp>
 #include <target.hpp>
 
-void printTargets(boost::shared_ptr<Target> target)
+using namespace silver;
+
+void printTargets(boost::shared_ptr<Target<Pose> > target)
 {
-  silver::Pose pose;
+  silver::Position pose;
 
   while(!boost::this_thread::interruption_requested())
   {
-    pose = target->getNewPose();
+    pose = target->getNew();
     std::cout << "X: " << pose.x
               << "\tY: " << pose.y
-              << "\tTheta: " << pose.theta
+              << "\tTheta: " << pose.yaw
               << std::endl;
   }
 }
@@ -55,10 +57,10 @@ int main(int argc,char **argv)
     receptionistPort = atoi(argv[3]);
   }
 
-  boost::shared_ptr<Target> target(new Target(id,
-                                              false,
-                                              ip,
-                                              receptionistPort));
+  boost::shared_ptr<Target<Pose> > target(new Target<Pose>(id,
+                                                           false,
+                                                           ip,
+                                                           receptionistPort));
 
   std::cout << "Connecting to server..." << std::endl;
   target->connect();
