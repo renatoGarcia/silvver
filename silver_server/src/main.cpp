@@ -71,13 +71,3 @@ int main(int argc, char **argv)
 
   return 0;
 }
-
-struct aaa
-{
-  void oi()
-  {
-  }
-};
-
-aaa b;
-b.
