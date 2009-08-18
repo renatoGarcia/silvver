@@ -107,7 +107,7 @@ Receptionist::operator()(AddOutput& request) const
                                   request.localPort));
 
   this->currentReception->write(ioConnection->getLocalPort());
-  this->outputs->addOutput(request, ioConnection);
+  this->outputs->addOutput(request.targetId, ioConnection);
 }
 
 void
@@ -117,7 +117,7 @@ Receptionist::operator()(DelOutput& request) const
                           << "Delete output request" << std::endl
                           << ts_output::unlock;
 
-  this->outputs->removeOutput(request.targetId, request.localPort);
+  this->outputs->delOutput(request.targetId, request.localPort);
 }
 
 void
