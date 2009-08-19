@@ -3,7 +3,7 @@
 #include "ioConnection.ipp"
 #include <boost/lexical_cast.hpp>
 #include "silverTypes.hpp"
-#include "processorFactory.hpp"
+#include "markerProcessor.hpp"
 
 InputFactory::InputFactory()
 {}
@@ -18,9 +18,8 @@ InputFactory::createInput(TargetType targetType,
   {
   case TargetType::ARTP_MARK:
     {
-      ProcessorType t = MARKER;
-      returnPtr.reset(new Input<silver::Identity<silver::Pose> >(connection,
-                                              t));
+      returnPtr.reset(new Input<silver::Identity<silver::Pose> >
+                      (connection, MarkerProcessor::instantiate()));
       break;
     }
 //   case COLOR_BLOB:

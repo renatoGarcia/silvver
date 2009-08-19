@@ -25,7 +25,7 @@
 #include "ioConnection.hpp"
 
 /** A class to hold the connected clients.
- * This class wrap the STL multimap to thread safety.
+ * This class wrap the STL multimap for thread safety.
  */
 class ClientsMap
 {

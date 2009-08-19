@@ -61,9 +61,9 @@ private:
     }
   };
 
-  unsigned threshold;
-
   std::basic_ostream<CharT, Traits>* os;
+
+  unsigned threshold;
 
   NullStream nullStream;
 };

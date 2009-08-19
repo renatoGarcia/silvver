@@ -18,30 +18,39 @@
 
 #include "inputInterface.hpp"
 
-#include <boost/scoped_ptr.hpp>
+#include <vector>
+
 #include <boost/shared_ptr.hpp>
-#include <boost/thread.hpp>
 
 #include "ioConnection.hpp"
 #include "processorInterface.hpp"
-#include "processorFactory.hpp"
 
+/// Receive the data sent by cameras and passes it to correct processor class.
 template <typename Type>
 class Input : public InputInterface
 {
 public:
 
+  /** Input class constructor
+   *
+   * @param connection A shared_ptr to an IoConnection already connected
+   *                   with a camera.
+   * @param processor A shared_ptr to the correct processor.
+   */
   Input(boost::shared_ptr<IoConnection> connection,
-        ProcessorType processorType);
+        boost::shared_ptr< ProcessorInterface<Type> > processor);
 
   ~Input();
 
 private:
 
+  /// Hold the last inputs received.
   std::vector<Type> inputs;
 
+  /// The connection with the camera.
   boost::shared_ptr<IoConnection> connection;
 
+  /// The local port where hearing for incoming data from cameras.
   unsigned connectionPort;
 
   boost::shared_ptr< ProcessorInterface<Type> > processor;

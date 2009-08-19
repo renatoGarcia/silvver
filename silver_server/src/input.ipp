@@ -18,19 +18,15 @@
 
 #include "input.hpp"
 
-#include "processorFactory_impl.hpp"
-#include <iostream>
-#include <vector>
 #include <boost/bind.hpp>
-#include "silverTypes.hpp"
 
 template <typename Type>
 Input<Type>::Input(boost::shared_ptr<IoConnection> connection,
-                   ProcessorType processorType)
+                   boost::shared_ptr< ProcessorInterface<Type> > processor)
   :InputInterface()
   ,connection(connection)
   ,connectionPort(connection->getLocalPort())
-  ,processor(ProcessorFactory<Type>::createProcessor(processorType))
+  ,processor(processor)
 {
   this->connection->asyncReceive(this->inputs,
                                  boost::bind(&Input<Type>::handleReceive,
