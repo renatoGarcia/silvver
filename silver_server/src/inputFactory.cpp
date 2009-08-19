@@ -1,5 +1,5 @@
 #include "inputFactory.hpp"
-#include "input_impl.hpp"
+#include "input.ipp"
 #include "ioConnection.ipp"
 #include <boost/lexical_cast.hpp>
 #include "silverTypes.hpp"

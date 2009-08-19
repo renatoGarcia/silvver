@@ -13,8 +13,8 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef _CLIENTS_MAP_H_
-#define _CLIENTS_MAP_H_
+#ifndef _CLIENTS_MAP_HPP_
+#define _CLIENTS_MAP_HPP_
 
 #include <map>
 #include <vector>
@@ -78,4 +78,4 @@ private:
 
 };
 
-#endif /* _CLIENTS_MAP_H_ */
+#endif /* _CLIENTS_MAP_HPP_ */

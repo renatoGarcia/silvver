@@ -15,6 +15,9 @@
 
 #include <iostream>
 
+#include <logging.hpp>
+#include <tsostream.hpp>
+
 namespace debug
 {
   tsostream ts(std::cout.rdbuf());

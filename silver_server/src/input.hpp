@@ -1,12 +1,29 @@
-#ifndef INPUT_HPP
-#define INPUT_HPP
+/* Copyright 2009 Renato Florentino Garcia <fgar.renato@gmail.com>
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License version 3, as
+ * published by the Free Software Foundation.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
+#ifndef _INPUT_HPP_
+#define _INPUT_HPP_
 
 #include "inputInterface.hpp"
-#include <boost/shared_ptr.hpp>
+
 #include <boost/scoped_ptr.hpp>
+#include <boost/shared_ptr.hpp>
 #include <boost/thread.hpp>
+
 #include "ioConnection.hpp"
-#include "processor.hpp"
+#include "processorInterface.hpp"
 #include "processorFactory.hpp"
 
 template <typename Type>
@@ -32,4 +49,4 @@ private:
   void handleReceive();
 };
 
-#endif
+#endif /* _INPUT_HPP_ */
