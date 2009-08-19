@@ -1,14 +1,29 @@
-#ifndef IO_CONNECTION_HPP
-#define IO_CONNECTION_HPP
+/* Copyright 2009 Renato Florentino Garcia <fgar.renato@gmail.com>
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License version 3, as
+ * published by the Free Software Foundation.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
+#ifndef _IO_CONNECTION_HPP_
+#define _IO_CONNECTION_HPP_
+
+#include <string>
 
 #include <boost/asio.hpp>
 #include <boost/bind.hpp>
-#include <string>
-#include <boost/tuple/tuple.hpp>
 #include <boost/thread.hpp>
+#include <boost/tuple/tuple.hpp>
 
-/**
- * Class to connect to silver-cameras and silver-clients.
+/** Class to connect to silver-cameras and silver-clients.
  * Wrapper a UDP/IP socket and silver message protocol.
  */
 class IoConnection
@@ -16,12 +31,13 @@ class IoConnection
 public:
 
   /**
-   * Construct an ioConnection and connect it to the givend remote endpoint.
+   * Construct an ioConnection and connect it to the given remote endpoint.
    * @param ioService An io_service running in some thread.
    * @param remoteIpAddress IP address of remote endpoint.
    * @param remotePort Port number of remote endpoint.
    */
-  IoConnection(const std::string& remoteIpAddress, unsigned short remotePort);
+  IoConnection(const std::string& remoteIpAddress,
+               const unsigned short remotePort);
 
   ~IoConnection();
 
@@ -31,12 +47,12 @@ public:
     this->socket.close();
   }
 
-  inline unsigned short getLocalPort()
+  inline unsigned short getLocalPort() const
   {
     return this->socket.local_endpoint().port();
   }
 
-  inline unsigned short getRemotePort()
+  inline unsigned short getRemotePort() const
   {
     return this->socket.remote_endpoint().port();
   }
@@ -88,4 +104,4 @@ private:
            boost::tuple<Handler> handler);
 };
 
-#endif // IO_CONNECTION_HPP
+#endif /*  _IO_CONNECTION_HPP_ */
