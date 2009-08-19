@@ -1,6 +1,6 @@
 #include <iostream>
 #include "markerProcessor.hpp"
-#include "processor_impl.hpp"
+#include "processor.ipp"
 
 boost::mutex MarkerProcessor::instantiatingMutex;
 boost::shared_ptr<MarkerProcessor> MarkerProcessor::singleInstance;
