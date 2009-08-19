@@ -5,6 +5,7 @@ sources = Split("""clientsMap.cpp
                    ioConnection.cpp
                    main.cpp
                    markerProcessor.cpp
-                   receptionist.cpp""")
+                   receptionist.cpp
+                   debugOutputs.cpp""")
 
 env.Program('silver_server', sources)

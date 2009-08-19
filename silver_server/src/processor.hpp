@@ -2,18 +2,14 @@
 #define PROCESSOR_HPP
 
 #include "processorInterface.hpp"
-#include "outputs.hpp"
 #include "silverTypes.hpp"
 #include <boost/shared_ptr.hpp>
 #include <vector>
+#include "clientsMap.hpp"
 
 template <typename Tinput, typename Toutput>
 class Processor : public ProcessorInterface<Tinput>
 {
-public:
-
-  virtual void deliverPackage(std::vector<Tinput>& package, unsigned id)=0;
-
 protected:
 
   Processor();
@@ -28,7 +24,7 @@ protected:
 
 private:
 
-  boost::shared_ptr< Outputs<Toutput> > outputs;
+  boost::shared_ptr<ClientsMap> clientsMap;
 };
 
 
