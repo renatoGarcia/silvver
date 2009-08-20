@@ -22,13 +22,13 @@
 
 #include "ioConnection.ipp"
 
-template <typename Tinput, typename Toutput>
+template <class Tinput, class Toutput>
 Processor<Tinput,Toutput>::Processor()
 {
   this->clientsMap = ClientsMap::instantiate();
 }
 
-template <typename Tinput, typename Toutput>
+template <class Tinput, class Toutput>
 void
 Processor<Tinput,Toutput>::sendToOutputs(const std::vector<Toutput> &localizations) const
 {

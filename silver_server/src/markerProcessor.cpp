@@ -2,24 +2,10 @@
 #include "markerProcessor.hpp"
 #include "processor.ipp"
 
-boost::mutex MarkerProcessor::instantiatingMutex;
-boost::shared_ptr<MarkerProcessor> MarkerProcessor::singleInstance;
-
-boost::shared_ptr<MarkerProcessor>
-MarkerProcessor::instantiate()
-{
-  boost::mutex::scoped_lock lock(MarkerProcessor::instantiatingMutex);
-  if(!MarkerProcessor::singleInstance)
-    MarkerProcessor::singleInstance.reset(new MarkerProcessor);
-
-  return MarkerProcessor::singleInstance;
-}
-
 MarkerProcessor::MarkerProcessor()
   :Processor<silver::Identity<silver::Pose>,
              silver::Identity<silver::Pose> >::Processor()
-{
-}
+{}
 
 void
 MarkerProcessor::deliverPackage(const std::vector< silver::Identity<silver::Pose> > &pacote,

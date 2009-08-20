@@ -17,21 +17,6 @@
 
 #include "ioConnection.ipp"
 
-boost::shared_ptr<ClientsMap> ClientsMap::singleInstance;
-boost::mutex ClientsMap::instantiatingMutex;
-
-boost::shared_ptr<ClientsMap>
-ClientsMap::instantiate()
-{
-  boost::mutex::scoped_lock lock(ClientsMap::instantiatingMutex);
-  if(!ClientsMap::singleInstance)
-  {
-    ClientsMap::singleInstance.reset(new ClientsMap);
-  }
-
-  return ClientsMap::singleInstance;
-}
-
 ClientsMap::ClientsMap()
 {}
 

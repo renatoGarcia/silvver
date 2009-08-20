@@ -7,14 +7,14 @@
 #include <boost/shared_ptr.hpp>
 #include "silverTypes.hpp"
 #include "processor.hpp"
+#include <singleton.hpp>
 
-class MarkerProcessor :
-  public Processor<silver::Identity<silver::Pose>,
-                   silver::Identity<silver::Pose> >
+class MarkerProcessor :  public Processor<silver::Identity<silver::Pose>,
+                                          silver::Identity<silver::Pose> >,
+                         public Singleton<MarkerProcessor>
+
 {
 public:
-
-  static boost::shared_ptr<MarkerProcessor> instantiate();
 
   void deliverPackage(const std::vector< silver::Identity<silver::Pose> > &pacote,
                       const unsigned id);
@@ -25,12 +25,11 @@ public:
 
 private:
 
-  static boost::shared_ptr<MarkerProcessor> singleInstance;
-  static boost::mutex instantiatingMutex;
+  friend class Singleton<MarkerProcessor>;
+
   MarkerProcessor();
 
   boost::mutex mutexArmazenador;
-
 };
 
 #endif

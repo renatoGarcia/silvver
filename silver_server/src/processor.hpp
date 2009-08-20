@@ -26,7 +26,7 @@
 #include "clientsMap.hpp"
 
 /// Abstract base class to the concrete processor classes.
-template <typename Tinput, typename Toutput>
+template <class Tinput, class Toutput>
 class Processor : public ProcessorInterface<Tinput>
 {
 protected:

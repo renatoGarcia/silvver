@@ -23,20 +23,14 @@
 #include <boost/thread/mutex.hpp>
 
 #include "ioConnection.hpp"
+#include <singleton.hpp>
 
 /** A class to hold the connected clients.
  * This class wrap the STL multimap for thread safety.
  */
-class ClientsMap
+class ClientsMap : public Singleton<ClientsMap>
 {
 public:
-
-  /** Instantiate or get the already created instance of the class.
-   * The ClientsMap class is singleton, this method allow instantiate it.
-   *
-   * @return A shared pointer to the instance.
-   */
-  static boost::shared_ptr<ClientsMap> instantiate();
 
   /** Add a client.
    *
@@ -63,10 +57,9 @@ public:
 
 private:
 
-  typedef std::multimap< unsigned, boost::shared_ptr<IoConnection> > TMultiMap;
+  friend class Singleton<ClientsMap>;
 
-  static boost::shared_ptr<ClientsMap> singleInstance;
-  static boost::mutex instantiatingMutex;
+  typedef std::multimap< unsigned, boost::shared_ptr<IoConnection> > TMultiMap;
 
   boost::mutex accessMap;
 
