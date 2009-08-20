@@ -22,11 +22,11 @@ MarkerProcessor::MarkerProcessor()
 }
 
 void
-MarkerProcessor::deliverPackage(std::vector<silver::Identity<silver::Pose> > &pacote,
-                                unsigned id)
+MarkerProcessor::deliverPackage(const std::vector< silver::Identity<silver::Pose> > &pacote,
+                                const unsigned id)
 {
   boost::mutex::scoped_lock lock(mutexArmazenador);
-  armazenador[id] = pacote;
+  this->lastInputs[id] = pacote;
 
   this->localize();
 }
@@ -40,9 +40,9 @@ MarkerProcessor::localize()
   std::vector<silver::Identity<silver::Pose> >::iterator iteEnteTemp;
 
   //---------------Copia os entes de todas as marcaCameras para vecEnte
-  TMapa::iterator iteMapa = armazenador.begin();
+  TMap::iterator iteMapa = this->lastInputs.begin();
 
-  for(; iteMapa != armazenador.end(); iteMapa++)
+  for(; iteMapa != this->lastInputs.end(); iteMapa++)
   {
     vecRobos.insert(vecRobos.end(),iteMapa->second.begin(),iteMapa->second.end());
     iteMapa->second.clear();
