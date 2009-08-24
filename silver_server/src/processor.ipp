@@ -34,7 +34,7 @@ template <class Tinput, class Toutput>
 void
 Processor<Tinput,Toutput>::sendToOutputs(const std::vector<Toutput> &localizations) const
 {
-  std::vector< boost::shared_ptr<IoConnection> > vecConnection;
+  std::vector< boost::shared_ptr<IoConnection> > vecConnections;
   boost::shared_ptr<IoConnection> connectionPtr;
 
   BOOST_FOREACH(Toutput output, localizations)
@@ -44,9 +44,9 @@ Processor<Tinput,Toutput>::sendToOutputs(const std::vector<Toutput> &localizatio
                   << ts_output::unlock;
 
     // Get all clients hearing for a given target.
-    vecConnection = this->clientsMap->findClient(output.uid);
+    this->clientsMap->findClients(output.uid, vecConnections);
 
-    BOOST_FOREACH(connectionPtr, vecConnection)
+    BOOST_FOREACH(connectionPtr, vecConnections)
     {
       connectionPtr->send(output);
     }

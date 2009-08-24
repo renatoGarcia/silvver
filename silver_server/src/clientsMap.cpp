@@ -51,21 +51,21 @@ ClientsMap::delOutput(unsigned idTarget, unsigned remotePort)
   }
 }
 
-std::vector< boost::shared_ptr<IoConnection> >
-ClientsMap::findClient(unsigned idTarget)
+void
+ClientsMap::findClients(unsigned idTarget,
+                        std::vector< boost::shared_ptr<IoConnection> >& clientsConnections)
 {
+  clientsConnections.clear();
+
   boost::mutex::scoped_lock lock(this->accessMap);
 
   std::pair< TMultiMap::iterator, TMultiMap::iterator >
     range(this->client.equal_range(idTarget));
 
-  std::vector< boost::shared_ptr<IoConnection> > vecConnection;
   for(TMultiMap::iterator it = range.first;
       it != range.second;
       ++it)
   {
-    vecConnection.push_back(it->second);
+    clientsConnections.push_back(it->second);
   }
-
-  return vecConnection;
 }

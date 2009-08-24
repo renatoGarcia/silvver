@@ -51,9 +51,10 @@ public:
   /** Return connections to all clients which are listening for a given target.
    *
    * @param idTarget The id of desired target.
-   * @return A vector of shared_prt with IoConnection to all clients found.
+   * @param clientsConnections A vector of shared_prt with IoConnection to all clients found.
    */
-  std::vector< boost::shared_ptr<IoConnection> > findClient(unsigned idTarget);
+  void findClients(unsigned idTarget,
+                   std::vector< boost::shared_ptr<IoConnection> >& clientsConnections);
 
 private:
 
