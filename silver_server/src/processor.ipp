@@ -21,6 +21,8 @@
 #include <boost/foreach.hpp>
 
 #include "ioConnection.ipp"
+#include "debugOutputs.hpp"
+#include <silverTypes.hpp>
 
 template <class Tinput, class Toutput>
 Processor<Tinput,Toutput>::Processor()
@@ -37,6 +39,10 @@ Processor<Tinput,Toutput>::sendToOutputs(const std::vector<Toutput> &localizatio
 
   BOOST_FOREACH(Toutput output, localizations)
   {
+    debug::logOut << ts_output::lock
+                  << output <<  std::endl
+                  << ts_output::unlock;
+
     // Get all clients hearing for a given target.
     vecConnection = this->clientsMap->findClient(output.uid);
 

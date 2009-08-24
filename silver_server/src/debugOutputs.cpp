@@ -22,4 +22,6 @@ namespace debug
 {
   tsostream ts(std::cout.rdbuf());
   logging messageOutput(ts);
+
+  tsostream logOut(std::clog.rdbuf());
 }

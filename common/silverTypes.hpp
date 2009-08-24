@@ -9,6 +9,7 @@
 
 namespace silver
 {
+  //------------------------------ Position
   struct Position
   {
     double x;
@@ -28,6 +29,17 @@ namespace silver
     {}
   };
 
+  template <class charT, class traits>
+  inline
+  std::basic_ostream<charT,traits>&
+  operator << (std::basic_ostream<charT,traits>& strm,
+               const Position& position)
+  {
+    strm << position.x << '\t' << position.y << '\t' << position.z;
+    return strm;
+  }
+
+  //------------------------------ Pose
   struct Pose : public Position
   {
     double yaw;
@@ -50,21 +62,45 @@ namespace silver
     {}
   };
 
-  template<class T>
-  struct Identity : public T
+  template <class charT, class traits>
+  inline
+  std::basic_ostream<charT,traits>&
+  operator << (std::basic_ostream<charT,traits>& strm,
+               const Pose& pose)
+  {
+    const Position& position = static_cast<const Position&>(pose);
+    strm  << position << '\t'
+          << pose.yaw << '\t' << pose.pitch << '\t' << pose.roll;
+    return strm;
+  }
+
+  //------------------------------ Identity
+  template<class BaseClass>
+  struct Identity : public BaseClass
   {
     unsigned uid;
 
     Identity()
-      :T()
+      :BaseClass()
       ,uid(0)
     {}
 
-    Identity(const T& t, const unsigned uid)
-      :T(t)
+    Identity(const BaseClass& base, const unsigned uid)
+      :BaseClass(base)
       ,uid(uid)
     {}
   };
+
+  template <class charT, class traits, class BaseClass>
+  inline
+  std::basic_ostream<charT,traits>&
+  operator << (std::basic_ostream<charT,traits>& strm,
+               const Identity<BaseClass>& identity)
+  {
+    const BaseClass& base = static_cast<const BaseClass&>(identity);
+    strm << identity.uid << '\t' << base;
+    return strm;
+  }
 
 } // namespace silver
 

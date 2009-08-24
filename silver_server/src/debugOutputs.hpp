@@ -22,6 +22,7 @@
 namespace debug
 {
   extern logging messageOutput;
+  extern tsostream logOut;
 }
 
 #endif /* _DEBUG_OUTPUTS_HPP_ */
