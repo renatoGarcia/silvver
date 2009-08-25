@@ -1,0 +1,22 @@
+PROJECT_NAME           = "Silver-server"
+PROJECT_NUMBER         = 0.4
+OUTPUT_LANGUAGE        = English
+OUTPUT_DIRECTORY       = ./
+
+EXTRACT_PRIVATE	       = NO
+HIDE_UNDOC_MEMBERS     = NO
+
+GENERATE_LATEX         = NO
+
+GENERATE_MAN           = NO
+GENERATE_RTF           = NO
+CASE_SENSE_NAMES       = NO
+INPUT                  = ../src/
+FILE_PATTERNS          = *.hpp
+INPUT_ENCODING         = UTF8
+
+HAVE_DOT               = YES
+HIDE_UNDOC_RELATIONS   = YES
+
+QUIET                  = YES
+JAVADOC_AUTOBRIEF      = YES

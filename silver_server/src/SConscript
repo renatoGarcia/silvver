@@ -1,4 +1,4 @@
-Import('env', 'opts')
+Import('env', 'install_nodes')
 
 sources = Split("""clientsMap.cpp
                    inputFactory.cpp
@@ -8,4 +8,8 @@ sources = Split("""clientsMap.cpp
                    receptionist.cpp
                    debugOutputs.cpp""")
 
-env.Program('silver_server', sources)
+silver_server_node = env.Program('silver_server', sources)
+silver_server = env.Alias('silver_server', silver_server_node)
+Default(silver_server)
+
+install_nodes.append(env.Install(env['bindir'], silver_server_node))

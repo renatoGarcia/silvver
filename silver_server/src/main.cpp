@@ -29,7 +29,7 @@ int main(int argc, char **argv)
   int receptionistPort;
   unsigned verbosityLevel;
 
-  po::options_description desc("silver_server 0.1\n\n"
+  po::options_description desc("silver_server 0.4\n\n"
                                "Receive inforamation from silver_cameras and send to clients\n"
                                "Usage: silver_server [OPTIONS]...\n\n"
                                "Options list");
@@ -51,23 +51,26 @@ int main(int argc, char **argv)
   if(vm.count("help"))
   {
     std::cout << desc << std::endl;
-    return 1;
   }
-
-  if(vm.count("version"))
+  else if(vm.count("version"))
   {
-    std::cout << "silver_server 0.1" << std::endl;
-    return 1;
+    std::cout << "silver_server 0.4" << std::endl;
   }
+  else
+  {
+    std::cout << "silver_server 0.4:" << std::endl << std::endl
+              << "Press [enter] key to quit" << std::endl << std::endl
+              << "----------------------------------------------"
+              << std::endl << std::endl;
 
-  debug::messageOutput.setThreshold(verbosityLevel);
+    debug::messageOutput.setThreshold(verbosityLevel);
 
-  boost::scoped_ptr<Receptionist>
-    receptionist(new Receptionist(receptionistPort));
-  receptionist-> run();
+    boost::scoped_ptr<Receptionist>
+      receptionist(new Receptionist(receptionistPort));
+    receptionist-> run();
 
-  getchar();
-  std::cout << "Terminando..." << std::endl << std::endl;
-
+    getchar();
+    std::cout << "Quitting..." << std::endl << std::endl;
+  }
   return 0;
 }

@@ -16,60 +16,52 @@ boost_libs = RelatedLibs('Boost',
 
 mandatory_libs = RelatedLibsGroup([boost_libs])
 
-opts = Options()
+vars = Variables()
 
-if False: #env['PLATFORM'] == 'win32':
-    pass
-#     opts.AddOptions(PathOption('prefix',
-#                                'Installation prefix',
-#                                'C:\\\\Syx', PathOption.PathAccept))
-#     env['bindir'] = env['datadir'] = env['rootdir'] = env['libdir'] = '$prefix'
-#     env['plugindir'] = '$prefix\\\\lib'
-#     env['imagepath'] = '$prefix\\\\default.sim'
-#     env['includedir'] = '$prefix\\\\include'
-#     env['docdir'] = '$prefix\\\\doc'
-else:
-    opts.AddOptions(
-        PathOption('prefix',
-                   'Installation prefix',
-                   '/usr/local', PathOption.PathAccept),
-        PathOption('bindir',
-                   'Installation prefix for user executables',
-                   '$exec_prefix/bin', PathOption.PathAccept),
-        PathOption('datadir',
-                   'Installation prefix for machine-independent data',
-                   '$prefix/share', PathOption.PathAccept),
-        PathOption('docdir',
-                   'Installation prefix for documentation',
-                   '$datadir/doc', PathOption.PathAccept),
-        PathOption('includedir',
-                   'Installation prefix for C header files',
-                   '$prefix/include', PathOption.PathAccept))
+vars.AddVariables(
+    PathVariable('prefix',
+                 'Installation prefix',
+                 '/usr/local', PathVariable.PathAccept),
+    PathVariable('exec_prefix',
+                 'Installation prefix for executables and object code libraries',
+                 '$prefix', PathVariable.PathAccept),
+    PathVariable('bindir',
+                 'Installation prefix for user executables',
+                 '$exec_prefix/bin', PathVariable.PathAccept),
+    PathVariable('datadir',
+                 'Installation prefix for machine-independent data',
+                 '$prefix/share', PathVariable.PathAccept),
+    PathVariable('docdir',
+                 'Installation prefix for documentation',
+                 '$datadir/doc', PathVariable.PathAccept),
+    PathVariable('includedir',
+                 'Installation prefix for C header files',
+                 '$prefix/include', PathVariable.PathAccept))
 
-    for related_libs in mandatory_libs:
-        opts.Add('lib_' + related_libs.short_name + '_suffix',
-                 'Suffix of ' + related_libs.long_name + ' libraries.',
-                 '')
-
-    opts.Add('CPPPATH',
-             'Directories that the C++ preprocessor will search for '
-             'include directories. List only directories, do not list '
-             'options flags like -I in gcc. Multiples directories must be '
-             'quoted and delimited by a semicolon',
+for related_libs in mandatory_libs:
+    vars.Add('lib_' + related_libs.short_name + '_suffix',
+             'Suffix of ' + related_libs.long_name + ' libraries.',
              '')
 
-    opts.Add('LIBPATH',
-             'The list of directories that will be searched for libraries. '
-             'List only directories, do not list options flags like -L in '
-             'gcc. Multiples directories must be quoted and delimited by '
-             'a semicolon',
-             '')
+vars.Add('CPPPATH',
+         'Directories that the C++ preprocessor will search for '
+         'include directories. List only directories, do not list '
+         'options flags like -I in gcc. Multiples directories must be '
+         'quoted and delimited by a semicolon',
+         '')
 
-    opts.Add('CPPFLAGS',
-             'C++ preprocessor flags',
-             '')
+vars.Add('LIBPATH',
+         'The list of directories that will be searched for libraries. '
+         'List only directories, do not list options flags like -L in '
+         'gcc. Multiples directories must be quoted and delimited by '
+         'a semicolon',
+         '')
 
-env = Environment(options = opts,
+vars.Add('CPPFLAGS',
+         'C++ preprocessor flags',
+         '')
+
+env = Environment(options = vars,
                   CPPFLAGS = '${CPPFLAGS}')
 
 for related_libs in mandatory_libs:
@@ -80,7 +72,7 @@ env.Append(CPPPATH = [abspath('../common')])
 
 env['LIBPATH'] = env['LIBPATH'].split(';')
 
-Help(opts.GenerateHelpText(env))
+Help(vars.GenerateHelpText(env))
 
 if not env.GetOption('clean') and not env.GetOption('help'):
 #=======================================================
@@ -93,13 +85,15 @@ if not env.GetOption('clean') and not env.GetOption('help'):
     for related_libs in mandatory_libs:
         for lib in related_libs:
             if not conf.CheckLib(lib):
-                print 'Did not find', lib, 'library'
+                print "Did not find", lib, "library, or it don't work properly in your system."
                 exit(1)
 
 #-------------------------------------------------------
     print '\n' + 'Mandatory headers...'
 #-------------------------------------------------------
-    headers = ['boost/asio.hpp',
+    headers = ['boost/archive/text_iarchive.hpp',
+               'boost/archive/text_oarchive.hpp',
+               'boost/asio.hpp',
                'boost/bind.hpp',
                'boost/enable_shared_from_this.hpp',
                'boost/foreach.hpp',
@@ -107,21 +101,30 @@ if not env.GetOption('clean') and not env.GetOption('help'):
                'boost/program_options.hpp',
                'boost/ref.hpp',
                'boost/scoped_ptr.hpp',
+               'boost/serialization/vector.hpp',
                'boost/shared_ptr.hpp',
+               'boost/system/system_error.hpp',
                'boost/thread.hpp',
                'boost/thread/mutex.hpp',
                'boost/thread/thread.hpp',
                'boost/tuple/tuple.hpp',
-               'math.h']
+               'iostream',
+               'map',
+               'string',
+               'vector']
 
     for header in headers:
         if not conf.CheckCXXHeader(header):
-            print 'Did not find the', header, 'header.'
+            print "Did not find the", header, "header, or it don't work properly in your system."
             exit(1)
 
     print
 
     env = conf.Finish()
 
-Export('env', 'opts')
+install_nodes = []
+
+Export('env', 'install_nodes')
 SConscript('src/SConscript', build_dir='build', duplicate=0)
+
+env.Alias('install', install_nodes)

@@ -5,7 +5,7 @@
 #include <boost/ref.hpp>
 
 #include "hardCameraFactory.hpp"
-#include "tsPrint.hpp"
+// #include "tsPrint.hpp"
 
 AbstractCamera::AbstractCamera(const scene::Camera& cameraConfig,
                                boost::shared_ptr<Connection> connection)
@@ -57,8 +57,7 @@ AbstractCamera::updateFrame()
   }
   catch(const HardCamera::capture_image_error& exception)
   {
-    {PRINT_LOCK;
-      std::cerr << exception.what() << std::endl;}
+    std::cerr << exception.what() << std::endl;
     return;
   }
 
