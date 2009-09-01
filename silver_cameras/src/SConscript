@@ -13,8 +13,7 @@ sources = Split("""cfParser.cpp
                    hardCamera.cpp
                    hardCameraFactory.cpp
                    main.cpp
-                   markerCamera.cpp
-                   markerExtractor.cpp
+                   artkpCamera.cpp
                    abstractCameraFactory.cpp
                    hardCameras/pseudoCamera.cpp""")
 

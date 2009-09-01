@@ -1,7 +1,8 @@
 #include "abstractCameraFactory.hpp"
 
 // #include "blobCamera.hpp"
-#include "markerCamera.hpp"
+// #include "markerCamera.hpp"
+#include "artkpCamera.hpp"
 
 AbstractCamera*
 AbstractCameraFactory::create(const std::string& targetType,
@@ -13,7 +14,7 @@ AbstractCameraFactory::create(const std::string& targetType,
 
   if(targetType == "artp_mark")
   {
-    abstractCamera = new MarkerCamera(vecTargets,
+    abstractCamera = new ArtkpCamera(vecTargets,
                                       cameraConfig,
                                       connection);
   }

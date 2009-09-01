@@ -42,23 +42,25 @@ namespace silver
   //------------------------------ Pose
   struct Pose : public Position
   {
-    double yaw;
-    double pitch;
-    double roll;
+    // double yaw;
+    // double pitch;
+    // double roll;
+
+    double rotationMatrix[3][3];
 
     Pose()
       :Position()
-      ,yaw(0.0)
-      ,pitch(0.0)
-      ,roll(0.0)
+      // ,yaw(0.0)
+      // ,pitch(0.0)
+      // ,roll(0.0)
     {}
 
     Pose(const Position& position,
          const double yaw=0.0, const double pitch=0.0, const double roll=0.0)
       :Position(position)
-      ,yaw(yaw)
-      ,pitch(pitch)
-      ,roll(roll)
+      // ,yaw(yaw)
+      // ,pitch(pitch)
+      // ,roll(roll)
     {}
   };
 
@@ -69,8 +71,11 @@ namespace silver
                const Pose& pose)
   {
     const Position& position = static_cast<const Position&>(pose);
-    strm  << position << '\t'
-          << pose.yaw << '\t' << pose.pitch << '\t' << pose.roll;
+    strm  << position;
+    for(int i = 0; i < 3; ++i)
+      for(int j = 0; j < 3; ++j)
+        strm  << '\t' << pose.rotationMatrix[i][j];
+
     return strm;
   }
 
