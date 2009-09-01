@@ -1,4 +1,4 @@
-Import('env', 'opts', 'build_optional_flags')
+Import('env', 'vars', 'build_optional_flags')
 
 if 'cleaning' in build_optional_flags:
     cleaning = True

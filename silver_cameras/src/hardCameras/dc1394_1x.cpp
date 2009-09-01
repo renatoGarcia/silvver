@@ -196,7 +196,7 @@ DC1394::initialize()
 }
 
 void
-DC1394::captureFrame(IplImage* &iplImage)
+DC1394::captureFrame(IplImage** iplImage)
 {
   boost::mutex::scoped_lock lock(this->mutexCaptureFrame);
 
@@ -223,7 +223,7 @@ DC1394::captureFrame(IplImage* &iplImage)
   }
 
   BayerEdgeSense(src,
-                 (unsigned char*)iplImage->imageData,
+                 (unsigned char*)(*iplImage)->imageData,
                  this->dc1394Camera.frame_width,
                  this->dc1394Camera.frame_height,
                  this->pattern );

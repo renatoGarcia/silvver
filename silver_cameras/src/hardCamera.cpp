@@ -14,9 +14,9 @@ HardCamera::~HardCamera()
 {}
 
 void
-HardCamera::createIplImage(IplImage* &iplImage) const
+HardCamera::createIplImage(IplImage** iplImage) const
 {
-  iplImage = cvCreateImage(cvSize(this->frameWidth, this->frameHeight),
-                           IPL_DEPTH_8U,
-                           3);
+  *iplImage = cvCreateImage(cvSize(this->frameWidth, this->frameHeight),
+                            IPL_DEPTH_8U,
+                            3);
 }

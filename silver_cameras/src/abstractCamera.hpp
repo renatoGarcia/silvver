@@ -1,3 +1,18 @@
+/* Copyright 2009 Renato Florentino Garcia <fgar.renato@gmail.com>
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License version 3, as
+ * published by the Free Software Foundation.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
 #ifndef ABSTRACT_CAMERA_HPP
 #define ABSTRACT_CAMERA_HPP
 
@@ -29,13 +44,13 @@ public:
 
   virtual ~AbstractCamera();
 
-  // It's the method which will be called when a new thread was created, and
-  // will make all camera work.
+  /// It's the method which will be called when a new thread was created, and
+  /// will make all camera work.
   virtual void operator()()=0;
 
 protected:
 
-  IplImage *currentFrame;
+  IplImage* currentFrame;
 
   /// Connection with the silver-server used to send the target localizations.
   const boost::shared_ptr<Connection> serverConnection;

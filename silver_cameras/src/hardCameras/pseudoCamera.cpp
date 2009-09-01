@@ -34,7 +34,7 @@ PseudoCamera::saveFrame()
 {}
 
 void
-PseudoCamera::captureFrame(IplImage* &iplImage)
+PseudoCamera::captureFrame(IplImage** iplImage)
 {
   boost::mutex::scoped_lock lock(this->mutexCaptureFrame);
 
@@ -53,10 +53,10 @@ PseudoCamera::captureFrame(IplImage* &iplImage)
       continue;
     }
 
-    cvReleaseImage(&iplImage);
-    iplImage = cvLoadImage(dirIterator->path().file_string().c_str(),
-                           CV_LOAD_IMAGE_COLOR);
-    if(iplImage == NULL)
+    cvReleaseImage(iplImage);
+    *iplImage = cvLoadImage(dirIterator->path().file_string().c_str(),
+                            CV_LOAD_IMAGE_COLOR);
+    if(*iplImage == NULL)
     {
       this->dirIterator++;
       throw capture_image_error("Error loading image: " +

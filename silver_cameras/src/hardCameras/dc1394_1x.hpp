@@ -33,7 +33,7 @@ public:
 
   void initialize();
 
-  void captureFrame(IplImage* &iplImage);
+  void captureFrame(IplImage** iplImage);
 
   // Grava a última imagem da câmera no disco
   void saveFrame();
