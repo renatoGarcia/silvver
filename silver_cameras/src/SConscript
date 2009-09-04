@@ -7,7 +7,6 @@ else:
 
 sources = Split("""cfParser.cpp
                    abstractCamera.cpp
-                   homography.cpp
                    connection.cpp
                    sceneMounter.cpp
                    hardCamera.cpp

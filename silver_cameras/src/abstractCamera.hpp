@@ -13,8 +13,8 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef ABSTRACT_CAMERA_HPP
-#define ABSTRACT_CAMERA_HPP
+#ifndef _ABSTRACT_CAMERA_HPP_
+#define _ABSTRACT_CAMERA_HPP_
 
 #include <string>
 
@@ -27,7 +27,6 @@
 
 #include "connection.hpp"
 #include "hardCamera.hpp"
-#include "homography.hpp"
 #include "scene.hpp"
 #include "silverTypes.hpp"
 
@@ -66,8 +65,8 @@ protected:
   // Este tempo é dado em milisegundos, e é calculado levando em conta o "tempoInicial".
   void updateFrame();
 
-  // Converte a posição das coordenadas em pixels para as coordenadas do mundo
-  void localize(silver::Position &position) const;
+  /// Tranform a pose in camera coordinates do world coordinates.
+  void toWorld(silver::Position &position) const;
 
 private:
 
@@ -76,7 +75,11 @@ private:
   // Hardware que fará a captura das imagens.
   const boost::shared_ptr<HardCamera> hardCamera;
 
-  boost::scoped_ptr<const Homography> homography;
+  /// Rotation matrix of camera in world coordinates.
+  boost::array<double, 9> rot;
+
+  /// Translation vector of camera in world coordinates.
+  boost::array<double, 3> trans;
 
   // Número de imagens processadas, usado para calcular a taxa média
   // de quadros por segundo.

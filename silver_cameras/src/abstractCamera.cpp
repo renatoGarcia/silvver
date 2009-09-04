@@ -27,20 +27,13 @@ AbstractCamera::AbstractCamera(const scene::Camera& cameraConfig,
   :currentFrame(NULL)
   ,serverConnection(connection)
   ,stopping(false)
+  ,runThread()
   ,hardCamera(HardCameraFactory::create(cameraConfig))
+  ,rot(cameraConfig.rotationMatrix)
+  ,trans(cameraConfig.translationVector)
   ,frameCounter(0)
   ,frameRate(0)
 {
-  if (const scene::MatrixHomography* const matrixHomography =
-      boost::get<const scene::MatrixHomography>(&cameraConfig.homography))
-  {
-    this->homography.reset(new Matrix(*matrixHomography));
-  }
-  else if (const scene::LutHomography* const lutHomography =
-           boost::get<const scene::LutHomography>(&cameraConfig.homography))
-  {
-    this->homography.reset(new Lut(*lutHomography, cameraConfig.resolution));
-  }
 
   this->hardCamera->createIplImage(&this->currentFrame);
 }
@@ -86,7 +79,7 @@ AbstractCamera::updateFrame()
 }
 
 void
-AbstractCamera::localize(silver::Position &position) const
+AbstractCamera::toWorld(silver::Position &position) const
 {
-  this->homography->transform2word(position);
+  // this->homography->transform2word(position);
 }

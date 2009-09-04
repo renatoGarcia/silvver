@@ -146,35 +146,13 @@ CfParser::readCamera(lua_State* L)
   camera.resolution = readArray<unsigned, 2>(L, "resolution");
   camera.frameRate = readValue<float>(L, "frame_rate");
 
-  if (hasField(L, "matrix_homography"))
-  {
-    scene::MatrixHomography mh;
-    lua_getfield(L, -1, "matrix_homography");
+  camera.focalLength = readArray<double, 2>(L, "focal_length");
+  camera.principalPoint = readArray<double, 2>(L, "principal_point");
+  camera.radialCoef = readArray<double, 3>(L, "radial_coef");
+  camera.tangentialCoef = readArray<double, 2>(L, "tangential_coef");
 
-    mh.fc = readArray<double, 2>(L, "focal_length");
-    mh.cc = readArray<double, 2>(L, "principal_point");
-    mh.kc = readArray<double, 5>(L, "radial_distortion");
-    mh.alpha_c = readValue<double>(L, "alpha_c");
-    mh.h = readArray<double, 9>(L, "matrix_h");
-
-    lua_pop(L,1); // pop matrix_homography
-    camera.homography = mh;
-  }
-  else if (hasField(L, "lut_homography"))
-  {
-    scene::LutHomography lh;
-    lua_getfield(L, -1, "lut_homography");
-
-    lh.lut = readArray<std::string, 2>(L, "lut");
-
-    lua_pop(L,1); // pop lut_homography
-    camera.homography = lh;
-  }
-  else
-  {
-    throw file_load_error("Don't found homography description "\
-                          "in camera table");
-  }
+  camera.translationVector = readArray<double, 3>(L, "translation_vector");
+  camera.rotationMatrix = readArray<double, 9>(L, "rotation_matrix");
 
   this->sc.vecCamera.push_back(camera);
 }

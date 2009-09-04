@@ -118,6 +118,7 @@ ArtkpCamera::operator()()
         continue;
       }
 
+      // The transMatrix will be the marker pose in relation to camera.
       this->tracker->arGetTransMat(&markerInfo[marker],
                                    pattCenter,
                                    (ARFloat)this->patternWidth,

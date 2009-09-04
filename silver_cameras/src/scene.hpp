@@ -1,55 +1,64 @@
-#ifndef SCENE_HPP
-#define SCENE_HPP
+/* Copyright 2009 Renato Florentino Garcia <fgar.renato@gmail.com>
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License version 3, as
+ * published by the Free Software Foundation.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
 
-#include <string>
+#ifndef _SCENE_HPP_
+#define _SCENE_HPP_
+
 #include <map>
+#include <string>
 #include <vector>
 
 #include <boost/array.hpp>
-#include <boost/variant.hpp>
 
 namespace scene
 {
-  struct MatrixHomography
-  {
-    // Intrinsic parameters
-    boost::array<double, 2> fc;     // Distância focal [pixels
-    boost::array<double, 2> cc;     // Coordenadas do ponto principal [pixels
-    boost::array<double, 5> kc;     // Coeficientes de distorção (radial e tangencial)
-    double alpha_c;   // Coeficiente de inclinação (ângulo entre os eixos de pixels x e y)
-
-    // Extrinsic parameters
-    boost::array<double, 9> h;
-  };
-
-  struct LutHomography
-  {
-    boost::array<std::string, 2> lut;
-  };
-
   struct Camera
   {
     float frameRate;
+
+    /// Type of hardware camera.
     std::string hardware;
-    std::string uid; // This must be a decimal integer representation.
+
+    /// String representation of camera unique identifier in decimal base.
+    std::string uid;
+
     boost::array<unsigned, 2> resolution;
 
     /// Path to input images for pseudoCamera
     std::string imagesPath;
 
-    boost::variant<MatrixHomography, LutHomography> homography;
+    /// {fx, fy}.
+    boost::array<double, 2> focalLength;
 
-    // If homography isn't MatrixHomography type, it throws boost::bad_get
-    inline MatrixHomography& getMatrixHomography()
-    {
-      return boost::get<MatrixHomography>(this->homography);
-    }
+    /// {cx, cy}.
+    boost::array<double, 2> principalPoint;
 
-    // If homography isn't LutHomography type, it throws boost::bad_get
-    inline LutHomography& getLutHomography()
-    {
-      return boost::get<LutHomography>(this->homography);
-    }
+    /// Radial distortion coefficients {k1, k2, k3}.
+    boost::array<double, 3> radialCoef;
+
+    /// Tangential distortion coefficients {p1, p2}.
+    boost::array<double, 2> tangentialCoef;
+
+    /// Translation vector of camera, in origin referential.
+    boost::array<double, 3> translationVector;
+
+    /** Rotation matrix of camera, in origin referential.
+     * The format must be {U11, U12, U13, U21, U22, U23, U31, U32, U33},
+     * where Uxy is the item of row x and column y.
+     */
+    boost::array<double, 9> rotationMatrix;
   };
 
   struct Target
@@ -66,4 +75,4 @@ namespace scene
     std::map< std::string, std::vector<Target> > targets;
   };
 }
-#endif /* SCENE_HPP */
+#endif /* _SCENE_HPP_ */
