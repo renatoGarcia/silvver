@@ -56,9 +56,9 @@ private:
   const unsigned receptionistPort;
 
   // Initialize the abstract camera given by cameraConfig
-  void constructAbstractCamera(const std::string& targetType,
-                               const std::vector<scene::Target> &vecTargets,
-                               scene::Camera& cameraConfig);
+  void constructAbstractCamera(const scene::Camera& cameraConfig,
+                               const scene::VariantAnyTarget& targets,
+                               const std::string& targetType);
 
   std::vector< boost::shared_ptr<AbstractCamera> > vecAbstractCamera;
 };

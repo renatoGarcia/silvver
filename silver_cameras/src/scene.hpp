@@ -21,6 +21,9 @@
 #include <vector>
 
 #include <boost/array.hpp>
+#include <boost/optional.hpp>
+#include <boost/tuple/tuple.hpp>
+#include <boost/variant.hpp>
 
 namespace scene
 {
@@ -56,23 +59,29 @@ namespace scene
 
     /** Rotation matrix of camera, in origin referential.
      * The format must be {U11, U12, U13, U21, U22, U23, U31, U32, U33},
-     * where Uxy is the item of row x and column y.
-     */
+     * where Uxy is the item of row x and column y. */
     boost::array<double, 9> rotationMatrix;
   };
 
-  struct Target
+  /// Struct with definitions of ARToolKitPlus targets.
+  struct ArtkpTargets
   {
-    std::string targetDefineFile;
+    /// ARToolKitPlus patter width [mm].
+    int patternWidth;
 
-    unsigned uid;
+    /// Each tuple is a pair of: the  path to the file describing one pattern
+    /// in second position, and the unique identifier that silver will
+    /// attribute to this pattern
+    std::vector< boost::tuple<unsigned, std::string> > patterns;
   };
+
+  typedef boost::variant<ArtkpTargets> VariantAnyTarget;
 
   struct Scene
   {
-    std::vector<Camera> vecCamera;
+    boost::tuple< boost::optional<ArtkpTargets> > targets;
 
-    std::map< std::string, std::vector<Target> > targets;
+    std::vector<Camera> cameras;
   };
 }
 #endif /* _SCENE_HPP_ */

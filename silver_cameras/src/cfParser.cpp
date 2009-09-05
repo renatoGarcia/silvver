@@ -154,7 +154,31 @@ CfParser::readCamera(lua_State* L)
   camera.translationVector = readArray<double, 3>(L, "translation_vector");
   camera.rotationMatrix = readArray<double, 9>(L, "rotation_matrix");
 
-  this->sc.vecCamera.push_back(camera);
+  this->sc.cameras.push_back(camera);
+}
+
+void
+CfParser::readArtkpTargets(lua_State* L)
+{
+  scene::ArtkpTargets artkpTargets;
+
+  // artkpTargets.patternWidth = readValue<int>(L, "pattern_width");
+
+  std::string patternPath;
+  unsigned uid;
+  lua_pushnil(L);// first key
+  while (lua_next(L, -2) != 0)
+  {
+    patternPath = readValue<std::string>(L, "pattern_file");
+    uid = readValue<unsigned>(L, "uid");
+
+    artkpTargets.patterns.push_back(boost::make_tuple(uid, patternPath));
+
+    // removes 'value', keeps 'key' for next iteration
+    lua_pop(L, 1);
+  }
+
+  boost::get<0>(this->sc.targets).reset(artkpTargets);
 }
 
 scene::Scene
@@ -191,23 +215,11 @@ CfParser::parseFile(const std::string& configFile)
   }
   lua_pop(L, 1); // pop camera field
 
-  if (hasField(L, "artp_target"))
+  if (hasField(L, "artp_targets"))
   {
-    lua_getfield(L, -1, "artp_target");
-
-    lua_pushnil(L);// first key
-    while (lua_next(L, -2) != 0)
-    {
-      scene::Target target;
-      target.targetDefineFile = readValue<std::string>(L, "patt_file");
-      target.uid = readValue<unsigned>(L, "uid");
-
-      this->sc.targets["artp_mark"].push_back(target);
-
-      // removes 'value', keeps 'key' for next iteration
-      lua_pop(L, 1);
-    }
-    lua_pop(L, 1); // pop artp_target field
+    lua_getfield(L, -1, "artp_targets");
+    readArtkpTargets(L);
+    lua_pop(L, 1); // pop artp_targets field
   }
 
   return this->sc;

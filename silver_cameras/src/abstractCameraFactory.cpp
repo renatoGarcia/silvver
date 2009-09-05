@@ -5,18 +5,18 @@
 #include "artkpCamera.hpp"
 
 AbstractCamera*
-AbstractCameraFactory::create(const std::string& targetType,
-                              const std::vector<scene::Target> &vecTargets,
-                              const scene::Camera& cameraConfig,
+AbstractCameraFactory::create(const scene::Camera& cameraConfig,
+                              const scene::VariantAnyTarget& targets,
                               boost::shared_ptr<Connection> connection)
 {
   AbstractCamera* abstractCamera;
 
-  if(targetType == "artp_mark")
+  if (const scene::ArtkpTargets* artkpTarget =
+      boost::get<scene::ArtkpTargets>(&targets))
   {
-    abstractCamera = new ArtkpCamera(vecTargets,
-                                      cameraConfig,
-                                      connection);
+    abstractCamera = new ArtkpCamera(cameraConfig,
+                                     *artkpTarget,
+                                     connection);
   }
 //   else if(targetType == "color_blob")
 //   {
@@ -26,7 +26,7 @@ AbstractCameraFactory::create(const std::string& targetType,
 //   }
   else
   {
-    throw std::invalid_argument("Unknown target type: " + targetType);
+    throw std::invalid_argument("Unknown target type");
   }
 
   return abstractCamera;

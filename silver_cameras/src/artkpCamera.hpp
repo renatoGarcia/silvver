@@ -44,8 +44,8 @@ public:
     {}
   };
 
-  ArtkpCamera(const std::vector<scene::Target>& vecTargets,
-              const scene::Camera& cameraConfig,
+  ArtkpCamera(const scene::Camera& cameraConfig,
+              const scene::ArtkpTargets& targets,
               boost::shared_ptr<Connection> connection);
 
   ~ArtkpCamera();

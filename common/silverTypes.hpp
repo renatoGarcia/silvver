@@ -42,26 +42,40 @@ namespace silver
   //------------------------------ Pose
   struct Pose : public Position
   {
-    // double yaw;
-    // double pitch;
-    // double roll;
-
     double rotationMatrix[3][3];
 
     Pose()
       :Position()
-      // ,yaw(0.0)
-      // ,pitch(0.0)
-      // ,roll(0.0)
     {}
+
+    Pose(const Pose& pose)
+      :Position(pose)
+    {
+      for (int i = 0; i < 3; ++i)
+        for (int j = 0; j < 3; ++j)
+          this->rotationMatrix[i][j] = pose.rotationMatrix[i][j];
+    }
 
     Pose(const Position& position,
          const double yaw=0.0, const double pitch=0.0, const double roll=0.0)
       :Position(position)
-      // ,yaw(yaw)
-      // ,pitch(pitch)
-      // ,roll(roll)
     {}
+
+    Pose&
+    operator=(const Pose& pose)
+    {
+      if (this == &pose)
+      {
+        return *this;
+      }
+
+      Position::operator=(pose);
+
+      for (int i = 0; i < 3; ++i)
+        for (int j = 0; j < 3; ++j)
+          this->rotationMatrix[i][j] = pose.rotationMatrix[i][j];
+    }
+
   };
 
   template <class charT, class traits>
@@ -94,6 +108,18 @@ namespace silver
       :BaseClass(base)
       ,uid(uid)
     {}
+
+    Identity<BaseClass>&
+    operator=(const Identity<BaseClass>& identity)
+    {
+      if (this == &identity)
+      {
+        return *this;
+      }
+
+      BaseClass::operator=(identity);
+      this->uid = identity.uid;
+    }
   };
 
   template <class charT, class traits, class BaseClass>

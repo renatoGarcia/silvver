@@ -45,6 +45,8 @@ private:
   bool hasField(lua_State* L, std::string name);
 
   void readCamera(lua_State* L);
+
+  void readArtkpTargets(lua_State* L);
 };
 
 

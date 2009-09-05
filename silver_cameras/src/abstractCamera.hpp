@@ -66,7 +66,7 @@ protected:
   void updateFrame();
 
   /// Tranform a pose in camera coordinates do world coordinates.
-  void toWorld(silver::Position &position) const;
+  void toWorld(silver::Pose& pose) const;
 
 private:
 

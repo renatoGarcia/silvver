@@ -32,31 +32,26 @@ SceneMounter::SceneMounter(const std::string& serverIp,
 void
 SceneMounter::mount()
 {
-  CfParser cfParser = CfParser();
+  CfParser cfParser;
   const scene::Scene scene = cfParser.parseFile(this->sceneDescriptorFile);
 
-  // The std::string is the name of target type, and the std::vector is
-  // the set of all the targets of that type.
-  std::pair< std::string, std::vector<scene::Target> > targetTypeGroup;
-  scene::Camera cameraConfig;
-
-  // For each type of targets...
-  BOOST_FOREACH(targetTypeGroup, scene.targets)
+  scene::Camera camera;
+  BOOST_FOREACH(camera, scene.cameras)
   {
-    // ...construct an abstract camera for each hardware camera
-    BOOST_FOREACH(cameraConfig, scene.vecCamera)
+    // If there are ARToolKitPlus targets.
+    if(scene.targets.get<0>())
     {
-      this->constructAbstractCamera(targetTypeGroup.first,
-                                    targetTypeGroup.second,
-                                    cameraConfig);
+      this->constructAbstractCamera(camera,
+                                    *scene.targets.get<0>(),
+                                    "artp_mark");
     }
   }
 }
 
 void
-SceneMounter::constructAbstractCamera(const std::string& targetType,
-                                      const std::vector<scene::Target>& vecTargets,
-                                      scene::Camera& cameraConfig)
+SceneMounter::constructAbstractCamera(const scene::Camera& camera,
+                                      const scene::VariantAnyTarget& targets,
+                                      const std::string& targetType)
 {
   boost::shared_ptr<Connection>
     connection(new Connection(this->serverIp, this->receptionistPort));
@@ -64,9 +59,8 @@ SceneMounter::constructAbstractCamera(const std::string& targetType,
   connection->connect(targetType);
 
   boost::shared_ptr<AbstractCamera>
-    abstractCameraPtr(AbstractCameraFactory::create(targetType,
-                                                    vecTargets,
-                                                    cameraConfig,
+    abstractCameraPtr(AbstractCameraFactory::create(camera,
+                                                    targets,
                                                     connection));
 
   this->vecAbstractCamera.push_back(abstractCameraPtr);

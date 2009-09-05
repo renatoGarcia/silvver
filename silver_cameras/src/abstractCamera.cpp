@@ -79,7 +79,59 @@ AbstractCamera::updateFrame()
 }
 
 void
-AbstractCamera::toWorld(silver::Position &position) const
+AbstractCamera::toWorld(silver::Pose &pose) const
 {
-  // this->homography->transform2word(position);
+  silver::Pose tempPose(pose);
+
+  //------------------------------- Rmo = Rmc x Rco
+  pose.rotationMatrix[0][0] =
+    tempPose.rotationMatrix[0][0] * this->rot[0] +
+    tempPose.rotationMatrix[0][1] * this->rot[3] +
+    tempPose.rotationMatrix[0][2] * this->rot[6];
+  pose.rotationMatrix[0][1] =
+    tempPose.rotationMatrix[0][0] * this->rot[1] +
+    tempPose.rotationMatrix[0][1] * this->rot[4] +
+    tempPose.rotationMatrix[0][2] * this->rot[7];
+  pose.rotationMatrix[0][2] =
+    tempPose.rotationMatrix[0][0] * this->rot[2] +
+    tempPose.rotationMatrix[0][1] * this->rot[5] +
+    tempPose.rotationMatrix[0][2] * this->rot[8];
+  pose.rotationMatrix[1][0] =
+    tempPose.rotationMatrix[1][0] * this->rot[0] +
+    tempPose.rotationMatrix[1][1] * this->rot[3] +
+    tempPose.rotationMatrix[1][2] * this->rot[6];
+  pose.rotationMatrix[1][1] =
+    tempPose.rotationMatrix[1][0] * this->rot[1] +
+    tempPose.rotationMatrix[1][1] * this->rot[4] +
+    tempPose.rotationMatrix[1][2] * this->rot[7];
+  pose.rotationMatrix[1][2] =
+    tempPose.rotationMatrix[1][0] * this->rot[2] +
+    tempPose.rotationMatrix[1][1] * this->rot[5] +
+    tempPose.rotationMatrix[1][2] * this->rot[8];
+  pose.rotationMatrix[2][0] =
+    tempPose.rotationMatrix[2][0] * this->rot[0] +
+    tempPose.rotationMatrix[2][1] * this->rot[3] +
+    tempPose.rotationMatrix[2][2] * this->rot[6];
+  pose.rotationMatrix[2][1] =
+    tempPose.rotationMatrix[2][0] * this->rot[1] +
+    tempPose.rotationMatrix[2][1] * this->rot[4] +
+    tempPose.rotationMatrix[2][2] * this->rot[7];
+  pose.rotationMatrix[2][2] =
+    tempPose.rotationMatrix[2][0] * this->rot[2] +
+    tempPose.rotationMatrix[2][1] * this->rot[5] +
+    tempPose.rotationMatrix[2][2] * this->rot[8];
+
+  //------------------------------- Tmo = Tco + Rco x Tmc
+  pose.x = this->trans[0] +
+    this->rot[0] * tempPose.x +
+    this->rot[1] * tempPose.y +
+    this->rot[2] * tempPose.z;
+  pose.y = this->trans[1] +
+    this->rot[3] * tempPose.x +
+    this->rot[4] * tempPose.y +
+    this->rot[5] * tempPose.z;
+  pose.z = this->trans[2] +
+    this->rot[6] * tempPose.x +
+    this->rot[7] * tempPose.y +
+    this->rot[8] * tempPose.z;
 }

@@ -22,21 +22,23 @@
 #include "connection.ipp"
 #include "silverTypes.hpp"
 
-ArtkpCamera:: ArtkpCamera(const std::vector<scene::Target>& vecTargets,
-                          const scene::Camera& cameraConfig,
-                          boost::shared_ptr<Connection> connection)
+ArtkpCamera::ArtkpCamera(const scene::Camera& cameraConfig,
+                         const scene::ArtkpTargets& targets,
+                         boost::shared_ptr<Connection> connection)
   :AbstractCamera(cameraConfig, connection)
-  ,patternWidth(250)
+  // ,patternWidth(targets.patternWidth)
+  ,patternWidth(150)
   ,logger()
   ,tracker(new ARToolKitPlus::TrackerSingleMarkerImpl<16,16,64,50,50>
            (cameraConfig.resolution.at(0), cameraConfig.resolution.at(1)))
 
 {
   int targetNum = 0;
-  BOOST_FOREACH(scene::Target targetConfig, vecTargets)
+  boost::tuple<unsigned, std::string> pattern;
+  BOOST_FOREACH(pattern, targets.patterns)
   {
-    this->vecDescriptionFilePath.push_back(targetConfig.targetDefineFile);
-    this->idMap.at(targetNum) = targetConfig.uid;
+    this->vecDescriptionFilePath.push_back(boost::get<1>(pattern));
+    this->idMap.at(targetNum) = boost::get<0>(pattern); // Get silver uid
     targetNum++;
   }
 }
@@ -131,6 +133,8 @@ ArtkpCamera::operator()()
       for(int i = 0; i < 3; ++i)
         for(int j = 0; j < 3; ++j)
           pose.rotationMatrix[i][j] = transMatrix[i][j];
+
+      this->toWorld(pose);
 
       poses.push_back(pose);
     }
