@@ -26,8 +26,7 @@ ArtkpCamera::ArtkpCamera(const scene::Camera& cameraConfig,
                          const scene::ArtkpTargets& targets,
                          boost::shared_ptr<Connection> connection)
   :AbstractCamera(cameraConfig, connection)
-  // ,patternWidth(targets.patternWidth)
-  ,patternWidth(150)
+  ,patternWidth(targets.patternWidth)
   ,logger()
   ,tracker(new ARToolKitPlus::TrackerSingleMarkerImpl<16,16,64,50,50>
            (cameraConfig.resolution.at(0), cameraConfig.resolution.at(1)))

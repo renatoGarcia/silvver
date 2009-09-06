@@ -1,5 +1,17 @@
-#include <iostream>
-using namespace std;
+/* Copyright 2009 Renato Florentino Garcia <fgar.renato@gmail.com>
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License version 3, as
+ * published by the Free Software Foundation.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
 
 #include "cfParser.hpp"
 
@@ -162,20 +174,23 @@ CfParser::readArtkpTargets(lua_State* L)
 {
   scene::ArtkpTargets artkpTargets;
 
-  // artkpTargets.patternWidth = readValue<int>(L, "pattern_width");
+  artkpTargets.patternWidth = readValue<int>(L, "pattern_width");
 
   std::string patternPath;
   unsigned uid;
-  lua_pushnil(L);// first key
-  while (lua_next(L, -2) != 0)
+
+  int nTargets = lua_objlen(L, -1);
+  for(int i = 1; i <= nTargets; ++i)
   {
+    lua_pushnumber(L, i);
+    lua_gettable(L, -2); // Get the i artkp target
+
     patternPath = readValue<std::string>(L, "pattern_file");
     uid = readValue<unsigned>(L, "uid");
 
     artkpTargets.patterns.push_back(boost::make_tuple(uid, patternPath));
 
-    // removes 'value', keeps 'key' for next iteration
-    lua_pop(L, 1);
+    lua_pop(L, 1); // pop the i artkp target
   }
 
   boost::get<0>(this->sc.targets).reset(artkpTargets);
@@ -199,10 +214,10 @@ CfParser::parseFile(const std::string& configFile)
     throw file_load_error("Don't found scene variable in config file");
   }
 
-  lua_getfield(L, -1, "camera");
+  lua_getfield(L, -1, "cameras");
   if (!lua_istable(L, -1))
   {
-    throw file_load_error("Don't found camera variable in config file");
+    throw file_load_error("Don't found cameras variable in config file");
   }
 
   lua_pushnil(L);// first key
