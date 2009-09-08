@@ -4,6 +4,7 @@
 #include <silverTypes.hpp>
 
 #include <boost/serialization/base_object.hpp>
+#include <boost/serialization/array.hpp>
 
 namespace boost
 {
@@ -24,12 +25,7 @@ namespace boost
     serialize(Archive& ar, silver::Pose& pose, const unsigned version)
     {
       ar & boost::serialization::base_object<silver::Position>(pose);
-      // ar & pose.yaw;
-      // ar & pose.pitch;
-      // ar & pose.roll;
-      for(int i = 0; i < 3; ++i)
-        for(int j = 0; j < 3; ++j)
-          ar & pose.rotationMatrix[i][j];
+      ar & pose.rotationMatrix;
     }
 
     template<class Archive, class T>

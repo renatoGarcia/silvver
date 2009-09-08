@@ -7,6 +7,8 @@
 #ifndef SILVER_TYPES_HPP
 #define SILVER_TYPES_HPP
 
+#include <boost/array.hpp>
+
 namespace silver
 {
   //------------------------------ Position
@@ -42,7 +44,13 @@ namespace silver
   //------------------------------ Pose
   struct Pose : public Position
   {
-    double rotationMatrix[3][3];
+    /// The order of items is: r11, r12, r13, r21, r22, r23, r31, r32, r33
+    boost::array<double, 9> rotationMatrix;
+
+    double& rotMat(int row, int column)
+    {
+      return this->rotationMatrix.at((3*row)+column);
+    }
 
     Pose()
       :Position()
@@ -50,11 +58,8 @@ namespace silver
 
     Pose(const Pose& pose)
       :Position(pose)
-    {
-      for (int i = 0; i < 3; ++i)
-        for (int j = 0; j < 3; ++j)
-          this->rotationMatrix[i][j] = pose.rotationMatrix[i][j];
-    }
+      ,rotationMatrix(pose.rotationMatrix)
+    {}
 
     Pose(const Position& position,
          const double yaw=0.0, const double pitch=0.0, const double roll=0.0)
@@ -70,10 +75,7 @@ namespace silver
       }
 
       Position::operator=(pose);
-
-      for (int i = 0; i < 3; ++i)
-        for (int j = 0; j < 3; ++j)
-          this->rotationMatrix[i][j] = pose.rotationMatrix[i][j];
+      this->rotationMatrix = pose.rotationMatrix;
     }
 
   };
@@ -85,10 +87,11 @@ namespace silver
                const Pose& pose)
   {
     const Position& position = static_cast<const Position&>(pose);
-    strm  << position;
-    for(int i = 0; i < 3; ++i)
-      for(int j = 0; j < 3; ++j)
-        strm  << '\t' << pose.rotationMatrix[i][j];
+    strm << position;
+    for (int i = 0; i < 9; ++i)
+    {
+      strm  << '\t' << pose.rotationMatrix[i];
+    }
 
     return strm;
   }

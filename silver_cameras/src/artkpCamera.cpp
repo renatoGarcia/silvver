@@ -131,7 +131,7 @@ ArtkpCamera::operator()()
       pose.z = transMatrix[2][3];
       for(int i = 0; i < 3; ++i)
         for(int j = 0; j < 3; ++j)
-          pose.rotationMatrix[i][j] = transMatrix[i][j];
+          pose.rotationMatrix[(3*i)+j] = transMatrix[i][j];
 
       this->toWorld(pose);
 
