@@ -19,6 +19,8 @@
 #include <vector>
 
 #include <boost/shared_ptr.hpp>
+#include <fstream>
+#include <string>
 
 #include <ARToolKitPlus/TrackerSingleMarker.h>
 
@@ -70,7 +72,9 @@ private:
 
   static const int MAX_TARGETS = 40;
 
-  /// Pattern width in millimeters.
+  std::string camConfigFileName;
+
+  /// Width of pattern, counting with border. [mm]
   const int patternWidth;
 
   MyLogger logger;

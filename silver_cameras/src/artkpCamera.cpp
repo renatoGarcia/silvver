@@ -15,7 +15,6 @@
 
 #include "artkpCamera.hpp"
 
-#include <fstream>
 #include <boost/foreach.hpp>
 
 #include <ARToolKitPlus/TrackerSingleMarkerImpl.h>
@@ -23,10 +22,13 @@
 #include "connection.ipp"
 #include "silverTypes.hpp"
 
+namespace bfs = boost::filesystem;
+
 ArtkpCamera::ArtkpCamera(const scene::Camera& cameraConfig,
                          const scene::ArtkpTargets& targets,
                          boost::shared_ptr<Connection> connection)
   :AbstractCamera(cameraConfig, connection)
+  ,camConfigFileName("/tmp/artkpCamera" + cameraConfig.uid)
   ,patternWidth(targets.patternWidth)
   ,logger()
   ,tracker(new ARToolKitPlus::TrackerSingleMarkerImpl<16,16,64,50,50>
@@ -41,6 +43,19 @@ ArtkpCamera::ArtkpCamera(const scene::Camera& cameraConfig,
     this->idMap.at(targetNum) = boost::get<0>(pattern); // Get silver uid
     targetNum++;
   }
+
+  std::ofstream tmpConfig(this->camConfigFileName.c_str());
+  tmpConfig.precision(10);
+  tmpConfig << "ARToolKitPlus_CamCal_Rev02" << "\n"
+            << cameraConfig.resolution.at(0) << " "
+            << cameraConfig.resolution.at(1) << " "
+            << cameraConfig.principalPoint.at(0) << " "
+            << cameraConfig.principalPoint.at(1) << " "
+            << cameraConfig.focalLength.at(0) << " "
+            << cameraConfig.focalLength.at(1) << " "
+            << 0.0 << " " << 0.0 << " " << 0.0 << " "
+            << 0.0 << " " << 0.0 << " " << 0.0 << " "
+            << 0;
 }
 
 ArtkpCamera::~ArtkpCamera()
@@ -49,11 +64,8 @@ ArtkpCamera::~ArtkpCamera()
 void
 ArtkpCamera::initialize()
 {
-  std::ofstream tmpConfig("tmpArtkpConfig.txt");
-  tmpConfig << 
-
-  if(!this->tracker->init("./data/no_distortion.cal",
-                          1.0f,
+  if(!this->tracker->init(this->camConfigFileName.c_str(),
+                          1000.0f,
                           7000.0f,
                           &this->logger))
   {
@@ -62,22 +74,18 @@ ArtkpCamera::initialize()
 
   this->tracker->setPixelFormat(ARToolKitPlus::PIXEL_FORMAT_BGR);
 
-  // Define o tamanho da marca, em milímetros.
   this->tracker->setPatternWidth(this->patternWidth);
 
   // Define a porcentagem da borda no tamanho da imagem.
-  // this->tracker->setBorderWidth(1.0/6.0);
-  this->tracker->setBorderWidth(/*0.250f*/0.125f);
+  this->tracker->setBorderWidth(1.0/6.0);
+  // this->tracker->setBorderWidth(/*0.250f*/0.125f);
 
-  // Define um limiar entre as tonalidades de cor.
   this->tracker->setThreshold(100);
 
   this->tracker->setPoseEstimator(ARToolKitPlus::POSE_ESTIMATOR_RPP);
 
   this->tracker->setUndistortionMode(ARToolKitPlus::UNDIST_NONE);
 
-  // switch to simple ID based markers
-  // use the tool in tools/IdPatGen to generate markers
   this->tracker->setMarkerMode(ARToolKitPlus::MARKER_TEMPLATE);
 
   this->tracker->setImageProcessingMode(ARToolKitPlus::IMAGE_FULL_RES);
@@ -126,10 +134,10 @@ ArtkpCamera::operator()()
       }
 
       // The transMatrix will be the marker pose in relation to camera.
-      this->tracker->/*ar*/rppGetTransMat(&markerInfo[marker],
-                                          pattCenter,
-                                          (ARFloat)this->patternWidth,
-                                          transMatrix);
+      this->tracker->rppGetTransMat(&markerInfo[marker],
+                                    pattCenter,
+                                    (ARFloat)this->patternWidth,
+                                    transMatrix);
 
       pose.uid = this->idMap.at(markerInfo[marker].id);
       pose.x = transMatrix[0][3];
@@ -139,8 +147,6 @@ ArtkpCamera::operator()()
         for(int j = 0; j < 3; ++j)
           pose.rotationMatrix[(3*i)+j] = transMatrix[i][j];
 
-      // std::cout << "oi:   " << pose << std::endl;
-
       this->toWorld(pose);
 
       poses.push_back(pose);
@@ -148,5 +154,4 @@ ArtkpCamera::operator()()
 
     this->serverConnection->send(poses);
   }
-
 }
