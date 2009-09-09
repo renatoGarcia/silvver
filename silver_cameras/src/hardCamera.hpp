@@ -13,8 +13,8 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef HARD_CAMERA_HPP
-#define HARD_CAMERA_HPP
+#ifndef _HARDCAMERA_H_
+#define _HARDCAMERA_H_
 
 #include <stdexcept>
 #include <string>
@@ -57,7 +57,9 @@ public:
 
   virtual void saveFrame() = 0;
 
-  virtual void captureFrame(IplImage** imgRetorno) = 0;
+  virtual void captureFrame(IplImage** image) = 0;
+
+  void captureRectFrame(IplImage** image);
 
 protected:
 
@@ -86,4 +88,4 @@ private:
   virtual void initialize() = 0;
 };
 
-#endif
+#endif /* _HARDCAMERA_H_ */

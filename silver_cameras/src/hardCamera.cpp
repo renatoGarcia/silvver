@@ -61,3 +61,9 @@ HardCamera::undistortFrame(IplImage* frame)
   cvReleaseImage(&tmp);
 }
 
+void
+HardCamera::captureRectFrame(IplImage** image)
+{
+  this->captureFrame(image);
+  undistortFrame(*image);
+}

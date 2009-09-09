@@ -60,7 +60,7 @@ AbstractCamera::updateFrame()
 {
   try
   {
-    hardCamera->captureFrame(&this->currentFrame);
+    hardCamera->captureRectFrame(&this->currentFrame);
   }
   catch(const HardCamera::capture_image_error& exception)
   {
@@ -82,43 +82,43 @@ AbstractCamera::toWorld(silver::Pose &pose) const
 {
   silver::Pose tempPose(pose);
 
-  //------------------------------- Rmo = Rmc x Rco
+  //------------------------------- Rmo = Rco x Rmc
   pose.rotationMatrix[0] =
-    tempPose.rotationMatrix[0] * this->rot[0] +
-    tempPose.rotationMatrix[1] * this->rot[3] +
-    tempPose.rotationMatrix[2] * this->rot[6];
+    this->rot[0] * tempPose.rotationMatrix[0] +
+    this->rot[1] * tempPose.rotationMatrix[3] +
+    this->rot[2] * tempPose.rotationMatrix[6];
   pose.rotationMatrix[1] =
-    tempPose.rotationMatrix[0] * this->rot[1] +
-    tempPose.rotationMatrix[1] * this->rot[4] +
-    tempPose.rotationMatrix[2] * this->rot[7];
+    this->rot[0] * tempPose.rotationMatrix[1] +
+    this->rot[1] * tempPose.rotationMatrix[4] +
+    this->rot[2] * tempPose.rotationMatrix[7];
   pose.rotationMatrix[2] =
-    tempPose.rotationMatrix[0] * this->rot[2] +
-    tempPose.rotationMatrix[1] * this->rot[5] +
-    tempPose.rotationMatrix[2] * this->rot[8];
+    this->rot[0] * tempPose.rotationMatrix[2] +
+    this->rot[1] * tempPose.rotationMatrix[5] +
+    this->rot[2] * tempPose.rotationMatrix[8];
   pose.rotationMatrix[3] =
-    tempPose.rotationMatrix[3] * this->rot[0] +
-    tempPose.rotationMatrix[4] * this->rot[3] +
-    tempPose.rotationMatrix[5] * this->rot[6];
+    this->rot[3] * tempPose.rotationMatrix[0] +
+    this->rot[4] * tempPose.rotationMatrix[3] +
+    this->rot[5] * tempPose.rotationMatrix[6];
   pose.rotationMatrix[4] =
-    tempPose.rotationMatrix[3] * this->rot[1] +
-    tempPose.rotationMatrix[4] * this->rot[4] +
-    tempPose.rotationMatrix[5] * this->rot[7];
+    this->rot[3] * tempPose.rotationMatrix[1] +
+    this->rot[4] * tempPose.rotationMatrix[4] +
+    this->rot[5] * tempPose.rotationMatrix[7];
   pose.rotationMatrix[5] =
-    tempPose.rotationMatrix[3] * this->rot[2] +
-    tempPose.rotationMatrix[4] * this->rot[5] +
-    tempPose.rotationMatrix[5] * this->rot[8];
+    this->rot[3] * tempPose.rotationMatrix[2] +
+    this->rot[4] * tempPose.rotationMatrix[5] +
+    this->rot[5] * tempPose.rotationMatrix[8];
   pose.rotationMatrix[6] =
-    tempPose.rotationMatrix[6] * this->rot[0] +
-    tempPose.rotationMatrix[7] * this->rot[3] +
-    tempPose.rotationMatrix[8] * this->rot[6];
+    this->rot[6] * tempPose.rotationMatrix[0] +
+    this->rot[7] * tempPose.rotationMatrix[3] +
+    this->rot[8] * tempPose.rotationMatrix[6];
   pose.rotationMatrix[7] =
-    tempPose.rotationMatrix[6] * this->rot[1] +
-    tempPose.rotationMatrix[7] * this->rot[4] +
-    tempPose.rotationMatrix[8] * this->rot[7];
+    this->rot[6] * tempPose.rotationMatrix[1] +
+    this->rot[7] * tempPose.rotationMatrix[4] +
+    this->rot[8] * tempPose.rotationMatrix[7];
   pose.rotationMatrix[8] =
-    tempPose.rotationMatrix[6] * this->rot[2] +
-    tempPose.rotationMatrix[7] * this->rot[5] +
-    tempPose.rotationMatrix[8] * this->rot[8];
+    this->rot[6] * tempPose.rotationMatrix[2] +
+    this->rot[7] * tempPose.rotationMatrix[5] +
+    this->rot[8] * tempPose.rotationMatrix[8];
 
   //------------------------------- Tmo = Tco + Rco x Tmc
   pose.x = this->trans[0] +
