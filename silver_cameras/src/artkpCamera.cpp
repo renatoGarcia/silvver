@@ -111,7 +111,6 @@ ArtkpCamera::operator()()
   {
     poses.clear();
     this->updateFrame();
-    this->undistortFrame();
 
     nMarkers = 0;
 

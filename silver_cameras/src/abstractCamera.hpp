@@ -65,8 +65,6 @@ protected:
   // Este tempo é dado em milisegundos, e é calculado levando em conta o "tempoInicial".
   void updateFrame();
 
-  void undistortFrame();
-
   /// Tranform a pose in camera coordinates do world coordinates.
   void toWorld(silver::Pose& pose) const;
 
@@ -76,11 +74,6 @@ private:
 
   // Hardware que fará a captura das imagens.
   const boost::shared_ptr<HardCamera> hardCamera;
-
-  CvMat* intrinsic;
-  CvMat* distortion;
-  IplImage* mapx;
-  IplImage* mapy;
 
   /// Rotation matrix of camera in world coordinates.
   boost::array<double, 9> rot;

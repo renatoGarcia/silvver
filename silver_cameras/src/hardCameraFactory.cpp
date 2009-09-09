@@ -43,17 +43,12 @@ HardCameraFactory::create(const scene::Camera& cameraConfig)
   {
     if (cameraConfig.hardware == "pseudocamera")
     {
-      hardCameraPtr.reset(new PseudoCamera(cameraConfig.uid,
-                                           cameraConfig.resolution,
-                                           cameraConfig.frameRate,
-                                           cameraConfig.imagesPath));
+      hardCameraPtr.reset(new PseudoCamera(cameraConfig));
     }
 #ifdef HAVE_DC1394
     else if (cameraConfig.hardware == "dc1394")
     {
-      hardCameraPtr.reset(new DC1394(0, cameraConfig.uid,
-                                     cameraConfig.resolution,
-                                     cameraConfig.frameRate));
+      hardCameraPtr.reset(new DC1394(0, cameraConfig));
     }
 #endif
     else

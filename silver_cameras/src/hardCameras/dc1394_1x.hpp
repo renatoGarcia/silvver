@@ -5,7 +5,6 @@
 
 #include <string>
 
-#include <boost/array.hpp>
 #include <boost/thread/mutex.hpp>
 
 #include <libdc1394/dc1394_control.h>
@@ -24,9 +23,7 @@ public:
   };
 
   DC1394(int nCard,
-         const std::string& uid,
-         const boost::array<unsigned, 2>& resolution,
-         float frameRate,
+         const scene::Camera& config,
          Format format = F_VGA_NONCOMPRESSED);
 
   ~DC1394();

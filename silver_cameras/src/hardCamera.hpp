@@ -19,11 +19,12 @@
 #include <stdexcept>
 #include <string>
 
-#include <boost/array.hpp>
 #include <boost/noncopyable.hpp>
 
 #include <opencv/cv.h>
 #include <opencv/highgui.h>
+
+#include "scene.hpp"
 
 class HardCamera : public boost::noncopyable
 {
@@ -60,9 +61,7 @@ public:
 
 protected:
 
-  HardCamera(const std::string& uid,
-             const boost::array<unsigned, 2>& resolution,
-             float frameRate);
+  HardCamera(const scene::Camera& config);
 
   // A string representing the uid of the hardware camera.
   // It must be numbers in decimal base.
@@ -74,9 +73,15 @@ protected:
 
   const float frameRate;
 
+  void undistortFrame(IplImage* frame);
+
 private:
 
   friend class HardCameraFactory;
+
+  /// Maps to distort captured images
+  IplImage* mapx;
+  IplImage* mapy;
 
   virtual void initialize() = 0;
 };

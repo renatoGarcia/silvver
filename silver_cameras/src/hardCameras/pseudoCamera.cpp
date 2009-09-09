@@ -5,12 +5,9 @@
 namespace bfs = boost::filesystem;
 namespace bpt = boost::posix_time;
 
-PseudoCamera::PseudoCamera(const std::string& uid,
-                           const boost::array<unsigned, 2>& resolution,
-                           float frameRate,
-                           const std::string& imagesPath)
-  :HardCamera(uid, resolution, frameRate)
-  ,path(imagesPath)
+PseudoCamera::PseudoCamera(const scene::Camera& config)
+  :HardCamera(config)
+  ,path(config.imagesPath)
   ,delay((static_cast<long>((1.0 / this->frameRate) * 1.0e3)))
 {}
 
