@@ -58,21 +58,18 @@ SceneMounter::constructAbstractCamera(const scene::Camera& camera,
 
   connection->connect(targetType);
 
-  boost::shared_ptr<AbstractCamera>
-    abstractCameraPtr(AbstractCameraFactory::create(camera,
-                                                    targets,
-                                                    connection));
+  this->abstractCameras.push_back(AbstractCameraFactory::create(camera,
+                                                                targets,
+                                                                connection));
 
-  this->vecAbstractCamera.push_back(abstractCameraPtr);
-
-  abstractCameraPtr->run();
+  this->abstractCameras.back().run();
 }
 
 void SceneMounter::dismount()
 {
-  BOOST_FOREACH(boost::shared_ptr<AbstractCamera> abstractCamera,
-                this->vecAbstractCamera)
+  BOOST_FOREACH(AbstractCamera& abstractCamera,
+                this->abstractCameras)
   {
-    abstractCamera->stop();
+    abstractCamera.stop();
   }
 }

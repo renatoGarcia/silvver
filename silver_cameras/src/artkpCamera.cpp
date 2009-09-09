@@ -22,8 +22,6 @@
 #include "connection.ipp"
 #include "silverTypes.hpp"
 
-namespace bfs = boost::filesystem;
-
 ArtkpCamera::ArtkpCamera(const scene::Camera& cameraConfig,
                          const scene::ArtkpTargets& targets,
                          boost::shared_ptr<Connection> connection)

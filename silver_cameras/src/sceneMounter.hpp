@@ -13,13 +13,13 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef SCENE_MOUNTER_HPP
-#define SCENE_MOUNTER_HPP
+#ifndef _SCENE_MOUNTER_HPP_
+#define _SCENE_MOUNTER_HPP_
 
 #include <vector>
 #include <string>
 
-#include <boost/shared_ptr.hpp>
+#include <boost/ptr_container/ptr_vector.hpp>
 
 #include "abstractCamera.hpp"
 #include "connection.hpp"
@@ -60,7 +60,7 @@ private:
                                const scene::VariantAnyTarget& targets,
                                const std::string& targetType);
 
-  std::vector< boost::shared_ptr<AbstractCamera> > vecAbstractCamera;
+  boost::ptr_vector<AbstractCamera> abstractCameras;
 };
 
-#endif //SCENE_MOUNTER_HPP
+#endif /* _SCENE_MOUNTER_HPP_ */
