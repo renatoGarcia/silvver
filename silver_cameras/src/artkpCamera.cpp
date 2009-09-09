@@ -15,6 +15,7 @@
 
 #include "artkpCamera.hpp"
 
+#include <fstream>
 #include <boost/foreach.hpp>
 
 #include <ARToolKitPlus/TrackerSingleMarkerImpl.h>
@@ -48,8 +49,11 @@ ArtkpCamera::~ArtkpCamera()
 void
 ArtkpCamera::initialize()
 {
+  std::ofstream tmpConfig("tmpArtkpConfig.txt");
+  tmpConfig << 
+
   if(!this->tracker->init("./data/no_distortion.cal",
-                          1000.0f,
+                          1.0f,
                           7000.0f,
                           &this->logger))
   {
@@ -62,6 +66,7 @@ ArtkpCamera::initialize()
   this->tracker->setPatternWidth(this->patternWidth);
 
   // Define a porcentagem da borda no tamanho da imagem.
+  // this->tracker->setBorderWidth(1.0/6.0);
   this->tracker->setBorderWidth(/*0.250f*/0.125f);
 
   // Define um limiar entre as tonalidades de cor.
@@ -69,7 +74,7 @@ ArtkpCamera::initialize()
 
   this->tracker->setPoseEstimator(ARToolKitPlus::POSE_ESTIMATOR_RPP);
 
-//   tracker[0]->setUndistortionMode(ARToolKitPlus::UNDIST_LUT);
+  this->tracker->setUndistortionMode(ARToolKitPlus::UNDIST_NONE);
 
   // switch to simple ID based markers
   // use the tool in tools/IdPatGen to generate markers
@@ -100,6 +105,7 @@ ArtkpCamera::operator()()
   {
     poses.clear();
     this->updateFrame();
+    this->undistortFrame();
 
     nMarkers = 0;
 
@@ -120,10 +126,10 @@ ArtkpCamera::operator()()
       }
 
       // The transMatrix will be the marker pose in relation to camera.
-      this->tracker->arGetTransMat(&markerInfo[marker],
-                                   pattCenter,
-                                   (ARFloat)this->patternWidth,
-                                   transMatrix);
+      this->tracker->/*ar*/rppGetTransMat(&markerInfo[marker],
+                                          pattCenter,
+                                          (ARFloat)this->patternWidth,
+                                          transMatrix);
 
       pose.uid = this->idMap.at(markerInfo[marker].id);
       pose.x = transMatrix[0][3];
@@ -132,6 +138,8 @@ ArtkpCamera::operator()()
       for(int i = 0; i < 3; ++i)
         for(int j = 0; j < 3; ++j)
           pose.rotationMatrix[(3*i)+j] = transMatrix[i][j];
+
+      // std::cout << "oi:   " << pose << std::endl;
 
       this->toWorld(pose);
 

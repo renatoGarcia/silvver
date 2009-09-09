@@ -29,18 +29,64 @@ AbstractCamera::AbstractCamera(const scene::Camera& cameraConfig,
   ,stopping(false)
   ,runThread()
   ,hardCamera(HardCameraFactory::create(cameraConfig))
+  ,intrinsic(NULL)
+  ,distortion(NULL)
+  ,mapx(NULL)
+  ,mapy(NULL)
   ,rot(cameraConfig.rotationMatrix)
   ,trans(cameraConfig.translationVector)
   ,frameCounter(0)
   ,frameRate(0)
 {
-
   this->hardCamera->createIplImage(&this->currentFrame);
+
+  this->intrinsic = cvCreateMat(3, 3, CV_32FC1);
+  this->distortion = cvCreateMat(5, 1, CV_32FC1);
+
+  CvSize imageSize = cvSize(cameraConfig.resolution.at(0),
+                            cameraConfig.resolution.at(1));
+
+  mapx = cvCreateImage(imageSize, IPL_DEPTH_32F, 1);
+  mapy = cvCreateImage(imageSize, IPL_DEPTH_32F, 1);
+
+  CV_MAT_ELEM(*(this->intrinsic), float, 0, 0) =
+                                            cameraConfig.focalLength.at(0);
+  CV_MAT_ELEM(*(this->intrinsic), float, 0, 1) = 0;
+  CV_MAT_ELEM(*(this->intrinsic), float, 0, 2) =
+                                            cameraConfig.principalPoint.at(0);
+  CV_MAT_ELEM(*(this->intrinsic), float, 1, 0) = 0;
+  CV_MAT_ELEM(*(this->intrinsic), float, 1, 1) =
+                                            cameraConfig.focalLength.at(1);
+  CV_MAT_ELEM(*(this->intrinsic), float, 1, 2) =
+                                            cameraConfig.principalPoint.at(1);
+  CV_MAT_ELEM(*(this->intrinsic), float, 2, 0) = 0;
+  CV_MAT_ELEM(*(this->intrinsic), float, 2, 1) = 0;
+  CV_MAT_ELEM(*(this->intrinsic), float, 2, 2) = 1;
+
+  CV_MAT_ELEM(*(this->distortion), float, 0, 0) =
+    cameraConfig.radialCoef.at(0);
+  CV_MAT_ELEM(*(this->distortion), float, 1, 0) =
+    cameraConfig.radialCoef.at(1);
+  CV_MAT_ELEM(*(this->distortion), float, 2, 0) =
+    cameraConfig.tangentialCoef.at(0);
+  CV_MAT_ELEM(*(this->distortion), float, 3, 0) =
+    cameraConfig.tangentialCoef.at(1);
+  CV_MAT_ELEM(*(this->distortion), float, 4, 0) =
+    cameraConfig.radialCoef.at(2);
+
+  cvInitUndistortMap(this->intrinsic, this->distortion,
+                     this->mapx, this->mapy);
 }
 
 AbstractCamera::~AbstractCamera()
 {
   cvReleaseImage(&currentFrame);
+
+  cvRelease((void**)&intrinsic);
+  cvRelease((void**)&distortion);
+
+  cvReleaseImage(&mapx);
+  cvReleaseImage(&mapy);
 }
 
 void
@@ -76,6 +122,17 @@ AbstractCamera::updateFrame()
 //     quadros = 0;
 //     timer->Start();
 //   }
+}
+
+void
+AbstractCamera::undistortFrame()
+{
+  IplImage *tmp = cvCloneImage(this->currentFrame);
+
+  cvRemap(tmp, this->currentFrame, this->mapx, this->mapy,
+          CV_INTER_LINEAR+CV_WARP_FILL_OUTLIERS, cvScalarAll(0));
+
+  cvReleaseImage(&tmp);
 }
 
 void
