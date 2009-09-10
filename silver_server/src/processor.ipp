@@ -39,9 +39,9 @@ Processor<Tinput,Toutput>::sendToOutputs(const std::vector<Toutput> &localizatio
 
   BOOST_FOREACH(Toutput output, localizations)
   {
-    debug::logOut << ts_output::lock
-                  << output <<  std::endl
-                  << ts_output::unlock;
+    debug::logOut(1) << ts_output::lock
+                     << output <<  std::endl
+                     << ts_output::unlock;
 
     // Get all clients hearing for a given target.
     this->clientsMap->findClients(output.uid, vecConnections);

@@ -19,10 +19,15 @@
 #include <logging.hpp>
 #include <tsostream.hpp>
 
+// Message levels
+const int STARTUP = 1;
+const int WARNING = 1;
+const int REQUEST = 2;
+
 namespace debug
 {
   extern logging messageOutput;
-  extern tsostream logOut;
+  extern logging logOut;
 }
 
 #endif /* _DEBUG_OUTPUTS_HPP_ */
