@@ -1,17 +1,33 @@
-/**
- * @file   silverTypes.hpp
+/* Copyright 2009 Renato Florentino Garcia <fgar.renato@gmail.com>
  *
- * @brief Especificação dos tipos e constantes usados para a comunicação entre os módulos de silvver.
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License version 3, as
+ * published by the Free Software Foundation.
  *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef SILVER_TYPES_HPP
-#define SILVER_TYPES_HPP
+
+/**
+ * @file silverTypes.hpp
+ *
+ * @brief Types used to represents the localized targets.
+ */
+#ifndef _SILVER_TYPES_HPP_
+#define _SILVER_TYPES_HPP_
 
 #include <boost/array.hpp>
+#include <cmath>
 
 namespace silver
 {
   //------------------------------ Position
+
   struct Position
   {
     double x;
@@ -29,6 +45,19 @@ namespace silver
       ,y(position.y)
       ,z(position.z)
     {}
+
+    Position&
+    operator=(const Position& position)
+    {
+      if (this == &position)
+      {
+        return *this;
+      }
+
+      this->x = position.x;
+      this->y = position.y;
+      this->z = position.z;
+    }
   };
 
   template <class charT, class traits>
@@ -52,6 +81,17 @@ namespace silver
       return this->rotationMatrix.at((3*row)+column);
     }
 
+    /** Calculates the theta angle. [rad]
+     * The theta is the angle between the x origin's axis and the projection
+     * of x axis of this pose in x,y origin's plane.
+     *
+     * @return An angle in range [-pi, pi]
+     */
+    double theta()
+    {
+      return atan2(rotationMatrix[3], rotationMatrix[0]);
+    }
+
     Pose()
       :Position()
     {}
@@ -59,11 +99,6 @@ namespace silver
     Pose(const Pose& pose)
       :Position(pose)
       ,rotationMatrix(pose.rotationMatrix)
-    {}
-
-    Pose(const Position& position,
-         const double yaw=0.0, const double pitch=0.0, const double roll=0.0)
-      :Position(position)
     {}
 
     Pose&
@@ -77,7 +112,6 @@ namespace silver
       Position::operator=(pose);
       this->rotationMatrix = pose.rotationMatrix;
     }
-
   };
 
   template <class charT, class traits>
@@ -86,8 +120,7 @@ namespace silver
   operator << (std::basic_ostream<charT,traits>& strm,
                const Pose& pose)
   {
-    const Position& position = static_cast<const Position&>(pose);
-    strm << position;
+    strm << static_cast<Position>(pose);
     for (int i = 0; i < 9; ++i)
     {
       strm  << '\t' << pose.rotationMatrix[i];
@@ -131,11 +164,10 @@ namespace silver
   operator << (std::basic_ostream<charT,traits>& strm,
                const Identity<BaseClass>& identity)
   {
-    const BaseClass& base = static_cast<const BaseClass&>(identity);
-    strm << identity.uid << '\t' << base;
+    strm << identity.uid << '\t' << static_cast<BaseClass>(identity);
     return strm;
   }
 
 } // namespace silver
 
-#endif
+#endif /* _SILVER_TYPES_HPP_ */
