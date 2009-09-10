@@ -1,6 +1,20 @@
+/* Copyright 2009 Renato Florentino Garcia <fgar.renato@gmail.com>
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License version 3, as
+ * published by the Free Software Foundation.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
 #include "target.hpp"
 
-#include <fstream>
 #include <iostream>
 
 #include <boost/bind.hpp>
@@ -28,7 +42,7 @@ private:
 
   friend class Target<U>;
 
-  CheshireCat(unsigned targetId, bool log,
+  CheshireCat(unsigned targetId,
               const std::string& serverIp,
               unsigned receptionistPort);
 
@@ -60,26 +74,17 @@ private:
   boost::scoped_ptr<Connection> connection;
 
   bool connected;
-
-  boost::scoped_ptr<std::ofstream> arqRegistro;
 };
 
 template<class U>
 CheshireCat<U>::CheshireCat(unsigned targetId,
-                            bool log,
                             const std::string& serverIp,
                             unsigned receptionistPort)
   :targetId(targetId)
   ,currentIsNew(false)
   ,connection(new Connection(serverIp, receptionistPort))
   ,connected(false)
-{
-  if (log)
-  {
-    std::string fileName(boost::lexical_cast<std::string>(targetId) + ".log");
-    arqRegistro.reset(new std::ofstream(fileName.c_str()));
-  }
-}
+{}
 
 template<class U>
 CheshireCat<U>::~CheshireCat()
@@ -131,14 +136,6 @@ CheshireCat<U>::update()
     }
 
     this->newPoseCondition.notify_one();
-
-    if(this->arqRegistro)
-    {
-      *(this->arqRegistro) << last.uid   << '\t'
-                           << last.x    << '\t'
-                           << last.y    << '\t'
-                           << last.yaw << std::endl;
-    }
   }
 
   this->connection->asyncRead(this->last,
@@ -221,10 +218,9 @@ Target<T>::getNext(const boost::posix_time::time_duration& waitTime)
 
 template<class T>
 Target<T>::Target(unsigned targetId,
-               bool log,
-               const std::string& serverIp,
+                const std::string& serverIp,
                unsigned receptionistPort)
-  :smile(new CheshireCat<T>(targetId, log, serverIp, receptionistPort))
+  :smile(new CheshireCat<T>(targetId, serverIp, receptionistPort))
 {}
 
 template<class T>

@@ -14,15 +14,12 @@ using namespace silver;
 
 void printTargets(boost::shared_ptr<Target<Pose> > target)
 {
-  silver::Position pose;
+  silver::Pose pose;
 
   while(!boost::this_thread::interruption_requested())
   {
     pose = target->getNew();
-    std::cout << "X: " << pose.x
-              << "\tY: " << pose.y
-              << "\tTheta: " << pose.yaw
-              << std::endl;
+    std::cout << pose << std::endl;
   }
 }
 
@@ -58,7 +55,6 @@ int main(int argc,char **argv)
   }
 
   boost::shared_ptr<Target<Pose> > target(new Target<Pose>(id,
-                                                           false,
                                                            ip,
                                                            receptionistPort));
 
