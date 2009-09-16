@@ -7,8 +7,8 @@
 #include <boost/shared_ptr.hpp>
 #include <boost/thread/thread.hpp>
 
-#include <silverTypes.hpp>
-#include <target.hpp>
+#include <silver/silverTypes.hpp>
+#include <silver/target.hpp>
 
 using namespace silver;
 

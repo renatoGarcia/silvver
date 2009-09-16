@@ -43,24 +43,12 @@ vars.AddVariables(
     PathVariable('datadir',
                  'Installation prefix for machine-independent data',
                  '$prefix/share', PathVariable.PathAccept),
-    PathVariable('rootdir',
-                 'Installation prefix for all smalltalk data',
-                 '$datadir/syx', PathVariable.PathAccept),
-    PathVariable('imagepath',
-                 'Installation path for the default binary image',
-                 '$rootdir/default.sim', PathVariable.PathAccept),
+    PathVariable('lualibdir',
+                 'Installation prefix for lua libraries',
+                 '$prefix/share/lua/5.1', PathVariable.PathAccept),
     PathVariable('docdir',
                  'Installation prefix for documentation',
                  '$datadir/doc', PathVariable.PathAccept),
-    PathVariable('libdir',
-                 'Installation prefix for object code libraries',
-                 '$exec_prefix/lib', PathVariable.PathAccept),
-    PathVariable('plugindir',
-                 'Installation prefix for object code plugins',
-                 '$libdir/syx', PathVariable.PathAccept),
-    PathVariable('includedir',
-                 'Installation prefix for C header files',
-                 '$prefix/include', PathVariable.PathAccept),
     BoolVariable('enable_libdc1394',
                  'Enable or disable the library dc1394',
                  True),
@@ -196,6 +184,13 @@ if not env.GetOption('clean') and not env.GetOption('help'):
 
     env = conf.Finish()
 
+install_nodes = []
 
-Export('env', 'vars', 'build_optional_flags')
+install_nodes.append(env.Install(env['lualibdir'], ['lua/cameraId.lua']))
+install_nodes.append(env.Install(env['bindir'], ['calibration/silvverExtCalib',
+                                                 'calibration/silvverIntCalib']))
+
+Export('env', 'build_optional_flags', 'install_nodes')
 SConscript('src/SConscript', build_dir='build', duplicate=0)
+
+env.Alias('install', install_nodes)

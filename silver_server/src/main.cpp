@@ -25,7 +25,6 @@ namespace po = boost::program_options;
 
 int main(int argc, char **argv)
 {
-  tsostream ts(std::cout.rdbuf());
   int receptionistPort;
   unsigned verbosityLevel;
   bool logInputs;

@@ -14,58 +14,52 @@ boost_libs = RelatedLibs('Boost',
 
 mandatory_libs = RelatedLibsGroup([boost_libs])
 
-opts = Options()
+vars = Variables()
 
-if False: #env['PLATFORM'] == 'win32':
-    pass
-#     opts.AddOptions(PathOption('prefix',
-#                                'Installation prefix',
-#                                'C:\\\\Syx', PathOption.PathAccept))
-#     env['bindir'] = env['datadir'] = env['rootdir'] = env['libdir'] = '$prefix'
-#     env['includedir'] = '$prefix\\\\include'
-#     env['docdir'] = '$prefix\\\\doc'
-else:
-    opts.AddOptions(
-        PathOption('prefix',
-                   'Installation prefix',
-                   '/usr/local', PathOption.PathAccept),
-        PathOption('datadir',
-                   'Installation prefix for machine-independent data',
-                   '$prefix/share', PathOption.PathAccept),
-        PathOption('docdir',
-                   'Installation prefix for documentation',
-                   '$datadir/doc', PathOption.PathAccept),
-        PathOption('libdir',
-                   'Installation prefix for object code libraries',
-                   '$exec_prefix/lib', PathOption.PathAccept),
-        PathOption('includedir',
-                   'Installation prefix for C header files',
-                   '$prefix/include', PathOption.PathAccept))
+vars.AddVariables(
+    PathVariable('prefix',
+               'Installation prefix',
+               '/usr/local', PathVariable.PathAccept),
+    PathVariable('exec_prefix',
+                 'Installation prefix for executables and object code libraries',
+                 '$prefix', PathVariable.PathAccept),
+    PathVariable('datadir',
+               'Installation prefix for machine-independent data',
+               '$prefix/share', PathVariable.PathAccept),
+    PathVariable('docdir',
+               'Installation prefix for documentation',
+               '$datadir/doc', PathVariable.PathAccept),
+    PathVariable('libdir',
+               'Installation prefix for object code libraries',
+               '$exec_prefix/lib', PathVariable.PathAccept),
+    PathVariable('includedir',
+               'Installation prefix for C header files',
+               '$prefix/include', PathVariable.PathAccept))
 
-    for related_libs in mandatory_libs:
-        opts.Add('lib_' + related_libs.short_name + '_suffix',
-                 'Suffix of ' + related_libs.long_name + ' libraries.',
-                 '')
-
-    opts.Add('CPPPATH',
-             'Directories that the C++ preprocessor will search for '
-             'include directories. List only directories, do not list '
-             'options flags like -I in gcc. Multiples directories must be '
-             'quoted and delimited by a semicolon',
+for related_libs in mandatory_libs:
+    vars.Add('lib_' + related_libs.short_name + '_suffix',
+             'Suffix of ' + related_libs.long_name + ' libraries.',
              '')
 
-    opts.Add('LIBPATH',
-             'The list of directories that will be searched for libraries. '
-             'List only directories, do not list options flags like -L in '
-             'gcc. Multiples directories must be quoted and delimited by '
-             'a semicolon',
-             '')
+vars.Add('CPPPATH',
+         'Directories that the C++ preprocessor will search for '
+         'include directories. List only directories, do not list '
+         'options flags like -I in gcc. Multiples directories must be '
+         'quoted and delimited by a semicolon',
+         '')
 
-    opts.Add('CPPFLAGS',
-             'C++ preprocessor flags',
-             '')
+vars.Add('LIBPATH',
+         'The list of directories that will be searched for libraries. '
+         'List only directories, do not list options flags like -L in '
+         'gcc. Multiples directories must be quoted and delimited by '
+         'a semicolon',
+         '')
 
-env = Environment(options = opts,
+vars.Add('CPPFLAGS',
+         'C++ preprocessor flags',
+         '')
+
+env = Environment(options = vars,
                   CPPFLAGS = '${CPPFLAGS}')
 
 for related_libs in mandatory_libs:
@@ -76,7 +70,7 @@ env.Append(CPPPATH = [abspath('../common')])
 
 env['LIBPATH'] = env['LIBPATH'].split(';')
 
-Help(opts.GenerateHelpText(env))
+Help(vars.GenerateHelpText(env))
 
 if not env.GetOption('clean') and not env.GetOption('help'):
 #=======================================================
@@ -122,5 +116,18 @@ if not env.GetOption('clean') and not env.GetOption('help'):
 
     env = conf.Finish()
 
-Export('env', 'opts')
+install_nodes = []
+
+install_nodes.append(env.Install(env['includedir'] + '/silver',
+                                 ['src/target.hpp',
+                                  '../common/silverTypes.hpp',
+                                  '../common/serializations.hpp']))
+
+install_nodes.append(env.Install(env['docdir'] + '/silvver_client',
+                                 ['doc/silver_client.cpp',
+                                  'doc/Makefile']))
+
+Export('env', 'install_nodes')
 SConscript('./src/SConscript', build_dir='./build', duplicate=0)
+
+env.Alias('install', install_nodes)

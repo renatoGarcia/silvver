@@ -33,10 +33,7 @@ vars.AddVariables(
                  '$prefix/share', PathVariable.PathAccept),
     PathVariable('docdir',
                  'Installation prefix for documentation',
-                 '$datadir/doc', PathVariable.PathAccept),
-    PathVariable('includedir',
-                 'Installation prefix for C header files',
-                 '$prefix/include', PathVariable.PathAccept))
+                 '$datadir/doc', PathVariable.PathAccept))
 
 for related_libs in mandatory_libs:
     vars.Add('lib_' + related_libs.short_name + '_suffix',

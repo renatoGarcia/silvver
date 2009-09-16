@@ -1,0 +1,72 @@
+#!/usr/bin/env python
+#
+# This program receive a pose P1 in relation to origin, this same pose P1 in
+# relation to camera, and calculates the camera pose in relation to origin
+#
+# The intput must be, and the output will be, a row in format:
+# T11 T21 T31 R11 R12 R13 R21 R22 R23 R31 R32 R33
+#
+# Where T21 is the item of row two and column one from translation matrix, and
+# R32 is the item of row three and column two from rotation matrix.
+#
+
+# Tab -> Represents a translation matrix of point 'a' in relation to b
+# Rab -> Represents a rotation matrix of point 'a' in relation to b
+
+import sys
+import numpy as np
+import string
+
+mo_file = np.loadtxt(sys.argv[1])
+mc_file = np.loadtxt(sys.argv[2])
+
+if mo_file.ndim == 2:
+    mo_file = mo_file.mean(axis=0)
+
+if mc_file.ndim == 2:
+    mc_file = mc_file.mean(axis=0)
+
+
+#--------------------- Inputs
+Tmo = np.matrix(mo_file[0:3].reshape(3,1)) # Mark to origin translation vector
+Tmc = np.matrix(mc_file[0:3].reshape(3,1)) # Mark to camera translation vector
+
+Rmo = np.matrix(mo_file[3:12].reshape(3,3)) # Mark to origin rotation matrix
+Rmc = np.matrix(mc_file[3:12].reshape(3,3)) # Mark to camera rotation matrix
+
+#--------------------- Normalize the rotation matrices
+Rmo_svd = np.linalg.svd(Rmo)
+Rmo = Rmo_svd[0] * Rmo_svd[2]
+
+Rmc_svd = np.linalg.svd(Rmc)
+Rmc = Rmc_svd[0] * Rmc_svd[2]
+#---------------------
+
+Rcm = Rmc.transpose()
+Tcm = (-Rcm) * Tmc
+
+#--------------------- Outputs
+Rco = Rmo * Rcm
+Tco = Tmo + (Rmo * Tcm)
+#---------------------
+
+Tco_print = []
+Rco_print = []
+for line in Tco.tolist():
+    for item in line:
+        Tco_print.append(str(item))
+
+for line in Rco.tolist():
+    for item in line:
+        Rco_print.append(str(item))
+
+output_print = Tco_print + Rco_print
+
+
+# print(string.join(output_print, "\t"))
+
+print("translation_vector = {" + string.join(Tco_print, ", ") + "},")
+print("rotation_matrix = {\n" +
+      string.join(Rco_print[0:3], ", ") + ",\n" +
+      string.join(Rco_print[3:6], ", ") + ",\n" +
+      string.join(Rco_print[6:9], ", ") + "\n},")
