@@ -103,6 +103,7 @@ ArtkpCamera::operator()()
   std::vector<silver::Identity<silver::Pose> > poses;
 
   int nMarkers = 0;
+  float error = 0;
   ARToolKitPlus::ARMarkerInfo* markerInfo;
   ARFloat pattCenter[2] = {0.0, 0.0};
   ARFloat transMatrix[3][4];
@@ -132,10 +133,20 @@ ArtkpCamera::operator()()
       }
 
       // The transMatrix will be the marker pose in relation to camera.
-      this->tracker->rppGetTransMat(&markerInfo[marker],
+      error = this->tracker->rppGetTransMat(&markerInfo[marker],
                                     pattCenter,
                                     (ARFloat)this->patternWidth,
                                     transMatrix);
+
+      // If the error in the pose estimated is 1e10, the rppGetTransMat has
+      // failed.
+      if (error == 1e10)
+      {
+        error = this->tracker->arGetTransMat(&markerInfo[marker],
+                                             pattCenter,
+                                             (ARFloat)this->patternWidth,
+                                             transMatrix);
+      }
 
       pose.uid = this->idMap.at(markerInfo[marker].id);
       pose.x = transMatrix[0][3];
