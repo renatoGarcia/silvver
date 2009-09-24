@@ -30,7 +30,7 @@ SceneMounter::SceneMounter(const std::string& serverIp,
 {}
 
 void
-SceneMounter::mount()
+SceneMounter::mount(const bool showImages)
 {
   CfParser cfParser;
   const scene::Scene scene = cfParser.parseFile(this->sceneDescriptorFile);
@@ -43,7 +43,8 @@ SceneMounter::mount()
     {
       this->constructAbstractCamera(camera,
                                     *scene.targets.get<0>(),
-                                    "artp_mark");
+                                    "artp_mark",
+                                    showImages);
     }
   }
 }
@@ -51,7 +52,8 @@ SceneMounter::mount()
 void
 SceneMounter::constructAbstractCamera(const scene::Camera& camera,
                                       const scene::VariantAnyTarget& targets,
-                                      const std::string& targetType)
+                                      const std::string& targetType,
+                                      const bool showImages)
 {
   boost::shared_ptr<Connection>
     connection(new Connection(this->serverIp, this->receptionistPort));
@@ -60,7 +62,8 @@ SceneMounter::constructAbstractCamera(const scene::Camera& camera,
 
   this->abstractCameras.push_back(AbstractCameraFactory::create(camera,
                                                                 targets,
-                                                                connection));
+                                                                connection,
+                                                                showImages));
 
   this->abstractCameras.back().run();
 }

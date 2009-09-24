@@ -17,7 +17,7 @@ class ImagesSource:
                 yield cvLoadImage(path, CV_LOAD_IMAGE_COLOR)
 
 description = "Receive a serie of images or videos with a checkerboard as input, and outputs the intrinsic calibration of camera which grab that images."
-usage="%prog [options] board_width board_height input_files..."
+usage="%prog [options] board_width board_height square_width input_files..."
 parser = OptionParser(usage=usage, description=description,
                       version="%prog 0.1")
 parser.add_option("-i", "--show-images", action="store_true",
@@ -38,6 +38,8 @@ board_w = int(args[0])
 
 # Number of squares in vertical
 board_h = int(args[1])
+
+square_width = int(args[2])
 
 source = ImagesSource(args[2:])
 
@@ -101,8 +103,8 @@ for image in source.get_images():
         for i in range(board_n):
             image_points[offset+i][0] = corners[i].x
             image_points[offset+i][1] = corners[i].y
-            object_points[offset+i][0] = i/board_w
-            object_points[offset+i][1] = i%board_w
+            object_points[offset+i][0] = i/board_w * square_width
+            object_points[offset+i][1] = i%board_w * square_width
             object_points[offset+i][2] = 0.0
 
         point_counts[successes] = board_n

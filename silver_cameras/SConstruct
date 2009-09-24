@@ -90,7 +90,7 @@ env.Append(CPPPATH = [abspath('../common')])
 
 env['LIBPATH'] = env['LIBPATH'].split(';')
 
-env.ParseConfig("pkg-config lua --cflags --libs")
+env.ParseConfig("pkg-config lua5.1 --cflags --libs")
 
 Help(vars.GenerateHelpText(env))
 

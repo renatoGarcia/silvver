@@ -24,8 +24,9 @@
 
 ArtkpCamera::ArtkpCamera(const scene::Camera& cameraConfig,
                          const scene::ArtkpTargets& targets,
-                         boost::shared_ptr<Connection> connection)
-  :AbstractCamera(cameraConfig, connection)
+                         boost::shared_ptr<Connection> connection,
+                         bool showImages)
+  :AbstractCamera(cameraConfig, connection, showImages)
   ,camConfigFileName("/tmp/artkpCamera" + cameraConfig.uid)
   ,patternWidth(targets.patternWidth)
   ,logger()

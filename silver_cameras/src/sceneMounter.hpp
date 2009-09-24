@@ -43,7 +43,7 @@ public:
    * The abstract cameras that will be initized are described in the scene
    * descriptor XML file.
    */
-  void mount();
+  void mount(const bool showImages);
 
   /// Close all opened abtract cameras
   void dismount();
@@ -58,7 +58,8 @@ private:
   // Initialize the abstract camera given by cameraConfig
   void constructAbstractCamera(const scene::Camera& cameraConfig,
                                const scene::VariantAnyTarget& targets,
-                               const std::string& targetType);
+                               const std::string& targetType,
+                               const bool showImages);
 
   boost::ptr_vector<AbstractCamera> abstractCameras;
 };

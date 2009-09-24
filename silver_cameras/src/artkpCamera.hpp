@@ -48,7 +48,8 @@ public:
 
   ArtkpCamera(const scene::Camera& cameraConfig,
               const scene::ArtkpTargets& targets,
-              boost::shared_ptr<Connection> connection);
+              boost::shared_ptr<Connection> connection,
+              bool showImages);
 
   ~ArtkpCamera();
 

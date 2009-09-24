@@ -14,7 +14,8 @@ DC1394::DC1394(int nCard,
                Format format)
   :HardCamera(config)
   ,nCard(nCard)
-  ,device("/dev/video1394/" + boost::lexical_cast<std::string>(nCard))
+  ,device("/dev/video1394-0")
+//   ,device("/dev/video1394/" + boost::lexical_cast<std::string>(nCard))
   ,bRaw1394HandleCreated(false)
   ,bDc1394CameraCreated(false)
 {

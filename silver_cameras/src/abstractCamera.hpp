@@ -59,7 +59,8 @@ protected:
   bool stopping;
 
   AbstractCamera(const scene::Camera& cameraConfig,
-                 boost::shared_ptr<Connection> connection);
+                 boost::shared_ptr<Connection> connection,
+                 bool showImage=false);
 
   // Atualiza a imagem em "*imgCamera", e retorna o instante no tempo em que elas foram capturadas.
   // Este tempo é dado em milisegundos, e é calculado levando em conta o "tempoInicial".
@@ -85,6 +86,9 @@ private:
   // de quadros por segundo.
   unsigned frameCounter;
   float frameRate;
+
+  const bool showImage;
+  const std::string windowName;
 };
 
 #endif

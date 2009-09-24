@@ -7,7 +7,8 @@
 AbstractCamera*
 AbstractCameraFactory::create(const scene::Camera& cameraConfig,
                               const scene::VariantAnyTarget& targets,
-                              boost::shared_ptr<Connection> connection)
+                              boost::shared_ptr<Connection> connection,
+                              const bool showImages)
 {
   AbstractCamera* abstractCamera;
 
@@ -16,7 +17,8 @@ AbstractCameraFactory::create(const scene::Camera& cameraConfig,
   {
     abstractCamera = new ArtkpCamera(cameraConfig,
                                      *artkpTarget,
-                                     connection);
+                                     connection,
+                                     showImages);
   }
 //   else if(targetType == "color_blob")
 //   {

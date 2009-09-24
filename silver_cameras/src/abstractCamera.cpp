@@ -16,14 +16,16 @@
 #include "abstractCamera.hpp"
 
 #include <cstddef>
-
 #include <boost/ref.hpp>
+
+#include <opencv/highgui.h>
 
 #include "hardCameraFactory.hpp"
 // #include "tsPrint.hpp"
 
 AbstractCamera::AbstractCamera(const scene::Camera& cameraConfig,
-                               boost::shared_ptr<Connection> connection)
+                               boost::shared_ptr<Connection> connection,
+                               bool showImage)
   :currentFrame(NULL)
   ,serverConnection(connection)
   ,stopping(false)
@@ -33,13 +35,23 @@ AbstractCamera::AbstractCamera(const scene::Camera& cameraConfig,
   ,trans(cameraConfig.translationVector)
   ,frameCounter(0)
   ,frameRate(0)
+  ,showImage(showImage)
+  ,windowName("Camera " + cameraConfig.uid)
 {
   this->hardCamera->createIplImage(&this->currentFrame);
+  if (this->showImage)
+  {
+    cvNamedWindow(this->windowName.c_str());
+  }
 }
 
 AbstractCamera::~AbstractCamera()
 {
   cvReleaseImage(&currentFrame);
+  if (this->showImage)
+  {
+    cvDestroyWindow(this->windowName.c_str());
+  }
 }
 
 void
@@ -61,6 +73,11 @@ AbstractCamera::updateFrame()
   try
   {
     hardCamera->captureRectFrame(&this->currentFrame);
+    if (this->showImage)
+    {
+      cvShowImage(this->windowName.c_str(), this->currentFrame);
+      cvWaitKey(5);
+    }
   }
   catch(const HardCamera::capture_image_error& exception)
   {
