@@ -1,5 +1,20 @@
 #!/usr/bin/env python
 #
+# Copyright 2009 Renato Florentino Garcia <fgar.renato@gmail.com>,
+#                Daniel Balbino
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License version 3, as
+# published by the Free Software Foundation.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+#
 
 from optparse import OptionParser
 from opencv.cv import *
@@ -10,13 +25,21 @@ from glob import glob
 class ImagesSource:
     def __init__(self, image_files):
         self._images_path = image_files
+        img = cvLoadImage(self._images_path[0], CV_LOAD_IMAGE_COLOR)
+        self._images_size = (img.width, img.height)
 
     def get_images(self):
         for path in self._images_path:
             if path.endswith(('.jpg', '.ppm', '.png')):
                 yield cvLoadImage(path, CV_LOAD_IMAGE_COLOR)
 
-description = "Receive a serie of images or videos with a checkerboard as input, and outputs the intrinsic calibration of camera which grab that images."
+    def n_images(self):
+        return len(self._images_path)
+
+    def images_cvSize(self):
+        return (cvSize(self._images_size[0], self._images_size[1]))
+
+description = "Receive a serie of images with a checkerboard as input, and outputs the intrinsic calibration of camera which grab that images."
 usage="%prog [options] board_width board_height square_width input_files..."
 parser = OptionParser(usage=usage, description=description,
                       version="%prog 0.1")
@@ -28,28 +51,30 @@ parser.add_option("-x", "--save-xml", action="store_true",
                   dest="save_xml", default=False,
                   help="Save an opencv xml for distortion and intrinsic\
                         values.")
-parser.add_option("-m", "--maximum", type="int", dest="n_boards",
+parser.add_option("-m", "--maximum", type="int", dest="max_boards",
                   help="How many boards will be analyzed")
 
 (options, args) = parser.parse_args()
 
-# Number of squares in horizontal
-board_w = int(args[0])
+# Number of internal corners
+board_sz = cvSize(int(args[0])-1, int(args[1])-1)
 
-# Number of squares in vertical
-board_h = int(args[1])
+# Number of corners in a checkerboard
+n_corners = board_sz.width * board_sz.height
 
 square_width = int(args[2])
 
-source = ImagesSource(args[2:])
+source = ImagesSource(args[3:])
 
-board_n = board_w * board_h
-board_sz = cvSize(board_w, board_h)
+if options.max_boards and options.max_boards < source.n_images():
+    max_boards = options.max_boards
+else:
+    max_boards = source.n_images()
 
-image_points      = cvCreateMat(options.n_boards*board_n,2,CV_32FC1)
-object_points     = cvCreateMat(options.n_boards*board_n,3,CV_32FC1)
+image_points      = cvCreateMat(max_boards*n_corners,2,CV_32FC1)
+object_points     = cvCreateMat(max_boards*n_corners,3,CV_32FC1)
 
-point_counts      = cvCreateMat(options.n_boards,1,CV_32SC1)
+point_counts      = cvCreateMat(max_boards,1,CV_32SC1)
 
 intrinsic_matrix  = cvCreateMat(3,3,CV_32FC1)
 distortion_coeffs = cvCreateMat(4,1,CV_32FC1)
@@ -60,22 +85,16 @@ successes = 0
 step = 0
 frame = 0
 
-# gray_image = cvCreateImage(cvGetSize(image),8,1); # subpixel
-# bin_image  = cvCreateImage(cvGetSize(image),8,1);
-gray_image = cvCreateImage(cvSize(640, 480),8,1); # subpixel
-bin_image  = cvCreateImage(cvSize(640, 480),8,1);
+gray_image = cvCreateImage(source.images_cvSize(),8,1); # subpixel
+bin_image  = cvCreateImage(source.images_cvSize(),8,1);
 
 corner_count = 0
 
 if options.show_images:
     cvNamedWindow("Calibration")
 
-# CAPTURE CORNER VIEWS LOOP UNTIL WE'VE GOT n_boards
-# SUCCESSFUL CAPTURES (ALL CORNERS ON THE BOARD ARE FOUND)
-# while successes < n_boards:
+# Capture corner views loop
 for image in source.get_images():
-
-    #Find chessboard corners:
 
     cvCvtColor(image, gray_image, CV_BGR2GRAY)
 
@@ -85,54 +104,45 @@ for image in source.get_images():
     (found, corners) = cvFindChessboardCorners(bin_image, board_sz,
                                                CV_CALIB_CB_NORMALIZE_IMAGE)
 
-    #Draw it
-    cvDrawChessboardCorners(image, board_sz, corners, found)
-
     if options.show_images:
+        cvDrawChessboardCorners(image, board_sz, corners, found)
         cvShowImage("Calibration", image );
+        c = cvWaitKey(5)
 
     # If we got a good board, add it to our data
     if found:
-        offset = successes*board_n;
+        offset = successes*n_corners;
+
         #Get Subpixel accuracy on those corners
         cvFindCornerSubPix(bin_image, corners, cvSize(5, 5), cvSize(-1,-1),
                            cvTermCriteria(CV_TERMCRIT_EPS+CV_TERMCRIT_ITER,
                                           1000, 0.0001))
 
-        step = successes*board_n;
-        for i in range(board_n):
+        step = successes*n_corners;
+        for i in range(n_corners):
             image_points[offset+i][0] = corners[i].x
             image_points[offset+i][1] = corners[i].y
-            object_points[offset+i][0] = i/board_w * square_width
-            object_points[offset+i][1] = i%board_w * square_width
+            object_points[offset+i][0] = i/board_sz.width * square_width
+            object_points[offset+i][1] = i%board_sz.width * square_width
             object_points[offset+i][2] = 0.0
 
-        point_counts[successes] = board_n
-
+        point_counts[successes] = n_corners
         successes += 1
 
+        if successes == max_boards:
+            break
 
-    # Handle pause/unpause and ESC
-    c = cvWaitKey(15)
-    # if c == 'p':
-    #     c = 0
-    #     while c != 'p' and c != 27:
-    #           c = cvWaitKey(250)
+if options.show_images:
+    cvDestroyWindow("Calibration")
 
-    # if c == 27:
-    #     exit
 
-#ALLOCATE MATRICES ACCORDING TO HOW MANY CHESSBOARDS FOUND
-object_points2 = cvCreateMat(successes*board_n,3,CV_32FC1);
-image_points2 = cvCreateMat(successes*board_n,2,CV_32FC1);
-point_counts2 = cvCreateMat(successes,1,CV_32SC1);
+# Allocate matrices according to how many chessboards found
+object_points2 = cvCreateMat(successes*n_corners, 3, CV_32FC1);
+image_points2  = cvCreateMat(successes*n_corners, 2, CV_32FC1);
+point_counts2  = cvCreateMat(successes, 1, CV_32SC1);
 
-#TRANSFER THE POINTS INTO THE CORRECT SIZE MATRICES
-#Below, we write out the details in the next two loops. We could
-#instead have written:
-#image_points->rows = object_points->rows = \
-#successes*board_n; point_counts->rows = successes;
-for i in range(successes*board_n):
+# Transfer the points into the correct size matrices
+for i in range(successes*n_corners):
     image_points2[i][0] = image_points[i][0]
     image_points2[i][1] = image_points[i][1]
     object_points2[i][0] = object_points[i][0]
@@ -152,10 +162,9 @@ cvReleaseMat(point_counts)
 intrinsic_matrix[0][0] = 1.0
 intrinsic_matrix[1][1] = 1.0
 
-cvCalibrateCamera2(
-    object_points2, image_points2,
-    point_counts2, cvGetSize( image ),
-    intrinsic_matrix, distortion_coeffs)
+cvCalibrateCamera2(object_points2, image_points2,
+                   point_counts2, cvGetSize(image),
+                   intrinsic_matrix, distortion_coeffs)
 
 # ---------------------------------------------------- Outputs the results
 
@@ -164,25 +173,26 @@ print("focal_length = {" + str(intrinsic_matrix[0][0]) + ", "
 print("principal_point = {" + str(intrinsic_matrix[0][2]) + ", "
       + str(intrinsic_matrix[1][2]) + "},")
 print("radial_coef = {" + str(distortion_coeffs[0]) + ", "
-      + str(distortion_coeffs[1]) + "},")
+      + str(distortion_coeffs[1]) + ", 0.0},")
 print("tangential_coef = {" + str(distortion_coeffs[2]) + ", "
       + str(distortion_coeffs[3]) + "},")
 
 if options.save_xml:
-    cvSave("Intrinsics.xml",intrinsic_matrix);
-    cvSave("Distortion.xml",distortion_coeffs);
+    cvSave("Intrinsics.xml",intrinsic_matrix)
+    cvSave("Distortion.xml",distortion_coeffs)
 
 if options.show_images:
-    mapx = cvCreateImage( cvSize(640,480), IPL_DEPTH_32F, 1 )
-    mapy = cvCreateImage( cvSize(640,480), IPL_DEPTH_32F, 1 )
+    mapx = cvCreateImage(source.images_cvSize(), IPL_DEPTH_32F, 1)
+    mapy = cvCreateImage(source.images_cvSize(), IPL_DEPTH_32F, 1)
 
     cvInitUndistortMap(intrinsic_matrix, distortion_coeffs, mapx, mapy)
 
-    cvNamedWindow( "Undistort" );
+    cvNamedWindow("Undistort")
     for image in source.get_images():
-        t = cvCreateImage( cvSize(640,480), 8, 3 )
-        cvShowImage( "Calibration", image ) # Show raw image
-        cvRemap( image, t, mapx, mapy )     # Undistort image
+        t = cvCreateImage(source.images_cvSize(), 8, 3)
+        cvRemap(image, t, mapx, mapy)   # Undistort image
         cvShowImage("Undistort", t)     # Show corrected image
 
         c = cvWaitKey(0)
+
+    cvDestroyWindow("Undistort")
