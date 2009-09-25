@@ -34,13 +34,14 @@ namespace scene
     /// Type of hardware camera.
     std::string hardware;
 
+    /// Device where the camera is mapped,
+    /// or path to input images for pseudoCamera
+    std::string device;
+
     /// String representation of camera unique identifier in decimal base.
     std::string uid;
 
     boost::array<unsigned, 2> resolution;
-
-    /// Path to input images for pseudoCamera
-    std::string imagesPath;
 
     /// {fx, fy}.
     boost::array<double, 2> focalLength;

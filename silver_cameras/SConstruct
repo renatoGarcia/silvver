@@ -28,9 +28,9 @@ mandatory_libs = RelatedLibsGroup([boost_libs,
                                    artkp_libs,
                                    opencv_libs])
 
-vars = Variables()
+var = Variables()
 
-vars.AddVariables(
+var.AddVariables(
     PathVariable('prefix',
                  'Installation prefix',
                  '/usr/local', PathVariable.PathAccept),
@@ -57,29 +57,33 @@ vars.AddVariables(
                  allowed_values=('any', '1', '2')))
 
 for related_libs in mandatory_libs:
-    vars.Add('lib_' + related_libs.short_name + '_suffix',
+    var.Add('lib_' + related_libs.short_name + '_suffix',
              'Suffix of ' + related_libs.long_name + ' libraries.',
              '')
 
-vars.Add('CPPPATH',
+var.Add('lua_pkgconfig',
+        'Name of pkg-config file of lua 5.1',
+        'lua')
+
+var.Add('CPPPATH',
          'Directories that the C++ preprocessor will search for '
          'include directories. List only directories, do not list '
          'options flags like -I in gcc. Multiples directories must be '
          'quoted and delimited by a semicolon',
          '')
 
-vars.Add('LIBPATH',
+var.Add('LIBPATH',
          'The list of directories that will be searched for libraries. '
          'List only directories, do not list options flags like -L in '
          'gcc. Multiples directories must be quoted and delimited by '
          'a semicolon',
          '')
 
-vars.Add('CPPFLAGS',
+var.Add('CPPFLAGS',
          'C++ preprocessor flags',
          '')
 
-env = Environment(options = vars,
+env = Environment(options = var,
                   CPPFLAGS = '${CPPFLAGS}')
 
 for related_libs in mandatory_libs:
@@ -90,9 +94,9 @@ env.Append(CPPPATH = [abspath('../common')])
 
 env['LIBPATH'] = env['LIBPATH'].split(';')
 
-env.ParseConfig("pkg-config lua5.1 --cflags --libs")
+env.ParseConfig("pkg-config " + env['lua_pkgconfig'] + " --cflags --libs")
 
-Help(vars.GenerateHelpText(env))
+Help(var.GenerateHelpText(env))
 
 if env.GetOption('clean'):
     build_optional_flags.append('cleaning')

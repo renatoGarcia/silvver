@@ -136,23 +136,8 @@ CfParser::readCamera(lua_State* L)
 {
   scene::Camera camera;
 
-  lua_getfield(L, -1, "hardware");
-  if (lua_isnil(L, -1))
-  {
-    throw file_load_error("An instance of field <hardware> "\
-                          "was don't found in config file");
-  }
-  if (lua_istable(L, -1)) // hardcamera is pseudocamera
-  {
-    camera.imagesPath = readValue<std::string>(L, "path");
-    lua_pop(L,1); // pop hardware table
-    camera.hardware = readArray<std::string, 1>(L, "hardware").at(0);
-  }
-  else
-  {
-    lua_pop(L,1); // pop hardware field
-    camera.hardware = readValue<std::string>(L, "hardware");
-  }
+  camera.hardware = readValue<std::string>(L, "hardware");
+  camera.device = readValue<std::string>(L, "device");
 
   camera.uid = readValue<std::string>(L, "uid");
   camera.resolution = readArray<unsigned, 2>(L, "resolution");

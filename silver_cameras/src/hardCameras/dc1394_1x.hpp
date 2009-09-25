@@ -22,8 +22,7 @@ public:
     F_VGA_NONCOMPRESSED = FORMAT_VGA_NONCOMPRESSED
   };
 
-  DC1394(int nCard,
-         const scene::Camera& config,
+  DC1394(const scene::Camera& config,
          Format format = F_VGA_NONCOMPRESSED);
 
   ~DC1394();

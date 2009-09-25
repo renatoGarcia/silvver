@@ -9,13 +9,11 @@ using namespace std;
 
 #include <boost/lexical_cast.hpp>
 
-DC1394::DC1394(int nCard,
-               const scene::Camera& config,
+DC1394::DC1394(const scene::Camera& config,
                Format format)
   :HardCamera(config)
   ,nCard(nCard)
-  ,device("/dev/video1394-0")
-//   ,device("/dev/video1394/" + boost::lexical_cast<std::string>(nCard))
+  ,device(config.device)
   ,bRaw1394HandleCreated(false)
   ,bDc1394CameraCreated(false)
 {

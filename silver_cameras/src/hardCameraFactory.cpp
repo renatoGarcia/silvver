@@ -48,7 +48,7 @@ HardCameraFactory::create(const scene::Camera& cameraConfig)
 #ifdef HAVE_DC1394
     else if (cameraConfig.hardware == "dc1394")
     {
-      hardCameraPtr.reset(new DC1394(0, cameraConfig));
+      hardCameraPtr.reset(new DC1394(cameraConfig));
     }
 #endif
     else

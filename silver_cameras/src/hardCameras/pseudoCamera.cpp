@@ -7,7 +7,7 @@ namespace bpt = boost::posix_time;
 
 PseudoCamera::PseudoCamera(const scene::Camera& config)
   :HardCamera(config)
-  ,path(config.imagesPath)
+  ,path(config.device)
   ,delay((static_cast<long>((1.0 / this->frameRate) * 1.0e3)))
 {}
 
