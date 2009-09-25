@@ -94,7 +94,13 @@ env.Append(CPPPATH = [abspath('../common')])
 
 env['LIBPATH'] = env['LIBPATH'].split(';')
 
-env.ParseConfig("pkg-config " + env['lua_pkgconfig'] + " --cflags --libs")
+try:
+    env.ParseConfig("pkg-config " + env['lua_pkgconfig'] + " --cflags --libs")
+except OSError:
+    if env.GetOption('clean') or env.GetOption('help'):
+        pass
+    else:
+        sys.exit(1)
 
 Help(var.GenerateHelpText(env))
 
