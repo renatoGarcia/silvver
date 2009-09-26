@@ -18,13 +18,11 @@
 
 #include "../hardCamera.hpp"
 
-#include <string>
-
 #include <boost/thread/mutex.hpp>
+#include <string>
 
 #include <libdc1394/dc1394_control.h>
 #include <libraw1394/raw1394.h>
-#include <sys/time.h>
 
 #include "conversions.h"
 
@@ -51,13 +49,16 @@ public:
 
 private:
 
+  void findThisCamera(nodeid_t& node, int& index);
+
+  // Convert the HardCamera frameRate to an equivalent DC1394 frame rate
+  int getDc1394FrameRate();
+
   static const int NUMERO_BUFFERS = 4;
 
-  const int nCard;
   const std::string device;
 
   raw1394handle_t raw1394Handle;
-  bool            bRaw1394HandleCreated;
 
   dc1394_cameracapture dc1394Camera;
   bool                 bDc1394CameraCreated;

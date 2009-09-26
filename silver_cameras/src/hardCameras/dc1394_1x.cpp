@@ -24,9 +24,8 @@
 DC1394::DC1394(const scene::Camera& config,
                Format format)
   :HardCamera(config)
-  ,nCard(nCard)
   ,device(config.device)
-  ,bRaw1394HandleCreated(false)
+  ,raw1394Handle(NULL)
   ,bDc1394CameraCreated(false)
 {
   this->mode = MODE_640x480_MONO;
@@ -46,102 +45,132 @@ DC1394::~DC1394()
     dc1394_dma_release_camera(this->raw1394Handle, &(this->dc1394Camera));
   }
 
-  if(this->bRaw1394HandleCreated)
+  if(this->raw1394Handle)
   {
     raw1394_destroy_handle(this->raw1394Handle);
   }
 }
 
 void
-DC1394::initialize()
+DC1394::findThisCamera(nodeid_t& node, int& index)
 {
-  this->raw1394Handle = dc1394_create_handle(this->nCard);
-  if(this->raw1394Handle == NULL)
-  {
-    throw open_camera_error("Unable to aquire a raw1394 handle");
-  }
-  else
-  {
-    this->bRaw1394HandleCreated = true;
-  }
+  raw1394handle_t tmpHandle;
+  tmpHandle = raw1394_new_handle();
+  int nCards = raw1394_get_port_info(tmpHandle, NULL, 0);
+  raw1394_destroy_handle(tmpHandle);
 
-  int numNodes;
-  numNodes = raw1394_get_nodecount(this->raw1394Handle);
-
-  nodeid_t* cameraNodes;
-  int	    nCameras;
-  cameraNodes = dc1394_get_camera_nodes(this->raw1394Handle, &nCameras, 0);
-  if(nCameras < 1)
-  {
-    throw open_camera_error("No cameras found");
-  }
-
-  // To prevent the iso-transfer bug from raw1394 system, check if
-  // camera is highest node. For details see
-  // http://linux1394.sourceforge.net/faq.html#DCbusmgmt
-  // and
-  // http://sourceforge.net/tracker/index.php?func=detail&aid=435107&group_id=8157&atid=108157
-  // The quick solution is to add the parameter attempt_root=1 when loading
-  // the OHCI driver as a module.
-  if(cameraNodes[0] == numNodes-1)
-  {
-    throw open_camera_error("Your camera is the highest numbered node");
-  }
-
-  /*-----------------------------------------------------------------------
-   *  Find the camera with this->uid
-   *-----------------------------------------------------------------------*/
-  int cameraIndex;
+  int        numNodes;
+  int	     nCameras;
+  nodeid_t*  cameraNodes;
   dc1394_camerainfo cameraInfo;
-  for(cameraIndex=0; cameraIndex < nCameras; cameraIndex++)
+  for(int iCard = 0; iCard < nCards; ++iCard)
   {
-    dc1394_get_camera_info(this->raw1394Handle, cameraNodes[cameraIndex],
-                           &cameraInfo);
-    if(boost::lexical_cast<std::string>(cameraInfo.euid_64) == this->uid)
+    this->raw1394Handle = dc1394_create_handle(iCard);
+    if(this->raw1394Handle == NULL)
     {
-      break;
+      throw open_camera_error("Unable to aquire a raw1394 handle");
     }
-  }
-  if(cameraIndex == nCameras)
-  {
-    throw open_camera_error("Don't found a camera with uid " + this->uid);
+
+    numNodes = raw1394_get_nodecount(this->raw1394Handle);
+
+    cameraNodes = dc1394_get_camera_nodes(this->raw1394Handle, &nCameras, 0);
+
+    // // To prevent the iso-transfer bug from raw1394 system, check if
+    // // camera is highest node. For details see
+    // // http://linux1394.sourceforge.net/faq.html#DCbusmgmt
+    // // and
+    // // http://sourceforge.net/tracker/index.php?func=detail&aid=435107&group_id=8157&atid=108157
+    // // The quick solution is to add the parameter attempt_root=1 when loading
+    // // the OHCI driver as a module.
+    // if(cameraNodes[0] == numNodes-1)
+    // {
+    //   throw open_camera_error("Your camera is the highest numbered node");
+    // }
+
+    // Find the camera with this->uid
+    for(int cameraIndex=0; cameraIndex < nCameras; cameraIndex++)
+    {
+      dc1394_get_camera_info(this->raw1394Handle, cameraNodes[cameraIndex],
+                             &cameraInfo);
+      if(boost::lexical_cast<std::string>(cameraInfo.euid_64) == this->uid)
+      {
+        // Return values
+        node  = cameraNodes[cameraIndex];
+        index = cameraIndex;
+        return;
+      }
+    }
+
+    raw1394_destroy_handle(this->raw1394Handle);
+    this->raw1394Handle = NULL;
   }
 
-  /*-----------------------------------------------------------------------
-   *  setup capture
-   *-----------------------------------------------------------------------*/
-  int dc1394FrameRate;
-  if (this->frameRate == 7.5)
+  throw open_camera_error("Don't found a camera with uid " + this->uid);
+}
+
+int
+DC1394::getDc1394FrameRate()
+{
+  if (this->frameRate == 1.875)
   {
-    dc1394FrameRate = FRAMERATE_7_5;
+    return FRAMERATE_1_875;
+  }
+  else if (this->frameRate == 3.75)
+  {
+    return FRAMERATE_3_75;
+  }
+  else if (this->frameRate == 7.5)
+  {
+    return FRAMERATE_7_5;
   }
   else if (this->frameRate == 15.0)
   {
-    dc1394FrameRate = FRAMERATE_15;
+    return FRAMERATE_15;
   }
   else if (this->frameRate == 30.0)
   {
-    dc1394FrameRate = FRAMERATE_30;
+    return FRAMERATE_30;
+  }
+  else if (this->frameRate == 60.0)
+  {
+    return FRAMERATE_60;
+  }
+  else if (this->frameRate == 120.0)
+  {
+    return FRAMERATE_120;
+  }
+  else if (this->frameRate == 240.0)
+  {
+    return FRAMERATE_240;
   }
   else
   {
-    throw open_camera_error("Frame Rate don't allowed");
+    throw open_camera_error("Invalid frame rate " +
+                            boost::lexical_cast<std::string>(this->frameRate));
   }
+}
+
+void
+DC1394::initialize()
+{
+  nodeid_t cameraNode;
+  int cameraIndex;
+  findThisCamera(cameraNode, cameraIndex);
+
+  int dc1394FrameRate = this->getDc1394FrameRate();
 
   unsigned int channel;
   unsigned int speed;
   if (dc1394_get_iso_channel_and_speed(this->raw1394Handle,
-                                       cameraNodes[cameraIndex],
+                                       cameraNode,
                                        &channel,
                                        &speed ) !=DC1394_SUCCESS)
   {
     throw open_camera_error("Unable to get the iso channel number");
   }
 
-  // Note: format, mode, frameRate and bytesPerPixel are all defined as globals
-  // in the header of dc1394 library
   int e = dc1394_dma_setup_capture(this->raw1394Handle,
-                                   cameraNodes[cameraIndex],
+                                   cameraNode,
                                    cameraIndex,
                                    this->format,
                                    this->mode,
@@ -177,7 +206,7 @@ DC1394::initialize()
    *-----------------------------------------------------------------------*/
   quadlet_t qValue;
   GetCameraControlRegister(this->raw1394Handle,
-                           cameraNodes[cameraIndex],
+                           cameraNode,
                            0x1040,         /* Bayer Tile Mapping register */
                            &qValue );
 
