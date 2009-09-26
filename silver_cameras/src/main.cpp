@@ -17,6 +17,7 @@
 #include <string>
 
 #include <boost/program_options.hpp>
+#include <boost/version.hpp>
 
 #include "sceneMounter.hpp"
 
@@ -29,6 +30,8 @@ int main(int argc, char **argv)
   std::string luaFile;
 
   po::options_description desc("silver_cameras 0.4\n\n"
+                               "Compiled with boost version " BOOST_LIB_VERSION "\n\n"
+
                                "Capture images with the cameras and process it\n"
                                "Usage: silver_cameras [OPTIONS]...\n\n"
                                "Options list");
@@ -61,11 +64,12 @@ int main(int argc, char **argv)
   }
   else
   {
-    std::cout << "silver_cameras 0.4:" << std::endl << std::endl
-              << "Capture images with the cameras and process it" << std::endl
-              << "Press [enter] key to quit" << std::endl << std::endl
-              << "----------------------------------------------"
-              << std::endl << std::endl;
+    std::cout << "silver_cameras 0.4:\n\n"
+              << "Compiled with boost version " << BOOST_LIB_VERSION << '\n'
+              << "Capture images with the cameras and process it\n"
+              << "Press [enter] key to quit\n\n"
+              << "----------------------------------------------\n"
+              << std::endl;
 
     SceneMounter sceneMounter(serverIP,receptionistPort,luaFile);
     sceneMounter.mount(vm.count("show-images"));

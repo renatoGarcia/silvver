@@ -17,6 +17,7 @@
 
 #include <boost/program_options.hpp>
 #include <boost/scoped_ptr.hpp>
+#include <boost/version.hpp>
 
 #include "debugOutputs.hpp"
 #include "receptionist.hpp"
@@ -30,6 +31,7 @@ int main(int argc, char **argv)
   bool logInputs;
 
   po::options_description desc("silver_server 0.4\n\n"
+                               "Compiled with boost version " BOOST_LIB_VERSION "\n\n"
                                "Receive inforamation from silver_cameras and send to clients\n"
                                "Usage: silver_server [OPTIONS]...\n\n"
                                "Options list");
@@ -65,6 +67,7 @@ int main(int argc, char **argv)
 
     debug::messageOutput(STARTUP)
       << "silver_server 0.4:\n\n"
+      << "Compiled with boost version " << BOOST_LIB_VERSION << '\n'
       << "Press [enter] key to quit\n\n"
       << "----------------------------------------------\n"
       << std::endl;
