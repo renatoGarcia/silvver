@@ -165,13 +165,13 @@ DC1394::captureFrame(IplImage** iplImage)
   }
 
   // This don't work for images whith more than 1 byte per pixel
-  if (frame->color_coding == DC1394_COLOR_CODING_RAW8)
+  if (frame->color_coding == DC1394_COLOR_CODING_MONO8)
   {
     if (dc1394_bayer_decoding_8bit(frame->image,
                                    (uint8_t*)(*iplImage)->imageData,
                                    this->frameWidth,
                                    this->frameHeight,
-                                   frame->color_filter,
+                                   DC1394_COLOR_FILTER_RGGB,
                                    DC1394_BAYER_METHOD_SIMPLE))
     {
       throw capture_image_error("Error on bayer decoding");
