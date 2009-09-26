@@ -13,298 +13,180 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include <iostream>
-using namespace std;
-
-#include "dc1394_1x.hpp"
-
-#include <cstddef>
-#include <fstream>
-#include <iostream>
+#include "dc1394_2x.hpp"
 
 #include <boost/lexical_cast.hpp>
 
-DC1394::DC1394(int nCard,
-               const std::string& uid,
-               const boost::array<unsigned, 2>& resolution,
-               float frameRate,
-               Format format)
-  :HardCamera(uid, resolution, frameRate)
-  ,nCard(nCard)
-  ,device("/dev/video1394/" + boost::lexical_cast<std::string>(nCard))
-  ,bRaw1394HandleCreated(false)
-  ,bDc1394CameraCreated(false)
+DC1394::DC1394(const scene::Camera& config)
+  :HardCamera(config)
+  ,context(NULL)
+  ,camera(NULL)
 {
-  this->mode = MODE_640x480_MONO;
-  this->format = format;
-
-  // if mode == MODE_640x40_MONO
-  this->bytesPerPixel = 1;
+  this->context = dc1394_new();
+  if (!this->context)
+  {
+    throw open_camera_error("Unable to create a libdc1394 context");
+  }
 }
 
 DC1394::~DC1394()
 {
-  dc1394_stop_iso_transmission(this->raw1394Handle, this->dc1394Camera.node);
-
-  if(this->bDc1394CameraCreated)
+  if (this->camera)
   {
-    dc1394_dma_unlisten(this->raw1394Handle, &(this->dc1394Camera));
-    dc1394_dma_release_camera(this->raw1394Handle, &(this->dc1394Camera));
+    dc1394_video_set_transmission(this->camera, DC1394_OFF);
+    dc1394_capture_stop(this->camera);
+    dc1394_camera_free(this->camera);
   }
 
-  if(this->bRaw1394HandleCreated)
+  dc1394_free(this->context);
+}
+
+dc1394video_mode_t
+DC1394::getDc1394VideoMode()
+{
+  if (this->frameWidth == 640 && this->frameHeight == 480)
   {
-    raw1394_destroy_handle(this->raw1394Handle);
+    return DC1394_VIDEO_MODE_640x480_MONO8;
+  }
+  else if (this->frameWidth == 800 && this->frameHeight == 600)
+  {
+    return DC1394_VIDEO_MODE_800x600_MONO8;
+  }
+  else if (this->frameWidth == 1024 && this->frameHeight == 768)
+  {
+    return DC1394_VIDEO_MODE_1024x768_MONO8;
+  }
+  else if (this->frameWidth == 1280 && this->frameHeight == 960)
+  {
+    return DC1394_VIDEO_MODE_1280x960_MONO8;
+  }
+  else if (this->frameWidth == 1600 && this->frameHeight == 1200)
+  {
+    return DC1394_VIDEO_MODE_1600x1200_MONO8;
+  }
+  else
+  {
+    throw open_camera_error("Invalid resolution " +
+                            boost::lexical_cast<std::string>(this->frameWidth) +
+                            " x " +
+                            boost::lexical_cast<std::string>(this->frameHeight));
+  }
+}
+
+dc1394framerate_t
+DC1394::getDc1394FrameRate()
+{
+  if (this->frameRate == 1.875)
+  {
+    return DC1394_FRAMERATE_1_875;
+  }
+  else if (this->frameRate == 3.75)
+  {
+    return DC1394_FRAMERATE_3_75;
+  }
+  else if (this->frameRate == 7.5)
+  {
+    return DC1394_FRAMERATE_7_5;
+  }
+  else if (this->frameRate == 15.0)
+  {
+    return DC1394_FRAMERATE_15;
+  }
+  else if (this->frameRate == 30.0)
+  {
+    return DC1394_FRAMERATE_30;
+  }
+  else if (this->frameRate == 60.0)
+  {
+    return DC1394_FRAMERATE_60;
+  }
+  else if (this->frameRate == 120.0)
+  {
+    return DC1394_FRAMERATE_120;
+  }
+  else if (this->frameRate == 240.0)
+  {
+    return DC1394_FRAMERATE_240;
+  }
+  else
+  {
+    throw open_camera_error("Invalid frame rate " +
+                            boost::lexical_cast<std::string>(this->frameRate));
   }
 }
 
 void
 DC1394::initialize()
 {
-  this->raw1394Handle = dc1394_create_handle(this->nCard);
-  if(this->raw1394Handle == NULL)
+  this->camera = dc1394_camera_new(this->context,
+                                   boost::lexical_cast<uint64_t>(this->uid));
+  if (!this->camera)
   {
-    throw open_camera_error("Unable to aquire a raw1394 handle");
-  }
-  else
-  {
-    this->bRaw1394HandleCreated = true;
+    throw open_camera_error("Don't found camera with uid " + this->uid);
   }
 
-  int numNodes;
-  numNodes = raw1394_get_nodecount(this->raw1394Handle);
-
-  nodeid_t* cameraNodes;
-  int	    nCameras;
-  cameraNodes = dc1394_get_camera_nodes(this->raw1394Handle, &nCameras, 0);
-  if(nCameras < 1)
+  if (dc1394_video_set_iso_speed(this->camera, DC1394_ISO_SPEED_400))
   {
-    throw open_camera_error("No cameras found");
+    throw open_camera_error("Could not set 400Mbps iso speed");
   }
 
-  // To prevent the iso-transfer bug from raw1394 system, check if
-  // camera is highest node. For details see
-  // http://linux1394.sourceforge.net/faq.html#DCbusmgmt
-  // and
-  // http://sourceforge.net/tracker/index.php?func=detail&aid=435107&group_id=8157&atid=108157
-  // The quick solution is to add the parameter attempt_root=1 when loading
-  // the OHCI driver as a module.
-  if(cameraNodes[0] == numNodes-1)
+  if (dc1394_video_set_mode(camera, this->getDc1394VideoMode()))
   {
-    throw open_camera_error("Your camera is the highest numbered node");
+    throw open_camera_error("Could not set video mode");
   }
 
-  /*-----------------------------------------------------------------------
-   *  Find the camera with this->uid
-   *-----------------------------------------------------------------------*/
-  int cameraIndex;
-  dc1394_camerainfo cameraInfo;
-  for(cameraIndex=0; cameraIndex < nCameras; cameraIndex++)
+  if (dc1394_video_set_framerate(camera, this->getDc1394FrameRate()))
   {
-    dc1394_get_camera_info(this->raw1394Handle, cameraNodes[cameraIndex],
-                           &cameraInfo);
-    if(boost::lexical_cast<std::string>(cameraInfo.euid_64) == this->uid)
-    {
-      break;
-    }
-  }
-  if(cameraIndex == nCameras)
-  {
-    throw open_camera_error("Don't found a camera with uid " + this->uid);
+    throw open_camera_error("Could not set framerate");
   }
 
-  /*-----------------------------------------------------------------------
-   *  setup capture
-   *-----------------------------------------------------------------------*/
-  int dc1394FrameRate;
-  if (this->frameRate == 7.5)
+  if (dc1394_capture_setup(this->camera, DC1394::N_BUFFERS,
+                           DC1394_CAPTURE_FLAGS_DEFAULT))
   {
-    dc1394FrameRate = FRAMERATE_7_5;
-  }
-  else if (this->frameRate == 15.0)
-  {
-    dc1394FrameRate = FRAMERATE_15;
-  }
-  else if (this->frameRate == 30.0)
-  {
-    dc1394FrameRate = FRAMERATE_30;
-  }
-  else
-  {
-    throw open_camera_error("Frame Rate don't allowed");
+    throw open_camera_error("Could not setup camera. Make sure that the resolution and framerate are supported by your camera");
   }
 
-  unsigned int channel;
-  unsigned int speed;
-  if (dc1394_get_iso_channel_and_speed(this->raw1394Handle,
-                                       cameraNodes[cameraIndex],
-                                       &channel,
-                                       &speed ) !=DC1394_SUCCESS)
+  if (dc1394_video_set_transmission(this->camera, DC1394_ON))
   {
-    throw open_camera_error("Unable to get the iso channel number");
+    throw open_camera_error("Could not start camera iso transmission");
   }
-
-  // Note: format, mode, frameRate and bytesPerPixel are all defined as globals
-  // in the header of dc1394 library
-  int e = dc1394_dma_setup_capture(this->raw1394Handle,
-                                   cameraNodes[cameraIndex],
-                                   cameraIndex,
-                                   this->format,
-                                   this->mode,
-                                   speed,
-                                   dc1394FrameRate,
-                                   8,	// number of buffers
-                                   1,	// drop frames
-                                   this->device.c_str(),
-                                   &(this->dc1394Camera));
-  if (e != DC1394_SUCCESS)
-  {
-    throw open_camera_error("Unable to setup camera");
-  }
-  else
-  {
-    this->bDc1394CameraCreated = true;
-  }
-
-
-  /*-----------------------------------------------------------------------
-   *  have the camera start sending us data
-   *-----------------------------------------------------------------------*/
-  if (dc1394_start_iso_transmission(this->raw1394Handle,
-                                    this->dc1394Camera.node)
-      != DC1394_SUCCESS)
-  {
-    throw open_camera_error("Unable to start camera iso transmission");
-  }
-
-
-  /*-----------------------------------------------------------------------
-   *  query the camera to determine the Bayer pattern
-   *-----------------------------------------------------------------------*/
-  quadlet_t qValue;
-  GetCameraControlRegister(this->raw1394Handle,
-                           cameraNodes[cameraIndex],
-                           0x1040,         /* Bayer Tile Mapping register */
-                           &qValue );
-
-  switch(qValue)
-  {
-  case 0x42474752:      /* BGGR */
-    this->pattern = BAYER_PATTERN_BGGR;
-    break;
-  case 0x47524247:      /* GRBG */
-    this->pattern = BAYER_PATTERN_GRBG;
-    break;
-  case 0x52474742:      /* RGGB */
-    this->pattern = BAYER_PATTERN_RGGB;
-    break;
-  case 0x47425247:      /* GBRG */
-    this->pattern = BAYER_PATTERN_GBRG;
-    break;
-  case 0x59595959:      /* YYYY = BW */
-    throw open_camera_error("Camera is black and white");
-  default:
-    throw open_camera_error("Camera BAYER_TILE_MAPPING register has an unexpected value");
-  }
-
-  return;
 }
 
 void
-DC1394::captureFrame(IplImage& iplImage)
+DC1394::captureFrame(IplImage** iplImage)
 {
   boost::mutex::scoped_lock lock(this->mutexCaptureFrame);
 
-  // Capture one frame
-  if (dc1394_dma_single_capture(&(this->dc1394Camera)) != DC1394_SUCCESS)
+  dc1394video_frame_t* frame = NULL;
+
+  if (dc1394_capture_dequeue(this->camera, DC1394_CAPTURE_POLICY_WAIT, &frame))
   {
-    throw capture_image_error("Unable to capture a frame");
+    throw capture_image_error("Could not capture a frame");
   }
 
-  unsigned char* src = (unsigned char*) this->dc1394Camera.capture_buffer;
-  if(this->bytesPerPixel > 1)
+  // This don't work for images whith more than 1 byte per pixel
+  if (frame->color_coding == DC1394_COLOR_CODING_RAW8)
   {
-    src = new unsigned char[this->frameSize];
-    if(!src)
+    if (dc1394_bayer_decoding_8bit(frame->image,
+                                   (uint8_t*)(*iplImage)->imageData,
+                                   this->frameWidth,
+                                   this->frameHeight,
+                                   frame->color_filter,
+                                   DC1394_BAYER_METHOD_SIMPLE))
     {
-      throw capture_image_error("Could not allocate copy buffer for color conversion");
-    }
-    unsigned char* captureBuffer =
-      (unsigned char*) this->dc1394Camera.capture_buffer;
-    for(unsigned i = 0; i < this->frameSize; i++)
-    {
-      src[i] = captureBuffer[i * this->bytesPerPixel];
+      throw capture_image_error("Error on bayer decoding");
+
     }
   }
-
-  BayerEdgeSense(src,
-                 (unsigned char*) &(iplImage.imageData),
-                 this->dc1394Camera.frame_width,
-                 this->dc1394Camera.frame_height,
-                 this->pattern );
 
   // Release the buffer
-  dc1394_dma_done_with_buffer(&(this->dc1394Camera));
-
-  return;
+  if (dc1394_capture_enqueue(this->camera, frame))
+  {
+    throw capture_image_error("Error on returning a frame to ring buffer");
+  }
 }
 
 void
 DC1394::saveFrame()
 {
-  /*-----------------------------------------------------------------------
-   *  capture one frame to save to file
-   *-----------------------------------------------------------------------*/
-  if (dc1394_dma_single_capture( &(this->dc1394Camera) ) != DC1394_SUCCESS)
-  {
-    throw capture_image_error("Unable to capture a frame");
-  }
-
-  unsigned char* rgbBuffer = new unsigned char[3 * frameSize];
-  if(!rgbBuffer)
-  {
-    throw capture_image_error("Could not allocate RGB buffer for color conversion");
-  }
-
-  unsigned char* src = (unsigned char*) this->dc1394Camera.capture_buffer;
-  if(this->bytesPerPixel > 1)
-  {
-    src = new unsigned char[this->frameSize];
-    if(!src)
-    {
-    throw capture_image_error("Could not allocate copy buffer for color conversion");
-    }
-    unsigned char* captureBuffer =
-      (unsigned char*) this->dc1394Camera.capture_buffer;
-    for(unsigned i = 0; i < this->frameSize; i++)
-    {
-      src[i] = captureBuffer[i * this->bytesPerPixel];
-    }
-  }
-
-  /*-----------------------------------------------------------------------
-   *  convert to color image
-   *-----------------------------------------------------------------------*/
-  BayerEdgeSense(src,
-                 rgbBuffer,
-                 this->frameWidth,
-                 this->frameHeight,
-                 this->pattern);
-
-  /*-----------------------------------------------------------------------
-   *  save image
-   *-----------------------------------------------------------------------*/
-  std::ofstream outfile("image.ppm");
-
-  outfile << "P6" << std::endl
-          << this->dc1394Camera.frame_width << " "
-          << this->dc1394Camera.frame_height << " "
-          << "255" << std::endl;
-
-  outfile.write((const char*)rgbBuffer, this->frameSize * 3);
-  outfile.close();
-
-  dc1394_dma_done_with_buffer(&(this->dc1394Camera));
-
-  delete rgbBuffer;
 }

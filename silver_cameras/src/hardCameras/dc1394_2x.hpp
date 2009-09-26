@@ -13,65 +13,47 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef _DC1394_2X_H_
-#define _DC1394_2X_H_
+#ifndef _DC1394_2X_HPP_
+#define _DC1394_2X_HPP_
 
 #include "../hardCamera.hpp"
 
-#include <string>
-
-#include <boost/array.hpp>
 #include <boost/thread/mutex.hpp>
 
 #include <dc1394/dc1394.h>
-#include <sys/time.h>
-
-#include "conversions.h"
 
 class DC1394: public HardCamera
 {
 public:
 
-  enum Format
-  {
-    F_VGA_NONCOMPRESSED = FORMAT_VGA_NONCOMPRESSED
-  };
-
-  DC1394(int nCard,
-         const std::string& uid,
-         const boost::array<unsigned, 2>& resolution,
-         float frameRate,
-         Format format = F_VGA_NONCOMPRESSED);
+  DC1394(const scene::Camera& config);
 
   ~DC1394();
 
   void initialize();
 
-  void captureFrame(IplImage& iplImage);
+  void captureFrame(IplImage** iplImage);
 
   // Grava a última imagem da câmera no disco
   void saveFrame();
 
 private:
 
-  static const int NUMERO_BUFFERS = 4;
+  static const int N_BUFFERS = 4;
 
-  const int nCard;
-  const std::string device;
+  // Convert the HardCamera frameWidth and frameHeight attributes to an
+  // equivalent dc1394video_mode_t
+  dc1394video_mode_t getDc1394VideoMode();
 
-  raw1394handle_t raw1394Handle;
-  bool            bRaw1394HandleCreated;
+  // Convert the HardCamera frameRate to an equivalent dc1394framerate_t
+  dc1394framerate_t getDc1394FrameRate();
 
-  dc1394_cameracapture dc1394Camera;
-  bool                 bDc1394CameraCreated;
+  // dc1394 context
+  dc1394_t* context;
 
-  Format format;
-  int mode;
-  int bytesPerPixel;
-
-  bayer_pattern_t pattern;
+  dc1394camera_t* camera;
 
   boost::mutex mutexCaptureFrame;
 };
 
-#endif /* _DC1394_2X_H_ */
+#endif /* _DC1394_2X_HPP_ */

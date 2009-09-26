@@ -128,11 +128,11 @@ if not env.GetOption('clean') and not env.GetOption('help'):
 #-------------------------------------------------------
     if env['enable_libdc1394']:
         lib_header_dc1394 = []
+        if env['libdc1394_version'] in ['2', 'any']:
+            lib_header_dc1394.append(['dc1394', 'dc1394/dc1394.h'])
         if env['libdc1394_version'] in ['1', 'any']:
             lib_header_dc1394.append(['dc1394_control',
                                       'libdc1394/dc1394_control.h'])
-        if env['libdc1394_version'] in ['2', 'any']:
-            lib_header_dc1394.append(['dc1394', 'dc1394/dc1394.h'])
 
         for [lib, header] in lib_header_dc1394:
             have_library = conf.CheckLib(lib)
@@ -141,7 +141,8 @@ if not env.GetOption('clean') and not env.GetOption('help'):
                 makeHeaderDefine(env, header)
                 build_optional_flags.append(lib)
                 supported_cameras.append('Cameras conform to the IEEE ' +\
-                                             '1394-based Digital Camera Specification')
+                                         '1394-based Digital Camera '+\
+                                         'Specification')
                 break
             elif not have_library and env['libdc1394_version'] != 'any':
                 print 'Did not find the libdc1394 in version',
