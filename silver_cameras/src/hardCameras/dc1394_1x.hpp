@@ -19,7 +19,9 @@
 #include "../hardCamera.hpp"
 
 #include <boost/thread/shared_mutex.hpp>
+#include <boost/scoped_ptr.hpp>
 #include <boost/thread/thread.hpp>
+#include <boost/thread/condition.hpp>
 #include <string>
 
 #include <libdc1394/dc1394_control.h>
@@ -48,11 +50,12 @@ public:
   // Grava a última imagem da câmera no disco
   void saveFrame();
 
-private:
-
   // void grabFrames();
   void operator()();
 
+private:
+
+  IplImage* img;
   void findThisCamera(nodeid_t& node, int& index);
 
   // Convert the HardCamera frameRate to an equivalent DC1394 frame rate
@@ -74,7 +77,7 @@ private:
   bayer_pattern_t pattern;
 
   boost::shared_mutex bufferAccess;
-  boost::condition_variable unreadFrameCondition;
+  boost::condition_variable_any unreadFrameCondition;
 
   boost::scoped_ptr<boost::thread> grabFrameThread;
 };

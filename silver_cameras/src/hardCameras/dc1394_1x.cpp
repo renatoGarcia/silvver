@@ -18,8 +18,8 @@
 #include <cstddef>
 #include <fstream>
 #include <iostream>
+#include <algorithm>
 
-#include <boost/foreach.hpp>
 #include <boost/lexical_cast.hpp>
 #include <boost/ref.hpp>
 
@@ -40,6 +40,9 @@ DC1394::DC1394(const scene::Camera& config,
 
 DC1394::~DC1394()
 {
+  this->grabFrameThread->interrupt();
+  this->grabFrameThread->join();
+
   dc1394_stop_iso_transmission(this->raw1394Handle, this->dc1394Camera.node);
 
   if(this->bDc1394CameraCreated)
@@ -231,7 +234,7 @@ DC1394::initialize()
   }
 
   this->grabFrameThread.reset(new boost::thread(boost::ref(*this)));
-
+  this->createIplImage(&this->img);
   return;
 }
 
@@ -239,25 +242,27 @@ void
 // DC1394::grabFrames()
 DC1394::operator()()
 {
-  this->bufferAccess.lock();
-
-  // Release the previously allocated buffer
-  dc1394_dma_done_with_buffer(&(this->dc1394Camera));
-
-  // Capture one frame
-  if (dc1394_dma_single_capture(&(this->dc1394Camera)) != DC1394_SUCCESS)
+  while (true)
   {
-    throw capture_image_error("Unable to capture a frame");
+    boost::this_thread::interruption_point();
+
+    this->bufferAccess.lock();
+
+    // Release the previously allocated buffer
+    dc1394_dma_done_with_buffer(&(this->dc1394Camera));
+
+    // Capture one frame
+    if (dc1394_dma_single_capture(&(this->dc1394Camera)) != DC1394_SUCCESS)
+    {
+      throw capture_image_error("Unable to capture a frame");
+    }
+
+    std::fill(this->unreadImage.begin(), this->unreadImage.end(), true);
+
+    this->bufferAccess.unlock();
+
+    this->unreadFrameCondition.notify_all();
   }
-
-  BOOST_FOREACH(bool& unreadI, this->unreadImage)
-  {
-    unreadI = true;
-  }
-
-  this->bufferAccess.unlock();
-
-  this->unreadFrameCondition.notify_all();
 }
 
 void
@@ -291,6 +296,8 @@ DC1394::captureFrame(IplImage** iplImage, unsigned clientUid)
                  this->dc1394Camera.frame_width,
                  this->dc1394Camera.frame_height,
                  this->pattern );
+
+  this->unreadImage.at(clientUid) = false;
 
   return;
 }
