@@ -21,7 +21,7 @@ public:
   void saveFrame();
 
   // Throw capture_image_error.
-  void captureFrame(IplImage** iplImage);
+  void captureFrame(IplImage** iplImage, unsigned clientUid);
 
 private:
 

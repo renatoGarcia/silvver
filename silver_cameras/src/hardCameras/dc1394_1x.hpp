@@ -18,7 +18,8 @@
 
 #include "../hardCamera.hpp"
 
-#include <boost/thread/mutex.hpp>
+#include <boost/thread/shared_mutex.hpp>
+#include <boost/thread/thread.hpp>
 #include <string>
 
 #include <libdc1394/dc1394_control.h>
@@ -42,12 +43,15 @@ public:
 
   void initialize();
 
-  void captureFrame(IplImage** iplImage);
+  void captureFrame(IplImage** iplImage, unsigned clientUid);
 
   // Grava a última imagem da câmera no disco
   void saveFrame();
 
 private:
+
+  // void grabFrames();
+  void operator()();
 
   void findThisCamera(nodeid_t& node, int& index);
 
@@ -69,7 +73,10 @@ private:
 
   bayer_pattern_t pattern;
 
-  boost::mutex mutexCaptureFrame;
+  boost::shared_mutex bufferAccess;
+  boost::condition_variable unreadFrameCondition;
+
+  boost::scoped_ptr<boost::thread> grabFrameThread;
 };
 
 #endif /* _DC1394_1X_HPP_ */

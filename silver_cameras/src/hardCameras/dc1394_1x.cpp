@@ -19,7 +19,9 @@
 #include <fstream>
 #include <iostream>
 
+#include <boost/foreach.hpp>
 #include <boost/lexical_cast.hpp>
+#include <boost/ref.hpp>
 
 DC1394::DC1394(const scene::Camera& config,
                Format format)
@@ -27,6 +29,7 @@ DC1394::DC1394(const scene::Camera& config,
   ,device(config.device)
   ,raw1394Handle(NULL)
   ,bDc1394CameraCreated(false)
+  ,grabFrameThread()
 {
   this->mode = MODE_640x480_MONO;
   this->format = format;
@@ -59,7 +62,6 @@ DC1394::findThisCamera(nodeid_t& node, int& index)
   int nCards = raw1394_get_port_info(tmpHandle, NULL, 0);
   raw1394_destroy_handle(tmpHandle);
 
-  int        numNodes;
   int	     nCameras;
   nodeid_t*  cameraNodes;
   dc1394_camerainfo cameraInfo;
@@ -70,8 +72,6 @@ DC1394::findThisCamera(nodeid_t& node, int& index)
     {
       throw open_camera_error("Unable to aquire a raw1394 handle");
     }
-
-    numNodes = raw1394_get_nodecount(this->raw1394Handle);
 
     cameraNodes = dc1394_get_camera_nodes(this->raw1394Handle, &nCameras, 0);
 
@@ -230,18 +230,44 @@ DC1394::initialize()
     throw open_camera_error("Camera BAYER_TILE_MAPPING register has an unexpected value");
   }
 
+  this->grabFrameThread.reset(new boost::thread(boost::ref(*this)));
+
   return;
 }
 
 void
-DC1394::captureFrame(IplImage** iplImage)
+// DC1394::grabFrames()
+DC1394::operator()()
 {
-  boost::mutex::scoped_lock lock(this->mutexCaptureFrame);
+  this->bufferAccess.lock();
+
+  // Release the previously allocated buffer
+  dc1394_dma_done_with_buffer(&(this->dc1394Camera));
 
   // Capture one frame
   if (dc1394_dma_single_capture(&(this->dc1394Camera)) != DC1394_SUCCESS)
   {
     throw capture_image_error("Unable to capture a frame");
+  }
+
+  BOOST_FOREACH(bool& unreadI, this->unreadImage)
+  {
+    unreadI = true;
+  }
+
+  this->bufferAccess.unlock();
+
+  this->unreadFrameCondition.notify_all();
+}
+
+void
+DC1394::captureFrame(IplImage** iplImage, unsigned clientUid)
+{
+  boost::shared_lock<boost::shared_mutex> lock(this->bufferAccess);
+
+  while (!this->unreadImage.at(clientUid))
+  {
+    this->unreadFrameCondition.wait(lock);
   }
 
   unsigned char* src = (unsigned char*) this->dc1394Camera.capture_buffer;
@@ -265,9 +291,6 @@ DC1394::captureFrame(IplImage** iplImage)
                  this->dc1394Camera.frame_width,
                  this->dc1394Camera.frame_height,
                  this->pattern );
-
-  // Release the buffer
-  dc1394_dma_done_with_buffer(&(this->dc1394Camera));
 
   return;
 }

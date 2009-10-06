@@ -23,32 +23,32 @@ HardCameraFactory::createdHardCameras;
 boost::mutex
 HardCameraFactory::mutexCameraCreate;
 
-boost::shared_ptr<HardCamera>
+boost::tuple<boost::shared_ptr<HardCamera>, unsigned>
 HardCameraFactory::create(const scene::Camera& cameraConfig)
 {
   // HardCameras can't be simultaneously initialized
   boost::mutex::scoped_lock lock(HardCameraFactory::mutexCameraCreate);
 
+  boost::tuple<boost::shared_ptr<HardCamera>, unsigned> hardCamera;
+
   std::map< std::string, boost::shared_ptr<HardCamera> >::iterator
     iteHardCamera = HardCameraFactory::createdHardCameras.find(cameraConfig.uid);
-
-  boost::shared_ptr<HardCamera> hardCameraPtr;
 
   // If hardCamera is already created
   if(iteHardCamera != HardCameraFactory::createdHardCameras.end())
   {
-    hardCameraPtr = iteHardCamera->second;
+    hardCamera.get<0>() = iteHardCamera->second;
   }
   else
   {
     if (cameraConfig.hardware == "pseudocamera")
     {
-      hardCameraPtr.reset(new PseudoCamera(cameraConfig));
+      hardCamera.get<0>().reset(new PseudoCamera(cameraConfig));
     }
 #ifdef HAVE_DC1394
     else if (cameraConfig.hardware == "dc1394")
     {
-      hardCameraPtr.reset(new DC1394(cameraConfig));
+      hardCamera.get<0>().reset(new DC1394(cameraConfig));
     }
 #endif
     else
@@ -57,12 +57,14 @@ HardCameraFactory::create(const scene::Camera& cameraConfig)
                                                cameraConfig.hardware);
     }
 
-    hardCameraPtr->initialize();
+    hardCamera.get<0>()->initialize();
 
     HardCameraFactory::createdHardCameras.
       insert(std::pair< std::string, boost::shared_ptr<HardCamera> >
-             (cameraConfig.uid, hardCameraPtr));
+             (cameraConfig.uid, hardCamera.get<0>()));
   }
 
-  return hardCameraPtr;
+  hardCamera.get<1>() = hardCamera.get<0>()->addClient();
+
+  return hardCamera;
 }

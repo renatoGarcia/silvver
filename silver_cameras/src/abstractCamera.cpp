@@ -38,7 +38,7 @@ AbstractCamera::AbstractCamera(const scene::Camera& cameraConfig,
   ,showImage(showImage)
   ,windowName("Camera " + cameraConfig.uid)
 {
-  this->hardCamera->createIplImage(&this->currentFrame);
+  this->hardCamera.get<0>()->createIplImage(&this->currentFrame);
   if (this->showImage)
   {
     cvNamedWindow(this->windowName.c_str());
@@ -72,14 +72,15 @@ AbstractCamera::updateFrame()
 {
   try
   {
-    hardCamera->captureRectFrame(&this->currentFrame);
+    this->hardCamera.get<0>()->captureRectFrame(&this->currentFrame,
+                                                this->hardCamera.get<1>());
     if (this->showImage)
     {
       cvShowImage(this->windowName.c_str(), this->currentFrame);
       cvWaitKey(5);
     }
   }
-  catch(const HardCamera::capture_image_error& exception)
+  catch (const HardCamera::capture_image_error& exception)
   {
     std::cerr << exception.what() << std::endl;
     return;

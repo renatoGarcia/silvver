@@ -42,6 +42,13 @@ HardCamera::~HardCamera()
   cvReleaseImage(&(this->mapy));
 }
 
+unsigned
+HardCamera::addClient()
+{
+  this->unreadImage.push_back(false);
+  return (this->unreadImage.size() - 1);
+}
+
 void
 HardCamera::createIplImage(IplImage** iplImage) const
 {
@@ -62,8 +69,8 @@ HardCamera::undistortFrame(IplImage* frame)
 }
 
 void
-HardCamera::captureRectFrame(IplImage** image)
+HardCamera::captureRectFrame(IplImage** image, unsigned clientUid)
 {
-  this->captureFrame(image);
+  this->captureFrame(image, clientUid);
   undistortFrame(*image);
 }

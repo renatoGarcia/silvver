@@ -31,7 +31,7 @@ PseudoCamera::saveFrame()
 {}
 
 void
-PseudoCamera::captureFrame(IplImage** iplImage)
+PseudoCamera::captureFrame(IplImage** iplImage, unsigned clientUid)
 {
   boost::mutex::scoped_lock lock(this->mutexCaptureFrame);
 

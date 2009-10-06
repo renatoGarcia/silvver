@@ -153,7 +153,7 @@ DC1394::initialize()
 }
 
 void
-DC1394::captureFrame(IplImage** iplImage)
+DC1394::captureFrame(IplImage** iplImage, unsigned clientUid)
 {
   boost::mutex::scoped_lock lock(this->mutexCaptureFrame);
 

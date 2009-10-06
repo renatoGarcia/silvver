@@ -22,6 +22,7 @@
 #include <boost/scoped_ptr.hpp>
 #include <boost/shared_ptr.hpp>
 #include <boost/thread/thread.hpp>
+#include <boost/tuple/tuple.hpp>
 
 #include <opencv/cv.h>
 
@@ -73,8 +74,9 @@ private:
 
   boost::scoped_ptr<boost::thread> runThread;
 
-  // Hardware que fará a captura das imagens.
-  const boost::shared_ptr<HardCamera> hardCamera;
+  /// Hardware camera which provides images, and the uid of this abstract
+  /// camera related to that hardCamera.
+  const boost::tuple<boost::shared_ptr<HardCamera>, unsigned> hardCamera;
 
   /// Rotation matrix of camera in world coordinates.
   boost::array<double, 9> rot;
