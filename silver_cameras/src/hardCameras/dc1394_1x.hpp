@@ -46,10 +46,9 @@ public:
 
   void captureFrame(IplImage** iplImage, unsigned clientUid);
 
-  // void grabFrames();
-  void operator()();
-
 private:
+
+  void runCapturer();
 
   void findThisCamera(nodeid_t& node, int& index);
 
@@ -65,9 +64,14 @@ private:
   dc1394_cameracapture dc1394Camera;
   bool                 bDc1394CameraCreated;
 
+  unsigned char* currentFrame;
+  unsigned char* frameBuffer[2];
+
+  /// Camera frame bytes per pixel
+  unsigned bytesPerPixel;
+
   Format format;
   int mode;
-  int bytesPerPixel;
 
   bayer_pattern_t pattern;
 
