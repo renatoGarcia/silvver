@@ -77,8 +77,6 @@ public:
    */
   void createIplImage(IplImage** iplImage) const;
 
-  virtual void saveFrame() = 0;
-
   /** Return a still not read frame.
    * If the last grabed frame was already read by calling object, the calling
    * thread will be locked until a new frame.

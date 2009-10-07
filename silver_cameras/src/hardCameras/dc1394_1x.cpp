@@ -15,13 +15,13 @@
 
 #include "dc1394_1x.hpp"
 
+#include <algorithm>
+#include <boost/lexical_cast.hpp>
+#include <boost/ref.hpp>
 #include <cstddef>
 #include <fstream>
 #include <iostream>
-#include <algorithm>
-
-#include <boost/lexical_cast.hpp>
-#include <boost/ref.hpp>
+#include <string>
 
 DC1394::DC1394(const scene::Camera& config,
                Format format)
@@ -234,7 +234,6 @@ DC1394::initialize()
   }
 
   this->grabFrameThread.reset(new boost::thread(boost::ref(*this)));
-  this->createIplImage(&this->img);
   return;
 }
 
@@ -300,64 +299,4 @@ DC1394::captureFrame(IplImage** iplImage, unsigned clientUid)
   this->unreadImage.at(clientUid) = false;
 
   return;
-}
-
-void
-DC1394::saveFrame()
-{
-  /*-----------------------------------------------------------------------
-   *  capture one frame to save to file
-   *-----------------------------------------------------------------------*/
-  if (dc1394_dma_single_capture( &(this->dc1394Camera) ) != DC1394_SUCCESS)
-  {
-    throw capture_image_error("Unable to capture a frame");
-  }
-
-  unsigned char* rgbBuffer = new unsigned char[3 * frameSize];
-  if(!rgbBuffer)
-  {
-    throw capture_image_error("Could not allocate RGB buffer for color conversion");
-  }
-
-  unsigned char* src = (unsigned char*) this->dc1394Camera.capture_buffer;
-  if(this->bytesPerPixel > 1)
-  {
-    src = new unsigned char[this->frameSize];
-    if(!src)
-    {
-    throw capture_image_error("Could not allocate copy buffer for color conversion");
-    }
-    unsigned char* captureBuffer =
-      (unsigned char*) this->dc1394Camera.capture_buffer;
-    for(unsigned i = 0; i < this->frameSize; i++)
-    {
-      src[i] = captureBuffer[i * this->bytesPerPixel];
-    }
-  }
-
-  /*-----------------------------------------------------------------------
-   *  convert to color image
-   *-----------------------------------------------------------------------*/
-  BayerEdgeSense(src,
-                 rgbBuffer,
-                 this->frameWidth,
-                 this->frameHeight,
-                 this->pattern);
-
-  /*-----------------------------------------------------------------------
-   *  save image
-   *-----------------------------------------------------------------------*/
-  std::ofstream outfile("image.ppm");
-
-  outfile << "P6" << std::endl
-          << this->dc1394Camera.frame_width << " "
-          << this->dc1394Camera.frame_height << " "
-          << "255" << std::endl;
-
-  outfile.write((const char*)rgbBuffer, this->frameSize * 3);
-  outfile.close();
-
-  dc1394_dma_done_with_buffer(&(this->dc1394Camera));
-
-  delete rgbBuffer;
 }

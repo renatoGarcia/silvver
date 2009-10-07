@@ -18,7 +18,10 @@
 
 #include "../hardCamera.hpp"
 
-#include <boost/thread/mutex.hpp>
+#include <boost/scoped_ptr.hpp>
+#include <boost/thread/condition.hpp>
+#include <boost/thread/shared_mutex.hpp>
+#include <boost/thread/thread.hpp>
 
 #include <dc1394/dc1394.h>
 
@@ -34,26 +37,32 @@ public:
 
   void captureFrame(IplImage** iplImage, unsigned clientUid);
 
-  // Grava a última imagem da câmera no disco
-  void saveFrame();
-
 private:
+
+  void runCapturer();
 
   static const int N_BUFFERS = 4;
 
   // Convert the HardCamera frameWidth and frameHeight attributes to an
   // equivalent dc1394video_mode_t
-  dc1394video_mode_t getDc1394VideoMode();
+  dc1394video_mode_t getDc1394VideoMode() const;
 
   // Convert the HardCamera frameRate to an equivalent dc1394framerate_t
-  dc1394framerate_t getDc1394FrameRate();
+  dc1394framerate_t getDc1394FrameRate() const;
 
   // dc1394 context
   dc1394_t* context;
 
   dc1394camera_t* camera;
 
-  boost::mutex mutexCaptureFrame;
+  /// Pointer to the last captured frame.
+  dc1394video_frame_t* currentFrame;
+  dc1394video_frame_t* frameBuffer[2];
+
+  boost::shared_mutex bufferAccess;
+  boost::condition_variable_any unreadFrameCondition;
+
+  boost::scoped_ptr<boost::thread> grabFrameThread;
 };
 
 #endif /* _DC1394_2X_HPP_ */

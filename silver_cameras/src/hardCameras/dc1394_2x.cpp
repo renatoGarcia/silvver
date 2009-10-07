@@ -15,13 +15,21 @@
 
 #include "dc1394_2x.hpp"
 
+#include <algorithm>
 #include <boost/lexical_cast.hpp>
+#include <boost/ref.hpp>
+#include <boost/bind.hpp>
 
 DC1394::DC1394(const scene::Camera& config)
   :HardCamera(config)
   ,context(NULL)
   ,camera(NULL)
+  ,currentFrame(NULL)
 {
+  for (int i = 0; i < 2; ++i)
+  {
+    this->frameBuffer[i] = NULL;
+  }
   this->context = dc1394_new();
   if (!this->context)
   {
@@ -31,6 +39,21 @@ DC1394::DC1394(const scene::Camera& config)
 
 DC1394::~DC1394()
 {
+  if (this->grabFrameThread)
+  {
+    this->grabFrameThread->interrupt();
+    this->grabFrameThread->join();
+  }
+
+  for (int i = 0; i < 2; ++i)
+  {
+    if (this->frameBuffer[i] != NULL)
+    {
+      // Release the buffer
+      dc1394_capture_enqueue(this->camera, this->frameBuffer[i]);
+    }
+  }
+
   if (this->camera)
   {
     dc1394_video_set_transmission(this->camera, DC1394_OFF);
@@ -42,7 +65,7 @@ DC1394::~DC1394()
 }
 
 dc1394video_mode_t
-DC1394::getDc1394VideoMode()
+DC1394::getDc1394VideoMode() const
 {
   if (this->frameWidth == 640 && this->frameHeight == 480)
   {
@@ -74,7 +97,7 @@ DC1394::getDc1394VideoMode()
 }
 
 dc1394framerate_t
-DC1394::getDc1394FrameRate()
+DC1394::getDc1394FrameRate() const
 {
   if (this->frameRate == 1.875)
   {
@@ -150,24 +173,68 @@ DC1394::initialize()
   {
     throw open_camera_error("Could not start camera iso transmission");
   }
+  this->grabFrameThread.reset(new boost::thread(boost::bind<void>
+                                                (&DC1394::runCapturer,
+                                                 this)));
+}
+
+void
+DC1394::runCapturer()
+{
+  int frameIdx = 0;
+
+  // Capture the first two frames to initialize the frameBuffer array.
+  for(int i = 0; i < 2; ++i)
+  {
+    if (dc1394_capture_dequeue(this->camera,
+                               DC1394_CAPTURE_POLICY_WAIT,
+                               &this->frameBuffer[i]))
+    {
+      throw capture_image_error("Could not capture a frame");
+    }
+  }
+  while (true)
+  {
+    boost::this_thread::interruption_point();
+
+    // Release the buffer
+    if (dc1394_capture_enqueue(this->camera, this->frameBuffer[frameIdx]))
+    {
+      throw capture_image_error("Error on returning a frame to ring buffer");
+    }
+
+    if (dc1394_capture_dequeue(this->camera,
+                               DC1394_CAPTURE_POLICY_WAIT,
+                               &this->frameBuffer[frameIdx]))
+    {
+      throw capture_image_error("Could not capture a frame");
+    }
+
+    this->bufferAccess.lock();
+    this->currentFrame = this->frameBuffer[frameIdx];
+    this->bufferAccess.unlock();
+
+    std::fill(this->unreadImage.begin(), this->unreadImage.end(), true);
+    this->unreadFrameCondition.notify_all();
+
+    frameIdx = (frameIdx+1) % 2;
+  }
 }
 
 void
 DC1394::captureFrame(IplImage** iplImage, unsigned clientUid)
 {
-  boost::mutex::scoped_lock lock(this->mutexCaptureFrame);
+  boost::shared_lock<boost::shared_mutex> lock(this->bufferAccess);
 
-  dc1394video_frame_t* frame = NULL;
-
-  if (dc1394_capture_dequeue(this->camera, DC1394_CAPTURE_POLICY_WAIT, &frame))
+  while (!this->unreadImage.at(clientUid))
   {
-    throw capture_image_error("Could not capture a frame");
+    this->unreadFrameCondition.wait(lock);
   }
 
   // This don't work for images whith more than 1 byte per pixel
-  if (frame->color_coding == DC1394_COLOR_CODING_MONO8)
+  if (this->currentFrame->color_coding == DC1394_COLOR_CODING_MONO8)
   {
-    if (dc1394_bayer_decoding_8bit(frame->image,
+    if (dc1394_bayer_decoding_8bit(this->currentFrame->image,
                                    (uint8_t*)(*iplImage)->imageData,
                                    this->frameWidth,
                                    this->frameHeight,
@@ -179,14 +246,5 @@ DC1394::captureFrame(IplImage** iplImage, unsigned clientUid)
     }
   }
 
-  // Release the buffer
-  if (dc1394_capture_enqueue(this->camera, frame))
-  {
-    throw capture_image_error("Error on returning a frame to ring buffer");
-  }
-}
-
-void
-DC1394::saveFrame()
-{
+  this->unreadImage.at(clientUid) = false;
 }

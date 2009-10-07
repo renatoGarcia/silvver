@@ -18,11 +18,10 @@
 
 #include "../hardCamera.hpp"
 
-#include <boost/thread/shared_mutex.hpp>
 #include <boost/scoped_ptr.hpp>
-#include <boost/thread/thread.hpp>
 #include <boost/thread/condition.hpp>
-#include <string>
+#include <boost/thread/shared_mutex.hpp>
+#include <boost/thread/thread.hpp>
 
 #include <libdc1394/dc1394_control.h>
 #include <libraw1394/raw1394.h>
@@ -47,15 +46,11 @@ public:
 
   void captureFrame(IplImage** iplImage, unsigned clientUid);
 
-  // Grava a última imagem da câmera no disco
-  void saveFrame();
-
   // void grabFrames();
   void operator()();
 
 private:
 
-  IplImage* img;
   void findThisCamera(nodeid_t& node, int& index);
 
   // Convert the HardCamera frameRate to an equivalent DC1394 frame rate
