@@ -30,13 +30,13 @@ AbstractCamera::AbstractCamera(const scene::Camera& cameraConfig,
   ,serverConnection(connection)
   ,stopping(false)
   ,runThread()
-  ,hardCamera(HardCameraFactory::create(cameraConfig))
+  ,hardCamera(HardCameraFactory::create(cameraConfig.hardware))
   ,rot(cameraConfig.rotationMatrix)
   ,trans(cameraConfig.translationVector)
   ,frameCounter(0)
   ,frameRate(0)
   ,showImage(showImage)
-  ,windowName("Camera " + cameraConfig.uid)
+  ,windowName("Camera")
 {
   this->hardCamera.get<0>()->createIplImage(&this->currentFrame);
   if (this->showImage)

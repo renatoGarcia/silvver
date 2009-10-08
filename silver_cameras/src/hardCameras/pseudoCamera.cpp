@@ -5,9 +5,10 @@
 namespace bfs = boost::filesystem;
 namespace bpt = boost::posix_time;
 
-PseudoCamera::PseudoCamera(const scene::Camera& config)
+PseudoCamera::PseudoCamera(const scene::PseudoCamera& config)
   :HardCamera(config)
-  ,path(config.device)
+  ,path(config.imagesPath)
+  ,frameRate(config.frameRate)
   ,delay((static_cast<long>((1.0 / this->frameRate) * 1.0e3)))
 {}
 

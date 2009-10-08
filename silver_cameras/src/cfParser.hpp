@@ -61,6 +61,10 @@ private:
 
   void readCamera(lua_State* L);
 
+  void  readHardware(lua_State* L, scene::Hardware& hardware);
+  scene::PseudoCamera readPseudoCameraConfig(lua_State* L);
+  scene::DC1394 readDC1394Config(lua_State* L);
+
   void readArtkpTargets(lua_State* L);
 };
 

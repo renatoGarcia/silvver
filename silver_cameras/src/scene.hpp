@@ -27,17 +27,8 @@
 
 namespace scene
 {
-  struct Camera
+  struct Hardware
   {
-    float frameRate;
-
-    /// Type of hardware camera.
-    std::string hardware;
-
-    /// Device where the camera is mapped,
-    /// or path to input images for pseudoCamera
-    std::string device;
-
     /// String representation of camera unique identifier in decimal base.
     std::string uid;
 
@@ -54,6 +45,43 @@ namespace scene
 
     /// Tangential distortion coefficients {p1, p2}.
     boost::array<double, 2> tangentialCoef;
+  };
+
+  struct PseudoCamera : public Hardware
+  {
+    /// Path to directory where are the input images.
+    std::string imagesPath;
+
+    /// The rate which the input images will be read.
+    float frameRate;
+  };
+
+  struct DC1394 : public Hardware
+  {
+    /// The rate which the input images will be read.
+    float frameRate;
+  };
+
+  typedef boost::variant<PseudoCamera, DC1394> VariantHardwareCamera;
+  struct GetHardware : public boost::static_visitor<Hardware>
+  {
+    template <class T>
+    const Hardware operator()(const T& config) const
+    {
+      return config;
+    }
+
+    template <class T>
+    Hardware operator()(T& config)
+    {
+      return config;
+    }
+  };
+
+
+  struct Camera
+  {
+    VariantHardwareCamera hardware;
 
     /// Translation vector of camera, in origin referential.
     boost::array<double, 3> translationVector;

@@ -136,22 +136,59 @@ CfParser::readCamera(lua_State* L)
 {
   scene::Camera camera;
 
-  camera.hardware = readValue<std::string>(L, "hardware");
-  camera.device = readValue<std::string>(L, "device");
-
-  camera.uid = readValue<std::string>(L, "uid");
-  camera.resolution = readArray<unsigned, 2>(L, "resolution");
-  camera.frameRate = readValue<float>(L, "frame_rate");
-
-  camera.focalLength = readArray<double, 2>(L, "focal_length");
-  camera.principalPoint = readArray<double, 2>(L, "principal_point");
-  camera.radialCoef = readArray<double, 3>(L, "radial_coef");
-  camera.tangentialCoef = readArray<double, 2>(L, "tangential_coef");
+  std::string name = readValue<std::string>(L, "__name");
+  if (name == "pseudocamera")
+  {
+    camera.hardware = this->readPseudoCameraConfig(L);
+  }
+  else if (name == "dc1394")
+  {
+    camera.hardware = this->readDC1394Config(L);
+  }
+  else
+  {
+    throw file_load_error("Unknown hardware camera name");
+  }
 
   camera.translationVector = readArray<double, 3>(L, "translation_vector");
   camera.rotationMatrix = readArray<double, 9>(L, "rotation_matrix");
 
   this->sc.cameras.push_back(camera);
+}
+
+void
+CfParser::readHardware(lua_State* L, scene::Hardware& hardware)
+{
+  hardware.uid = readValue<std::string>(L, "uid");
+  hardware.resolution = readArray<unsigned, 2>(L, "resolution");
+
+  hardware.focalLength = readArray<double, 2>(L, "focal_length");
+  hardware.principalPoint = readArray<double, 2>(L, "principal_point");
+  hardware.radialCoef = readArray<double, 3>(L, "radial_coef");
+  hardware.tangentialCoef = readArray<double, 2>(L, "tangential_coef");
+}
+
+scene::PseudoCamera
+CfParser::readPseudoCameraConfig(lua_State* L)
+{
+  scene::PseudoCamera pseudoCamera;
+
+  this->readHardware(L, pseudoCamera);
+  pseudoCamera.imagesPath = readValue<std::string>(L, "images_path");
+  pseudoCamera.frameRate = readValue<float>(L, "frame_rate");
+
+  return pseudoCamera;
+}
+
+scene::DC1394
+CfParser::readDC1394Config(lua_State* L)
+{
+  scene::DC1394 dc1394;
+
+  this->readHardware(L, dc1394);
+  dc1394.frameRate = readValue<float>(L, "frame_rate");
+
+  return dc1394;
 }
 
 void

@@ -28,18 +28,13 @@
 #include <libraw1394/raw1394.h>
 
 #include "conversions.h"
+#include "../scene.hpp"
 
 class DC1394: public HardCamera
 {
 public:
 
-  enum Format
-  {
-    F_VGA_NONCOMPRESSED = FORMAT_VGA_NONCOMPRESSED
-  };
-
-  DC1394(const scene::Camera& config,
-         Format format = F_VGA_NONCOMPRESSED);
+  DC1394(const scene::DC1394& config);
 
   ~DC1394();
 
@@ -60,6 +55,12 @@ private:
 
   static const int NUMERO_BUFFERS = 4;
 
+  /// A string representing the uid of the camera.
+  /// It must be numbers in decimal base.
+  const std::string uid;
+
+  const float frameRate;
+
   raw1394handle_t raw1394Handle;
 
   dc1394_cameracapture dc1394Camera;
@@ -71,7 +72,6 @@ private:
   /// Camera frame bytes per pixel
   unsigned bytesPerPixel;
 
-  Format format;
   int mode;
 
   bayer_pattern_t pattern;

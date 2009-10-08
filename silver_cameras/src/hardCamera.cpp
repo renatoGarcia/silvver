@@ -1,11 +1,9 @@
 #include "hardCamera.hpp"
 
-HardCamera::HardCamera(const scene::Camera& config)
-  :uid(config.uid)
-  ,frameSize(config.resolution.at(0) * config.resolution.at(1))
+HardCamera::HardCamera(const scene::Hardware& config)
+  :frameSize(config.resolution.at(0) * config.resolution.at(1))
   ,frameWidth(config.resolution.at(0))
   ,frameHeight(config.resolution.at(1))
-  ,frameRate(config.frameRate)
   ,mapx(cvCreateImage(cvSize(this->frameWidth, this->frameHeight),
                       IPL_DEPTH_32F, 1))
   ,mapy(cvCreateImage(cvSize(this->frameWidth, this->frameHeight),

@@ -27,11 +27,13 @@ ArtkpCamera::ArtkpCamera(const scene::Camera& cameraConfig,
                          boost::shared_ptr<Connection> connection,
                          bool showImages)
   :AbstractCamera(cameraConfig, connection, showImages)
-  ,camConfigFileName("/tmp/artkpCamera" + cameraConfig.uid)
+  ,camConfigFileName("/tmp/artkpCamera" + /* + cameraConfig.uid*/
+                     boost::apply_visitor(scene::GetHardware(),
+                                          cameraConfig.hardware).uid)
   ,patternWidth(targets.patternWidth)
   ,logger()
   ,tracker(new ARToolKitPlus::TrackerSingleMarkerImpl<16,16,64,50,50>
-           (cameraConfig.resolution.at(0), cameraConfig.resolution.at(1)))
+           (this->currentFrame->width, this->currentFrame->height))
 
 {
   int targetNum = 0;
@@ -43,15 +45,18 @@ ArtkpCamera::ArtkpCamera(const scene::Camera& cameraConfig,
     targetNum++;
   }
 
+  const scene::Hardware hardwareConfig =
+    boost::apply_visitor(scene::GetHardware(), cameraConfig.hardware);
+
   std::ofstream tmpConfig(this->camConfigFileName.c_str());
   tmpConfig.precision(10);
   tmpConfig << "ARToolKitPlus_CamCal_Rev02" << "\n"
-            << cameraConfig.resolution.at(0) << " "
-            << cameraConfig.resolution.at(1) << " "
-            << cameraConfig.principalPoint.at(0) << " "
-            << cameraConfig.principalPoint.at(1) << " "
-            << cameraConfig.focalLength.at(0) << " "
-            << cameraConfig.focalLength.at(1) << " "
+            << this->currentFrame->width << " "
+            << this->currentFrame->height << " "
+            << hardwareConfig.principalPoint.at(0) << " "
+            << hardwareConfig.principalPoint.at(1) << " "
+            << hardwareConfig.focalLength.at(0) << " "
+            << hardwareConfig.focalLength.at(1) << " "
             << 0.0 << " " << 0.0 << " " << 0.0 << " "
             << 0.0 << " " << 0.0 << " " << 0.0 << " "
             << 0;

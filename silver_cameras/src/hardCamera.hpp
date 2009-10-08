@@ -13,8 +13,8 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef _HARDCAMERA_H_
-#define _HARDCAMERA_H_
+#ifndef _HARDCAMERA_HPP_
+#define _HARDCAMERA_HPP_
 
 #include <stdexcept>
 #include <string>
@@ -95,11 +95,7 @@ public:
 
 protected:
 
-  HardCamera(const scene::Camera& config);
-
-  /// A string representing the uid of the hardware camera.
-  /// It must be numbers in decimal base.
-  const std::string uid;
+  HardCamera(const scene::Hardware& config);
 
   // Frame size measures in pixels.
   const unsigned frameSize;
@@ -109,8 +105,6 @@ protected:
   /// received image from camera. Each client have one unique id,
   /// which is it position on vector.
   std::vector<bool> unreadImage;
-
-  const float frameRate;
 
   void undistortFrame(IplImage* frame);
 
@@ -125,4 +119,4 @@ private:
   virtual void initialize() = 0;
 };
 
-#endif /* _HARDCAMERA_H_ */
+#endif /* _HARDCAMERA_HPP_ */

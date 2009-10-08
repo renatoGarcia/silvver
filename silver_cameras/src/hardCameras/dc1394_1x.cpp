@@ -25,9 +25,10 @@
 
 #include <sys/stat.h>
 
-DC1394::DC1394(const scene::Camera& config,
-               Format format)
+DC1394::DC1394(const scene::DC1394& config)
   :HardCamera(config)
+  ,uid(config.uid)
+  ,frameRate(config.frameRate)
   ,raw1394Handle(NULL)
   ,bDc1394CameraCreated(false)
 {
@@ -41,7 +42,6 @@ DC1394::DC1394(const scene::Camera& config,
   }
 
   this->mode = MODE_640x480_MONO;
-  this->format = format;
 }
 
 DC1394::~DC1394()
@@ -133,7 +133,7 @@ DC1394::findVideo1394Device(unsigned nodeNumber)
     }
   }
 
-  // If here, don't found camera devide
+  // If here, didn't found camera devide
   throw open_camera_error("Don't found the device of camera with uid " +
                           this->uid);
 }
@@ -202,7 +202,7 @@ DC1394::initialize()
   int e = dc1394_dma_setup_capture(this->raw1394Handle,
                                    cameraNode,
                                    cameraIndex,
-                                   this->format,
+                                   FORMAT_VGA_NONCOMPRESSED,
                                    this->mode,
                                    speed,
                                    dc1394FrameRate,
@@ -220,9 +220,7 @@ DC1394::initialize()
   }
 
 
-  /*-----------------------------------------------------------------------
-   *  have the camera start sending us data
-   *-----------------------------------------------------------------------*/
+  // Have the camera start sending us data
   if (dc1394_start_iso_transmission(this->raw1394Handle,
                                     this->dc1394Camera.node)
       != DC1394_SUCCESS)
@@ -231,9 +229,7 @@ DC1394::initialize()
   }
 
 
-  /*-----------------------------------------------------------------------
-   *  query the camera to determine the Bayer pattern
-   *-----------------------------------------------------------------------*/
+  // Query the camera to determine the Bayer pattern
   quadlet_t qValue;
   GetCameraControlRegister(this->raw1394Handle,
                            cameraNode,

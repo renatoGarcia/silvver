@@ -12,7 +12,7 @@ class PseudoCamera : public HardCamera
 {
 public:
 
-  PseudoCamera(const scene::Camera& config);
+  PseudoCamera(const scene::PseudoCamera& config);
 
   ~PseudoCamera();
 
@@ -26,6 +26,8 @@ public:
 private:
 
   const boost::filesystem::path path;
+
+  const float frameRate;
 
   boost::filesystem::directory_iterator dirIterator, endIterator;
 

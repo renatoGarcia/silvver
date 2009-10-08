@@ -1,10 +1,23 @@
+/* Copyright 2009 Renato Florentino Garcia <fgar.renato@gmail.com>
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License version 3, as
+ * published by the Free Software Foundation.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
 #include "hardCameraFactory.hpp"
 
-#include "hardCameras/pseudoCamera.hpp"
+#include <stdexcept>
 
-#ifdef HAVE_CONFIG_H
- #include "../config.h"
-#endif
+#include "hardCameras/pseudoCamera.hpp"
 #ifdef HAVE_PGRFLYCAPTURE_HEADERS
  #include "hardCameras/pgr.hpp"
 #endif
@@ -24,15 +37,18 @@ boost::mutex
 HardCameraFactory::mutexCameraCreate;
 
 boost::tuple<boost::shared_ptr<HardCamera>, unsigned>
-HardCameraFactory::create(const scene::Camera& cameraConfig)
+HardCameraFactory::create(const scene::VariantHardwareCamera& cameraConfig)
 {
   // HardCameras can't be simultaneously initialized
   boost::mutex::scoped_lock lock(HardCameraFactory::mutexCameraCreate);
 
   boost::tuple<boost::shared_ptr<HardCamera>, unsigned> hardCamera;
 
+  const scene::Hardware hardwareConfig =
+    boost::apply_visitor(scene::GetHardware(), cameraConfig);
+
   std::map< std::string, boost::shared_ptr<HardCamera> >::iterator
-    iteHardCamera = HardCameraFactory::createdHardCameras.find(cameraConfig.uid);
+    iteHardCamera = HardCameraFactory::createdHardCameras.find(hardwareConfig.uid);
 
   // If hardCamera is already created
   if(iteHardCamera != HardCameraFactory::createdHardCameras.end())
@@ -41,30 +57,36 @@ HardCameraFactory::create(const scene::Camera& cameraConfig)
   }
   else
   {
-    if (cameraConfig.hardware == "pseudocamera")
-    {
-      hardCamera.get<0>().reset(new PseudoCamera(cameraConfig));
-    }
-#ifdef HAVE_DC1394
-    else if (cameraConfig.hardware == "dc1394")
-    {
-      hardCamera.get<0>().reset(new DC1394(cameraConfig));
-    }
-#endif
-    else
-    {
-      throw HardCamera::camera_parameter_error("Unknown hardware camera model: " +
-                                               cameraConfig.hardware);
-    }
+
+    hardCamera.get<0>().reset(boost::apply_visitor
+                              (HardCameraFactory::ConstructHardCamera(),
+                               cameraConfig));
 
     hardCamera.get<0>()->initialize();
 
     HardCameraFactory::createdHardCameras.
       insert(std::pair< std::string, boost::shared_ptr<HardCamera> >
-             (cameraConfig.uid, hardCamera.get<0>()));
+             (hardwareConfig.uid, hardCamera.get<0>()));
   }
 
   hardCamera.get<1>() = hardCamera.get<0>()->addClient();
 
   return hardCamera;
+}
+
+HardCamera*
+HardCameraFactory::ConstructHardCamera::operator()(const scene::PseudoCamera& config) const
+{
+  return (new PseudoCamera(config));
+}
+
+HardCamera*
+HardCameraFactory::ConstructHardCamera::operator()(const scene::DC1394& config) const
+{
+#ifdef HAVE_DC1394
+  return (new DC1394(config));
+#else
+  throw std::invalid_argument("This program don't was compiled with support "\
+                              "to ieee 1394 cameras");
+#endif
 }
