@@ -22,6 +22,7 @@
 #include <boost/thread/condition.hpp>
 #include <boost/thread/shared_mutex.hpp>
 #include <boost/thread/thread.hpp>
+#include <string>
 
 #include <libdc1394/dc1394_control.h>
 #include <libraw1394/raw1394.h>
@@ -52,12 +53,12 @@ private:
 
   void findThisCamera(nodeid_t& node, int& index);
 
+  std::string findVideo1394Device(unsigned nodeNumber);
+
   // Convert the HardCamera frameRate to an equivalent DC1394 frame rate
   int getDc1394FrameRate();
 
   static const int NUMERO_BUFFERS = 4;
-
-  const std::string device;
 
   raw1394handle_t raw1394Handle;
 

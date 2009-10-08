@@ -17,15 +17,17 @@
 
 #include <algorithm>
 #include <boost/bind.hpp>
+#include <boost/array.hpp>
+#include <boost/foreach.hpp>
 #include <boost/lexical_cast.hpp>
 #include <cstddef>
 #include <cstring>
-#include <string>
+
+#include <sys/stat.h>
 
 DC1394::DC1394(const scene::Camera& config,
                Format format)
   :HardCamera(config)
-  ,device(config.device)
   ,raw1394Handle(NULL)
   ,bDc1394CameraCreated(false)
 {
@@ -90,18 +92,6 @@ DC1394::findThisCamera(nodeid_t& node, int& index)
 
     cameraNodes = dc1394_get_camera_nodes(this->raw1394Handle, &nCameras, 0);
 
-    // // To prevent the iso-transfer bug from raw1394 system, check if
-    // // camera is highest node. For details see
-    // // http://linux1394.sourceforge.net/faq.html#DCbusmgmt
-    // // and
-    // // http://sourceforge.net/tracker/index.php?func=detail&aid=435107&group_id=8157&atid=108157
-    // // The quick solution is to add the parameter attempt_root=1 when loading
-    // // the OHCI driver as a module.
-    // if(cameraNodes[0] == numNodes-1)
-    // {
-    //   throw open_camera_error("Your camera is the highest numbered node");
-    // }
-
     // Find the camera with this->uid
     for(int cameraIndex=0; cameraIndex < nCameras; cameraIndex++)
     {
@@ -121,6 +111,31 @@ DC1394::findThisCamera(nodeid_t& node, int& index)
   }
 
   throw open_camera_error("Don't found a camera with uid " + this->uid);
+}
+
+std::string
+DC1394::findVideo1394Device(unsigned nodeNumber)
+{
+  std::string strNodeNumber(boost::lexical_cast<std::string>(nodeNumber));
+
+  boost::array<std::string, 3> possibleDevices;
+  possibleDevices.at(0) = "/dev/video1394/" + strNodeNumber;
+  possibleDevices.at(1) = "/dev/video1394-" + strNodeNumber;
+  possibleDevices.at(2) = "/dev/video1394" + strNodeNumber;
+
+  struct stat statbuf;
+  std::string device;
+  BOOST_FOREACH (device, possibleDevices)
+  {
+    if (stat(device.c_str(), &statbuf) == 0 && S_ISCHR(statbuf.st_mode))
+    {
+      return device;
+    }
+  }
+
+  // If here, don't found camera devide
+  throw open_camera_error("Don't found the device of camera with uid " +
+                          this->uid);
 }
 
 int
@@ -193,7 +208,7 @@ DC1394::initialize()
                                    dc1394FrameRate,
                                    8,	// number of buffers
                                    1,	// drop frames
-                                   this->device.c_str(),
+                                   this->findVideo1394Device(cameraNode).c_str(),
                                    &(this->dc1394Camera));
   if (e != DC1394_SUCCESS)
   {
