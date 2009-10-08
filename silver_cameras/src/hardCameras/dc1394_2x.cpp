@@ -20,8 +20,10 @@
 #include <boost/ref.hpp>
 #include <boost/bind.hpp>
 
-DC1394::DC1394(const scene::Camera& config)
+DC1394::DC1394(const scene::DC1394& config)
   :HardCamera(config)
+  ,uid(config.uid)
+  ,frameRate(config.frameRate)
   ,context(NULL)
   ,camera(NULL)
   ,currentFrame(NULL)

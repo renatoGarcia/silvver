@@ -29,7 +29,7 @@ class DC1394: public HardCamera
 {
 public:
 
-  DC1394(const scene::Camera& config);
+  DC1394(const scene::DC1394& config);
 
   ~DC1394();
 
@@ -42,6 +42,12 @@ private:
   void runCapturer();
 
   static const int N_BUFFERS = 4;
+
+  /// A string representing the uid of the camera.
+  /// It must be numbers in decimal base.
+  const std::string uid;
+
+  const float frameRate;
 
   // Convert the HardCamera frameWidth and frameHeight attributes to an
   // equivalent dc1394video_mode_t
