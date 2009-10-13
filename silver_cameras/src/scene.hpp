@@ -13,6 +13,11 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+/** \file scene.hpp
+ * \brief This file contain all structs with the configuration of scene.
+ * In this structs be put all data read from lua config file.
+ */
+
 #ifndef _SCENE_HPP_
 #define _SCENE_HPP_
 
@@ -27,6 +32,10 @@
 
 namespace scene
 {
+
+  /** Base struct to all hardware camera configuration structs.
+   * This struct have all common configurations for all hardware cameras.
+   */
   struct Hardware
   {
     /// String representation of camera unique identifier in decimal base.
@@ -62,7 +71,10 @@ namespace scene
     float frameRate;
   };
 
+  /// This is a boost::variant with all hardware camera models, i.e. all structs which inherit from Hardware struct.
   typedef boost::variant<PseudoCamera, DC1394> VariantHardwareCamera;
+
+  /// Functor which receives a VariantHardwareCamera and return a copy of its Hardware base class.
   struct GetHardware : public boost::static_visitor<Hardware>
   {
     template <class T>
@@ -78,7 +90,10 @@ namespace scene
     }
   };
 
-
+  /** Struct with all configurations of a camera.
+   * This struct groups the hardware camera specific configurations and the
+   * commons camera extrinsic parameters.
+   */
   struct Camera
   {
     VariantHardwareCamera hardware;
@@ -104,12 +119,16 @@ namespace scene
     std::vector< boost::tuple<unsigned, std::string> > patterns;
   };
 
+  /// boost::variant with all structs of target configurations.
   typedef boost::variant<ArtkpTargets> VariantAnyTarget;
 
+  /// Complete description of scene, with cameras and targets.
   struct Scene
   {
+    /// Tuple with configuration structs of all targets in scene, and only these.
     boost::tuple< boost::optional<ArtkpTargets> > targets;
 
+    /// Vector with configuration structs of all camera in scene.
     std::vector<Camera> cameras;
   };
 }
