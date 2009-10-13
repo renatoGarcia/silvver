@@ -134,6 +134,8 @@ Receptionist::operator()(AddCamera& request)
     ioConnection(new IoConnection(this->currentReception->getRemoteIp(),
                                   request.localPort));
 
+  // Send to camera the local UDP port number for which it must send the
+  // localizations.
   this->currentReception->write(ioConnection->getLocalPort());
 
   boost::shared_ptr<InputInterface> input =

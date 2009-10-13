@@ -1,0 +1,89 @@
+\documentclass[a4paper,10pt]{article}
+\usepackage[brazil]{babel}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{graphicx}
+\title {Silvver \\ Sistema de Localização por Visão VERLab}
+\author{Renato Garcia}
+\date{}
+
+
+\begin{document}
+\maketitle
+
+\section{Introdução}
+O Silvver é um sistema descentralizado de localização por visão. Ele
+efetua localização de marcos visuais pré-determinados a partir de
+imagens digitais.
+
+
+\section{O programa}
+O Silvver foi construído com o objetivo de ser um sistema de
+localização modular e multi-plataforma. A modularidade possibilita uma
+maior escalabilidade ao sistema, cada um de seus módulos pode ser
+executados em uma máquina diferente, dividindo entre elas o
+processamento do todo. Além disso, os diferentes computadores podem
+ser distribuídos procurando uma posição que minimize
+
+é constituído por três módulos: libsilvver-cliente, silvver-servidor e
+silvver-câmeras. Silvver-câmeras é o módulo responsável por controlar
+A comunicação entre estes módulos é feita através de sockets,
+portanto, cada um deles pode ser executado em um computador diferente,
+desde que estejam ligados em rede ou tenham acesso à internet.
+
+\section{Exemplo de uso}
+\subsection{silvver-câmera}
+Silvver-câmera é o módulo responsável por controlar as câmeras e
+processar as imagens obtidas. Cada computador deve executar no máximo
+uma única instância deste programa, e antes de iniciar a execução, um
+silvver-servidor deve estar obrigatoriamente sendo executado em alguma
+máquina cujo endereço IP seja conhecido. Caso hajam múltiplas câmeras
+conectadas em um mesmo computador, esta única instância manipulará
+todo o conjunto.
+
+\subsubsection{cameras.xml}
+Toda as opções de execução e configuração são fornecidas ao programa
+através de arquivo xml cujo nome deverá ser necessariamente
+cameras.xml. Este arquivo descreve as propriedades de cada câmera
+disponível, e se elas serão ou não utilizadas. Abaixo está ilustrado
+um aquivo de configuração cameras.xml.
+
+
+\begin{verbatim}
+<camera ligada="sim">
+   <modelo> PGR </modelo>
+   <serial> 5111119 </serial>
+   <diretorio> E:/renato/cam19/ </diretorio>
+   <resolucao> 640 480 </resolucao>
+   <frequencia> 30 </frequencia>
+   <distancia_focal> 530.09343 529.65974 </distancia_focal>
+   <ponto_principal> 341.69169 219.77290 </ponto_principal>
+   <distorcao_radial>
+       -0.41522   0.16578   0.00092   -0.0016 0.0 0.0
+   </distorcao_radial>
+   <alfa_c> 0 </alfa_c>
+   <matrizH>
+       4.654740  0.212210 -5845.671545
+       0.031842 -4.724545 -2008.903768
+      -0.040346  0.012023 -1347.414986
+   </matrizH>
+</camera>
+\end{verbatim}
+
+Onde as etiquetas utilizadas tem o seguinte significado:
+\begin{itemize}
+\item modelo: Utilizado internamente por silvver-cameras para
+  identificar a classe que será utilizada para controlar a captura de
+  imagens da câmera. É necessário que o modelo da camêra tenha uma
+  classe correspondente implementada no silvver-cameras.
+\item serial: Uma identificação única para a câmera
+\end{itemize}
+
+
+
+% \input{silvver_cliente_h}
+
+
+
+
+\end{document}
