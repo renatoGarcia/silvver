@@ -58,7 +58,6 @@ private:
   // Initialize the abstract camera given by cameraConfig
   void constructAbstractCamera(const scene::Camera& cameraConfig,
                                const scene::VariantAnyTarget& targets,
-                               const std::string& targetType,
                                const bool showImages);
 
   boost::ptr_vector<AbstractCamera> abstractCameras;

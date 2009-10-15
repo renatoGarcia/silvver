@@ -139,7 +139,7 @@ Receptionist::operator()(AddCamera& request)
   this->currentReception->write(ioConnection->getLocalPort());
 
   boost::shared_ptr<InputInterface> input =
-    InputFactory::createInput(request.targetType, ioConnection);
+    InputFactory::createInput(request.processorOpt, ioConnection);
 
   this->mapInputs.insert(std::pair< unsigned,boost::shared_ptr<InputInterface> >
                          ((unsigned)ioConnection->getRemotePort(), input));

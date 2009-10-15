@@ -43,7 +43,6 @@ SceneMounter::mount(const bool showImages)
     {
       this->constructAbstractCamera(camera,
                                     *scene.targets.get<0>(),
-                                    "artp_mark",
                                     showImages);
     }
   }
@@ -52,13 +51,10 @@ SceneMounter::mount(const bool showImages)
 void
 SceneMounter::constructAbstractCamera(const scene::Camera& camera,
                                       const scene::VariantAnyTarget& targets,
-                                      const std::string& targetType,
                                       const bool showImages)
 {
   boost::shared_ptr<Connection>
     connection(new Connection(this->serverIp, this->receptionistPort));
-
-  connection->connect(targetType);
 
   this->abstractCameras.push_back(AbstractCameraFactory::create(camera,
                                                                 targets,

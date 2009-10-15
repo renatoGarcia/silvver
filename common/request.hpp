@@ -1,3 +1,18 @@
+/* Copyright 2009 Renato Florentino Garcia <fgar.renato@gmail.com>
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License version 3, as
+ * published by the Free Software Foundation.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
 #ifndef REQUEST_HPP
 #define REQUEST_HPP
 
@@ -8,7 +23,7 @@
 #include <boost/variant.hpp>
 #include <boost/serialization/variant.hpp>
 
-#include "targetType.hpp"
+#include "processorOptions.hpp"
 
 /// This type symbolize a uninitialized Request.
 struct NullRequest
@@ -66,28 +81,24 @@ struct DelOutput
 
 struct AddCamera
 {
-  TargetType targetType;
+  procOpt::AnyProcOpt processorOpt;
   unsigned short localPort;
 
+
   AddCamera()
-    :targetType()
+    :processorOpt()
     ,localPort(0)
   {}
 
-  AddCamera(TargetType targetType, unsigned short localPort)
-    :targetType(targetType)
-    ,localPort(localPort)
-  {}
-
-  AddCamera(const std::string& targetType, unsigned short localPort)
-    :targetType(targetType)
+  AddCamera(const procOpt::AnyProcOpt& processorOpt, unsigned short localPort)
+    :processorOpt(processorOpt)
     ,localPort(localPort)
   {}
 
   template<typename Archive>
   void serialize(Archive& ar, const unsigned version)
   {
-    ar & targetType;
+    ar & processorOpt;
     ar & localPort;
   }
 };
@@ -110,21 +121,6 @@ struct DelCamera
     ar & localPort;
   }
 };
-
-namespace boost
-{
-  namespace serialization
-  {
-    template<typename Archive>
-    void
-    serialize(Archive& ar, TargetType& targetType, const unsigned version)
-    {
-      ar & targetType.state;
-    }
-  }
-}
-
-
 
 typedef boost::variant<NullRequest,
                        AddOutput,

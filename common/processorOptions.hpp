@@ -13,27 +13,22 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef _INPUT_FACTORY_HPP_
-#define _INPUT_FACTORY_HPP_
+#ifndef _PROCESSOR_OPTIONS_HPP_
+#define _PROCESSOR_OPTIONS_HPP_
 
-#include <boost/shared_ptr.hpp>
+#include <boost/variant.hpp>
 
-#include "inputInterface.hpp"
-#include "input.hpp"
-#include "ioConnection.hpp"
-#include <processorOptions.hpp>
-
-class InputFactory
+namespace procOpt
 {
-public:
+  struct Marker
+  {
+    template<class Archive>
+    void
+    serialize(Archive & ar, const unsigned int version)
+    {}
+  };
 
-  static boost::shared_ptr<InputInterface>
-  createInput(const procOpt::AnyProcOpt& processorOpt,
-              const boost::shared_ptr<IoConnection>& connection);
+  typedef boost::variant<Marker> AnyProcOpt;
+}
 
-private:
-
-  InputFactory();
-};
-
-#endif /* _INPUT_FACTORY_HPP_ */
+#endif /* _PROCESSOR_OPTIONS_HPP_ */

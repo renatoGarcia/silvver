@@ -16,6 +16,7 @@
 #include "inputFactory.hpp"
 
 #include <boost/lexical_cast.hpp>
+#include <boost/variant.hpp>
 
 #include "input.ipp"
 #include "ioConnection.ipp"
@@ -27,30 +28,21 @@ InputFactory::InputFactory()
 {}
 
 boost::shared_ptr<InputInterface>
-InputFactory::createInput(const TargetType targetType,
+InputFactory::createInput(const procOpt::AnyProcOpt& processorOpt,
                           const boost::shared_ptr<IoConnection>& connection)
 {
   boost::shared_ptr<InputInterface> returnPtr;
 
-  switch(targetType.state)
+  if (const procOpt::Marker* const marker =
+      boost::get<procOpt::Marker>(&processorOpt))
   {
-  case TargetType::ARTP_MARK:
-    {
-      returnPtr.reset(new Input<silver::Identity<silver::Pose> >
-                      (connection, MarkerProcessor::instantiate()));
-      break;
-    }
-//   case COLOR_BLOB:
-//     {
-//       returnPtr.reset(new Input<silver::Blob>(connection
-//                                               ProcessorType::MARKER));
-//       break;
-//     }
-  default:
-    {
-//       throw std::invalid_argument("Unknown inputType code: " +
-//                                   boost::lexical_cast<std::string>(inputType));
-    }
+    returnPtr.reset(new Input<silver::Identity<silver::Pose> >
+                    (connection, MarkerProcessor::instantiate()));
+  }
+  else
+  {
+    throw std::invalid_argument("Processor option 'get' not implemented in "
+                                "InputFactory class.");
   }
 
   return returnPtr;

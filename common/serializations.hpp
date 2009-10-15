@@ -1,5 +1,20 @@
-#ifndef SERIALIZATIONS_HPP
-#define SERIALIZATIONS_HPP
+/* Copyright 2009 Renato Florentino Garcia <fgar.renato@gmail.com>
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License version 3, as
+ * published by the Free Software Foundation.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
+#ifndef _SERIALIZATIONS_HPP_
+#define _SERIALIZATIONS_HPP_
 
 #include <silverTypes.hpp>
 
@@ -36,15 +51,7 @@ namespace boost
       ar & id.uid;
     }
 
-//     template<class Archive>
-//     void
-//     serialize(Archive& ar, silver::Blob& blob, const unsigned version)
-//     {
-//       ar & blob.highestVertex;
-//       ar & blob.lowestVertex;
-//     }
-
   } // namespace serialization
 } // namespace boost
 
-#endif // SERIALIZATIONS_HPP
+#endif // _SERIALIZATIONS_HPP_

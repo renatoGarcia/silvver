@@ -95,9 +95,9 @@ StreamConnection::readHeader(const boost::system::error_code& e,
 template <typename T, typename Handler>
 void
 StreamConnection::readData(const boost::system::error_code& e,
-                     std::size_t bytes_transferred,
-                     T& t,
-                     boost::tuple<Handler> handler)
+                           std::size_t bytes_transferred,
+                           T& t,
+                           boost::tuple<Handler> handler)
 {
   if (e)
   {
