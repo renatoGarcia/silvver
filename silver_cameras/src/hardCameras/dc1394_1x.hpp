@@ -46,9 +46,9 @@ private:
 
   void runCapturer();
 
-  void findThisCamera(nodeid_t& node, int& index);
+  void findThisCamera(nodeid_t& node, int& cardIndex);
 
-  std::string findVideo1394Device(unsigned nodeNumber);
+  std::string findVideo1394Device(unsigned cardNumber);
 
   // Convert the HardCamera frameRate to an equivalent DC1394 frame rate
   int getDc1394FrameRate();

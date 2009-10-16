@@ -72,7 +72,7 @@ DC1394::~DC1394()
 }
 
 void
-DC1394::findThisCamera(nodeid_t& node, int& index)
+DC1394::findThisCamera(nodeid_t& node, int& cardIndex)
 {
   raw1394handle_t tmpHandle;
   tmpHandle = raw1394_new_handle();
@@ -101,7 +101,7 @@ DC1394::findThisCamera(nodeid_t& node, int& index)
       {
         // Return values
         node  = cameraNodes[cameraIndex];
-        index = cameraIndex;
+        cardIndex = iCard;
         return;
       }
     }
@@ -114,14 +114,14 @@ DC1394::findThisCamera(nodeid_t& node, int& index)
 }
 
 std::string
-DC1394::findVideo1394Device(unsigned nodeNumber)
+DC1394::findVideo1394Device(unsigned cardNumber)
 {
-  std::string strNodeNumber(boost::lexical_cast<std::string>(nodeNumber));
+  std::string strCardNumber(boost::lexical_cast<std::string>(cardNumber));
 
   boost::array<std::string, 3> possibleDevices;
-  possibleDevices.at(0) = "/dev/video1394/" + strNodeNumber;
-  possibleDevices.at(1) = "/dev/video1394-" + strNodeNumber;
-  possibleDevices.at(2) = "/dev/video1394" + strNodeNumber;
+  possibleDevices.at(0) = "/dev/video1394/" + strCardNumber;
+  possibleDevices.at(1) = "/dev/video1394-" + strCardNumber;
+  possibleDevices.at(2) = "/dev/video1394" + strCardNumber;
 
   struct stat statbuf;
   std::string device;
@@ -184,8 +184,8 @@ void
 DC1394::initialize()
 {
   nodeid_t cameraNode;
-  int cameraIndex;
-  findThisCamera(cameraNode, cameraIndex);
+  int cardIndex;
+  findThisCamera(cameraNode, cardIndex);
 
   int dc1394FrameRate = this->getDc1394FrameRate();
 
@@ -201,14 +201,14 @@ DC1394::initialize()
 
   int e = dc1394_dma_setup_capture(this->raw1394Handle,
                                    cameraNode,
-                                   cameraIndex,
+                                   cameraNode, // ISO channe. Is will work with multiples firewire cards?
                                    FORMAT_VGA_NONCOMPRESSED,
                                    this->mode,
                                    speed,
                                    dc1394FrameRate,
                                    8,	// number of buffers
                                    1,	// drop frames
-                                   this->findVideo1394Device(cameraNode).c_str(),
+                                   this->findVideo1394Device(cardIndex).c_str(),
                                    &(this->dc1394Camera));
   if (e != DC1394_SUCCESS)
   {
