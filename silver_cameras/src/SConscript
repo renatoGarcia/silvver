@@ -18,7 +18,8 @@ sources = Split("""cfParser.cpp
 
 if 'dc1394_control' in build_optional_flags or cleaning:
     sources += ['hardCameras/dc1394_1x.cpp',
-                'hardCameras/conversions.cpp']
+                'hardCameras/conversions/bayer.c',
+                'hardCameras/conversions/conversions.c']
 elif 'dc1394' in build_optional_flags or cleaning:
     sources += ['hardCameras/dc1394_2x.cpp']
 

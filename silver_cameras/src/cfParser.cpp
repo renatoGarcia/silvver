@@ -187,6 +187,7 @@ CfParser::readDC1394Config(lua_State* L)
 
   this->readHardware(L, dc1394);
   dc1394.frameRate = readValue<float>(L, "frame_rate");
+  dc1394.colorMode = readValue<std::string>(L, "color_mode");
 
   return dc1394;
 }

@@ -69,6 +69,12 @@ namespace scene
   {
     /// The rate which the input images will be read.
     float frameRate;
+
+    /** The color mode of the camera.
+     * One of: yuv444, yuv422, yuv411, rgb8, mono8 or mono16. All letters must
+     * be in lower case.
+     */
+    std::string colorMode;
   };
 
   /// This is a boost::variant with all hardware camera models, i.e. all structs which inherit from Hardware struct.

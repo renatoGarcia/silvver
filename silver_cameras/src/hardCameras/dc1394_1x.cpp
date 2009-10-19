@@ -22,6 +22,7 @@
 #include <boost/lexical_cast.hpp>
 #include <cstddef>
 #include <cstring>
+#include <stdexcept>
 
 #include <sys/stat.h>
 
@@ -31,18 +32,12 @@ DC1394::DC1394(const scene::DC1394& config)
   ,frameRate(config.frameRate)
   ,raw1394Handle(NULL)
   ,bDc1394CameraCreated(false)
-{
-  // if mode == MODE_640x40_MONO
-  this->bytesPerPixel = 1;
-
-  for (int i = 0; i < 2; ++i)
-  {
-    this->frameBuffer[i] = new unsigned char[this->frameSize *
-                                             this->bytesPerPixel];
-  }
-
-  this->mode = MODE_640x480_MONO;
-}
+  ,videoMode(getDc1394VideoMode(config.colorMode))
+  ,bitsPerPixel(getBitsPerPixel(config.colorMode))
+  ,bufferSize((this->frameSize * this->bitsPerPixel) / 8)
+  ,frameBuffer(boost::extents[2][bufferSize])
+  ,currentFrame(0)
+{}
 
 DC1394::~DC1394()
 {
@@ -50,11 +45,6 @@ DC1394::~DC1394()
   {
     this->grabFrameThread->interrupt();
     this->grabFrameThread->join();
-  }
-
-  for (int i = 0; i < 2; ++i)
-  {
-    delete[] this->frameBuffer[i];
   }
 
   dc1394_stop_iso_transmission(this->raw1394Handle, this->dc1394Camera.node);
@@ -139,7 +129,7 @@ DC1394::findVideo1394Device(unsigned cardNumber)
 }
 
 int
-DC1394::getDc1394FrameRate()
+DC1394::getDc1394FrameRate() const
 {
   if (this->frameRate == 1.875)
   {
@@ -180,6 +170,79 @@ DC1394::getDc1394FrameRate()
   }
 }
 
+unsigned
+DC1394::getDc1394VideoMode(const std::string& colorMode) const
+{
+  const unsigned fw = this->frameWidth;
+  const unsigned fh = this->frameHeight;
+  const std::string& cm = colorMode;
+
+  if      (fw==640  && fh==480  && cm=="yuv444") return MODE_160x120_YUV444;
+  else if (fw==320  && fh==240  && cm=="yuv422") return MODE_320x240_YUV422;
+  else if (fw==640  && fh==480  && cm=="yuv411") return MODE_640x480_YUV411;
+  else if (fw==640  && fh==480  && cm=="yuv422") return MODE_640x480_YUV422;
+  else if (fw==640  && fh==480  && cm=="rgb8"  ) return MODE_640x480_RGB;
+  else if (fw==640  && fh==480  && cm=="mono8" ) return MODE_640x480_MONO;
+  else if (fw==640  && fh==480  && cm=="mono16") return MODE_640x480_MONO16;
+  else if (fw==800  && fh==600  && cm=="yuv422") return MODE_800x600_YUV422;
+  else if (fw==800  && fh==600  && cm=="rgb8"  ) return MODE_800x600_RGB;
+  else if (fw==800  && fh==600  && cm=="mono8" ) return MODE_800x600_MONO;
+  else if (fw==1024 && fh==768  && cm=="yuv422") return MODE_1024x768_YUV422;
+  else if (fw==1024 && fh==768  && cm=="rgb8"  ) return MODE_1024x768_RGB;
+  else if (fw==1024 && fh==768  && cm=="mono8" ) return MODE_1024x768_MONO;
+  else if (fw==800  && fh==600  && cm=="mono16") return MODE_800x600_MONO16;
+  else if (fw==1024 && fh==768  && cm=="mono16") return MODE_1024x768_MONO16;
+  else if (fw==1280 && fh==960  && cm=="yuv422") return MODE_1280x960_YUV422;
+  else if (fw==1280 && fh==960  && cm=="rgb8"  ) return MODE_1280x960_RGB;
+  else if (fw==1280 && fh==960  && cm=="mono8" ) return MODE_1280x960_MONO;
+  else if (fw==1600 && fh==1200 && cm=="yuv422") return MODE_1600x1200_YUV422;
+  else if (fw==1600 && fh==1200 && cm=="rgb8"  ) return MODE_1600x1200_RGB;
+  else if (fw==1600 && fh==1200 && cm=="mono8" ) return MODE_1600x1200_MONO;
+  else if (fw==1280 && fh==960  && cm=="mono16") return MODE_1280x960_MONO16;
+  else if (fw==1600 && fh==1200 && cm=="mono16") return MODE_1600x1200_MONO16;
+  else
+  {
+    throw open_camera_error("Invalid resolution " +
+                            boost::lexical_cast<std::string>(this->frameWidth) +
+                            " x " +
+                            boost::lexical_cast<std::string>(this->frameHeight)+
+                            " with color mode " + colorMode);
+  }
+}
+
+unsigned
+DC1394::getBitsPerPixel(const std::string& colorMode) const
+{
+  if (colorMode == "yuv444")
+  {
+    return 12;
+  }
+  else if (colorMode == "yuv422")
+  {
+    return 8;
+  }
+  else if (colorMode == "yuv411")
+  {
+    return 6;
+  }
+  else if (colorMode == "rgb8")
+  {
+    return 8;
+  }
+  else if (colorMode == "mono8")
+  {
+    return 8;
+  }
+  else if (colorMode == "mono16")
+  {
+    return 16;
+  }
+  else
+  {
+    throw std::invalid_argument("Invalid color mode: " + colorMode);
+  }
+}
+
 void
 DC1394::initialize()
 {
@@ -203,7 +266,7 @@ DC1394::initialize()
                                    cameraNode,
                                    cameraNode, // ISO channe. Is will work with multiples firewire cards?
                                    FORMAT_VGA_NONCOMPRESSED,
-                                   this->mode,
+                                   this->videoMode,
                                    speed,
                                    dc1394FrameRate,
                                    8,	// number of buffers
@@ -229,32 +292,32 @@ DC1394::initialize()
   }
 
 
-  // Query the camera to determine the Bayer pattern
-  quadlet_t qValue;
-  GetCameraControlRegister(this->raw1394Handle,
-                           cameraNode,
-                           0x1040,         /* Bayer Tile Mapping register */
-                           &qValue );
+  // // Query the camera to determine the Bayer pattern
+  // quadlet_t qValue;
+  // GetCameraControlRegister(this->raw1394Handle,
+  //                          cameraNode,
+  //                          0x1040,         /* Bayer Tile Mapping register */
+  //                          &qValue );
 
-  switch(qValue)
-  {
-  case 0x42474752:      /* BGGR */
-    this->pattern = BAYER_PATTERN_BGGR;
-    break;
-  case 0x47524247:      /* GRBG */
-    this->pattern = BAYER_PATTERN_GRBG;
-    break;
-  case 0x52474742:      /* RGGB */
-    this->pattern = BAYER_PATTERN_RGGB;
-    break;
-  case 0x47425247:      /* GBRG */
-    this->pattern = BAYER_PATTERN_GBRG;
-    break;
-  case 0x59595959:      /* YYYY = BW */
-    throw open_camera_error("Camera is black and white");
-  default:
-    throw open_camera_error("Camera BAYER_TILE_MAPPING register has an unexpected value");
-  }
+  // switch(qValue)
+  // {
+  // case 0x42474752:      /* BGGR */
+  //   this->pattern = BAYER_PATTERN_BGGR;
+  //   break;
+  // case 0x47524247:      /* GRBG */
+  //   this->pattern = BAYER_PATTERN_GRBG;
+  //   break;
+  // case 0x52474742:      /* RGGB */
+  //   this->pattern = BAYER_PATTERN_RGGB;
+  //   break;
+  // case 0x47425247:      /* GBRG */
+  //   this->pattern = BAYER_PATTERN_GBRG;
+  //   break;
+  // case 0x59595959:      /* YYYY = BW */
+  //   throw open_camera_error("Camera is black and white");
+  // default:
+  //   throw open_camera_error("Camera BAYER_TILE_MAPPING register has an unexpected value");
+  // }
 
   this->grabFrameThread.reset(new boost::thread(boost::bind<void>
                                                 (&DC1394::runCapturer,
@@ -275,12 +338,12 @@ DC1394::runCapturer()
       throw capture_image_error("Unable to capture a frame");
     }
 
-    memcpy(this->frameBuffer[frameIdx],
+    memcpy(this->frameBuffer[frameIdx].origin(),
            this->dc1394Camera.capture_buffer,
-           this->frameSize * this->bytesPerPixel);
+           this->bufferSize);
 
     this->bufferAccess.lock();
-    this->currentFrame = this->frameBuffer[frameIdx];
+    this->currentFrame = frameIdx;
     this->bufferAccess.unlock();
 
     std::fill(this->unreadImage.begin(), this->unreadImage.end(), true);
@@ -302,11 +365,12 @@ DC1394::captureFrame(IplImage** iplImage, unsigned clientUid)
     this->unreadFrameCondition.wait(lock);
   }
 
-  BayerEdgeSense(this->currentFrame,
-                 (unsigned char*)(*iplImage)->imageData,
-                 this->dc1394Camera.frame_width,
-                 this->dc1394Camera.frame_height,
-                 this->pattern);
+  dc1394_bayer_decoding_8bit(this->frameBuffer[this->currentFrame].origin(),
+                             (unsigned char*)(*iplImage)->imageData,
+                             this->dc1394Camera.frame_width,
+                             this->dc1394Camera.frame_height,
+                             LIBDC1394_COLOR_FILTER_RGGB,
+                             LIBDC1394_BAYER_METHOD_SIMPLE);
 
   this->unreadImage.at(clientUid) = false;
 }

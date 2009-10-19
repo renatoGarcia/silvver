@@ -22,12 +22,13 @@
 #include <boost/thread/condition.hpp>
 #include <boost/thread/shared_mutex.hpp>
 #include <boost/thread/thread.hpp>
+#include "boost/multi_array.hpp"
 #include <string>
 
 #include <libdc1394/dc1394_control.h>
 #include <libraw1394/raw1394.h>
 
-#include "conversions.h"
+#include "conversions/conversions.h"
 #include "../scene.hpp"
 
 class DC1394: public HardCamera
@@ -51,7 +52,11 @@ private:
   std::string findVideo1394Device(unsigned cardNumber);
 
   // Convert the HardCamera frameRate to an equivalent DC1394 frame rate
-  int getDc1394FrameRate();
+  int getDc1394FrameRate() const;
+
+  unsigned getDc1394VideoMode(const std::string& colorMode) const;
+
+  unsigned getBitsPerPixel(const std::string& colorMode) const;
 
   static const int NUMERO_BUFFERS = 4;
 
@@ -66,15 +71,18 @@ private:
   dc1394_cameracapture dc1394Camera;
   bool                 bDc1394CameraCreated;
 
-  unsigned char* currentFrame;
-  unsigned char* frameBuffer[2];
+  const int videoMode;
 
-  /// Camera frame bytes per pixel
-  unsigned bytesPerPixel;
+  /// Camera frame bits per pixel
+  const unsigned bitsPerPixel;
 
-  int mode;
+  /// Frame buffer size in bytes
+  const unsigned bufferSize;
 
-  bayer_pattern_t pattern;
+  boost::multi_array<unsigned char, 2> frameBuffer;
+  unsigned currentFrame;
+
+  // bayer_pattern_t pattern;
 
   boost::shared_mutex bufferAccess;
   boost::condition_variable_any unreadFrameCondition;

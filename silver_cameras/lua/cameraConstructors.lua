@@ -20,24 +20,16 @@ function __getOptional(value, default)
     end
 end
 
-function __getMandatory(value)
-    if value then
-        return value
-    else
-        error()
-    end
-end
-
 function Dragonfly(parameters)
     camera = {}
     camera.__name = 'dc1394'
 
-    camera.uid = __getMandatory(parameters.uid)
+    camera.uid = parameters.uid
 
-    camera.focal_length = __getMandatory(parameters.focal_length)
-    camera.principal_point = __getMandatory(parameters.principal_point)
-    camera.radial_coef = __getMandatory(parameters.radial_coef)
-    camera.tangential_coef = __getMandatory(parameters.tangential_coef)
+    camera.focal_length = parameters.focal_length
+    camera.principal_point = parameters.principal_point
+    camera.radial_coef = parameters.radial_coef
+    camera.tangential_coef = parameters.tangential_coef
 
     camera.translation_vector = __getOptional(parameters.translation_vector,
                                               {0, 0, 0})
@@ -48,6 +40,8 @@ function Dragonfly(parameters)
 
     camera.resolution = __getOptional(parameters.resolution, {640, 480})
     camera.frame_rate = __getOptional(parameters.frame_rate, 30)
+
+    camera.color_mode = __getOptional(parameters.color_mode, 'mono8')
 
     return camera
 end
