@@ -42,6 +42,12 @@ function Dragonfly(parameters)
     camera.frame_rate = __getOptional(parameters.frame_rate, 30)
 
     camera.color_mode = __getOptional(parameters.color_mode, 'mono8')
+    camera.brightness = __getOptional(parameters.brightness, 'untouched')
+    camera.exposure = __getOptional(parameters.exposure, 'untouched')
+    camera.white_balance = __getOptional(parameters.white_balance,
+                                         {'untouched', 'untouched'})
+    camera.shutter = __getOptional(parameters.shutter, 'untouched')
+    camera.gain = __getOptional(parameters.gain, 'untouched')
 
     return camera
 end

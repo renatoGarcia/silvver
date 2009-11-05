@@ -186,8 +186,13 @@ CfParser::readDC1394Config(lua_State* L)
   scene::DC1394 dc1394;
 
   this->readHardware(L, dc1394);
-  dc1394.frameRate = readValue<float>(L, "frame_rate");
-  dc1394.colorMode = readValue<std::string>(L, "color_mode");
+  dc1394.frameRate    = readValue<float>(L, "frame_rate");
+  dc1394.colorMode    = readValue<std::string>(L, "color_mode");
+  dc1394.brightness   = readValue<std::string>(L, "brightness");
+  dc1394.exposure     = readValue<std::string>(L, "exposure");
+  dc1394.whiteBalance = readArray<std::string, 2>(L, "white_balance");
+  dc1394.shutter      = readValue<std::string>(L, "shutter");
+  dc1394.gain         = readValue<std::string>(L, "gain");
 
   return dc1394;
 }

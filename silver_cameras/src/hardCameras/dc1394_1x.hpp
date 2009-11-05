@@ -18,6 +18,7 @@
 
 #include "../hardCamera.hpp"
 
+#include <boost/array.hpp>
 #include <boost/scoped_ptr.hpp>
 #include <boost/thread/condition.hpp>
 #include <boost/thread/shared_mutex.hpp>
@@ -58,6 +59,8 @@ private:
 
   unsigned getBitsPerPixel(const std::string& colorMode) const;
 
+  void setFeatures(nodeid_t cameraNode);
+
   static const int NUMERO_BUFFERS = 4;
 
   /// A string representing the uid of the camera.
@@ -88,6 +91,12 @@ private:
   boost::condition_variable_any unreadFrameCondition;
 
   boost::scoped_ptr<boost::thread> grabFrameThread;
+
+  const std::string brightness;
+  const std::string exposure;
+  const boost::array<std::string, 2> whiteBalance;
+  const std::string shutter;
+  const std::string gain;
 };
 
 #endif /* _DC1394_1X_HPP_ */

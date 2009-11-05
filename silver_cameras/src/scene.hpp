@@ -75,6 +75,34 @@ namespace scene
      * be in lower case.
      */
     std::string colorMode;
+
+    /** The brightness control.
+     * One of "untouched" or an unsigned integer between 0 and 255.
+     */
+    std::string brightness;
+
+    /** The auto exposure control.
+     * One of "untouched", "off", "auto" or an unsigned integer between
+     * 1 and 1023.
+     */
+    std::string exposure;
+
+    /** The white balance control.
+     * An array with [(blue/v), (red/v)].
+     * Each position must be one of (the same in both) "untouched", "off" or
+     * an unsigned integer between 0 and 63.
+     */
+    boost::array<std::string, 2> whiteBalance;
+
+    /** The shuter timer control.
+     * One of "untouched", "auto" or an unsigned integer greater than  2.
+     */
+    std::string shutter;
+
+     /** The gain control.
+     * One of "untouched", "auto" or an unsigned integer between 220 and 1023.
+     */
+    std::string gain;
   };
 
   /// This is a boost::variant with all hardware camera models, i.e. all structs which inherit from Hardware struct.

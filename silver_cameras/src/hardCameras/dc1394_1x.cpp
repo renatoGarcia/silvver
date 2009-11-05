@@ -16,8 +16,9 @@
 #include "dc1394_1x.hpp"
 
 #include <algorithm>
+#include <boost/assign/std/vector.hpp>
+#include <boost/tuple/tuple.hpp>
 #include <boost/bind.hpp>
-#include <boost/array.hpp>
 #include <boost/foreach.hpp>
 #include <boost/lexical_cast.hpp>
 #include <cstddef>
@@ -25,6 +26,8 @@
 #include <stdexcept>
 
 #include <sys/stat.h>
+
+using namespace boost::assign;
 
 DC1394::DC1394(const scene::DC1394& config)
   :HardCamera(config)
@@ -37,6 +40,11 @@ DC1394::DC1394(const scene::DC1394& config)
   ,bufferSize((this->frameSize * this->bitsPerPixel) / 8)
   ,frameBuffer(boost::extents[2][bufferSize])
   ,currentFrame(0)
+  ,brightness(config.brightness)
+  ,exposure(config.exposure)
+  ,whiteBalance(config.whiteBalance)
+  ,shutter(config.shutter)
+  ,gain(config.gain)
 {}
 
 DC1394::~DC1394()
@@ -244,6 +252,101 @@ DC1394::getBitsPerPixel(const std::string& colorMode) const
 }
 
 void
+DC1394::setFeatures(nodeid_t cameraNode)
+{
+  typedef boost::tuple<std::string, unsigned, std::string> FeatureTuple;
+
+  std::vector<FeatureTuple > features;
+  features += FeatureTuple(this->brightness, FEATURE_BRIGHTNESS, "brightness"),
+              FeatureTuple(this->exposure, FEATURE_EXPOSURE, "exposure"),
+              FeatureTuple(this->shutter, FEATURE_SHUTTER, "shutter"),
+              FeatureTuple(this->gain, FEATURE_GAIN, "gain");
+
+  FeatureTuple featureTuple;
+  dc1394bool_t on;
+  dc1394bool_t autoMode;
+  unsigned value;
+  BOOST_FOREACH(featureTuple, features)
+  {
+    if (featureTuple.get<0>() == "untouched")
+    {
+      continue;
+    }
+
+    on = (featureTuple.get<0>() == "off") ? DC1394_FALSE : DC1394_TRUE;
+    autoMode = (featureTuple.get<0>() == "auto") ? DC1394_TRUE : DC1394_FALSE;
+
+    //If there are a unsigned integer inside feature value string
+    if (on == DC1394_TRUE && autoMode == DC1394_FALSE)
+    {
+      try{ value = boost::lexical_cast<unsigned>(featureTuple.get<0>());}
+      catch (const boost::bad_lexical_cast& error)
+      {
+        throw open_camera_error("Invalid value of " + featureTuple.get<2>() +
+                                " of dc1394 camera uid: " + this->uid);
+      }
+
+      if (dc1394_set_feature_value(this->raw1394Handle, cameraNode,
+                                   featureTuple.get<1>(), value)
+          != DC1394_SUCCESS)
+      {
+        throw open_camera_error("Error on setting " + featureTuple.get<2>() +
+                                " to dc1394 camera uid: " + this->uid);
+      }
+    }
+
+    if (dc1394_auto_on_off(this->raw1394Handle, cameraNode,
+                           featureTuple.get<1>(), autoMode)
+        != DC1394_SUCCESS)
+    {
+      throw open_camera_error("Error on setting auto mode to " +
+                              featureTuple.get<2>() +
+                              " feature of dc1394 camera uid: " + this->uid);
+    }
+
+    if (dc1394_feature_on_off(this->raw1394Handle, cameraNode,
+                              featureTuple.get<1>(), on)
+        != DC1394_SUCCESS)
+    {
+      throw open_camera_error("Error on setting mode on to " +
+                              featureTuple.get<2>() +
+                              " feature of dc1394 camera uid: " + this->uid);
+    }
+  }
+
+
+  if (this->whiteBalance.at(0) != "untouched")
+  {
+    try
+    {
+      if (this->whiteBalance.at(0) == "off")
+      {
+        dc1394_feature_on_off(this->raw1394Handle, cameraNode,
+                              FEATURE_WHITE_BALANCE, 0);
+      }
+      else
+      {
+        if (dc1394_set_white_balance(this->raw1394Handle, cameraNode,
+                                 boost::lexical_cast<unsigned>
+                                              (this->whiteBalance.at(0)),
+                                 boost::lexical_cast<unsigned>
+                                              (this->whiteBalance.at(1)))
+            != DC1394_SUCCESS)
+        {
+          throw open_camera_error("Error on setting " + featureTuple.get<2>() +
+                                " to dc1394 camera uid: " + this->uid);
+        }
+      }
+    }
+    catch (const boost::bad_lexical_cast& error)
+    {
+      throw open_camera_error("Invalid white balance value to "
+                              "dc1394 camera uid: "+ this->uid);
+    }
+  }
+}
+
+void
 DC1394::initialize()
 {
   nodeid_t cameraNode;
@@ -282,6 +385,7 @@ DC1394::initialize()
     this->bDc1394CameraCreated = true;
   }
 
+  this->setFeatures(cameraNode);
 
   // Have the camera start sending us data
   if (dc1394_start_iso_transmission(this->raw1394Handle,

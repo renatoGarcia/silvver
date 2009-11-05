@@ -33,7 +33,7 @@ public:
    *
    * @param receptionistPort Port where the receptionist of silver-server is hearing.
    * @param serverIP IP address where silver-server is running.
-   * @param sceneDescriptorFile Path to XML file scene descriptor.
+   * @param sceneDescriptorFile Path to the lua file scene descriptor.
    */
   SceneMounter(const std::string& serverIp, const int receptionistPort,
                const std::string& sceneDescriptorFile);
@@ -41,7 +41,7 @@ public:
   /** Initialize all abstract cameras.
    *
    * The abstract cameras that will be initized are described in the scene
-   * descriptor XML file.
+   * descriptor lua file.
    */
   void mount(const bool showImages);
 
