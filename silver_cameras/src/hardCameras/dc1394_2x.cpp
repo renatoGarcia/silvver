@@ -16,17 +16,29 @@
 #include "dc1394_2x.hpp"
 
 #include <algorithm>
+#include <boost/assign/std/vector.hpp>
 #include <boost/lexical_cast.hpp>
+#include <boost/foreach.hpp>
 #include <boost/ref.hpp>
 #include <boost/bind.hpp>
+
+using namespace boost::assign;
 
 DC1394::DC1394(const scene::DC1394& config)
   :HardCamera(config)
   ,uid(config.uid)
   ,frameRate(config.frameRate)
+  ,videoMode(getDc1394VideoMode(config.colorMode))
+  ,bitsPerPixel(getBitsPerPixel(config.colorMode))
+  ,bufferSize((this->frameSize * this->bitsPerPixel) / 8)
   ,context(NULL)
   ,camera(NULL)
   ,currentFrame(NULL)
+  ,brightness(config.brightness)
+  ,exposure(config.exposure)
+  ,whiteBalance(config.whiteBalance)
+  ,shutter(config.shutter)
+  ,gain(config.gain)
 {
   for (int i = 0; i < 2; ++i)
   {
@@ -67,34 +79,98 @@ DC1394::~DC1394()
 }
 
 dc1394video_mode_t
-DC1394::getDc1394VideoMode() const
+DC1394::getDc1394VideoMode(const std::string& colorMode) const
 {
-  if (this->frameWidth == 640 && this->frameHeight == 480)
-  {
+  const unsigned fw = this->frameWidth;
+  const unsigned fh = this->frameHeight;
+  const std::string& cm = colorMode;
+
+  if      (fw==640  && fh==480  && cm=="yuv444")
+    return DC1394_VIDEO_MODE_160x120_YUV444;
+  else if (fw==320  && fh==240  && cm=="yuv422")
+    return DC1394_VIDEO_MODE_320x240_YUV422;
+  else if (fw==640  && fh==480  && cm=="yuv411")
+    return DC1394_VIDEO_MODE_640x480_YUV411;
+  else if (fw==640  && fh==480  && cm=="yuv422")
+    return DC1394_VIDEO_MODE_640x480_YUV422;
+  else if (fw==640  && fh==480  && cm=="rgb8"  )
+    return DC1394_VIDEO_MODE_640x480_RGB8;
+  else if (fw==640  && fh==480  && cm=="mono8" )
     return DC1394_VIDEO_MODE_640x480_MONO8;
-  }
-  else if (this->frameWidth == 800 && this->frameHeight == 600)
-  {
+  else if (fw==640  && fh==480  && cm=="mono16")
+    return DC1394_VIDEO_MODE_640x480_MONO16;
+  else if (fw==800  && fh==600  && cm=="yuv422")
+    return DC1394_VIDEO_MODE_800x600_YUV422;
+  else if (fw==800  && fh==600  && cm=="rgb8"  )
+    return DC1394_VIDEO_MODE_800x600_RGB8;
+  else if (fw==800  && fh==600  && cm=="mono8" )
     return DC1394_VIDEO_MODE_800x600_MONO8;
-  }
-  else if (this->frameWidth == 1024 && this->frameHeight == 768)
-  {
+  else if (fw==1024 && fh==768  && cm=="yuv422")
+    return DC1394_VIDEO_MODE_1024x768_YUV422;
+  else if (fw==1024 && fh==768  && cm=="rgb8"  )
+    return DC1394_VIDEO_MODE_1024x768_RGB8;
+  else if (fw==1024 && fh==768  && cm=="mono8" )
     return DC1394_VIDEO_MODE_1024x768_MONO8;
-  }
-  else if (this->frameWidth == 1280 && this->frameHeight == 960)
-  {
+  else if (fw==800  && fh==600  && cm=="mono16")
+    return DC1394_VIDEO_MODE_800x600_MONO16;
+  else if (fw==1024 && fh==768  && cm=="mono16")
+    return DC1394_VIDEO_MODE_1024x768_MONO16;
+  else if (fw==1280 && fh==960  && cm=="yuv422")
+    return DC1394_VIDEO_MODE_1280x960_YUV422;
+  else if (fw==1280 && fh==960  && cm=="rgb8"  )
+    return DC1394_VIDEO_MODE_1280x960_RGB8;
+  else if (fw==1280 && fh==960  && cm=="mono8" )
     return DC1394_VIDEO_MODE_1280x960_MONO8;
-  }
-  else if (this->frameWidth == 1600 && this->frameHeight == 1200)
-  {
+  else if (fw==1600 && fh==1200 && cm=="yuv422")
+    return DC1394_VIDEO_MODE_1600x1200_YUV422;
+  else if (fw==1600 && fh==1200 && cm=="rgb8"  )
+    return DC1394_VIDEO_MODE_1600x1200_RGB8;
+  else if (fw==1600 && fh==1200 && cm=="mono8" )
     return DC1394_VIDEO_MODE_1600x1200_MONO8;
-  }
+  else if (fw==1280 && fh==960  && cm=="mono16")
+    return DC1394_VIDEO_MODE_1280x960_MONO16;
+  else if (fw==1600 && fh==1200 && cm=="mono16")
+    return DC1394_VIDEO_MODE_1600x1200_MONO16;
   else
   {
     throw open_camera_error("Invalid resolution " +
                             boost::lexical_cast<std::string>(this->frameWidth) +
                             " x " +
-                            boost::lexical_cast<std::string>(this->frameHeight));
+                            boost::lexical_cast<std::string>(this->frameHeight)+
+                            " with color mode " + colorMode);
+  }
+}
+
+unsigned
+DC1394::getBitsPerPixel(const std::string& colorMode) const
+{
+  if (colorMode == "yuv444")
+  {
+    return 12;
+  }
+  else if (colorMode == "yuv422")
+  {
+    return 8;
+  }
+  else if (colorMode == "yuv411")
+  {
+    return 6;
+  }
+  else if (colorMode == "rgb8")
+  {
+    return 8;
+  }
+  else if (colorMode == "mono8")
+  {
+    return 8;
+  }
+  else if (colorMode == "mono16")
+  {
+    return 16;
+  }
+  else
+  {
+    throw std::invalid_argument("Invalid color mode: " + colorMode);
   }
 }
 
@@ -141,6 +217,104 @@ DC1394::getDc1394FrameRate() const
 }
 
 void
+DC1394::setFeatures()
+{
+  typedef boost::tuple<std::string, dc1394feature_t, std::string> FeatureTuple;
+
+  std::vector<FeatureTuple > features;
+  features += FeatureTuple(this->brightness, DC1394_FEATURE_BRIGHTNESS,
+                           "brightness"),
+              FeatureTuple(this->exposure, DC1394_FEATURE_EXPOSURE,
+                           "exposure"),
+              FeatureTuple(this->shutter, DC1394_FEATURE_SHUTTER,
+                           "shutter"),
+              FeatureTuple(this->gain, DC1394_FEATURE_GAIN,
+                           "gain");
+
+  FeatureTuple featureTuple;
+  dc1394switch_t power;
+  dc1394feature_mode_t featureMode;
+  unsigned value;
+  BOOST_FOREACH(featureTuple, features)
+  {
+    if (featureTuple.get<0>() == "untouched")
+    {
+      continue;
+    }
+
+    power = (featureTuple.get<0>() == "off") ? DC1394_OFF : DC1394_ON;
+    featureMode = (featureTuple.get<0>() == "auto") ?
+      DC1394_FEATURE_MODE_AUTO : DC1394_FEATURE_MODE_MANUAL;
+
+    //If there are a unsigned integer inside feature value string
+    if (power == DC1394_ON && featureMode == DC1394_FEATURE_MODE_MANUAL)
+    {
+      try{ value = boost::lexical_cast<unsigned>(featureTuple.get<0>());}
+      catch (const boost::bad_lexical_cast& error)
+      {
+        throw open_camera_error("Invalid value of " + featureTuple.get<2>() +
+                                " of dc1394 camera uid: " + this->uid);
+      }
+
+      if (dc1394_feature_set_value(this->camera, featureTuple.get<1>(), value)
+          != DC1394_SUCCESS)
+      {
+        throw open_camera_error("Error on setting " + featureTuple.get<2>() +
+                                " to dc1394 camera uid: " + this->uid);
+      }
+    }
+
+    if (dc1394_feature_set_mode(this->camera, featureTuple.get<1>(),
+                                featureMode)
+        != DC1394_SUCCESS)
+    {
+      throw open_camera_error("Error on setting auto mode to " +
+                              featureTuple.get<2>() +
+                              " feature of dc1394 camera uid: " + this->uid);
+    }
+
+    if (dc1394_feature_set_power(this->camera, featureTuple.get<1>(), power)
+        != DC1394_SUCCESS)
+    {
+      throw open_camera_error("Error on setting mode on to " +
+                              featureTuple.get<2>() +
+                              " feature of dc1394 camera uid: " + this->uid);
+    }
+  }
+
+
+  if (this->whiteBalance.at(0) != "untouched")
+  {
+    try
+    {
+      if (this->whiteBalance.at(0) == "off")
+      {
+        dc1394_feature_set_power(this->camera, DC1394_FEATURE_WHITE_BALANCE,
+                                 DC1394_OFF);
+      }
+      else
+      {
+        if (dc1394_feature_whitebalance_set_value(this->camera,
+                                                  boost::lexical_cast<unsigned>
+                                                    (this->whiteBalance.at(0)),
+                                                  boost::lexical_cast<unsigned>
+                                                    (this->whiteBalance.at(1)))
+            != DC1394_SUCCESS)
+        {
+          throw open_camera_error("Error on setting " + featureTuple.get<2>() +
+                                " to dc1394 camera uid: " + this->uid);
+        }
+      }
+    }
+    catch (const boost::bad_lexical_cast& error)
+    {
+      throw open_camera_error("Invalid white balance value to "
+                              "dc1394 camera uid: "+ this->uid);
+    }
+  }
+}
+
+void
 DC1394::initialize()
 {
   this->camera = dc1394_camera_new(this->context,
@@ -155,7 +329,7 @@ DC1394::initialize()
     throw open_camera_error("Could not set 400Mbps iso speed");
   }
 
-  if (dc1394_video_set_mode(camera, this->getDc1394VideoMode()))
+  if (dc1394_video_set_mode(camera, this->videoMode))
   {
     throw open_camera_error("Could not set video mode");
   }
@@ -170,6 +344,8 @@ DC1394::initialize()
   {
     throw open_camera_error("Could not setup camera. Make sure that the resolution and framerate are supported by your camera");
   }
+
+  this->setFeatures();
 
   if (dc1394_video_set_transmission(this->camera, DC1394_ON))
   {

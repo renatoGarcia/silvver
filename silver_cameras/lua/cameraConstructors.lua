@@ -20,6 +20,31 @@ function __getOptional(value, default)
     end
 end
 
+function PseudoCamera(parameters)
+    camera = {}
+    camera.__name = 'pseudocamera'
+
+    camera.uid = parameters.uid
+    camera.images_path = parameters.images_path
+
+    camera.focal_length = parameters.focal_length
+    camera.principal_point = parameters.principal_point
+    camera.radial_coef = parameters.radial_coef
+    camera.tangential_coef = parameters.tangential_coef
+
+    camera.translation_vector = __getOptional(parameters.translation_vector,
+                                              {0, 0, 0})
+    camera.rotation_matrix = __getOptional(parameters.rotation_matrix,
+                                           {1, 0, 0,
+                                            0, 1, 0,
+                                            0, 0, 1})
+
+    camera.resolution = parameters.resolution
+    camera.frame_rate = parameters.frame_rate
+
+    return camera
+end
+
 function Dragonfly(parameters)
     camera = {}
     camera.__name = 'dc1394'
@@ -44,10 +69,10 @@ function Dragonfly(parameters)
     camera.color_mode = __getOptional(parameters.color_mode, 'mono8')
     camera.brightness = __getOptional(parameters.brightness, 'untouched')
     camera.exposure = __getOptional(parameters.exposure, 'untouched')
-    camera.white_balance = __getOptional(parameters.white_balance,
-                                         {'untouched', 'untouched'})
     camera.shutter = __getOptional(parameters.shutter, 'untouched')
     camera.gain = __getOptional(parameters.gain, 'untouched')
+    camera.white_balance = __getOptional(parameters.white_balance,
+                                         {'untouched', 'untouched'})
 
     return camera
 end

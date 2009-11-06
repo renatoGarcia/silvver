@@ -51,10 +51,22 @@ private:
 
   // Convert the HardCamera frameWidth and frameHeight attributes to an
   // equivalent dc1394video_mode_t
-  dc1394video_mode_t getDc1394VideoMode() const;
+  dc1394video_mode_t getDc1394VideoMode(const std::string& colorMode) const;
+
+  unsigned getBitsPerPixel(const std::string& colorMode) const;
 
   // Convert the HardCamera frameRate to an equivalent dc1394framerate_t
   dc1394framerate_t getDc1394FrameRate() const;
+
+  void setFeatures();
+
+  const dc1394video_mode_t videoMode;
+
+  /// Camera frame bits per pixel
+  const unsigned bitsPerPixel;
+
+  /// Frame buffer size in bytes
+  const unsigned bufferSize;
 
   // dc1394 context
   dc1394_t* context;
@@ -69,6 +81,12 @@ private:
   boost::condition_variable_any unreadFrameCondition;
 
   boost::scoped_ptr<boost::thread> grabFrameThread;
+
+  const std::string brightness;
+  const std::string exposure;
+  const boost::array<std::string, 2> whiteBalance;
+  const std::string shutter;
+  const std::string gain;
 };
 
 #endif /* _DC1394_2X_HPP_ */
