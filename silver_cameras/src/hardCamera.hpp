@@ -95,11 +95,14 @@ public:
 
 protected:
 
-  HardCamera(const scene::Hardware& config);
+  HardCamera(const scene::Hardware& config, unsigned bitsPerPixel);
 
   // Frame size measures in pixels.
   const unsigned frameSize;
   const unsigned frameWidth, frameHeight;
+
+  /// Camera frame bits per pixel
+  const unsigned bitsPerPixel;
 
   /// Each bool represents if one client read or not the last
   /// received image from camera. Each client have one unique id,

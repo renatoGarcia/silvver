@@ -62,9 +62,6 @@ private:
 
   const dc1394video_mode_t videoMode;
 
-  /// Camera frame bits per pixel
-  const unsigned bitsPerPixel;
-
   /// Frame buffer size in bytes
   const unsigned bufferSize;
 

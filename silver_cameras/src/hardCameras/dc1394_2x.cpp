@@ -25,11 +25,10 @@
 using namespace boost::assign;
 
 DC1394::DC1394(const scene::DC1394& config)
-  :HardCamera(config)
+  :HardCamera(config, getBitsPerPixel(config.colorMode))
   ,uid(config.uid)
   ,frameRate(config.frameRate)
   ,videoMode(getDc1394VideoMode(config.colorMode))
-  ,bitsPerPixel(getBitsPerPixel(config.colorMode))
   ,bufferSize((this->frameSize * this->bitsPerPixel) / 8)
   ,context(NULL)
   ,camera(NULL)
@@ -410,7 +409,7 @@ DC1394::captureFrame(IplImage** iplImage, unsigned clientUid)
   }
 
   // This don't work for images whith more than 1 byte per pixel
-  if (this->currentFrame->color_coding == DC1394_COLOR_CODING_MONO8)
+  if (this->bitsPerPixel == 8)
   {
     if (dc1394_bayer_decoding_8bit(this->currentFrame->image,
                                    (uint8_t*)(*iplImage)->imageData,
@@ -418,6 +417,20 @@ DC1394::captureFrame(IplImage** iplImage, unsigned clientUid)
                                    this->frameHeight,
                                    DC1394_COLOR_FILTER_RGGB,
                                    DC1394_BAYER_METHOD_SIMPLE))
+    {
+      throw capture_image_error("Error on bayer decoding");
+
+    }
+  }
+  else if (this->bitsPerPixel == 16)
+  {
+    if (dc1394_bayer_decoding_16bit((uint16_t*)this->currentFrame->image,
+                                    (uint16_t*)(*iplImage)->imageData,
+                                    this->frameWidth,
+                                    this->frameHeight,
+                                    DC1394_COLOR_FILTER_RGGB,
+                                    DC1394_BAYER_METHOD_SIMPLE,
+                                    this->bitsPerPixel))
     {
       throw capture_image_error("Error on bayer decoding");
 

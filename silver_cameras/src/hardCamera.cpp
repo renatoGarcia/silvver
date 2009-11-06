@@ -1,9 +1,10 @@
 #include "hardCamera.hpp"
 
-HardCamera::HardCamera(const scene::Hardware& config)
+HardCamera::HardCamera(const scene::Hardware& config, unsigned bitsPerPixel)
   :frameSize(config.resolution.at(0) * config.resolution.at(1))
   ,frameWidth(config.resolution.at(0))
   ,frameHeight(config.resolution.at(1))
+  ,bitsPerPixel(bitsPerPixel)
   ,mapx(cvCreateImage(cvSize(this->frameWidth, this->frameHeight),
                       IPL_DEPTH_32F, 1))
   ,mapy(cvCreateImage(cvSize(this->frameWidth, this->frameHeight),
@@ -50,9 +51,22 @@ HardCamera::addClient()
 void
 HardCamera::createIplImage(IplImage** iplImage) const
 {
+  int depth;
+  if (this->bitsPerPixel == 8)
+  {
+    depth = IPL_DEPTH_8U;
+  }
+  else if (this->bitsPerPixel == 16)
+  {
+    depth = IPL_DEPTH_16U;
+  }
+  else
+  {
+    throw camera_parameter_error("Invalid image depth");
+  }
+
   *iplImage = cvCreateImage(cvSize(this->frameWidth, this->frameHeight),
-                            IPL_DEPTH_8U,
-                            3);
+                            depth, 3);
 }
 
 void

@@ -25,6 +25,8 @@ public:
 
 private:
 
+  static const unsigned BITS_PER_PIXEL = 8;
+
   const boost::filesystem::path path;
 
   const float frameRate;
