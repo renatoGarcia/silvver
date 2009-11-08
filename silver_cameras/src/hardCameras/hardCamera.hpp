@@ -18,13 +18,14 @@
 
 #include <stdexcept>
 #include <string>
+#include <vector>
 
 #include <boost/noncopyable.hpp>
 
 #include <opencv/cv.h>
 #include <opencv/highgui.h>
 
-#include "scene.hpp"
+#include "hardCameraDescriptions.hpp"
 
 /** Base class to all classes which manage camera hardware.
  * All hardware camera class must fill the following requeriments:

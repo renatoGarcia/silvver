@@ -4,7 +4,7 @@
 #include <vector>
 #include <string>
 
-#include "abstractCamera.hpp"
+#include "abstractCameras/abstractCamera.hpp"
 #include "connection.hpp"
 #include "scene.hpp"
 

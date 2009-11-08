@@ -1,7 +1,7 @@
 #ifndef PSEUDO_CAMERA_HPP
 #define PSEUDO_CAMERA_HPP
 
-#include "../hardCamera.hpp"
+#include "hardCamera.hpp"
 
 #include <string>
 

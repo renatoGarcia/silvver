@@ -16,15 +16,15 @@
 #ifndef _ARTKP_CAMERA_H_
 #define _ARTKP_CAMERA_H_
 
-#include <vector>
-
 #include <boost/shared_ptr.hpp>
 #include <fstream>
 #include <string>
+#include <vector>
 
 #include <ARToolKitPlus/TrackerSingleMarker.h>
 
 #include "abstractCamera.hpp"
+#include "targetDescriptions.hpp"
 
 class ArtkpCamera  : public AbstractCamera
 {

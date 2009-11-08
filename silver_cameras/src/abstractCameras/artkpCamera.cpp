@@ -19,8 +19,8 @@
 
 #include <ARToolKitPlus/TrackerSingleMarkerImpl.h>
 
-#include "connection.ipp"
-#include "silverTypes.hpp"
+#include "../connection.ipp"
+#include <silverTypes.hpp>
 
 ArtkpCamera::ArtkpCamera(const scene::Camera& cameraConfig,
                          const scene::ArtkpTargets& targets,

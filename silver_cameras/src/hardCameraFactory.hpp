@@ -23,7 +23,7 @@
 #include <map>
 #include <string>
 
-#include "hardCamera.hpp"
+#include "hardCameras/hardCamera.hpp"
 #include "scene.hpp"
 
 class HardCameraFactory : public boost::noncopyable

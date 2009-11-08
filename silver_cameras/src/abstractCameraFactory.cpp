@@ -17,7 +17,7 @@
 
 #include <processorOptions.hpp>
 
-#include "artkpCamera.hpp"
+#include "abstractCameras/artkpCamera.hpp"
 
 AbstractCamera*
 AbstractCameraFactory::create(const scene::Camera& cameraConfig,

@@ -21,7 +21,7 @@
 
 #include <boost/ptr_container/ptr_vector.hpp>
 
-#include "abstractCamera.hpp"
+#include "abstractCameras/abstractCamera.hpp"
 #include "connection.hpp"
 #include "scene.hpp"
 

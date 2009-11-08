@@ -16,20 +16,19 @@
 #ifndef _ABSTRACT_CAMERA_HPP_
 #define _ABSTRACT_CAMERA_HPP_
 
-#include <string>
-
 #include <boost/noncopyable.hpp>
 #include <boost/scoped_ptr.hpp>
 #include <boost/shared_ptr.hpp>
 #include <boost/thread/thread.hpp>
 #include <boost/tuple/tuple.hpp>
+#include <string>
 
 #include <opencv/cv.h>
 
-#include "connection.hpp"
-#include "hardCamera.hpp"
-#include "scene.hpp"
-#include "silverTypes.hpp"
+#include "../connection.hpp"
+#include "../hardCameras/hardCamera.hpp"
+#include "../scene.hpp"
+#include <silverTypes.hpp>
 
 /// Abstract base class to all abstract cameras.
 class AbstractCamera : boost::noncopyable

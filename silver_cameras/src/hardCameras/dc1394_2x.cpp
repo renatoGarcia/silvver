@@ -21,6 +21,7 @@
 #include <boost/foreach.hpp>
 #include <boost/ref.hpp>
 #include <boost/bind.hpp>
+#include <boost/tuple/tuple.hpp>
 
 using namespace boost::assign;
 

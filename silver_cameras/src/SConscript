@@ -6,14 +6,14 @@ else:
     cleaning = False
 
 sources = Split("""cfParser.cpp
-                   abstractCamera.cpp
+                   abstractCameras/abstractCamera.cpp
                    connection.cpp
                    sceneMounter.cpp
-                   hardCamera.cpp
                    hardCameraFactory.cpp
                    main.cpp
-                   artkpCamera.cpp
+                   abstractCameras/artkpCamera.cpp
                    abstractCameraFactory.cpp
+                   hardCameras/hardCamera.cpp
                    hardCameras/pseudoCamera.cpp""")
 
 if 'dc1394_control' in build_optional_flags or cleaning:

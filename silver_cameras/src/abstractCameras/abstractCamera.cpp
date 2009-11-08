@@ -20,7 +20,7 @@
 
 #include <opencv/highgui.h>
 
-#include "hardCameraFactory.hpp"
+#include "../hardCameraFactory.hpp"
 // #include "tsPrint.hpp"
 
 AbstractCamera::AbstractCamera(const scene::Camera& cameraConfig,

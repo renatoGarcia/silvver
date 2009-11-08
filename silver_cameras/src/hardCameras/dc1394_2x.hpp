@@ -16,7 +16,7 @@
 #ifndef _DC1394_2X_HPP_
 #define _DC1394_2X_HPP_
 
-#include "../hardCamera.hpp"
+#include "hardCamera.hpp"
 
 #include <boost/scoped_ptr.hpp>
 #include <boost/thread/condition.hpp>
