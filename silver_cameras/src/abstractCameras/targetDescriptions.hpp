@@ -36,13 +36,13 @@ namespace scene
     /// ARToolKitPlus patter width [mm].
     int patternWidth;
 
-    /// Each tuple is a pair of: the  path to the file describing one pattern
-    /// in second position, and the unique identifier that silver will
-    /// attribute to this pattern
+    /// Each tuple is a pair of: the unique identifier that silvver will
+    /// attribute to this pattern, and the path to the file describing
+    /// the pattern.
     std::vector< boost::tuple<unsigned, std::string> > patterns;
   };
 
   /// boost::variant with all structs of target configurations.
-  typedef boost::variant<ArtkpTargets> VariantAnyTarget;
+  typedef boost::variant<ArtkpTargets> AnyTarget;
 }
 #endif /* _TARGET_DESCRIPTIONS_HPP_ */

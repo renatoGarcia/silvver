@@ -37,7 +37,7 @@ namespace scene
    */
   struct Camera
   {
-    VariantHardwareCamera hardware;
+    AnyHardwareCamera hardware;
 
     /// Translation vector of camera, in origin referential.
     boost::array<double, 3> translationVector;

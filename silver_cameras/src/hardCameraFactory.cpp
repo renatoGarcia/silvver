@@ -37,7 +37,7 @@ boost::mutex
 HardCameraFactory::mutexCameraCreate;
 
 boost::tuple<boost::shared_ptr<HardCamera>, unsigned>
-HardCameraFactory::create(const scene::VariantHardwareCamera& cameraConfig)
+HardCameraFactory::create(const scene::AnyHardwareCamera& cameraConfig)
 {
   // HardCameras can't be simultaneously initialized
   boost::mutex::scoped_lock lock(HardCameraFactory::mutexCameraCreate);

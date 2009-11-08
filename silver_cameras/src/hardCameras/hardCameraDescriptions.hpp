@@ -105,9 +105,9 @@ namespace scene
   /** This is a boost::variant with all hardware camera models,
    * i.e. all structs which inherit from Hardware struct.
    */
-  typedef boost::variant<PseudoCamera, DC1394> VariantHardwareCamera;
+  typedef boost::variant<PseudoCamera, DC1394> AnyHardwareCamera;
 
-  /** Functor which receives a VariantHardwareCamera and return a copy
+  /** Functor which receives a AnyHardwareCamera and return a copy
    * of its Hardware base class.
    */
   struct GetHardware : public boost::static_visitor<Hardware>

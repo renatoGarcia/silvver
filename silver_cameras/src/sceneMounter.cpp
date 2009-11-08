@@ -50,7 +50,7 @@ SceneMounter::mount(const bool showImages)
 
 void
 SceneMounter::constructAbstractCamera(const scene::Camera& camera,
-                                      const scene::VariantAnyTarget& targets,
+                                      const scene::AnyTarget& targets,
                                       const bool showImages)
 {
   boost::shared_ptr<Connection>

@@ -38,7 +38,7 @@ public:
    *         the clientUid is an unsigned with the uid of calling object.
    */
    static boost::tuple<boost::shared_ptr<HardCamera>, unsigned>
-   create(const scene::VariantHardwareCamera& cameraConfig);
+   create(const scene::AnyHardwareCamera& cameraConfig);
 
 private:
 
