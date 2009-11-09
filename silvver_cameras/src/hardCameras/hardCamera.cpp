@@ -1,10 +1,28 @@
+/* Copyright 2009 Renato Florentino Garcia <fgar.renato@gmail.com>
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License version 3, as
+ * published by the Free Software Foundation.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
 #include "hardCamera.hpp"
+
+#include <opencv/highgui.h>
 
 HardCamera::HardCamera(const scene::Hardware& config, unsigned bitsPerPixel)
   :frameSize(config.resolution.at(0) * config.resolution.at(1))
   ,frameWidth(config.resolution.at(0))
   ,frameHeight(config.resolution.at(1))
   ,bitsPerPixel(bitsPerPixel)
+  ,unreadImage()
   ,mapx(cvCreateImage(cvSize(this->frameWidth, this->frameHeight),
                       IPL_DEPTH_32F, 1))
   ,mapy(cvCreateImage(cvSize(this->frameWidth, this->frameHeight),

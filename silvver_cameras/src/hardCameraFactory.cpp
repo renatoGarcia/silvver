@@ -69,6 +69,7 @@ HardCameraFactory::create(const scene::AnyHardwareCamera& cameraConfig)
              (hardwareConfig.uid, hardCamera.get<0>()));
   }
 
+  // Set one more client to hardCamera already created and get the client uid.
   hardCamera.get<1>() = hardCamera.get<0>()->addClient();
 
   return hardCamera;

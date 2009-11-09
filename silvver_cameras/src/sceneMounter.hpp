@@ -16,13 +16,10 @@
 #ifndef _SCENE_MOUNTER_HPP_
 #define _SCENE_MOUNTER_HPP_
 
-#include <vector>
+#include <boost/ptr_container/ptr_vector.hpp>
 #include <string>
 
-#include <boost/ptr_container/ptr_vector.hpp>
-
 #include "abstractCameras/abstractCamera.hpp"
-#include "connection.hpp"
 #include "scene.hpp"
 
 class SceneMounter
@@ -31,12 +28,15 @@ public:
 
   /** sceneMounter class constructor.
    *
-   * @param receptionistPort Port where the receptionist of silvver-server is hearing.
    * @param serverIP IP address where silvver-server is running.
+   * @param receptionistPort Port where the receptionist of silvver-server
+   *                         is hearing.
    * @param sceneDescriptorFile Path to the lua file scene descriptor.
    */
   SceneMounter(const std::string& serverIp, const int receptionistPort,
                const std::string& sceneDescriptorFile);
+
+  ~SceneMounter();
 
   /** Initialize all abstract cameras.
    *
@@ -45,9 +45,6 @@ public:
    */
   void mount(const bool showImages);
 
-  /// Close all opened abtract cameras
-  void dismount();
-
 private:
 
   const std::string sceneDescriptorFile;
@@ -55,11 +52,12 @@ private:
   const std::string serverIp;
   const unsigned receptionistPort;
 
-  // Initialize the abstract camera given by cameraConfig
+  /// Initialize the abstract camera given by cameraConfig and targets.
   void constructAbstractCamera(const scene::Camera& cameraConfig,
                                const scene::AnyTarget& targets,
                                const bool showImages);
 
+  /// Handle all opened abstract cameras.
   boost::ptr_vector<AbstractCamera> abstractCameras;
 };
 

@@ -25,7 +25,6 @@
 #include <boost/thread/condition.hpp>
 #include <boost/thread/shared_mutex.hpp>
 #include <boost/thread/thread.hpp>
-// #include <boost/thread/mutex.hpp>
 
 class PseudoCamera : public HardCamera
 {
@@ -56,8 +55,6 @@ private:
 
   // Tempo que pseudoCamera ficará ociosa para simular uma dada frequência
   const boost::posix_time::millisec delay;
-
-  // boost::mutex mutexCaptureFrame;
 
   IplImage* currentFrame;
   IplImage* frameBuffer[2];

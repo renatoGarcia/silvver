@@ -17,6 +17,8 @@
 
 #include <boost/bind.hpp>
 
+#include <opencv/highgui.h>
+
 namespace bfs = boost::filesystem;
 namespace bpt = boost::posix_time;
 
@@ -30,6 +32,12 @@ PseudoCamera::PseudoCamera(const scene::PseudoCamera& config)
 
 PseudoCamera::~PseudoCamera()
 {
+  if (this->grabFrameThread)
+  {
+    this->grabFrameThread->interrupt();
+    this->grabFrameThread->join();
+  }
+
   for (int i=0; i<2; ++i)
   {
     if (this->frameBuffer[i] != NULL)

@@ -23,12 +23,13 @@
 
 #include <boost/array.hpp>
 #include <boost/optional.hpp>
+#include <boost/preprocessor/punctuation/comma_if.hpp>
 #include <boost/preprocessor/seq/for_each_i.hpp>
 #include <boost/tuple/tuple.hpp>
 #include <vector>
 
-#include "hardCameras/hardCameraDescriptions.hpp"
 #include "abstractCameras/targetDescriptions.hpp"
+#include "hardCameras/hardCameraDescriptions.hpp"
 
 namespace scene
 {
@@ -60,7 +61,7 @@ namespace scene
 #define OPTIONAL_targets_macro(r, data, i, elem) BOOST_PP_COMMA_IF(i) boost::optional<elem>
 
     /// Tuple with configuration structs of all targets in scene,
-    /// and only ifit is in scene.
+    /// and only if it is in scene.
      boost::tuple<BOOST_PP_SEQ_FOR_EACH_I(OPTIONAL_targets_macro,
                                           _,
                                           ALL_TARGETS_SEQ        )> targets;

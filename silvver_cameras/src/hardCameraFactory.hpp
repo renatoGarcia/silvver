@@ -16,6 +16,7 @@
 #ifndef _HARD_CAMERA_FACTORY_HPP_
 #define _HARD_CAMERA_FACTORY_HPP_
 
+#include <boost/noncopyable.hpp>
 #include <boost/shared_ptr.hpp>
 #include <boost/thread/mutex.hpp>
 #include <boost/tuple/tuple.hpp>
@@ -24,7 +25,7 @@
 #include <string>
 
 #include "hardCameras/hardCamera.hpp"
-#include "scene.hpp"
+#include "hardCameras/hardCameraDescriptions.hpp"
 
 class HardCameraFactory : public boost::noncopyable
 {

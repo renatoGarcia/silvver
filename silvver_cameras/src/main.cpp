@@ -13,11 +13,10 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include <iostream>
-#include <string>
-
 #include <boost/program_options.hpp>
 #include <boost/version.hpp>
+#include <iostream>
+#include <string>
 
 #include "sceneMounter.hpp"
 
@@ -76,8 +75,6 @@ int main(int argc, char **argv)
 
     getchar();
     std::cout << "Quitting..." << std::endl << std::endl;
-
-    sceneMounter.dismount();
   }
 
   return 0;

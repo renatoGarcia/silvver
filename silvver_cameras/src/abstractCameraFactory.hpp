@@ -13,11 +13,10 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef ABSTRACT_CAMERA_FACTORY_HPP
-#define ABSTRACT_CAMERA_FACTORY_HPP
+#ifndef _ABSTRACT_CAMERA_FACTORY_HPP_
+#define _ABSTRACT_CAMERA_FACTORY_HPP_
 
-#include <vector>
-#include <string>
+#include <boost/shared_ptr.hpp>
 
 #include "abstractCameras/abstractCamera.hpp"
 #include "connection.hpp"
@@ -39,4 +38,4 @@ private:
 };
 
 
-#endif /* ABSTRACT_CAMERA_FACTORY_HPP */
+#endif /* _ABSTRACT_CAMERA_FACTORY_HPP_ */

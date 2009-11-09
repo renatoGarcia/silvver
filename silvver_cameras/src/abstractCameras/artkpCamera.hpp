@@ -16,8 +16,10 @@
 #ifndef _ARTKP_CAMERA_HPP_
 #define _ARTKP_CAMERA_HPP_
 
+#include <boost/scoped_ptr.hpp>
 #include <boost/shared_ptr.hpp>
-#include <fstream>
+#include <boost/thread.hpp>
+#include <stdexcept>
 #include <string>
 #include <vector>
 
@@ -25,6 +27,7 @@
 
 #include "abstractCamera.hpp"
 #include "targetDescriptions.hpp"
+#include "../connection.hpp"
 
 class ArtkpCamera  : public AbstractCamera
 {
@@ -53,11 +56,15 @@ public:
 
   ~ArtkpCamera();
 
-  virtual void operator()();
+  virtual void run();
+
+  virtual void stop();
 
 private:
 
-  void initialize();
+  /// It's the method which will be called when a new thread was created, and
+  /// will make all camera work.
+ void makeWork();
 
   class MyLogger : public ARToolKitPlus::Logger
   {
@@ -89,6 +96,8 @@ private:
 
   /// Translates the inner artkp id to silvver id
   boost::array<int, MAX_TARGETS> idMap;
+
+  boost::scoped_ptr<boost::thread> runThread;
 };
 
 #endif /* _ARTKP_CAMERA_HPP_ */

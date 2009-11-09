@@ -13,13 +13,12 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef CF_PARSER_HPP
-#define CF_PARSER_HPP
-
-#include <stdexcept>
-#include <string>
+#ifndef _CF_PARSER_HPP_
+#define _CF_PARSER_HPP_
 
 #include <boost/array.hpp>
+#include <stdexcept>
+#include <string>
 
 extern "C"
 {
@@ -69,4 +68,4 @@ private:
 };
 
 
-#endif // CF_PARSER_HPP
+#endif // _CF_PARSER_HPP_

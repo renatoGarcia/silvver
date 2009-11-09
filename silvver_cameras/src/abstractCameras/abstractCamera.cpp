@@ -16,7 +16,7 @@
 #include "abstractCamera.hpp"
 
 #include <cstddef>
-#include <boost/ref.hpp>
+#include <boost/bind.hpp>
 
 #include <opencv/highgui.h>
 
@@ -28,8 +28,6 @@ AbstractCamera::AbstractCamera(const scene::Camera& cameraConfig,
                                bool showImage)
   :currentFrame(NULL)
   ,serverConnection(connection)
-  ,stopping(false)
-  ,runThread()
   ,hardCamera(HardCameraFactory::create(cameraConfig.hardware))
   ,rot(cameraConfig.rotationMatrix)
   ,trans(cameraConfig.translationVector)
@@ -47,24 +45,14 @@ AbstractCamera::AbstractCamera(const scene::Camera& cameraConfig,
 
 AbstractCamera::~AbstractCamera()
 {
-  cvReleaseImage(&currentFrame);
+  if (this->currentFrame != NULL)
+  {
+    cvReleaseImage(&this->currentFrame);
+  }
   if (this->showImage)
   {
     cvDestroyWindow(this->windowName.c_str());
   }
-}
-
-void
-AbstractCamera::run()
-{
-  this->runThread.reset(new boost::thread(boost::ref(*this)));
-}
-
-void
-AbstractCamera::stop()
-{
-  this->stopping = true;
-  this->runThread->join();
 }
 
 void

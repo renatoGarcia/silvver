@@ -16,6 +16,7 @@
 #include "artkpCamera.hpp"
 
 #include <boost/foreach.hpp>
+#include <fstream>
 
 #include <ARToolKitPlus/TrackerSingleMarkerImpl.h>
 
@@ -35,7 +36,7 @@ ArtkpCamera::ArtkpCamera(const scene::Camera& cameraConfig,
   ,logger()
   ,tracker(new ARToolKitPlus::TrackerSingleMarkerImpl<16,16,64,50,50>
            (this->currentFrame->width, this->currentFrame->height))
-
+  ,runThread()
 {
   int targetNum = 0;
   boost::tuple<unsigned, std::string> pattern;
@@ -61,14 +62,8 @@ ArtkpCamera::ArtkpCamera(const scene::Camera& cameraConfig,
             << 0.0 << " " << 0.0 << " " << 0.0 << " "
             << 0.0 << " " << 0.0 << " " << 0.0 << " "
             << 0;
-}
+  tmpConfig.close();
 
-ArtkpCamera::~ArtkpCamera()
-{}
-
-void
-ArtkpCamera::initialize()
-{
   if(!this->tracker->init(this->camConfigFileName.c_str(),
                           1000.0f,
                           7000.0f,
@@ -81,9 +76,8 @@ ArtkpCamera::initialize()
 
   this->tracker->setPatternWidth(this->patternWidth);
 
-  // Define a porcentagem da borda no tamanho da imagem.
+  // Define the proportion of bord in image size.
   this->tracker->setBorderWidth(1.0/6.0);
-  // this->tracker->setBorderWidth(/*0.250f*/0.125f);
 
   this->tracker->setThreshold(this->threshold);
 
@@ -101,11 +95,36 @@ ArtkpCamera::initialize()
   }
 }
 
-void
-ArtkpCamera::operator()()
+ArtkpCamera::~ArtkpCamera()
 {
-  this->initialize();
+  if (this->runThread)
+  {
+    this->runThread->interrupt();
+    this->runThread->join();
+  }
+}
 
+void
+ArtkpCamera::run()
+{
+  this->runThread.reset(new boost::thread(boost::bind<void>
+                                          (&ArtkpCamera::makeWork,
+                                           this)));
+}
+
+void
+ArtkpCamera::stop()
+{
+  if (this->runThread)
+  {
+    this->runThread->interrupt();
+    this->runThread->join();
+  }
+}
+
+void
+ArtkpCamera::makeWork()
+{
   std::vector<silvver::Identity<silvver::Pose> > poses;
 
   int nMarkers = 0;
@@ -115,8 +134,10 @@ ArtkpCamera::operator()()
   ARFloat transMatrix[3][4];
   silvver::Identity<silvver::Pose> pose;
 
-  while(!this->stopping)
+  while(true)
   {
+    boost::this_thread::interruption_point();
+
     poses.clear();
     this->updateFrame();
 

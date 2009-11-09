@@ -17,11 +17,12 @@
 
 #include <boost/foreach.hpp>
 #include <boost/preprocessor/repetition/repeat.hpp>
-#include <boost/preprocessor/slot/slot.hpp>
+#include <boost/preprocessor/seq/size.hpp>
+#include <boost/shared_ptr.hpp>
 
+#include "connection.hpp"
 #include "cfParser.hpp"
 #include "abstractCameraFactory.hpp"
-#include <request.hpp>
 
 SceneMounter::SceneMounter(const std::string& serverIp,
                            const int receptionistPort,
@@ -29,6 +30,9 @@ SceneMounter::SceneMounter(const std::string& serverIp,
   :sceneDescriptorFile(sceneDescriptorFile)
   ,serverIp(serverIp)
   ,receptionistPort(receptionistPort)
+{}
+
+ SceneMounter::~SceneMounter()
 {}
 
 void
@@ -70,13 +74,4 @@ SceneMounter::constructAbstractCamera(const scene::Camera& camera,
                                                                 showImages));
 
   this->abstractCameras.back().run();
-}
-
-void SceneMounter::dismount()
-{
-  BOOST_FOREACH(AbstractCamera& abstractCamera,
-                this->abstractCameras)
-  {
-    abstractCamera.stop();
-  }
 }

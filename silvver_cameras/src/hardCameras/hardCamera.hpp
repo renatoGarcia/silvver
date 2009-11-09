@@ -19,11 +19,9 @@
 #include <stdexcept>
 #include <string>
 #include <vector>
-
 #include <boost/noncopyable.hpp>
 
 #include <opencv/cv.h>
-#include <opencv/highgui.h>
 
 #include "hardCameraDescriptions.hpp"
 
@@ -98,7 +96,9 @@ protected:
 
   HardCamera(const scene::Hardware& config, unsigned bitsPerPixel);
 
-  // Frame size measures in pixels.
+  void undistortFrame(IplImage* frame);
+
+  /// Frame size measures in pixels.
   const unsigned frameSize;
   const unsigned frameWidth, frameHeight;
 
@@ -109,8 +109,6 @@ protected:
   /// received image from camera. Each client have one unique id,
   /// which is it position on vector.
   std::vector<bool> unreadImage;
-
-  void undistortFrame(IplImage* frame);
 
 private:
 
