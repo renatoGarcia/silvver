@@ -78,6 +78,9 @@ private:
   /// Width of pattern, counting with border. [mm]
   const int patternWidth;
 
+  /// Grey level threshold between black and white.
+  const int threshold;
+
   MyLogger logger;
 
   const boost::scoped_ptr<ARToolKitPlus::TrackerSingleMarker> tracker;

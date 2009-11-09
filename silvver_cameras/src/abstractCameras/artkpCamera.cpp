@@ -27,10 +27,11 @@ ArtkpCamera::ArtkpCamera(const scene::Camera& cameraConfig,
                          boost::shared_ptr<Connection> connection,
                          bool showImages)
   :AbstractCamera(cameraConfig, connection, showImages)
-  ,camConfigFileName("/tmp/artkpCamera" + /* + cameraConfig.uid*/
+  ,camConfigFileName("/tmp/artkpCamera" +
                      boost::apply_visitor(scene::GetHardware(),
                                           cameraConfig.hardware).uid)
   ,patternWidth(targets.patternWidth)
+  ,threshold(targets.threshold)
   ,logger()
   ,tracker(new ARToolKitPlus::TrackerSingleMarkerImpl<16,16,64,50,50>
            (this->currentFrame->width, this->currentFrame->height))
@@ -84,7 +85,7 @@ ArtkpCamera::initialize()
   this->tracker->setBorderWidth(1.0/6.0);
   // this->tracker->setBorderWidth(/*0.250f*/0.125f);
 
-  this->tracker->setThreshold(100);
+  this->tracker->setThreshold(this->threshold);
 
   this->tracker->setPoseEstimator(ARToolKitPlus::POSE_ESTIMATOR_RPP);
 
@@ -122,7 +123,7 @@ ArtkpCamera::operator()()
     nMarkers = 0;
 
     if (this->tracker->arDetectMarker((ARToolKitPlus::ARUint8*)this->currentFrame->imageData,
-                                      100,
+                                      this->threshold,
                                       &markerInfo,
                                       &nMarkers)
         < 0 )

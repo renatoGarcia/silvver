@@ -203,6 +203,7 @@ CfParser::readArtkpTargets(lua_State* L)
   scene::ArtkpTargets artkpTargets;
 
   artkpTargets.patternWidth = readValue<int>(L, "pattern_width");
+  artkpTargets.threshold    = readValue<int>(L, "threshold");
 
   std::string patternPath;
   unsigned uid;
