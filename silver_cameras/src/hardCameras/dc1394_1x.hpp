@@ -16,7 +16,7 @@
 #ifndef _DC1394_1X_HPP_
 #define _DC1394_1X_HPP_
 
-#include "../hardCamera.hpp"
+#include "hardCamera.hpp"
 
 #include <boost/array.hpp>
 #include <boost/scoped_ptr.hpp>
@@ -30,7 +30,6 @@
 #include <libraw1394/raw1394.h>
 
 #include "conversions/conversions.h"
-#include "../scene.hpp"
 
 class DC1394: public HardCamera
 {
@@ -75,9 +74,6 @@ private:
   bool                 bDc1394CameraCreated;
 
   const int videoMode;
-
-  /// Camera frame bits per pixel
-  const unsigned bitsPerPixel;
 
   /// Frame buffer size in bytes
   const unsigned bufferSize;

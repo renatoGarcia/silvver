@@ -30,13 +30,12 @@
 using namespace boost::assign;
 
 DC1394::DC1394(const scene::DC1394& config)
-  :HardCamera(config)
+  :HardCamera(config, getBitsPerPixel(config.colorMode))
   ,uid(config.uid)
   ,frameRate(config.frameRate)
   ,raw1394Handle(NULL)
   ,bDc1394CameraCreated(false)
   ,videoMode(getDc1394VideoMode(config.colorMode))
-  ,bitsPerPixel(getBitsPerPixel(config.colorMode))
   ,bufferSize((this->frameSize * this->bitsPerPixel) / 8)
   ,frameBuffer(boost::extents[2][bufferSize])
   ,currentFrame(0)
