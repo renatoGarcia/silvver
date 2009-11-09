@@ -16,6 +16,8 @@
 #include "sceneMounter.hpp"
 
 #include <boost/foreach.hpp>
+#include <boost/preprocessor/repetition/repeat.hpp>
+#include <boost/preprocessor/slot/slot.hpp>
 
 #include "cfParser.hpp"
 #include "abstractCameraFactory.hpp"
@@ -38,15 +40,21 @@ SceneMounter::mount(const bool showImages)
   scene::Camera camera;
   BOOST_FOREACH(camera, scene.cameras)
   {
-    // If there are ARToolKitPlus targets.
-    if(scene.targets.get<0>())
-    {
-      this->constructAbstractCamera(camera,
-                                    *scene.targets.get<0>(),
-                                    showImages);
+#define CALL_construct_macro(z, n, text)                        \
+    if(scene.targets.get<n>())                                  \
+    {                                                           \
+      this->constructAbstractCamera(camera,                     \
+                                    *scene.targets.get<n>(),    \
+                                    showImages);                \
     }
+
+    // Repeat CALL_construct_macro with one indice "n" for each type
+    // in ALL_TARGETS_SEQ.
+    BOOST_PP_REPEAT(BOOST_PP_SEQ_SIZE(ALL_TARGETS_SEQ),
+                    CALL_construct_macro, _)
   }
 }
+#undef CALL_construct_macro
 
 void
 SceneMounter::constructAbstractCamera(const scene::Camera& camera,

@@ -23,10 +23,15 @@
 #ifndef _TARGET_DESCRIPTIONS_HPP_
 #define _TARGET_DESCRIPTIONS_HPP_
 
-#include <string>
-#include <vector>
+#include <boost/preprocessor/seq/for_each_i.hpp>
 #include <boost/tuple/tuple.hpp>
 #include <boost/variant.hpp>
+#include <string>
+#include <vector>
+
+// This is the sequence which contain all target description structs.
+// It will be expanded in places where a list of all targets types is required.
+#define ALL_TARGETS_SEQ (ArtkpTargets)
 
 namespace scene
 {
@@ -42,7 +47,17 @@ namespace scene
     std::vector< boost::tuple<unsigned, std::string> > patterns;
   };
 
-  /// boost::variant with all structs of target configurations.
-  typedef boost::variant<ArtkpTargets> AnyTarget;
+  // This macro will expand to a list of all structs in ALL_TARGETS_SEQ.
+  // Except in the first struct there will be a comma before each of.
+#define ANY_target_macro(r, data, i, elem) BOOST_PP_COMMA_IF(i) elem
+
+  /** The AnyTarget is a type which can handle any of target structs listed in
+   * ALL_TARGETS_SEQ. */
+  typedef boost::variant<BOOST_PP_SEQ_FOR_EACH_I(ANY_target_macro,
+                                                 _,
+                                                 ALL_TARGETS_SEQ) > AnyTarget;
 }
+
+#undef ANY_target_macro
+
 #endif /* _TARGET_DESCRIPTIONS_HPP_ */

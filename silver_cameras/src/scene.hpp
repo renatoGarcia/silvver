@@ -23,6 +23,7 @@
 
 #include <boost/array.hpp>
 #include <boost/optional.hpp>
+#include <boost/preprocessor/seq/for_each_i.hpp>
 #include <boost/tuple/tuple.hpp>
 #include <vector>
 
@@ -51,11 +52,24 @@ namespace scene
   /// Complete description of scene, with cameras and targets.
   struct Scene
   {
-    /// Tuple with configuration structs of all targets in scene.
-    boost::tuple< boost::optional<ArtkpTargets> > targets;
+
+    // This macro will expand to a list of "boost::optional<elem>", one
+    // expansion to each struct in ALL_TARGETS_SEQ, which is defined in file
+    // targetDescriptions.hpp. Except in the first expansion there will be a
+    // comma before each of.
+#define OPTIONAL_targets_macro(r, data, i, elem) BOOST_PP_COMMA_IF(i) boost::optional<elem>
+
+    /// Tuple with configuration structs of all targets in scene,
+    /// and only ifit is in scene.
+     boost::tuple<BOOST_PP_SEQ_FOR_EACH_I(OPTIONAL_targets_macro,
+                                          _,
+                                          ALL_TARGETS_SEQ        )> targets;
 
     /// Vector with configuration structs of all camera in scene.
     std::vector<Camera> cameras;
   };
 }
+
+#undef OPTIONAL_targets_macro
+
 #endif /* _SCENE_HPP_ */
