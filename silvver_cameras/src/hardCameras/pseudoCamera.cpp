@@ -26,7 +26,6 @@ PseudoCamera::PseudoCamera(const scene::PseudoCamera& config)
   ,frameRate(config.frameRate)
   ,delay((static_cast<long>((1.0 / this->frameRate) * 1.0e3)))
   ,currentFrame(NULL)
-  ,frameBuffer({NULL, NULL})
 {}
 
 PseudoCamera::~PseudoCamera()
