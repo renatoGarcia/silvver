@@ -1,7 +1,7 @@
-LIB_FLAG = -lsilver_client -lboost_thread-mt
-# CPP_FLAGS = -I../src -I../../common -L../build
+LIB_FLAG = -lsilvver_client -lboost_thread-mt
+CPP_FLAGS = -I../src -I../../common -L../build
 
-OBJECTS = silver_client
+OBJECTS = silvver_client 2dPlane
 all: $(OBJECTS)
 
 clean:

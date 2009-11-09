@@ -14,17 +14,17 @@
  */
 
 /**
- * @file silverTypes.hpp
+ * @file silvverTypes.hpp
  *
  * @brief Types used to represents the localized targets.
  */
-#ifndef _SILVER_TYPES_HPP_
-#define _SILVER_TYPES_HPP_
+#ifndef _SILVVER_TYPES_HPP_
+#define _SILVVER_TYPES_HPP_
 
 #include <boost/array.hpp>
 #include <cmath>
 
-namespace silver
+namespace silvver
 {
   //------------------------------ Position
 
@@ -168,6 +168,6 @@ namespace silver
     return strm;
   }
 
-} // namespace silver
+} // namespace silvver
 
-#endif /* _SILVER_TYPES_HPP_ */
+#endif /* _SILVVER_TYPES_HPP_ */

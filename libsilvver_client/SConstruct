@@ -118,13 +118,13 @@ if not env.GetOption('clean') and not env.GetOption('help'):
 
 install_nodes = []
 
-install_nodes.append(env.Install(env['includedir'] + '/silver',
+install_nodes.append(env.Install(env['includedir'] + '/silvver',
                                  ['src/target.hpp',
-                                  '../common/silverTypes.hpp',
+                                  '../common/silvverTypes.hpp',
                                   '../common/serializations.hpp']))
 
 install_nodes.append(env.Install(env['docdir'] + '/silvver_client',
-                                 ['doc/silver_client.cpp',
+                                 ['doc/silvver_client.cpp',
                                   'doc/Makefile']))
 
 Export('env', 'install_nodes')

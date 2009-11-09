@@ -29,18 +29,18 @@ int main(int argc, char **argv)
   int receptionistPort;
   std::string luaFile;
 
-  po::options_description desc("silver_cameras 0.4\n\n"
+  po::options_description desc("silvver_cameras 0.4\n\n"
                                "Compiled with boost version " BOOST_LIB_VERSION "\n\n"
 
                                "Capture images with the cameras and process it\n"
-                               "Usage: silver_cameras [OPTIONS]...\n\n"
+                               "Usage: silvver_cameras [OPTIONS]...\n\n"
                                "Options list");
   desc.add_options()
     ("help,h", "Print this help message and exit")
     ("version,V", "Print version and exit")
     ("server-ip",
      po::value<std::string>(&serverIP)->default_value("127.0.0.1"),
-     "IP address of silver_servidor")
+     "IP address of silvver_servidor")
     ("receptionist-port,p",
      po::value<int>(&receptionistPort)->default_value(12000),
      "Port on the server where the receptionist is hearing")
@@ -60,11 +60,11 @@ int main(int argc, char **argv)
   }
   else if(vm.count("version"))
   {
-    std::cout << "silver_cameras 0.4" << std::endl;
+    std::cout << "silvver_cameras 0.4" << std::endl;
   }
   else
   {
-    std::cout << "silver_cameras 0.4:\n\n"
+    std::cout << "silvver_cameras 0.4:\n\n"
               << "Compiled with boost version " << BOOST_LIB_VERSION << '\n'
               << "Capture images with the cameras and process it\n"
               << "Press [enter] key to quit\n\n"

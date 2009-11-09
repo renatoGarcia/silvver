@@ -1,5 +1,20 @@
-#ifndef SILVER_DRIVER2_0_HPP
-#define SILVER_DRIVER2_0_HPP
+/* Copyright 2009 Renato Florentino Garcia <fgar.renato@gmail.com>
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License version 3, as
+ * published by the Free Software Foundation.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
+#ifndef SILVVER_DRIVER2_0_HPP
+#define SILVVER_DRIVER2_0_HPP
 
 #include <boost/ptr_container/ptr_vector.hpp>
 
@@ -8,7 +23,7 @@
 #include "target.hpp"
 
 /** \file
- * Header file where is the SilverDriver2_0 class, for Player version 2.0
+ * Header file where is the SilvverDriver2_0 class, for Player version 2.0
  */
 
 /** Plug-in driver for the e-puck robot, in conformity with Player version 2.0.
@@ -20,13 +35,13 @@
  * \author Renato Florentino Garcia
  * \date August 2008
  */
-class SilverDriver2_0 : public Driver
+class SilvverDriver2_0 : public Driver
 {
 public:
 
-  SilverDriver2_0(ConfigFile* cf, int section);
+  SilvverDriver2_0(ConfigFile* cf, int section);
 
-  ~SilverDriver2_0();
+  ~SilvverDriver2_0();
 
   virtual int Setup();
 
@@ -39,9 +54,9 @@ public:
 
   virtual int Unsubscribe(player_devaddr_t addr);
 
-  static void SilverDriver2_0_Register(DriverTable* table);
+  static void SilvverDriver2_0_Register(DriverTable* table);
 
-  static Driver* SilverDriver2_0_Init(ConfigFile* cf, int section);
+  static Driver* SilvverDriver2_0_Init(ConfigFile* cf, int section);
 
 private:
 
@@ -53,4 +68,4 @@ private:
   boost::ptr_vector<Target> targets;
 };
 
-#endif // SILVER_DRIVER2_0_HPP
+#endif // SILVVER_DRIVER2_0_HPP

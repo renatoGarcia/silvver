@@ -15,7 +15,7 @@
 #include <boost/tuple/tuple.hpp>
 #include <boost/bind.hpp>
 
-/** Wrapper all network communication with silver-server.
+/** Wrapper all network communication with silvver-server.
  */
 class Connection
 {

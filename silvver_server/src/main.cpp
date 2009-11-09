@@ -30,10 +30,10 @@ int main(int argc, char **argv)
   unsigned verbosityLevel;
   bool logInputs;
 
-  po::options_description desc("silver_server 0.4\n\n"
+  po::options_description desc("silvver_server 0.4\n\n"
                                "Compiled with boost version " BOOST_LIB_VERSION "\n\n"
-                               "Receive inforamation from silver_cameras and send to clients\n"
-                               "Usage: silver_server [OPTIONS]...\n\n"
+                               "Receive inforamation from silvver_cameras and send to clients\n"
+                               "Usage: silvver_server [OPTIONS]...\n\n"
                                "Options list");
   desc.add_options()
     ("help,h", "Print this help message and exit")
@@ -57,7 +57,7 @@ int main(int argc, char **argv)
   }
   else if(vm.count("version"))
   {
-    std::cout << "silver_server 0.4" << std::endl;
+    std::cout << "silvver_server 0.4" << std::endl;
   }
   else
   {
@@ -66,7 +66,7 @@ int main(int argc, char **argv)
     debug::logOut.setThreshold(vm.count("log-inputs"));
 
     debug::messageOutput(STARTUP)
-      << "silver_server 0.4:\n\n"
+      << "silvver_server 0.4:\n\n"
       << "Compiled with boost version " << BOOST_LIB_VERSION << '\n'
       << "Press [enter] key to quit\n\n"
       << "----------------------------------------------\n"

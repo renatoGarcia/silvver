@@ -23,8 +23,8 @@
 #include <boost/thread.hpp>
 #include <boost/tuple/tuple.hpp>
 
-/** Class to connect to silver-cameras and silver-clients.
- * Wrapper a UDP/IP socket and silver message protocol.
+/** Class to connect to silvver-cameras and silvver-clients.
+ * Wrapper a UDP/IP socket and silvver message protocol.
  */
 class IoConnection
 {

@@ -31,8 +31,8 @@ public:
 
   /** sceneMounter class constructor.
    *
-   * @param receptionistPort Port where the receptionist of silver-server is hearing.
-   * @param serverIP IP address where silver-server is running.
+   * @param receptionistPort Port where the receptionist of silvver-server is hearing.
+   * @param serverIP IP address where silvver-server is running.
    * @param sceneDescriptorFile Path to the lua file scene descriptor.
    */
   SceneMounter(const std::string& serverIp, const int receptionistPort,

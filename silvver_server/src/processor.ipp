@@ -22,7 +22,7 @@
 
 #include "ioConnection.ipp"
 #include "debugOutputs.hpp"
-#include <silverTypes.hpp>
+#include <silvverTypes.hpp>
 
 template <class Tinput, class Toutput>
 Processor<Tinput,Toutput>::Processor()

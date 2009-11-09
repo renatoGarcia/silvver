@@ -7,11 +7,11 @@ from sconsUtilities import *
 from os.path import abspath
 from commands import getoutput
 
-silver_libs = RelatedLibs('Silver-client',
-                          'silver',
-                          ['silver_client'])
+silvver_libs = RelatedLibs('Silvver-client',
+                          'silvver',
+                          ['silvver_client'])
 
-mandatory_libs = RelatedLibsGroup([silver_libs])
+mandatory_libs = RelatedLibsGroup([silvver_libs])
 
 opts = Options()
 
@@ -63,13 +63,13 @@ for related_libs in mandatory_libs:
 
 env['CPPPATH'] = env['CPPPATH'].split(';')
 env.Append(CPPPATH = [abspath('../common'),
-                      abspath('../libsilver_client/src')])
+                      abspath('../libsilvver_client/src')])
 
 env['LIBPATH'] = env['LIBPATH'].split(';')
-env.Append(LIBPATH = [abspath('../libsilver_client/build')])
+env.Append(LIBPATH = [abspath('../libsilvver_client/build')])
 
 # env.ParseConfig("pkg-config playercore --cflags --libs")
-# env.ParseConfig("pkg-config silverclient --cflags --libs")
+# env.ParseConfig("pkg-config silvverclient --cflags --libs")
 
 Help(opts.GenerateHelpText(env))
 

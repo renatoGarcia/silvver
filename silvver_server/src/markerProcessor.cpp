@@ -1,14 +1,29 @@
+/* Copyright 2009 Renato Florentino Garcia <fgar.renato@gmail.com>
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License version 3, as
+ * published by the Free Software Foundation.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
 #include <iostream>
 #include "markerProcessor.hpp"
 #include "processor.ipp"
 
 MarkerProcessor::MarkerProcessor()
-  :Processor<silver::Identity<silver::Pose>,
-             silver::Identity<silver::Pose> >::Processor()
+  :Processor<silvver::Identity<silvver::Pose>,
+             silvver::Identity<silvver::Pose> >::Processor()
 {}
 
 void
-MarkerProcessor::deliverPackage(const std::vector< silver::Identity<silver::Pose> > &pacote,
+MarkerProcessor::deliverPackage(const std::vector< silvver::Identity<silvver::Pose> > &pacote,
                                 const unsigned id)
 {
   boost::mutex::scoped_lock lock(mutexArmazenador);
@@ -20,10 +35,10 @@ MarkerProcessor::deliverPackage(const std::vector< silver::Identity<silver::Pose
 void
 MarkerProcessor::localize()
 {
-  std::vector<silver::Identity<silver::Pose> > vecRobos;
+  std::vector<silvver::Identity<silvver::Pose> > vecRobos;
 
-  std::vector<silver::Identity<silver::Pose> > vecEnteTemp;
-  std::vector<silver::Identity<silver::Pose> >::iterator iteEnteTemp;
+  std::vector<silvver::Identity<silvver::Pose> > vecEnteTemp;
+  std::vector<silvver::Identity<silvver::Pose> >::iterator iteEnteTemp;
 
   //---------------Copia os entes de todas as marcaCameras para vecEnte
   TMap::iterator iteMapa = this->lastInputs.begin();
@@ -41,7 +56,7 @@ MarkerProcessor::localize()
 //   }
 
   //---------------Verifica se há um mesmo robô reportado por duas câmeras diferentes
-  std::vector<silver::Identity<silver::Pose> >::iterator itePrimeiro,iteSegundo;
+  std::vector<silvver::Identity<silvver::Pose> >::iterator itePrimeiro,iteSegundo;
 
   for(itePrimeiro = vecRobos.begin(); itePrimeiro < vecRobos.end(); itePrimeiro++)
   {

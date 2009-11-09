@@ -28,7 +28,7 @@
 #include "../connection.hpp"
 #include "../hardCameras/hardCamera.hpp"
 #include "../scene.hpp"
-#include <silverTypes.hpp>
+#include <silvverTypes.hpp>
 
 /// Abstract base class to all abstract cameras.
 class AbstractCamera : boost::noncopyable
@@ -51,7 +51,7 @@ protected:
 
   IplImage* currentFrame;
 
-  /// Connection with the silver-server used to send the target localizations.
+  /// Connection with the silvver-server used to send the target localizations.
   const boost::shared_ptr<Connection> serverConnection;
 
   /** When this variable become True, the loop in operator() method implemented
@@ -67,7 +67,7 @@ protected:
   void updateFrame();
 
   /// Tranform a pose in camera coordinates do world coordinates.
-  void toWorld(silver::Pose& pose) const;
+  void toWorld(silvver::Pose& pose) const;
 
 private:
 

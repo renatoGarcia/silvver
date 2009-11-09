@@ -27,7 +27,7 @@
 
 namespace bpt = boost::posix_time;
 
-namespace silver
+namespace silvver
 {
 
 template<class U>
@@ -229,4 +229,4 @@ Target<T>::~Target() throw()
 
 template class Target<Pose>;
 
-} // End namespace silver
+} // End namespace silvver

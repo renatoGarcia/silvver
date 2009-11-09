@@ -16,7 +16,7 @@
 #ifndef _SERIALIZATIONS_HPP_
 #define _SERIALIZATIONS_HPP_
 
-#include <silverTypes.hpp>
+#include "silvverTypes.hpp"
 
 #include <boost/serialization/base_object.hpp>
 #include <boost/serialization/array.hpp>
@@ -28,7 +28,7 @@ namespace boost
 
     template<class Archive>
     void
-    serialize(Archive& ar, silver::Position& position, const unsigned version)
+    serialize(Archive& ar, silvver::Position& position, const unsigned version)
     {
       ar & position.x;
       ar & position.y;
@@ -37,15 +37,15 @@ namespace boost
 
     template<class Archive>
     void
-    serialize(Archive& ar, silver::Pose& pose, const unsigned version)
+    serialize(Archive& ar, silvver::Pose& pose, const unsigned version)
     {
-      ar & boost::serialization::base_object<silver::Position>(pose);
+      ar & boost::serialization::base_object<silvver::Position>(pose);
       ar & pose.rotationMatrix;
     }
 
     template<class Archive, class T>
     void
-    serialize(Archive& ar, silver::Identity<T>& id, const unsigned version)
+    serialize(Archive& ar, silvver::Identity<T>& id, const unsigned version)
     {
       ar & boost::serialization::base_object<T>(id);
       ar & id.uid;

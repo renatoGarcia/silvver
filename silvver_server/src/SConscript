@@ -8,7 +8,7 @@ sources = Split("""clientsMap.cpp
                    receptionist.cpp
                    debugOutputs.cpp""")
 
-silver_server_node = env.Program('silver_server', sources)
-Default(env.Alias('silver_server', silver_server_node))
+silvver_server_node = env.Program('silvver_server', sources)
+Default(env.Alias('silvver_server', silvver_server_node))
 
-install_nodes.append(env.Install(env['bindir'], silver_server_node))
+install_nodes.append(env.Install(env['bindir'], silvver_server_node))

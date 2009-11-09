@@ -18,7 +18,7 @@
 
 #include <string>
 
-#include <silverTypes.hpp>
+#include <silvverTypes.hpp>
 #include <iostream>
 #include <boost/array.hpp>
 #include <boost/asio.hpp>

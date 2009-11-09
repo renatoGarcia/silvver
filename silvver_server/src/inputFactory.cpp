@@ -20,7 +20,7 @@
 
 #include "input.ipp"
 #include "ioConnection.ipp"
-#include "silverTypes.hpp"
+#include "silvverTypes.hpp"
 
 #include "markerProcessor.hpp"
 
@@ -36,7 +36,7 @@ InputFactory::createInput(const procOpt::AnyProcOpt& processorOpt,
   if (const procOpt::Marker* const marker =
       boost::get<procOpt::Marker>(&processorOpt))
   {
-    returnPtr.reset(new Input<silver::Identity<silver::Pose> >
+    returnPtr.reset(new Input<silvver::Identity<silvver::Pose> >
                     (connection, MarkerProcessor::instantiate()));
   }
   else

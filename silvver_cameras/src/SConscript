@@ -23,7 +23,7 @@ if 'dc1394_control' in build_optional_flags or cleaning:
 elif 'dc1394' in build_optional_flags or cleaning:
     sources += ['hardCameras/dc1394_2x.cpp']
 
-silver_camera_node = env.Program('silver_camera', sources)
-Default(env.Alias('silver_camera', silver_camera_node))
+silvver_cameras_node = env.Program('silvver_cameras', sources)
+Default(env.Alias('silvver_cameras', silvver_cameras_node))
 
-install_nodes.append(env.Install(env['bindir'], silver_camera_node))
+install_nodes.append(env.Install(env['bindir'], silvver_cameras_node))

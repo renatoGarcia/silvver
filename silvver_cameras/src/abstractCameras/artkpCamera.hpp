@@ -13,8 +13,8 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef _ARTKP_CAMERA_H_
-#define _ARTKP_CAMERA_H_
+#ifndef _ARTKP_CAMERA_HPP_
+#define _ARTKP_CAMERA_HPP_
 
 #include <boost/shared_ptr.hpp>
 #include <fstream>
@@ -84,8 +84,8 @@ private:
 
   std::vector<std::string> vecDescriptionFilePath;
 
-  /// Translates the inner artkp id to silver id
+  /// Translates the inner artkp id to silvver id
   boost::array<int, MAX_TARGETS> idMap;
 };
 
-#endif /* _ARTKP_CAMERA_H_ */
+#endif /* _ARTKP_CAMERA_HPP_ */

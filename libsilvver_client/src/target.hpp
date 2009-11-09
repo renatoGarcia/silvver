@@ -23,13 +23,13 @@
 #include <boost/date_time/time_duration.hpp>
 #include <boost/date_time/posix_time/posix_time.hpp>
 
-#include "silverTypes.hpp"
+#include "silvverTypes.hpp"
 
-namespace silver
+namespace silvver
 {
   template<class U> class CheshireCat;
 
-  /// Represents a target looked by Silver.
+  /// Represents a target looked by Silvver.
   template<class T>
   class Target
   {
@@ -45,8 +45,8 @@ namespace silver
 
     /** Target class constructor.
      * @param targetId Target identifier.
-     * @param serverIp IP address of silver-server.
-     * @param receptionistPort Port number of silver-server receptionist.
+     * @param serverIp IP address of silvver-server.
+     * @param receptionistPort Port number of silvver-server receptionist.
      */
     Target(unsigned targetId,
            const std::string& serverIp="127.0.0.1",
@@ -54,7 +54,7 @@ namespace silver
 
     ~Target() throw();
 
-    /// Connect to the silver-server.
+    /// Connect to the silvver-server.
     void connect();
 
     void disconnect();

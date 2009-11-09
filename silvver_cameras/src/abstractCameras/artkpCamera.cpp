@@ -20,7 +20,7 @@
 #include <ARToolKitPlus/TrackerSingleMarkerImpl.h>
 
 #include "../connection.ipp"
-#include <silverTypes.hpp>
+#include <silvverTypes.hpp>
 
 ArtkpCamera::ArtkpCamera(const scene::Camera& cameraConfig,
                          const scene::ArtkpTargets& targets,
@@ -41,7 +41,7 @@ ArtkpCamera::ArtkpCamera(const scene::Camera& cameraConfig,
   BOOST_FOREACH(pattern, targets.patterns)
   {
     this->vecDescriptionFilePath.push_back(boost::get<1>(pattern));
-    this->idMap.at(targetNum) = boost::get<0>(pattern); // Get silver uid
+    this->idMap.at(targetNum) = boost::get<0>(pattern); // Get silvver uid
     targetNum++;
   }
 
@@ -105,14 +105,14 @@ ArtkpCamera::operator()()
 {
   this->initialize();
 
-  std::vector<silver::Identity<silver::Pose> > poses;
+  std::vector<silvver::Identity<silvver::Pose> > poses;
 
   int nMarkers = 0;
   float error = 0;
   ARToolKitPlus::ARMarkerInfo* markerInfo;
   ARFloat pattCenter[2] = {0.0, 0.0};
   ARFloat transMatrix[3][4];
-  silver::Identity<silver::Pose> pose;
+  silvver::Identity<silvver::Pose> pose;
 
   while(!this->stopping)
   {

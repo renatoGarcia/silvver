@@ -1,7 +1,22 @@
+/* Copyright 2009 Renato Florentino Garcia <fgar.renato@gmail.com>
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License version 3, as
+ * published by the Free Software Foundation.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
 #include <iostream>
 using namespace std;
 
-#include "silverDriver2_0.hpp"
+#include "silvverDriver2_0.hpp"
 
 #include <cstddef>
 #include <string>
@@ -9,7 +24,7 @@ using namespace std;
 #include <boost/foreach.hpp>
 #include <boost/date_time/time_duration.hpp>
 
-SilverDriver2_0::SilverDriver2_0(ConfigFile* cf, int section)
+SilvverDriver2_0::SilvverDriver2_0(ConfigFile* cf, int section)
   :Driver(cf, section, true, PLAYER_MSGQUEUE_DEFAULT_MAXLEN)
 {
   if (cf->ReadDeviceAddr(&this->fiducialAddr, section, "provides",
@@ -40,25 +55,25 @@ SilverDriver2_0::SilverDriver2_0(ConfigFile* cf, int section)
   }
 }
 
-SilverDriver2_0::~SilverDriver2_0()
+SilvverDriver2_0::~SilvverDriver2_0()
 {}
 
 int
-SilverDriver2_0::Setup()
+SilvverDriver2_0::Setup()
 {
   this->StartThread();
   return 0;
 }
 
 int
-SilverDriver2_0::Shutdown()
+SilvverDriver2_0::Shutdown()
 {
   this->StopThread();
   return 0;
 }
 
 int
-SilverDriver2_0::Subscribe(player_devaddr_t addr)
+SilvverDriver2_0::Subscribe(player_devaddr_t addr)
 {
   BOOST_FOREACH(Target& target, this->targets)
   {
@@ -68,7 +83,7 @@ SilverDriver2_0::Subscribe(player_devaddr_t addr)
 }
 
 int
-SilverDriver2_0::Unsubscribe(player_devaddr_t addr)
+SilvverDriver2_0::Unsubscribe(player_devaddr_t addr)
 {
   BOOST_FOREACH(Target& target, this->targets)
   {
@@ -79,7 +94,7 @@ SilverDriver2_0::Unsubscribe(player_devaddr_t addr)
 }
 
 int
-SilverDriver2_0::ProcessMessage(MessageQueue* resp_queue,
+SilvverDriver2_0::ProcessMessage(MessageQueue* resp_queue,
                                 player_msghdr* hdr, void* data)
 {
   if(Message::MatchMessage(hdr, PLAYER_MSGTYPE_REQ,
@@ -112,13 +127,13 @@ SilverDriver2_0::ProcessMessage(MessageQueue* resp_queue,
          << " subtype: " << (int)hdr->subtype
          << " inf: " << hdr->addr.interf
          << endl;
-    PLAYER_ERROR("Silver:: Unhandled message");
+    PLAYER_ERROR("Silvver:: Unhandled message");
     return -1;
   }
 }
 
 void
-SilverDriver2_0::Main()
+SilvverDriver2_0::Main()
 {
   while (true)
   {
@@ -132,7 +147,7 @@ SilverDriver2_0::Main()
     system("sleep 0.1");
 
     this->fiducialData.fiducials_count = 0;
-    silver::Pose pose;
+    silvver::Pose pose;
 
     boost::ptr_vector<Target>::iterator ite = this->targets.begin();
     boost::ptr_vector<Target>::iterator end = this->targets.end();
@@ -172,26 +187,26 @@ SilverDriver2_0::Main()
 }
 
 Driver*
-SilverDriver2_0::SilverDriver2_0_Init(ConfigFile* cf, int section)
+SilvverDriver2_0::SilvverDriver2_0_Init(ConfigFile* cf, int section)
 {
-  return((Driver*)(new SilverDriver2_0(cf, section)));
+  return((Driver*)(new SilvverDriver2_0(cf, section)));
 }
 
 void
-SilverDriver2_0::SilverDriver2_0_Register(DriverTable* table)
+SilvverDriver2_0::SilvverDriver2_0_Register(DriverTable* table)
 {
-  table->AddDriver((char*)"silver", SilverDriver2_0_Init);
+  table->AddDriver((char*)"silvver", SilvverDriver2_0_Init);
 }
 
-/*! \relates SilverDriver2_0
- * Function called from player server for to register the silver driver.
+/*! \relates SilvverDriver2_0
+ * Function called from player server for to register the silvver driver.
  */
 extern "C"
 {
   int player_driver_init(DriverTable* table)
   {
-    PLAYER_MSG0(1, "Registering silver driver.");
-    SilverDriver2_0::SilverDriver2_0_Register(table);
+    PLAYER_MSG0(1, "Registering silvver driver.");
+    SilvverDriver2_0::SilvverDriver2_0_Register(table);
     return (0);
   }
 }

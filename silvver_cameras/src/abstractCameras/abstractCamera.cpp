@@ -96,9 +96,9 @@ AbstractCamera::updateFrame()
 }
 
 void
-AbstractCamera::toWorld(silver::Pose &pose) const
+AbstractCamera::toWorld(silvver::Pose &pose) const
 {
-  silver::Pose tempPose(pose);
+  silvver::Pose tempPose(pose);
 
   //------------------------------- Rmo = Rco x Rmc
   pose.rotationMatrix[0] =

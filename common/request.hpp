@@ -17,7 +17,7 @@
 #define REQUEST_HPP
 
 /** \file request.hpp
- * \brief Types for request actions from receptionist on silver-server.
+ * \brief Types for request actions from receptionist on silvver-server.
  */
 
 #include <boost/variant.hpp>

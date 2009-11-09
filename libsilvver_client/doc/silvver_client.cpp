@@ -7,14 +7,14 @@
 #include <boost/shared_ptr.hpp>
 #include <boost/thread/thread.hpp>
 
-#include <silver/silverTypes.hpp>
-#include <silver/target.hpp>
+#include <silvver/silvverTypes.hpp>
+#include <silvver/target.hpp>
 
-using namespace silver;
+using namespace silvver;
 
 void printTargets(boost::shared_ptr<Target<Pose> > target)
 {
-  silver::Pose pose;
+  silvver::Pose pose;
 
   while(!boost::this_thread::interruption_requested())
   {
@@ -33,10 +33,10 @@ int main(int argc,char **argv)
   {
     if ((std::string(argv[1]) == "-h") || (std::string(argv[1]) == "--help"))
     {
-      std::cout << "silver_client" << std::endl << std::endl
+      std::cout << "silvver_client" << std::endl << std::endl
                 << "Print the target pose until [enter] key be pressed." << std::endl
                 << "Execution:" << std::endl
-                << "silver_client [target id] [server ip] [receptionist port]"
+                << "silvver_client [target id] [server ip] [receptionist port]"
                 << std::endl;
       return 0;
     }
