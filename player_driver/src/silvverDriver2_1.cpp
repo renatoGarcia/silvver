@@ -17,7 +17,7 @@
 #include <string>
 #include <cstddef>
 
-SilverDriver2_1::SilverDriver2_1(ConfigFile* cf, int section)
+SilvverDriver2_1::SilvverDriver2_1(ConfigFile* cf, int section)
   :Driver(cf, section, true, PLAYER_MSGQUEUE_DEFAULT_MAXLEN)
   ,EXPECTED_EPUCK_SIDE_VERSION(300) // Version 3.0
 {
@@ -141,13 +141,13 @@ SilverDriver2_1::SilverDriver2_1(ConfigFile* cf, int section)
   }
 }
 
-SilverDriver2_1::~SilverDriver2_1()
+SilvverDriver2_1::~SilvverDriver2_1()
 {
   delete serialPort;
 }
 
 int
-SilverDriver2_1::Setup()
+SilvverDriver2_1::Setup()
 {
   if(this->serialPort->initialize() == -1)
   {
@@ -183,14 +183,14 @@ SilverDriver2_1::Setup()
 }
 
 int
-SilverDriver2_1::Shutdown()
+SilvverDriver2_1::Shutdown()
 {
   this->StopThread();
   return 0;
 }
 
 int
-SilverDriver2_1::Subscribe(player_devaddr_t addr)
+SilvverDriver2_1::Subscribe(player_devaddr_t addr)
 {
   if(addr.interf == PLAYER_POSITION2D_CODE)
   {
@@ -201,7 +201,7 @@ SilverDriver2_1::Subscribe(player_devaddr_t addr)
 }
 
 int
-SilverDriver2_1::Unsubscribe(player_devaddr_t addr)
+SilvverDriver2_1::Unsubscribe(player_devaddr_t addr)
 {
   if(addr.interf == PLAYER_POSITION2D_CODE)
   {
@@ -217,7 +217,7 @@ SilverDriver2_1::Unsubscribe(player_devaddr_t addr)
 
 
 int
-SilverDriver2_1::ProcessMessage(QueuePointer &resp_queue,
+SilvverDriver2_1::ProcessMessage(QueuePointer &resp_queue,
                             player_msghdr* hdr, void* data)
 {
   //-------------------- POSITION2D
@@ -383,7 +383,7 @@ SilverDriver2_1::ProcessMessage(QueuePointer &resp_queue,
 }
 
 void
-SilverDriver2_1::Main()
+SilvverDriver2_1::Main()
 {
   EpuckPosition2d::DynamicConfiguration epuckOdometry;
 
@@ -496,18 +496,18 @@ SilverDriver2_1::Main()
 }
 
 Driver*
-SilverDriver2_1::SilverDriver2_1_Init(ConfigFile* cf, int section)
+SilvverDriver2_1::SilvverDriver2_1_Init(ConfigFile* cf, int section)
 {
-  return((Driver*)(new SilverDriver2_1(cf, section)));
+  return((Driver*)(new SilvverDriver2_1(cf, section)));
 }
 
 void
-SilverDriver2_1::SilverDriver2_1_Register(DriverTable* table)
+SilvverDriver2_1::SilvverDriver2_1_Register(DriverTable* table)
 {
-  table->AddDriver((char*)"epuck", SilverDriver2_1_Init);
+  table->AddDriver((char*)"epuck", SilvverDriver2_1_Init);
 }
 
-/*! \relates SilverDriver2_1
+/*! \relates SilvverDriver2_1
  * Function called from player server for to register the e-Puck driver.
  */
 extern "C"
@@ -515,7 +515,7 @@ extern "C"
   int player_driver_init(DriverTable* table)
   {
     PLAYER_MSG0(1, "Registering epuck driver.");
-    SilverDriver2_1::SilverDriver2_1_Register(table);
+    SilvverDriver2_1::SilvverDriver2_1_Register(table);
     return (0);
   }
 }

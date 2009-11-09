@@ -13,8 +13,8 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef SILVER_DRIVER2_1_HPP
-#define SILVER_DRIVER2_1_HPP
+#ifndef SILVVER_DRIVER2_1_HPP
+#define SILVVER_DRIVER2_1_HPP
 
 #include <libplayercore/playercore.h>
 #include <string>
@@ -26,7 +26,7 @@
 #include "epuckLEDs.hpp"
 
 /** \file
- * Header file where is the SilverDriver2_1 class, for Player version 2.1
+ * Header file where is the SilvverDriver2_1 class, for Player version 2.1
  */
 
 /** Plug-in driver for the e-puck robot, in conformity with Player version 2.1.
@@ -38,13 +38,13 @@
  * \author Renato Florentino Garcia
  * \date November 2008
  */
-class SilverDriver2_1 : public Driver
+class SilvverDriver2_1 : public Driver
 {
 public:
 
-  SilverDriver2_1(ConfigFile* cf, int section);
+  SilvverDriver2_1(ConfigFile* cf, int section);
 
-  ~SilverDriver2_1();
+  ~SilvverDriver2_1();
 
   virtual int Setup();
 
@@ -57,9 +57,9 @@ public:
 
   virtual int Unsubscribe(player_devaddr_t addr);
 
-  static void SilverDriver2_1_Register(DriverTable* table);
+  static void SilvverDriver2_1_Register(DriverTable* table);
 
-  static Driver* SilverDriver2_1_Init(ConfigFile* cf, int section);
+  static Driver* SilvverDriver2_1_Init(ConfigFile* cf, int section);
 
 private:
 
@@ -90,4 +90,4 @@ private:
   SerialPort* serialPort;
 };
 
-#endif // SILVER_DRIVER2_1_HPP
+#endif // SILVVER_DRIVER2_1_HPP
