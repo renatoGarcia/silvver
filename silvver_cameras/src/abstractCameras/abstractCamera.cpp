@@ -58,20 +58,12 @@ AbstractCamera::~AbstractCamera()
 void
 AbstractCamera::updateFrame()
 {
-  try
+  this->hardCamera.get<0>()->captureRectFrame(&this->currentFrame,
+                                              this->hardCamera.get<1>());
+  if (this->showImage)
   {
-    this->hardCamera.get<0>()->captureRectFrame(&this->currentFrame,
-                                                this->hardCamera.get<1>());
-    if (this->showImage)
-    {
-      cvShowImage(this->windowName.c_str(), this->currentFrame);
-      cvWaitKey(5);
-    }
-  }
-  catch (const HardCamera::capture_image_error& exception)
-  {
-    std::cerr << exception.what() << std::endl;
-    return;
+    cvShowImage(this->windowName.c_str(), this->currentFrame);
+    cvWaitKey(5);
   }
 
 //   this->frameCounter++;

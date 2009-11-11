@@ -13,18 +13,18 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef PSEUDO_CAMERA_HPP
-#define PSEUDO_CAMERA_HPP
+#ifndef _PSEUDO_CAMERA_HPP_
+#define _PSEUDO_CAMERA_HPP_
 
 #include "hardCamera.hpp"
-
-#include <string>
 
 #include <boost/filesystem.hpp>
 #include <boost/scoped_ptr.hpp>
 #include <boost/thread/condition.hpp>
 #include <boost/thread/shared_mutex.hpp>
 #include <boost/thread/thread.hpp>
+#include <stdexcept>
+#include <string>
 
 class PseudoCamera : public HardCamera
 {
@@ -38,7 +38,7 @@ public:
 
   void saveFrame();
 
-  // Throw capture_image_error.
+  /// Can throw capture_image_error
   void captureFrame(IplImage** iplImage, unsigned clientUid);
 
 private:
@@ -51,7 +51,10 @@ private:
 
   const float frameRate;
 
-  boost::filesystem::directory_iterator dirIterator, endIterator;
+  boost::filesystem::directory_iterator dirIterator;
+  const boost::filesystem::directory_iterator  endIterator;
+
+  bool allImageReaded;
 
   // Tempo que pseudoCamera ficará ociosa para simular uma dada frequência
   const boost::posix_time::millisec delay;
@@ -65,4 +68,4 @@ private:
   boost::scoped_ptr<boost::thread> grabFrameThread;
 };
 
-#endif
+#endif /* _PSEUDO_CAMERA_HPP_ */

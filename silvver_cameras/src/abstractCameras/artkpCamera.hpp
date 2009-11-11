@@ -64,7 +64,7 @@ private:
 
   /// It's the method which will be called when a new thread was created, and
   /// will make all camera work.
- void makeWork();
+ void doWork();
 
   class MyLogger : public ARToolKitPlus::Logger
   {

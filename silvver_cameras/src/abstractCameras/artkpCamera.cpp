@@ -108,7 +108,7 @@ void
 ArtkpCamera::run()
 {
   this->runThread.reset(new boost::thread(boost::bind<void>
-                                          (&ArtkpCamera::makeWork,
+                                          (&ArtkpCamera::doWork,
                                            this)));
 }
 
@@ -123,7 +123,7 @@ ArtkpCamera::stop()
 }
 
 void
-ArtkpCamera::makeWork()
+ArtkpCamera::doWork()
 {
   std::vector<silvver::Identity<silvver::Pose> > poses;
 
@@ -139,7 +139,15 @@ ArtkpCamera::makeWork()
     boost::this_thread::interruption_point();
 
     poses.clear();
-    this->updateFrame();
+    try
+    {
+      this->updateFrame();
+    }
+    catch (const HardCamera::capture_image_error& exception)
+    {
+      std::cerr << exception.what() << std::endl;
+      return;
+    }
 
     nMarkers = 0;
 

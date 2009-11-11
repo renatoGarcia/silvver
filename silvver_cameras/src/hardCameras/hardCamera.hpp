@@ -16,10 +16,10 @@
 #ifndef _HARDCAMERA_HPP_
 #define _HARDCAMERA_HPP_
 
+#include <boost/noncopyable.hpp>
 #include <stdexcept>
 #include <string>
 #include <vector>
-#include <boost/noncopyable.hpp>
 
 #include <opencv/cv.h>
 

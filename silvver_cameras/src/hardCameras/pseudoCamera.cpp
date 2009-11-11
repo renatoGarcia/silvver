@@ -16,6 +16,7 @@
 #include "pseudoCamera.hpp"
 
 #include <boost/bind.hpp>
+#include "boost/date_time/posix_time/posix_time_types.hpp"
 
 #include <opencv/highgui.h>
 
@@ -26,8 +27,14 @@ PseudoCamera::PseudoCamera(const scene::PseudoCamera& config)
   :HardCamera(config, PseudoCamera::BITS_PER_PIXEL)
   ,path(config.imagesPath)
   ,frameRate(config.frameRate)
+  ,dirIterator()
+  ,endIterator()
+  ,allImageReaded(false)
   ,delay((static_cast<long>((1.0 / this->frameRate) * 1.0e3)))
   ,currentFrame(NULL)
+  ,bufferAccess()
+  ,unreadFrameCondition()
+  ,grabFrameThread()
 {}
 
 PseudoCamera::~PseudoCamera()
@@ -84,9 +91,7 @@ PseudoCamera::runCapturer()
     {
       if(this->dirIterator == this->endIterator)
       {
-        // boost::this_thread::sleep(this->delay);
-        // throw capture_image_error("PseudoCamera: all images already read");
-        // continue;
+        this->allImageReaded = true;
         return;
       }
 
@@ -135,7 +140,13 @@ PseudoCamera::captureFrame(IplImage** iplImage, unsigned clientUid)
 
   while (!this->unreadImage.at(clientUid))
   {
-    this->unreadFrameCondition.wait(lock);
+    // If elapsed two seconds and all images were readed.
+    if (!this->unreadFrameCondition.timed_wait(lock, bpt::seconds(2)) &&
+        this->allImageReaded)
+    {
+      throw capture_image_error("PseudoCamera already readed all images in "
+                                "directory " + this->path.file_string());
+    }
   }
 
   cvReleaseImage(iplImage);
