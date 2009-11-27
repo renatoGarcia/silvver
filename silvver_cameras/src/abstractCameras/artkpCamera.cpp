@@ -25,9 +25,8 @@
 
 ArtkpCamera::ArtkpCamera(const scene::Camera& cameraConfig,
                          const scene::ArtkpTargets& targets,
-                         boost::shared_ptr<Connection> connection,
-                         bool showImages)
-  :AbstractCamera(cameraConfig, connection, showImages)
+                         boost::shared_ptr<Connection> connection)
+  :AbstractCamera(cameraConfig, connection)
   ,camConfigFileName("/tmp/artkpCamera" +
                      boost::apply_visitor(scene::GetHardware(),
                                           cameraConfig.hardware).uid)

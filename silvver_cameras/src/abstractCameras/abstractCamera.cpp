@@ -18,14 +18,11 @@
 #include <cstddef>
 #include <boost/bind.hpp>
 
-#include <opencv/highgui.h>
-
 #include "../hardCameraFactory.hpp"
 // #include "tsPrint.hpp"
 
 AbstractCamera::AbstractCamera(const scene::Camera& cameraConfig,
-                               boost::shared_ptr<Connection> connection,
-                               bool showImage)
+                               boost::shared_ptr<Connection> connection)
   :currentFrame(NULL)
   ,serverConnection(connection)
   ,hardCamera(HardCameraFactory::create(cameraConfig.hardware))
@@ -33,14 +30,8 @@ AbstractCamera::AbstractCamera(const scene::Camera& cameraConfig,
   ,trans(cameraConfig.translationVector)
   ,frameCounter(0)
   ,frameRate(0)
-  ,showImage(showImage)
-  ,windowName("Camera")
 {
   this->hardCamera.get<0>()->createIplImage(&this->currentFrame);
-  if (this->showImage)
-  {
-    cvNamedWindow(this->windowName.c_str());
-  }
 }
 
 AbstractCamera::~AbstractCamera()
@@ -49,10 +40,6 @@ AbstractCamera::~AbstractCamera()
   {
     cvReleaseImage(&this->currentFrame);
   }
-  if (this->showImage)
-  {
-    cvDestroyWindow(this->windowName.c_str());
-  }
 }
 
 void
@@ -60,11 +47,6 @@ AbstractCamera::updateFrame()
 {
   this->hardCamera.get<0>()->captureRectFrame(&this->currentFrame,
                                               this->hardCamera.get<1>());
-  if (this->showImage)
-  {
-    cvShowImage(this->windowName.c_str(), this->currentFrame);
-    cvWaitKey(5);
-  }
 
 //   this->frameCounter++;
 //   if(this->frameCounter >= 30)

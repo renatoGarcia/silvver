@@ -119,6 +119,9 @@ private:
   IplImage* mapy;
 
   virtual void initialize() = 0;
+
+  const bool showImages;
+  const std::string windowName;
 };
 
 #endif /* _HARDCAMERA_HPP_ */

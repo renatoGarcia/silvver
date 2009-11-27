@@ -43,7 +43,7 @@ public:
    * The abstract cameras that will be initized are described in the scene
    * descriptor lua file.
    */
-  void mount(const bool showImages);
+  void mount();
 
 private:
 
@@ -54,8 +54,7 @@ private:
 
   /// Initialize the abstract camera given by cameraConfig and targets.
   void constructAbstractCamera(const scene::Camera& cameraConfig,
-                               const scene::AnyTarget& targets,
-                               const bool showImages);
+                               const scene::AnyTarget& targets);
 
   /// Handle all opened abstract cameras.
   boost::ptr_vector<AbstractCamera> abstractCameras;

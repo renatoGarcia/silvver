@@ -43,8 +43,7 @@ public:
 protected:
 
   AbstractCamera(const scene::Camera& cameraConfig,
-                 boost::shared_ptr<Connection> connection,
-                 bool showImage=false);
+                 boost::shared_ptr<Connection> connection);
 
   /// Update the frame pointed by currentFrame.
   void updateFrame();
@@ -73,9 +72,6 @@ private:
   // de quadros por segundo.
   unsigned frameCounter;
   float frameRate;
-
-  const bool showImage;
-  const std::string windowName;
 };
 
 #endif

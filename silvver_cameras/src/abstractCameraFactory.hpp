@@ -29,8 +29,7 @@ public:
   static AbstractCamera*
   create(const scene::Camera& cameraConfig,
          const scene::AnyTarget& targets,
-         boost::shared_ptr<Connection> connection,
-         const bool showImages);
+         boost::shared_ptr<Connection> connection);
 
 private:
 

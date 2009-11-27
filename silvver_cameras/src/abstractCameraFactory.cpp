@@ -25,8 +25,7 @@
 AbstractCamera*
 AbstractCameraFactory::create(const scene::Camera& cameraConfig,
                               const scene::AnyTarget& targets,
-                              boost::shared_ptr<Connection> connection,
-                              const bool showImages)
+                              boost::shared_ptr<Connection> connection)
 {
   AbstractCamera* abstractCamera;
 
@@ -38,8 +37,7 @@ AbstractCameraFactory::create(const scene::Camera& cameraConfig,
 
     abstractCamera = new ArtkpCamera(cameraConfig,
                                      *artkpTarget,
-                                     connection,
-                                     showImages);
+                                     connection);
   }
   else
   {

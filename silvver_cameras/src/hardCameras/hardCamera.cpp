@@ -17,6 +17,10 @@
 
 #include <opencv/highgui.h>
 
+#include "../globalOptions.hpp"
+
+extern globalOptions::Options global_options;
+
 HardCamera::HardCamera(const scene::Hardware& config, unsigned bitsPerPixel)
   :frameSize(config.resolution.at(0) * config.resolution.at(1))
   ,frameWidth(config.resolution.at(0))
@@ -27,6 +31,8 @@ HardCamera::HardCamera(const scene::Hardware& config, unsigned bitsPerPixel)
                       IPL_DEPTH_32F, 1))
   ,mapy(cvCreateImage(cvSize(this->frameWidth, this->frameHeight),
                       IPL_DEPTH_32F, 1))
+  ,showImages(global_options.showImages)
+  ,windowName("Camera")
 {
   CvMat* intrinsic = cvCreateMat(3, 3, CV_32FC1);
   CvMat* distortion = cvCreateMat(5, 1, CV_32FC1);
@@ -51,12 +57,22 @@ HardCamera::HardCamera(const scene::Hardware& config, unsigned bitsPerPixel)
 
   cvRelease((void**)&intrinsic);
   cvRelease((void**)&distortion);
+
+  if (this->showImages)
+  {
+    cvNamedWindow(this->windowName.c_str());
+  }
 }
 
 HardCamera::~HardCamera()
 {
   cvReleaseImage(&(this->mapx));
   cvReleaseImage(&(this->mapy));
+
+  if (this->showImages)
+  {
+    cvDestroyWindow(this->windowName.c_str());
+  }
 }
 
 unsigned
@@ -103,4 +119,10 @@ HardCamera::captureRectFrame(IplImage** image, unsigned clientUid)
 {
   this->captureFrame(image, clientUid);
   undistortFrame(*image);
+
+  if (this->showImages)
+  {
+    cvShowImage(this->windowName.c_str(), *image);
+    cvWaitKey(5);
+  }
 }

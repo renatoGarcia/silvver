@@ -18,9 +18,12 @@
 #include <iostream>
 #include <string>
 
+#include "globalOptions.hpp"
 #include "sceneMounter.hpp"
 
 namespace po = boost::program_options;
+
+globalOptions::Options global_options;
 
 int main(int argc, char **argv)
 {
@@ -70,8 +73,10 @@ int main(int argc, char **argv)
               << "----------------------------------------------\n"
               << std::endl;
 
+    global_options.showImages = vm.count("show-images");
+
     SceneMounter sceneMounter(serverIP,receptionistPort,luaFile);
-    sceneMounter.mount(vm.count("show-images"));
+    sceneMounter.mount();
 
     getchar();
     std::cout << "Quitting..." << std::endl << std::endl;

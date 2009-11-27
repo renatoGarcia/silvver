@@ -36,7 +36,7 @@ SceneMounter::SceneMounter(const std::string& serverIp,
 {}
 
 void
-SceneMounter::mount(const bool showImages)
+SceneMounter::mount()
 {
   CfParser cfParser;
   const scene::Scene scene = cfParser.parseFile(this->sceneDescriptorFile);
@@ -48,8 +48,7 @@ SceneMounter::mount(const bool showImages)
     if(scene.targets.get<n>())                                  \
     {                                                           \
       this->constructAbstractCamera(camera,                     \
-                                    *scene.targets.get<n>(),    \
-                                    showImages);                \
+                                    *scene.targets.get<n>());   \
     }
 
     // Repeat CALL_construct_macro with one indice "n" for each type
@@ -62,16 +61,14 @@ SceneMounter::mount(const bool showImages)
 
 void
 SceneMounter::constructAbstractCamera(const scene::Camera& camera,
-                                      const scene::AnyTarget& targets,
-                                      const bool showImages)
+                                      const scene::AnyTarget& targets)
 {
   boost::shared_ptr<Connection>
     connection(new Connection(this->serverIp, this->receptionistPort));
 
   this->abstractCameras.push_back(AbstractCameraFactory::create(camera,
                                                                 targets,
-                                                                connection,
-                                                                showImages));
+                                                                connection));
 
   this->abstractCameras.back().run();
 }
