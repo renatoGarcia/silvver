@@ -159,6 +159,7 @@ CfParser::readCamera(lua_State* L)
 void
 CfParser::readHardware(lua_State* L, scene::Hardware& hardware)
 {
+  hardware.saveImageFormat = readValue<std::string>(L, "save_image_format");
   hardware.uid = readValue<std::string>(L, "uid");
   hardware.resolution = readArray<unsigned, 2>(L, "resolution");
 

@@ -24,7 +24,7 @@ namespace bfs = boost::filesystem;
 namespace bpt = boost::posix_time;
 
 PseudoCamera::PseudoCamera(const scene::PseudoCamera& config)
-  :HardCamera(config, PseudoCamera::BITS_PER_PIXEL)
+  :HardCamera(config, PseudoCamera::BITS_PER_PIXEL, config.uid)
   ,path(config.imagesPath)
   ,frameRate(config.frameRate)
   ,dirIterator()
@@ -35,7 +35,10 @@ PseudoCamera::PseudoCamera(const scene::PseudoCamera& config)
   ,bufferAccess()
   ,unreadFrameCondition()
   ,grabFrameThread()
-{}
+{
+  frameBuffer[0] = NULL;
+  frameBuffer[1] = NULL;
+}
 
 PseudoCamera::~PseudoCamera()
 {

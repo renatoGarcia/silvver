@@ -21,18 +21,23 @@
 
 extern globalOptions::Options global_options;
 
-HardCamera::HardCamera(const scene::Hardware& config, unsigned bitsPerPixel)
+HardCamera::HardCamera(const scene::Hardware& config, unsigned bitsPerPixel,
+                       std::string cameraIdenfier)
   :frameSize(config.resolution.at(0) * config.resolution.at(1))
   ,frameWidth(config.resolution.at(0))
   ,frameHeight(config.resolution.at(1))
   ,bitsPerPixel(bitsPerPixel)
   ,unreadImage()
+  ,cameraIdenfier(cameraIdenfier)
   ,mapx(cvCreateImage(cvSize(this->frameWidth, this->frameHeight),
                       IPL_DEPTH_32F, 1))
   ,mapy(cvCreateImage(cvSize(this->frameWidth, this->frameHeight),
                       IPL_DEPTH_32F, 1))
   ,showImages(global_options.showImages)
   ,windowName("Camera")
+  ,saveImages(global_options.saveImages)
+  ,saveImageformat(config.saveImageFormat)
+  ,savedImagesCounter(0)
 {
   CvMat* intrinsic = cvCreateMat(3, 3, CV_32FC1);
   CvMat* distortion = cvCreateMat(5, 1, CV_32FC1);
@@ -124,5 +129,11 @@ HardCamera::captureRectFrame(IplImage** image, unsigned clientUid)
   {
     cvShowImage(this->windowName.c_str(), *image);
     cvWaitKey(5);
+  }
+  if (this->saveImages)
+  {
+    this->saveImageformat % this->cameraIdenfier % this->savedImagesCounter;
+    cvSaveImage(this->saveImageformat.str().c_str(), *image);
+    this->savedImagesCounter++;
   }
 }

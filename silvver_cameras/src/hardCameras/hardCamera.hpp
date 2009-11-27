@@ -16,6 +16,7 @@
 #ifndef _HARDCAMERA_HPP_
 #define _HARDCAMERA_HPP_
 
+#include <boost/format.hpp>
 #include <boost/noncopyable.hpp>
 #include <stdexcept>
 #include <string>
@@ -94,7 +95,8 @@ public:
 
 protected:
 
-  HardCamera(const scene::Hardware& config, unsigned bitsPerPixel);
+  HardCamera(const scene::Hardware& config, unsigned bitsPerPixel,
+             std::string cameraIdenfier);
 
   void undistortFrame(IplImage* frame);
 
@@ -114,14 +116,22 @@ private:
 
   friend class HardCameraFactory;
 
+  virtual void initialize() = 0;
+
+  /// A string to differentiate this camera, e.g.: when saving images or
+  /// in title of window where showing the captured images.
+  const std::string cameraIdenfier;
+
   /// Maps to distort captured images
   IplImage* mapx;
   IplImage* mapy;
 
-  virtual void initialize() = 0;
-
   const bool showImages;
   const std::string windowName;
+
+  const bool saveImages;
+  boost::format saveImageformat;
+  unsigned savedImagesCounter;
 };
 
 #endif /* _HARDCAMERA_HPP_ */

@@ -33,6 +33,11 @@ namespace scene
    */
   struct Hardware
   {
+    /// String configuring the name of saved images. This string MUST have
+    /// the two placeholders %1% and %2%, where %1% is the camera identifier,
+    /// and the %2% is the saved images counter.
+    std::string saveImageFormat;
+
     /// String representation of camera unique identifier in decimal base.
     std::string uid;
 

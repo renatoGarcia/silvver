@@ -49,7 +49,8 @@ int main(int argc, char **argv)
     ("scene-config,c",
      po::value<std::string>(&luaFile)->default_value("scene.lua"),
      "Lua file with the scene configuration")
-    ("show-images,s", "Show the captured images by cameras")
+    ("show-images,s", "Show the images captured by cameras")
+    ("save-images", "Save the images captured by cameras")
     ;
 
   po::variables_map vm;
@@ -74,6 +75,7 @@ int main(int argc, char **argv)
               << std::endl;
 
     global_options.showImages = vm.count("show-images");
+    global_options.saveImages = vm.count("save-images");
 
     SceneMounter sceneMounter(serverIP,receptionistPort,luaFile);
     sceneMounter.mount();
