@@ -11,4 +11,5 @@ sources = Split("""clientsMap.cpp
 silvver_server_node = env.Program('silvver_server', sources)
 Default(env.Alias('silvver_server', silvver_server_node))
 
-install_nodes.append(env.Install(env['bindir'], silvver_server_node))
+install_nodes.append(env.Install(env['DESTDIR'] + env['bindir'],
+                                 silvver_server_node))

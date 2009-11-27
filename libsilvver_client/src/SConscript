@@ -8,5 +8,5 @@ shared_client_node = env.SharedLibrary('silvver_client', sources)
 
 Default(env.Alias('sivver_client', [static_client_node, shared_client_node]))
 
-install_nodes.append(env.Install(env['libdir'],
+install_nodes.append(env.Install(env['DESTDIR'] + env['libdir'],
                                  [static_client_node, shared_client_node]))

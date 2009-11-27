@@ -39,7 +39,7 @@ class ImagesSource:
     def images_cvSize(self):
         return (cvSize(self._images_size[0], self._images_size[1]))
 
-description = "Receive a serie of images with a checkerboard as input, and outputs the intrinsic calibration of camera which grab that images."
+description = "Receive a series of images with a checkerboard as input, and outputs the intrinsic calibration of camera which grab that images."
 usage="%prog [options] board_width board_height square_width input_files..."
 parser = OptionParser(usage=usage, description=description,
                       version="%prog 0.1")

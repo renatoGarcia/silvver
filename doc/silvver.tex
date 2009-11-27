@@ -3,89 +3,285 @@
 \usepackage[utf8]{inputenc}
 \usepackage[T1]{fontenc}
 \usepackage{graphicx}
-\title {Silvver \\ Sistema de Localização por Visão VERLab}
-\author{Renato Garcia}
-\date{}
+\usepackage{listings}
+\usepackage{numprint}
+\usepackage{tikz}
+\usepackage[colorlinks=true,linkcolor=blue,citecolor=blue,urlcolor=blue]{hyperref}
+\title {Silvver \\ Sistema de Localização por Visão VeRLab}
+\author{Renato Florentino Garcia}
 
+\usetikzlibrary{calc,3d}
+
+\include{lua}
+\lstset{numbers=left, numberstyle=\tiny, stepnumber=2, numbersep=5pt,
+  basicstyle=\small\tt, language=lua}
 
 \begin{document}
-\maketitle
 
+\maketitle
+\newpage
+
+\tableofcontents
+\newpage
 \section{Introdução}
 Esta documentação está desatualizada
 
-O Silvver é um sistema descentralizado de localização por visão. Ele
-efetua localização de marcos visuais pré-determinados a partir de
-imagens digitais.
+O Silvver é um sistema que foi desenvolvido para facilitar a obtenção da
+localização de alvos no ambiente. Ele possibilita que um usuário consiga de
+forma transparente as localização de alvos obtidos através de vários toolkits
+de localização, como por exemplo o ARToolKitPlus.
+
+O Silvver foi construído com o objetivo de ser um sistema de localização
+modular e multi-plataforma. A modularidade possibilita uma maior
+escalabilidade ao sistema, cada um de seus módulos pode ser executado em uma
+máquina diferente, dividindo entre elas o processamento do todo. Além disso,
+os diferentes computadores podem ser espalhados espacialmente, tornando mais
+fácil o uso de várias câmeras para cobrir uma grande área.
+
+O sistema é dividido em três módulos: silvver-cameras, silvver-server e
+libsilvver-client. Cada um desses módulos é um programa independente dos
+demais; o silvver-cameras e o silvver-server são programas executáveis, e a
+libsilvver-client é um biblioteca. Cada programa pode ser executado ou em
+computadores diferentes ou na mesma máquina, e a comunicação entre eles se dá
+por meio sockets.
+
+\subsection{Silvver-cameras}
+
+O silvver-cameras é o módulo responsável por controlar as câmeras e processar
+as imagens capturadas por elas. Cada instância desse módulo pode controlar
+quantas câmeras forem necessárias, e esse módulo pode ser instanciado tantas
+vezes, e em quantos computadores forem necessários.
+
+O silvver-cameras é configurado por um arquivo que descreve a cena que que
+será controlada por ele. Este arquivo de configuração é um script escrito na
+linguagem Lua\cite{lua}, e nele estão todas as câmeras que serão usadas e seus
+parâmetros, bem como todos os tipos de alvos e suas configurações.
+
+\subsection{Silvver-server}
+
+O silvver-server deve ser instanciado uma única vez em todo o sistema. Ele tem
+a tarefa de receber todos os alvos que foram localizados pelos vários
+silvver-cameras, verificar se algum deles foi visto por mais de uma câmera ao
+mesmo tempo e eliminar a duplicidade, e enviar as localizações para os
+clientes interessados.
+
+Ao ser iniciado o silvver-server passa imediatamente a ouvir uma porta TCP/IP
+pré-estabelecida. A entidade ligada a esta porta é chamada recepcionista, e
+todos os pedidos para adicionar ou terminar a conexão com uma câmera, e
+adicionar ou retirar um cliente é recebido primeiramente por ela.
 
 
-\section{O programa}
-O Silvver foi construído com o objetivo de ser um sistema de
-localização modular e multi-plataforma. A modularidade possibilita uma
-maior escalabilidade ao sistema, cada um de seus módulos pode ser
-executados em uma máquina diferente, dividindo entre elas o
-processamento do todo. Além disso, os diferentes computadores podem
-ser distribuídos procurando uma posição que minimize
+\subsection{Libsilvver-client}
 
-é constituído por três módulos: libsilvver-cliente, silvver-servidor e
-silvver-câmeras. Silvver-câmeras é o módulo responsável por controlar
-A comunicação entre estes módulos é feita através de sockets,
-portanto, cada um deles pode ser executado em um computador diferente,
-desde que estejam ligados em rede ou tenham acesso à internet.
+A libsilvver-client é uma biblioteca C++ que fornece uma API para o acesso às
+localizações de um dado alvo.
+
+\section{Instalação}
+
+A compilação de cada um dos módulos é feita individualmente, por serem eles
+programas independentes. A única exigência quanto a bibliotecas é que a versão
+da Boost\cite{boost} usada na compilação seja a mesma em todos eles, pois como
+os objetos que serão enviados pela rede são serializados usando a Boost
+Serialization, e versões antigas dessa biblioteca não necessariamente são
+compatíveis com as serializações feitas por versões mais novas, problemas de
+comunicação podem surgir.
+
+Na raiz do projeto existem três diretórios: common, libsilvver\_client,
+silvver\_cameras e silvver\_server. Em cada um dos diretórios
+libsilvver\_client, silvver\_cameras e silvver\_server estão os fontes dos
+respectivos módulos; já o diretório common contém os fontes que são
+compartilhados entre os módulos.
+
+Todo o projeto Silvver usa o SCons\cite{scons} como ferramenta de
+compilação. Portanto, em cada uma das pastas dos módulos há um arquivo
+\emph{SConstruct}, que é o script que verificas quais bibliotecas estão
+instaladas no sistema, e faz a compilação e a instalação. As opções de
+compilação de cada módulo podem ser vistas usando o comando \texttt{scons -h}
+no mesmo diretório onde está o arquivo \emph{SConstruct}.
+
+O processo para compilar e instalar os três módulos é excencialmente o mesmo,
+por isso um mesmo exemplo pode ser seguido para todos eles, com pequenas
+alterações se necessário. Dado um ambiente linux com a Boost versão 1.39
+instalada em um diretório não padrão, com as bibliotecas em
+\emph{/usr/local/bin} e os cabeçalhos em
+\emph{/usr/local/include/boost-1\_39}. O Silvver pode ser instalado dentro do
+diretório \emph{/home/renatofg/silvver} com o seguinte comando: \texttt{scons
+  install prefix=/home/renatofg/silvver/usr lib\_boost\_suffix=-gcc43-mt-1\_39
+  LIBPATH=/usr/local/lib/ CPPPATH=/usr/local/include/boost-1\_39/}.
 
 \section{Exemplo de uso}
-\subsection{silvver-câmera}
-Silvver-câmera é o módulo responsável por controlar as câmeras e
-processar as imagens obtidas. Cada computador deve executar no máximo
-uma única instância deste programa, e antes de iniciar a execução, um
-silvver-servidor deve estar obrigatoriamente sendo executado em alguma
-máquina cujo endereço IP seja conhecido. Caso hajam múltiplas câmeras
-conectadas em um mesmo computador, esta única instância manipulará
-todo o conjunto.
 
-\subsubsection{cameras.xml}
-Toda as opções de execução e configuração são fornecidas ao programa
-através de arquivo xml cujo nome deverá ser necessariamente
-cameras.xml. Este arquivo descreve as propriedades de cada câmera
-disponível, e se elas serão ou não utilizadas. Abaixo está ilustrado
-um aquivo de configuração cameras.xml.
+O primeiro módulo que dever ser executado é o silvver-server. A opção mais
+importante que este ele possui é -p ou --receptionist-port, que permite
+selecionar em qual porta TCP/IP o recepcionista estará ouvindo. Caso não seja
+especificado, a porta 12000 será usada.
+
+Após executado 
+
+\section{O Arquivo de Configuração}
+
+O arquivo de configuração do silvver-cameras é um script escrito na
+linguagem de progração Lua\cite{lua}. Ao inciar o silvver-cameras criará um
+ambiente lua para executar o \emph{script}, e após a execução lerá a variável
+scene, que deverá ser uma tabela contento toda as estruturas necessárias.
+A única variável de interesse ao silvver-cameras é a scene, todas as outras
+variáveis que por ventura estejam no ambiente serão ignoradas.  Um exemplo
+completo é dado abaixo:
+
+\begin{lstlisting}[frame=lines]
+require("cameraId")
+require("cameraConstructors")
+
+scene = {
+    cameras = {
+        Dragonfly{
+            uid = dragonfly2uid(5110432),
+
+            focal_length = {531.20605, 531.45104},
+            principal_point = {359.2638, 278.30819},
+            radial_coef = {-0.43208, 0.236, 0},
+            tangential_coef = {-0.00054004, 0.003849},
+
+            translation_vector = {358.43, -2.3797, 921.3742},
+            rotation_matrix = {
+                0.9960135, 0.0050411, -0.0890,
+                0.0013316, -0.99913, -0.04166,
+                    -0.08919, 0.04137, -0.99515
+            },
+
+            shutter = 500,
+            gain = 800,
+            white_balance = {50, 5},
+        },
+    },
+
+    artp_targets = {
+
+        pattern_width = 150,
+
+        {
+            pattern_file = 'data/4x4patt/4x4_1.patt',
+            uid = 1,
+        },
+    },
+}
+\end{lstlisting}
+
+As linhas 1 e 2 incluem dois fontes com funções que implementam algumas
+facilidades. Cada câmera possui um número que a identifica univocamente (UID),
+e dependendo da biblioteca utilizada, como a libdc1394, esse número difere do
+UID dado pelo fabricante. Em camedaId estão funções que traduzem os
+identificadores dados pelo fabricante da câmera para o UID esperado pela
+biblioteca. Esse é o caso de dragonfly2uid, que recebe o UID no formato dado
+nas câmeras dragonfly e retorna um UID no formato esperado pela libdc1394.
+
+Cada câmera possui diversas opções de configuração, e para que não seja
+necessário especificar cada um desses parâmetros.
+
+\section{Calibração das Câmeras}
+
+O processo de calibração de uma câmera consiste de se procurar os melhores
+parâmetros para um modelo teórico que a descreva através de equações
+matemáticas, sendo que estes parâmetros podem ser divididos entre intrínsecos
+e extrínsecos. Os parâmetros intrínsecos definem as características opticas,
+geométricas e digitais da câmera. No Silvver, os parâmetros intrínsecos de
+interesse são: distância focal, ponto principal, três parâmetros de distorção
+radial e dois parâmetros de distorção tangencial. Os parâmetros extrínsecos
+por sua vez descrevem como a câmera está posicionada no mundo, através de um
+vetor de deslocamento e uma matriz de rotação é dada a pose da câmera em
+relação a uma origem no mundo.
+
+Dois scripts para a calibração de câmeras fazem parte do projeto Silvver, são
+eles \emph{silvverIntCalib} e \emph{silvverExtCalib}, que são usados para
+determinar os parâmetros intrínsecos e extrínsecos respectivamente.
+
+\subsection{SilvverIntCalib}
+
+\begin{figure}
+  \centering
+  \includegraphics[width=0.5\columnwidth]{figures/checkerboard}
+  \caption{Exemplo de imagem usada para a calibração intrínseca de uma
+    câmera.}
+  \label{fig:checkerboard}
+\end{figure}
+
+A calibração intrínseca usando o script \emph{silvverIntCalib} é feita por
+meio de imagens de um tabuleiro xadrez capturadas pela câmera em questão, como
+a imagem da figura \ref{fig:checkerboard}. O primeiro passo portanto para a
+calibração intrínseca é salvar uma sequência de imagens em que seja possível
+ver completamente um tabuleiro. Uma vez que se tenha as imagens, basta
+executar o script passando-as como argumento.
+
+Assumindo-se que se esteja no mesmo diretório que as imagens, todas elas com
+extensão .ppm; e o tabuleiro seja o mesmo da figura \ref{fig:checkerboard},
+com 10$\times$7 casas, e cada casa medindo \numprint[mm]{25}, a calibração
+poderia ser obtida com o seguinte comando: \texttt{silvverIntCalib 10 7 0.025
+  *.ppm}. O silvverIntCalib também aceita algumas opções, que podem ser vistas
+pelo comando \texttt{silvverIntCalib -h}.
+
+\subsection{SilvverExtCalib}
+
+\begin{figure}[h]
+  \centering
+  \begin{tikzpicture}
+    \draw (0,0,0) -- (1,0,0);
+    \draw (0,0,0) -- (0,1,0);
+    \draw (0,0,0) -- (0,0,1);
+  \end{tikzpicture}
+  \caption{oi}
+  \label{fig:silvverExtCalib}
+\end{figure}
+
+O problema da calibração extrínseca resolvido pelo silvverExtCalib é definido
+pelo seguinte enunciado: em um espaço tridimensional, seja uma pose
+$\mathrm{P_1}$ e uma câmera C. São conhecidas as coordenadas (x, y, z, e a
+matriz de rotação) da pose $\mathrm{P_1}$ em relação a uma origem O
+($\mathrm{P_1^O}$), e em relação à camera C ($\mathrm{P_1^C}$). Deseja-se
+obter a pose da camera C em relação à origem O ($\mathrm{P_C^O}$). Ou seja,
+tendo-se $\mathrm{P_1^O}$ e $\mathrm{P_1^C}$ deseja-se conhecer
+$\mathrm{P_C^O}$, como está ilustrado na figura \ref{fig:silvverExtCalib}. O
+que o silvverExtCalib faz é essa transformação vetorial.
 
 
-\begin{verbatim}
-<camera ligada="sim">
-   <modelo> PGR </modelo>
-   <serial> 5111119 </serial>
-   <diretorio> E:/renato/cam19/ </diretorio>
-   <resolucao> 640 480 </resolucao>
-   <frequencia> 30 </frequencia>
-   <distancia_focal> 530.09343 529.65974 </distancia_focal>
-   <ponto_principal> 341.69169 219.77290 </ponto_principal>
-   <distorcao_radial>
-       -0.41522   0.16578   0.00092   -0.0016 0.0 0.0
-   </distorcao_radial>
-   <alfa_c> 0 </alfa_c>
-   <matrizH>
-       4.654740  0.212210 -5845.671545
-       0.031842 -4.724545 -2008.903768
-      -0.040346  0.012023 -1347.414986
-   </matrizH>
-</camera>
-\end{verbatim}
+Uma forma prática se obter $\mathrm{P_1^O}$ e $\mathrm{P_1^C}$, que são
+pré-requisitos do processo de calibração, é utilizando um alvo para o qual o
+Silvver forneça uma pose 6D. Vamos assumir que a pose desse alvo seja
+$\mathrm{P_1}$. Caso se deseje que $\mathrm{P_1}$ seja a origem do mundo, para
+determinar $\mathrm{P_1^O}$ basta fazer $(x,y,z) = (0,0,0)$ e a matriz de
+rotação igual à matriz identidade. Caso $\mathrm{P_1}$ não esteja na origem do
+mundo, sua pose $\mathrm{P_1^O}$ pode ser dada usando o Silvver e uma segunda
+câmera já calibrada.
 
-Onde as etiquetas utilizadas tem o seguinte significado:
-\begin{itemize}
-\item modelo: Utilizado internamente por silvver-cameras para
-  identificar a classe que será utilizada para controlar a captura de
-  imagens da câmera. É necessário que o modelo da camêra tenha uma
-  classe correspondente implementada no silvver-cameras.
-\item serial: Uma identificação única para a câmera
-\end{itemize}
+Para encontrar $\mathrm{P_1^C}$ basta configurar o silvver-cameras tendo a
+câmera C na origem do mundo, e obter a localização de $\mathrm{P_1}$. Para
+isso, o arquivo de configuração lua teria o seguinte trecho de código na
+tabela referente à camera C:
+\begin{lstlisting}[numbers=none]
+    translation_vector = {0, 0, 0},
+    rotation_matrix = {
+        1, 0, 0,
+        0, 1, 0,
+        0, 0, 1},
+\end{lstlisting}
+
+O formato de entrada de $\mathrm{P_1^O}$ e $\mathrm{P_1^C}$ esperado pelo
+silvverExtCalib é um arquivo de texto para cada uma, dentro do qual está sua
+pose. Se $\mathrm{P_1^O}$ e/ou $\mathrm{P_1^C}$ foram obtidas usando o
+Silvver, possivelmente seu arquivo de texto correspondente é formado por
+várias linhas, onde cada uma delas é a localização de $\mathrm{P_1}$ em um
+dado instante de tempo. Neste caso o silvverExtCalib tomará a média desses
+valores como a pose que será utilizada.
+
+Tendo-se $\mathrm{P_1^O}$ em um arquivo de texto nomeado \emph{p1o.txt}, e
+$\mathrm{P_1^C}$ em um nomeado \emph{p1c.txt}, para encontrar $\mathrm{P_C^O}$
+basta executar o seguinte comando estando-se no mesmo mesmo diretório em que
+estão os arquivos \emph{p1o.txt} e \emph{p1c.txt}: \texttt{silvverExtCalib
+  p1o.txt p1c.txt}.
+
+\section{Desenvolvimento}
 
 
-
-% \input{silvver_cliente_h}
-
-
-
+\bibliography{silvver}
+\bibliographystyle{plain}
 
 \end{document}

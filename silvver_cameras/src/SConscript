@@ -26,4 +26,5 @@ elif 'dc1394' in build_optional_flags or cleaning:
 silvver_cameras_node = env.Program('silvver_cameras', sources)
 Default(env.Alias('silvver_cameras', silvver_cameras_node))
 
-install_nodes.append(env.Install(env['bindir'], silvver_cameras_node))
+install_nodes.append(env.Install(env['DESTDIR'] + env['bindir'],
+                                 silvver_cameras_node))

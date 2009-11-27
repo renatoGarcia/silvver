@@ -34,7 +34,7 @@ public:
   void deliverPackage(const std::vector< silvver::Identity<silvver::Pose> > &pacote,
                       const unsigned id);
 
-  // Calcula a configuraçãoo dos robôs, usando os dados atualmente
+  // Calcula a configuração dos robôs, usando os dados atualmente
   // disponíveis no map armazenador.
   void localize(/*std::vector<silvver::Ente> &vecRobos*/);
 

@@ -64,31 +64,34 @@ for related_libs in mandatory_libs:
 var.Add('lua_pkgconfig',
         'Name of pkg-config file of lua 5.1',
         'lua')
-
+var.Add('DESTDIR',
+        'In installation the path inside DESTDIR will be prepended '
+        'to all instalation paths',
+        '')
 var.Add('CPPPATH',
-         'Directories that the C++ preprocessor will search for '
-         'include directories. List only directories, do not list '
-         'options flags like -I in gcc. Multiples directories must be '
-         'quoted and delimited by a semicolon',
-         '')
-
+        'Directories that the C++ preprocessor will search for '
+        'include directories. List only directories, do not list '
+        'options flags like -I in gcc. Multiples directories must be '
+        'quoted and delimited by a semicolon',
+        '')
 var.Add('LIBPATH',
-         'The list of directories that will be searched for libraries. '
-         'List only directories, do not list options flags like -L in '
-         'gcc. Multiples directories must be quoted and delimited by '
-         'a semicolon',
-         '')
-
+        'The list of directories that will be searched for libraries. '
+        'List only directories, do not list options flags like -L in '
+        'gcc. Multiples directories must be quoted and delimited by '
+        'a semicolon',
+        '')
 var.Add('CPPFLAGS',
-         'C++ preprocessor flags',
-         '')
+        'C++ preprocessor flags',
+        '')
 
 env = Environment(options = var,
                   CPPFLAGS = '${CPPFLAGS}')
 
+
 for related_libs in mandatory_libs:
     related_libs.add_suffix(env['lib_' + related_libs.short_name + '_suffix'])
 
+env['DESTDIR'] = env['DESTDIR'] + '/'
 env['CPPPATH'] = env['CPPPATH'].split(';')
 env.Append(CPPPATH = [abspath('../common')])
 
@@ -196,10 +199,12 @@ if not env.GetOption('clean') and not env.GetOption('help'):
     env = conf.Finish()
 
 install_nodes = []
-
-install_nodes.append(env.Install(env['lualibdir'], ['lua/cameraId.lua']))
-install_nodes.append(env.Install(env['bindir'], ['calibration/silvverExtCalib',
-                                                 'calibration/silvverIntCalib']))
+install_nodes.append(env.Install(env['DESTDIR'] + env['lualibdir'],
+                                 ['lua/cameraId.lua',
+                                  'lua/cameraConstructors.lua']))
+install_nodes.append(env.Install(env['DESTDIR'] + env['bindir'],
+                                 ['calibration/silvverExtCalib',
+                                  'calibration/silvverIntCalib']))
 
 Export('env', 'build_optional_flags', 'install_nodes')
 SConscript('src/SConscript', build_dir='build', duplicate=0)
