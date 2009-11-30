@@ -1,3 +1,5 @@
+#include <iostream>
+
 /* Copyright 2009 Renato Florentino Garcia <fgar.renato@gmail.com>
  *
  * This program is free software: you can redistribute it and/or modify
@@ -15,9 +17,13 @@
 
 #include "hardCamera.hpp"
 
+#include <boost/filesystem.hpp>
+
 #include <opencv/highgui.h>
 
 #include "../globalOptions.hpp"
+
+namespace bfs = boost::filesystem;
 
 extern globalOptions::Options global_options;
 
@@ -34,7 +40,7 @@ HardCamera::HardCamera(const scene::Hardware& config, unsigned bitsPerPixel,
   ,mapy(cvCreateImage(cvSize(this->frameWidth, this->frameHeight),
                       IPL_DEPTH_32F, 1))
   ,showImages(global_options.showImages)
-  ,windowName("Camera")
+  ,windowName("Camera_" + cameraIdenfier)
   ,saveImages(global_options.saveImages)
   ,saveImageformat(config.saveImageFormat)
   ,savedImagesCounter(0)
@@ -66,6 +72,13 @@ HardCamera::HardCamera(const scene::Hardware& config, unsigned bitsPerPixel,
   if (this->showImages)
   {
     cvNamedWindow(this->windowName.c_str());
+  }
+  if (this->saveImages)
+  {
+    // Create directory where images will be saved if it don't exists yet.
+    bfs::path path(config.saveImageFormat);
+    path = path.remove_filename();
+    bfs::create_directories(path);
   }
 }
 
