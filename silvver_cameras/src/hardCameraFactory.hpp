@@ -51,7 +51,7 @@ private:
 
   HardCameraFactory();
 
-  /// The std::string key is the HardCamera unique identifier
+  /// The std::string key is the HardCamera identifier.
   static std::map< std::string, boost::shared_ptr<HardCamera> >
   createdHardCameras;
 

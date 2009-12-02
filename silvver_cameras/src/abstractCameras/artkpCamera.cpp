@@ -29,7 +29,7 @@ ArtkpCamera::ArtkpCamera(const scene::Camera& cameraConfig,
   :AbstractCamera(cameraConfig, connection)
   ,camConfigFileName("/tmp/artkpCamera" +
                      boost::apply_visitor(scene::GetHardware(),
-                                          cameraConfig.hardware).uid)
+                                          cameraConfig.hardware).identifier)
   ,patternWidth(targets.patternWidth)
   ,threshold(targets.threshold)
   ,logger()

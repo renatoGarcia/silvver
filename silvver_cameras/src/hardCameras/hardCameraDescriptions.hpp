@@ -33,13 +33,13 @@ namespace scene
    */
   struct Hardware
   {
-    /// String configuring the name of saved images. This string MUST have
+    /// An unique string which differentiate this hardCamera from others hardCamera.
+    std::string identifier;
+
+    /// String configuring the name of saved images. This string can have
     /// the two placeholders %1% and %2%, where %1% is the camera identifier,
     /// and the %2% is the saved images counter.
     std::string saveImageFormat;
-
-    /// String representation of camera unique identifier in decimal base.
-    std::string uid;
 
     /// {width, height}.
     boost::array<unsigned, 2> resolution;
@@ -68,6 +68,9 @@ namespace scene
 
   struct DC1394 : public Hardware
   {
+    /// String representation of camera unique identifier in decimal base.
+    std::string uid;
+
     /// The rate which the input images will be read.
     float frameRate;
 

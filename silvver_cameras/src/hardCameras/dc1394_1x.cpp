@@ -30,7 +30,7 @@
 using namespace boost::assign;
 
 DC1394::DC1394(const scene::DC1394& config)
-  :HardCamera(config, getBitsPerPixel(config.colorMode), config.uid)
+  :HardCamera(config, getBitsPerPixel(config.colorMode))
   ,uid(config.uid)
   ,frameRate(config.frameRate)
   ,raw1394Handle(NULL)

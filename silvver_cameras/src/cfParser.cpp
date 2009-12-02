@@ -159,8 +159,8 @@ CfParser::readCamera(lua_State* L)
 void
 CfParser::readHardware(lua_State* L, scene::Hardware& hardware)
 {
+  hardware.identifier = readValue<std::string>(L, "identifier");
   hardware.saveImageFormat = readValue<std::string>(L, "save_image_format");
-  hardware.uid = readValue<std::string>(L, "uid");
   hardware.resolution = readArray<unsigned, 2>(L, "resolution");
 
   hardware.focalLength = readArray<double, 2>(L, "focal_length");
@@ -174,9 +174,9 @@ CfParser::readPseudoCameraConfig(lua_State* L)
 {
   scene::PseudoCamera pseudoCamera;
 
-  this->readHardware(L, pseudoCamera);
   pseudoCamera.imagesPath = readValue<std::string>(L, "images_path");
   pseudoCamera.frameRate = readValue<float>(L, "frame_rate");
+  this->readHardware(L, pseudoCamera);
 
   return pseudoCamera;
 }
@@ -186,7 +186,7 @@ CfParser::readDC1394Config(lua_State* L)
 {
   scene::DC1394 dc1394;
 
-  this->readHardware(L, dc1394);
+  dc1394.uid          = readValue<std::string>(L, "uid");
   dc1394.frameRate    = readValue<float>(L, "frame_rate");
   dc1394.colorMode    = readValue<std::string>(L, "color_mode");
   dc1394.brightness   = readValue<std::string>(L, "brightness");
@@ -194,6 +194,7 @@ CfParser::readDC1394Config(lua_State* L)
   dc1394.whiteBalance = readArray<std::string, 2>(L, "white_balance");
   dc1394.shutter      = readValue<std::string>(L, "shutter");
   dc1394.gain         = readValue<std::string>(L, "gain");
+  this->readHardware(L, dc1394);
 
   return dc1394;
 }

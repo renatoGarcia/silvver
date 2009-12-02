@@ -95,8 +95,7 @@ public:
 
 protected:
 
-  HardCamera(const scene::Hardware& config, unsigned bitsPerPixel,
-             std::string cameraIdenfier);
+  HardCamera(const scene::Hardware& config, unsigned bitsPerPixel);
 
   void undistortFrame(IplImage* frame);
 
@@ -120,7 +119,7 @@ private:
 
   /// A string to differentiate this camera, e.g.: when saving images or
   /// in title of window where showing the captured images.
-  const std::string cameraIdenfier;
+  const std::string cameraIdentifier;
 
   /// Maps to distort captured images
   IplImage* mapx;

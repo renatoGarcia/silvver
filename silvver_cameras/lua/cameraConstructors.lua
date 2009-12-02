@@ -23,10 +23,10 @@ end
 function PseudoCamera(parameters)
     camera = {}
     camera.__name = 'pseudocamera'
+    camera.identifier = parameters.images_path
 
     camera.save_image_format = __getOptional(parameters.save_image_format,
                                              "%1%_%2%.jpg")
-    camera.uid = parameters.uid
     camera.images_path = parameters.images_path
 
     camera.focal_length = parameters.focal_length
@@ -50,6 +50,7 @@ end
 function Dragonfly(parameters)
     camera = {}
     camera.__name = 'dc1394'
+    camera.identifier = parameters.uid
 
     camera.save_image_format = __getOptional(parameters.save_image_format,
                                              "%1%_%2%.jpg")
