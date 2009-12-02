@@ -37,8 +37,9 @@ namespace scene
     std::string identifier;
 
     /// String configuring the name of saved images. This string can have
-    /// the two placeholders %1% and %2%, where %1% is the camera identifier,
-    /// and the %2% is the saved images counter.
+    /// the placeholders %1%, %2% and %3%; where %1% is the camera identifier,
+    /// %2% is the saved images counter, and the %3% is the string "d" or
+    /// "u" indicating if the saving image was undistorted or not.
     std::string saveImageFormat;
 
     /// {width, height}.

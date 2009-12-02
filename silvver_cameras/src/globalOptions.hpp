@@ -18,6 +18,7 @@ namespace globalOptions
   struct Options
   {
     bool showImages;
-    bool saveImages;
+    bool saveDistortedImages;
+    bool saveUndistortedImages;
   };
 }

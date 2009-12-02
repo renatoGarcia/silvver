@@ -52,7 +52,10 @@ int main(int argc, char **argv)
      po::value<std::string>(&luaFile)->default_value("scene.lua"),
      "Lua file with the scene configuration")
     ("show-images,s", "Show the images captured by cameras")
-    ("save-images", "Save the images captured by cameras")
+    ("save-undistorted",
+     "Save the images captured by cameras with intrinsic distortion corrected")
+    ("save-distorted",
+     "Save the images captured by cameras without correct the intrinsic distortion")
     ;
 
   po::variables_map vm;
@@ -77,7 +80,8 @@ int main(int argc, char **argv)
               << std::endl;
 
     global_options.showImages = vm.count("show-images");
-    global_options.saveImages = vm.count("save-images");
+    global_options.saveDistortedImages = vm.count("save-distorted");
+    global_options.saveUndistortedImages = vm.count("save-undistorted");
 
     SceneMounter sceneMounter(serverIP,receptionistPort,luaFile);
     sceneMounter.mount();

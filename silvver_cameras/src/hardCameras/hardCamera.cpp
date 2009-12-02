@@ -40,8 +40,11 @@ HardCamera::HardCamera(const scene::Hardware& config, unsigned bitsPerPixel)
                       IPL_DEPTH_32F, 1))
   ,showImages(global_options.showImages)
   ,windowName("Camera_" + cameraIdentifier)
-  ,saveImages(global_options.saveImages)
-  ,saveImageformat(config.saveImageFormat)
+  ,saveDistortedImages(global_options.saveDistortedImages &&
+                       !config.saveImageFormat.empty())
+  ,saveUndistortedImages(global_options.saveUndistortedImages &&
+                         !config.saveImageFormat.empty())
+  ,saveImageFormat(config.saveImageFormat)
   ,savedImagesCounter(0)
 {
   CvMat* intrinsic = cvCreateMat(3, 3, CV_32FC1);
@@ -72,13 +75,16 @@ HardCamera::HardCamera(const scene::Hardware& config, unsigned bitsPerPixel)
   {
     cvNamedWindow(this->windowName.c_str());
   }
-  if (this->saveImages)
+  if (this->saveUndistortedImages || this->saveDistortedImages)
   {
     // Create directory where images will be saved if it don't exists yet.
     bfs::path path(config.saveImageFormat);
     path = path.remove_filename();
     bfs::create_directories(path);
   }
+  // Ignore if using not all placeholders in format string.
+  this->saveImageFormat.exceptions(boost::io::all_error_bits ^
+                                   boost::io::too_many_args_bit);
 }
 
 HardCamera::~HardCamera()
@@ -135,17 +141,32 @@ void
 HardCamera::captureRectFrame(IplImage** image, unsigned clientUid)
 {
   this->captureFrame(image, clientUid);
+
+  if (this->saveDistortedImages)
+  {
+    this->saveImageFormat % this->cameraIdentifier % this->savedImagesCounter
+                          % "d";
+    cvSaveImage(this->saveImageFormat.str().c_str(), *image);
+  }
+
   undistortFrame(*image);
+
+  if (this->saveUndistortedImages)
+  {
+    this->saveImageFormat % this->cameraIdentifier % this->savedImagesCounter
+                          % "u";
+    cvSaveImage(this->saveImageFormat.str().c_str(), *image);
+  }
+
+  if (this->saveUndistortedImages || this->saveDistortedImages)
+  {
+    this->savedImagesCounter++;
+  }
+
 
   if (this->showImages)
   {
     cvShowImage(this->windowName.c_str(), *image);
     cvWaitKey(5);
-  }
-  if (this->saveImages)
-  {
-    this->saveImageformat % this->cameraIdentifier % this->savedImagesCounter;
-    cvSaveImage(this->saveImageformat.str().c_str(), *image);
-    this->savedImagesCounter++;
   }
 }
