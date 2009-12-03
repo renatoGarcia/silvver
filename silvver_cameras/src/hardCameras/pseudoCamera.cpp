@@ -133,10 +133,6 @@ PseudoCamera::runCapturer()
 }
 
 void
-PseudoCamera::saveFrame()
-{}
-
-void
 PseudoCamera::captureFrame(IplImage** iplImage, unsigned clientUid)
 {
   boost::shared_lock<boost::shared_mutex> lock(this->bufferAccess);

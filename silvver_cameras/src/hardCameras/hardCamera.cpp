@@ -75,16 +75,19 @@ HardCamera::HardCamera(const scene::Hardware& config, unsigned bitsPerPixel)
   {
     cvNamedWindow(this->windowName.c_str());
   }
-  if (this->saveUndistortedImages || this->saveDistortedImages)
-  {
-    // Create directory where images will be saved if it don't exists yet.
-    bfs::path path(config.saveImageFormat);
-    path = path.remove_filename();
-    bfs::create_directories(path);
-  }
+
   // Ignore if using not all placeholders in format string.
   this->saveImageFormat.exceptions(boost::io::all_error_bits ^
                                    boost::io::too_many_args_bit);
+  if (this->saveUndistortedImages || this->saveDistortedImages)
+  {
+    this->saveImageFormat % this->cameraIdentifier % this->savedImagesCounter
+                          % "u";
+    // Create directory where images will be saved if it don't exists yet.
+    bfs::path path(this->saveImageFormat.str());
+    path = path.remove_filename();
+    bfs::create_directories(path);
+  }
 }
 
 HardCamera::~HardCamera()

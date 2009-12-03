@@ -36,8 +36,6 @@ public:
 
   void initialize();
 
-  void saveFrame();
-
   /// Can throw capture_image_error
   void captureFrame(IplImage** iplImage, unsigned clientUid);
 
