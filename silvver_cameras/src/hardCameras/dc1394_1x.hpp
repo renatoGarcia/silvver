@@ -23,7 +23,6 @@
 #include <boost/thread/condition.hpp>
 #include <boost/thread/shared_mutex.hpp>
 #include <boost/thread/thread.hpp>
-#include "boost/multi_array.hpp"
 #include <string>
 
 #include <libdc1394/dc1394_control.h>
@@ -60,7 +59,7 @@ private:
 
   void setFeatures(nodeid_t cameraNode);
 
-  static const int NUMERO_BUFFERS = 4;
+  static const int N_BUFFERS = 4;
 
   /// A string representing the uid of the camera.
   /// It must be numbers in decimal base.
@@ -78,8 +77,7 @@ private:
   /// Frame buffer size in bytes
   const unsigned bufferSize;
 
-  boost::multi_array<unsigned char, 2> frameBuffer;
-  unsigned currentFrame;
+  IplImage* currentFrame;
 
   // bayer_pattern_t pattern;
 

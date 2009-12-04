@@ -24,6 +24,7 @@
 #include <cstddef>
 #include <cstring>
 #include <stdexcept>
+#include <stdint.h>
 
 #include <sys/stat.h>
 
@@ -37,14 +38,15 @@ DC1394::DC1394(const scene::DC1394& config)
   ,bDc1394CameraCreated(false)
   ,videoMode(getDc1394VideoMode(config.colorMode))
   ,bufferSize((this->frameSize * this->bitsPerPixel) / 8)
-  ,frameBuffer(boost::extents[2][bufferSize])
-  ,currentFrame(0)
+  ,currentFrame(NULL)
   ,brightness(config.brightness)
   ,exposure(config.exposure)
   ,whiteBalance(config.whiteBalance)
   ,shutter(config.shutter)
   ,gain(config.gain)
-{}
+{
+  createIplImage(&this->currentFrame);
+}
 
 DC1394::~DC1394()
 {
@@ -65,6 +67,11 @@ DC1394::~DC1394()
   if(this->raw1394Handle)
   {
     raw1394_destroy_handle(this->raw1394Handle);
+  }
+
+  if(this->currentFrame)
+  {
+    cvReleaseImage(&this->currentFrame);
   }
 }
 
@@ -366,12 +373,12 @@ DC1394::initialize()
 
   int e = dc1394_dma_setup_capture(this->raw1394Handle,
                                    cameraNode,
-                                   cameraNode, // ISO channe. Is will work with multiples firewire cards?
+                                   cameraNode, // ISO channel. Is will work with multiples firewire cards?
                                    FORMAT_VGA_NONCOMPRESSED,
                                    this->videoMode,
                                    speed,
                                    dc1394FrameRate,
-                                   8,	// number of buffers
+                                   DC1394::N_BUFFERS,
                                    1,	// drop frames
                                    this->findVideo1394Device(cardIndex).c_str(),
                                    &(this->dc1394Camera));
@@ -430,7 +437,8 @@ DC1394::initialize()
 void
 DC1394::runCapturer()
 {
-  int frameIdx = 0;
+  IplImage* tmpFrame;
+  createIplImage(&tmpFrame);
 
   while (true)
   {
@@ -441,21 +449,26 @@ DC1394::runCapturer()
       throw capture_image_error("Unable to capture a frame");
     }
 
-    memcpy(this->frameBuffer[frameIdx].origin(),
+    memcpy(tmpFrame->imageData,
            this->dc1394Camera.capture_buffer,
            this->bufferSize);
 
     this->bufferAccess.lock();
-    this->currentFrame = frameIdx;
+    dc1394_bayer_decoding_8bit((uint8_t*)tmpFrame->imageData,
+                               (uint8_t*)(this->currentFrame)->imageData,
+                               this->dc1394Camera.frame_width,
+                               this->dc1394Camera.frame_height,
+                               LIBDC1394_COLOR_FILTER_RGGB,
+                               LIBDC1394_BAYER_METHOD_SIMPLE);
     this->bufferAccess.unlock();
 
     std::fill(this->unreadImage.begin(), this->unreadImage.end(), true);
     this->unreadFrameCondition.notify_all();
 
     dc1394_dma_done_with_buffer(&(this->dc1394Camera));
-
-    frameIdx = (frameIdx+1) % 2;
   }
+
+  cvReleaseImage(&tmpFrame);
 }
 
 void
@@ -468,12 +481,7 @@ DC1394::captureFrame(IplImage** iplImage, unsigned clientUid)
     this->unreadFrameCondition.wait(lock);
   }
 
-  dc1394_bayer_decoding_8bit(this->frameBuffer[this->currentFrame].origin(),
-                             (unsigned char*)(*iplImage)->imageData,
-                             this->dc1394Camera.frame_width,
-                             this->dc1394Camera.frame_height,
-                             LIBDC1394_COLOR_FILTER_RGGB,
-                             LIBDC1394_BAYER_METHOD_SIMPLE);
+  fixChannelOrder(this->currentFrame, *iplImage);
 
   this->unreadImage.at(clientUid) = false;
 }

@@ -1,5 +1,3 @@
-#include <iostream>
-
 /* Copyright 2009 Renato Florentino Garcia <fgar.renato@gmail.com>
  *
  * This program is free software: you can redistribute it and/or modify
@@ -18,6 +16,7 @@
 #include "hardCamera.hpp"
 
 #include <boost/filesystem.hpp>
+#include <stdint.h>
 
 #include <opencv/highgui.h>
 
@@ -127,6 +126,64 @@ HardCamera::createIplImage(IplImage** iplImage) const
 
   *iplImage = cvCreateImage(cvSize(this->frameWidth, this->frameHeight),
                             depth, 3);
+}
+
+template <class T>
+void
+HardCamera::rgb2bgr(const T* const input, T* const output,
+                    const unsigned nPixels)
+{
+  for (int i=0; i<nPixels*3; i+=3)
+  {
+    output[i]   = input[i+2];
+    output[i+1] = input[i+1];
+    output[i+2] = input[i];
+  }
+}
+
+void
+HardCamera::fixChannelOrder(const IplImage* const input,
+                            IplImage* const output)
+{
+  if (input->depth != output->depth ||
+      input->width != output->width ||
+      input->height != output->height)
+  {
+    // throw BIZIU
+  }
+
+  unsigned nPixels = input->width*input->height;
+  if (input->depth == IPL_DEPTH_8U ||
+      input->depth == IPL_DEPTH_8S)
+  {
+    this->rgb2bgr(reinterpret_cast<const uint8_t* const>(input->imageData),
+                  reinterpret_cast<uint8_t* const>(output->imageData),
+                  nPixels);
+  }
+  else if (input->depth == IPL_DEPTH_16S)
+  {
+    this->rgb2bgr(reinterpret_cast<const uint16_t* const>(input->imageData),
+                  reinterpret_cast<uint16_t* const>(output->imageData),
+                  nPixels);
+
+  }
+  else if (input->depth == IPL_DEPTH_32S ||
+           input->depth == IPL_DEPTH_32F)
+  {
+    this->rgb2bgr(reinterpret_cast<const uint32_t* const>(input->imageData),
+                  reinterpret_cast<uint32_t* const>(output->imageData),
+                  nPixels);
+
+  }
+  // else if (input->depth == IPL_DEPTH_64F)
+  // {
+  // }
+  else
+  {
+    // throw BIZIU
+  }
+
+  return;
 }
 
 void
