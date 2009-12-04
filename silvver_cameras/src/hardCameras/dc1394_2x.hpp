@@ -71,8 +71,7 @@ private:
   dc1394camera_t* camera;
 
   /// Pointer to the last captured frame.
-  dc1394video_frame_t* currentFrame;
-  dc1394video_frame_t* frameBuffer[2];
+  IplImage* currentFrame;
 
   boost::shared_mutex bufferAccess;
   boost::condition_variable_any unreadFrameCondition;

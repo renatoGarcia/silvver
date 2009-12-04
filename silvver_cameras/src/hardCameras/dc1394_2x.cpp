@@ -22,6 +22,7 @@
 #include <boost/ref.hpp>
 #include <boost/bind.hpp>
 #include <boost/tuple/tuple.hpp>
+#include <stdint.h>
 
 using namespace boost::assign;
 
@@ -40,15 +41,13 @@ DC1394::DC1394(const scene::DC1394& config)
   ,shutter(config.shutter)
   ,gain(config.gain)
 {
-  for (int i = 0; i < 2; ++i)
-  {
-    this->frameBuffer[i] = NULL;
-  }
   this->context = dc1394_new();
   if (!this->context)
   {
     throw open_camera_error("Unable to create a libdc1394 context");
   }
+
+  createIplImage(&this->currentFrame);
 }
 
 DC1394::~DC1394()
@@ -59,15 +58,6 @@ DC1394::~DC1394()
     this->grabFrameThread->join();
   }
 
-  for (int i = 0; i < 2; ++i)
-  {
-    if (this->frameBuffer[i] != NULL)
-    {
-      // Release the buffer
-      dc1394_capture_enqueue(this->camera, this->frameBuffer[i]);
-    }
-  }
-
   if (this->camera)
   {
     dc1394_video_set_transmission(this->camera, DC1394_OFF);
@@ -76,6 +66,11 @@ DC1394::~DC1394()
   }
 
   dc1394_free(this->context);
+
+  if(this->currentFrame)
+  {
+    cvReleaseImage(&this->currentFrame);
+  }
 }
 
 dc1394video_mode_t
@@ -359,43 +354,57 @@ DC1394::initialize()
 void
 DC1394::runCapturer()
 {
-  int frameIdx = 0;
+  dc1394video_frame_t* tmpFrame = NULL;
 
-  // Capture the first two frames to initialize the frameBuffer array.
-  for(int i = 0; i < 2; ++i)
-  {
-    if (dc1394_capture_dequeue(this->camera,
-                               DC1394_CAPTURE_POLICY_WAIT,
-                               &this->frameBuffer[i]))
-    {
-      throw capture_image_error("Could not capture a frame");
-    }
-  }
   while (true)
   {
     boost::this_thread::interruption_point();
 
-    // Release the buffer
-    if (dc1394_capture_enqueue(this->camera, this->frameBuffer[frameIdx]))
-    {
-      throw capture_image_error("Error on returning a frame to ring buffer");
-    }
-
     if (dc1394_capture_dequeue(this->camera,
                                DC1394_CAPTURE_POLICY_WAIT,
-                               &this->frameBuffer[frameIdx]))
+                               &tmpFrame))
     {
       throw capture_image_error("Could not capture a frame");
     }
 
     this->bufferAccess.lock();
-    this->currentFrame = this->frameBuffer[frameIdx];
+    // This don't work for images whith more than 1 byte per pixel
+    if (this->bitsPerPixel == 8)
+    {
+      if (dc1394_bayer_decoding_8bit((uint8_t*)tmpFrame->image,
+                                     (uint8_t*)this->currentFrame->imageData,
+                                     this->frameWidth,
+                                     this->frameHeight,
+                                     DC1394_COLOR_FILTER_RGGB,
+                                     DC1394_BAYER_METHOD_SIMPLE))
+      {
+        throw capture_image_error("Error on bayer decoding");
+
+      }
+    }
+    else if (this->bitsPerPixel == 16)
+    {
+      if (dc1394_bayer_decoding_16bit((uint16_t*)tmpFrame->image,
+                                      (uint16_t*)this->currentFrame->imageData,
+                                      this->frameWidth,
+                                      this->frameHeight,
+                                      DC1394_COLOR_FILTER_RGGB,
+                                      DC1394_BAYER_METHOD_SIMPLE,
+                                      this->bitsPerPixel))
+      {
+        throw capture_image_error("Error on bayer decoding");
+      }
+    }
     this->bufferAccess.unlock();
 
     std::fill(this->unreadImage.begin(), this->unreadImage.end(), true);
     this->unreadFrameCondition.notify_all();
 
-    frameIdx = (frameIdx+1) % 2;
+    // Release the buffer
+    if (dc1394_capture_enqueue(this->camera, tmpFrame))
+    {
+      throw capture_image_error("Error on returning a frame to ring buffer");
+    }
   }
 }
 
@@ -409,34 +418,7 @@ DC1394::captureFrame(IplImage** iplImage, unsigned clientUid)
     this->unreadFrameCondition.wait(lock);
   }
 
-  // This don't work for images whith more than 1 byte per pixel
-  if (this->bitsPerPixel == 8)
-  {
-    if (dc1394_bayer_decoding_8bit(this->currentFrame->image,
-                                   (uint8_t*)(*iplImage)->imageData,
-                                   this->frameWidth,
-                                   this->frameHeight,
-                                   DC1394_COLOR_FILTER_RGGB,
-                                   DC1394_BAYER_METHOD_SIMPLE))
-    {
-      throw capture_image_error("Error on bayer decoding");
-
-    }
-  }
-  else if (this->bitsPerPixel == 16)
-  {
-    if (dc1394_bayer_decoding_16bit((uint16_t*)this->currentFrame->image,
-                                    (uint16_t*)(*iplImage)->imageData,
-                                    this->frameWidth,
-                                    this->frameHeight,
-                                    DC1394_COLOR_FILTER_RGGB,
-                                    DC1394_BAYER_METHOD_SIMPLE,
-                                    this->bitsPerPixel))
-    {
-      throw capture_image_error("Error on bayer decoding");
-
-    }
-  }
+  fixChannelOrder(this->currentFrame, *iplImage);
 
   this->unreadImage.at(clientUid) = false;
 }
