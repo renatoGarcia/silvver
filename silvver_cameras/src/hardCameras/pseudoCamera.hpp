@@ -20,11 +20,7 @@
 
 #include <boost/filesystem.hpp>
 #include <boost/scoped_ptr.hpp>
-#include <boost/thread/condition.hpp>
-#include <boost/thread/shared_mutex.hpp>
 #include <boost/thread/thread.hpp>
-#include <stdexcept>
-#include <string>
 
 class PseudoCamera : public HardCamera
 {
@@ -36,14 +32,11 @@ public:
 
   void initialize();
 
-  /// Can throw capture_image_error
-  void captureFrame(IplImage** iplImage, unsigned clientUid);
-
 private:
 
   static const unsigned BITS_PER_PIXEL = 8;
 
-  void runCapturer();
+  void doWork();
 
   const boost::filesystem::path path;
 
@@ -52,16 +45,10 @@ private:
   boost::filesystem::directory_iterator dirIterator;
   const boost::filesystem::directory_iterator  endIterator;
 
-  bool allImageReaded;
-
   // Tempo que pseudoCamera ficará ociosa para simular uma dada frequência
   const boost::posix_time::millisec delay;
 
-  IplImage* currentFrame;
   IplImage* frameBuffer[2];
-
-  boost::shared_mutex bufferAccess;
-  boost::condition_variable_any unreadFrameCondition;
 
   boost::scoped_ptr<boost::thread> grabFrameThread;
 };

@@ -25,17 +25,20 @@ AbstractCamera::AbstractCamera(const scene::Camera& cameraConfig,
                                boost::shared_ptr<Connection> connection)
   :currentFrame(NULL)
   ,serverConnection(connection)
-  ,hardCamera(HardCameraFactory::create(cameraConfig.hardware))
+  ,subjectHardCamera(HardCameraFactory::create(cameraConfig.hardware))
   ,rot(cameraConfig.rotationMatrix)
   ,trans(cameraConfig.translationVector)
   ,frameCounter(0)
   ,frameRate(0)
 {
-  this->hardCamera.get<0>()->createIplImage(&this->currentFrame);
+  this->subjectHardCamera->attach(this);
+  this->subjectHardCamera->createIplImage(&this->currentFrame);
 }
 
 AbstractCamera::~AbstractCamera()
 {
+  this->subjectHardCamera->detach(this);
+
   if (this->currentFrame != NULL)
   {
     cvReleaseImage(&this->currentFrame);
@@ -43,18 +46,27 @@ AbstractCamera::~AbstractCamera()
 }
 
 void
+AbstractCamera::update()
+{
+  this->unreadImageAccess.lock();
+  this->unreadImage = true;
+  this->unreadImageAccess.unlock();
+
+  this->unreadImageCondition.notify_one();
+}
+
+void
 AbstractCamera::updateFrame()
 {
-  this->hardCamera.get<0>()->captureRectFrame(&this->currentFrame,
-                                              this->hardCamera.get<1>());
+  boost::unique_lock<boost::mutex> lock(this->unreadImageAccess);
+  while (!this->unreadImage)
+  {
+    this->unreadImageCondition.wait(lock);
+  }
 
-//   this->frameCounter++;
-//   if(this->frameCounter >= 30)
-//   {
-//     this->frameRate = float( this->frameCounter/timer->ElapsedTime() );
-//     quadros = 0;
-//     timer->Start();
-//   }
+  this->subjectHardCamera->getUndistortedFrame(&this->currentFrame);
+
+  this->unreadImage = false;
 }
 
 void

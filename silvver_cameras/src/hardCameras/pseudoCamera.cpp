@@ -29,11 +29,7 @@ PseudoCamera::PseudoCamera(const scene::PseudoCamera& config)
   ,frameRate(config.frameRate)
   ,dirIterator()
   ,endIterator()
-  ,allImageReaded(false)
   ,delay((static_cast<long>((1.0 / this->frameRate) * 1.0e3)))
-  ,currentFrame(NULL)
-  ,bufferAccess()
-  ,unreadFrameCondition()
   ,grabFrameThread()
 {
   frameBuffer[0] = NULL;
@@ -69,12 +65,12 @@ PseudoCamera::initialize()
   this->dirIterator = bfs::directory_iterator(this->path);
 
   this->grabFrameThread.reset(new boost::thread(boost::bind<void>
-                                                (&PseudoCamera::runCapturer,
+                                                (&PseudoCamera::doWork,
                                                  this)));
 }
 
 void
-PseudoCamera::runCapturer()
+PseudoCamera::doWork()
 {
   int frameIdx = 0;
   bool imageLoaded = false;
@@ -94,7 +90,8 @@ PseudoCamera::runCapturer()
     {
       if(this->dirIterator == this->endIterator)
       {
-        this->allImageReaded = true;
+        // std::cout << "PseudoCamera already readed all images in "
+        //   "directory " + this->path.file_string());
         return;
       }
 
@@ -119,37 +116,10 @@ PseudoCamera::runCapturer()
       this->dirIterator++;
     }while(!imageLoaded);
 
-    this->bufferAccess.lock();
-    this->currentFrame = this->frameBuffer[frameIdx];
-    this->bufferAccess.unlock();
-
-    std::fill(this->unreadImage.begin(), this->unreadImage.end(), true);
-    this->unreadFrameCondition.notify_all();
+    updateCurrentFrame(this->frameBuffer[frameIdx]);
 
     frameIdx = (frameIdx+1) % 2;
 
     boost::this_thread::sleep(this->delay);
   }
-}
-
-void
-PseudoCamera::captureFrame(IplImage** iplImage, unsigned clientUid)
-{
-  boost::shared_lock<boost::shared_mutex> lock(this->bufferAccess);
-
-  while (!this->unreadImage.at(clientUid))
-  {
-    // If elapsed two seconds and all images were readed.
-    if (!this->unreadFrameCondition.timed_wait(lock, bpt::seconds(2)) &&
-        this->allImageReaded)
-    {
-      throw capture_image_error("PseudoCamera already readed all images in "
-                                "directory " + this->path.file_string());
-    }
-  }
-
-  cvReleaseImage(iplImage);
-  *iplImage = cvCloneImage(this->currentFrame);
-
-  this->unreadImage.at(clientUid) = false;
 }

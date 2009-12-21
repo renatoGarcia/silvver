@@ -18,6 +18,7 @@
 
 #include <boost/format.hpp>
 #include <boost/noncopyable.hpp>
+#include <boost/thread/shared_mutex.hpp>
 #include <stdexcept>
 #include <string>
 #include <vector>
@@ -25,6 +26,7 @@
 #include <opencv/cv.h>
 
 #include "hardCameraDescriptions.hpp"
+#include "../observer.hpp"
 
 /** Base class to all classes which manage camera hardware.
  * All hardware camera class must fill the following requeriments:
@@ -35,7 +37,9 @@
  *   -# Each call to captureFrame method must return only a frame still unread
  *      by calling object
  */
-class HardCamera : public boost::noncopyable
+class HardCamera
+  :public boost::noncopyable
+  ,public Subject
 {
 public:
 
@@ -62,12 +66,6 @@ public:
 
   virtual ~HardCamera();
 
-  /** Add a client to hardCamera.
-   * This function add a client position in unreadImage vector.
-   * @return The uid of new client.
-   */
-  unsigned addClient();
-
   /** Return an IplImage ready to receive the captured frames.
    * This method won't free a supposed IplImage pointed by iplImage parameter.
    * The iplImage is supposed pointing to null, and the new IplImage allocated
@@ -77,32 +75,21 @@ public:
    */
   void createIplImage(IplImage** iplImage) const;
 
-  /** Return a still not read frame.
-   * If the last grabed frame was already read by calling object, the calling
-   * thread will be locked until a new frame.
-   * @param image A pointer to pointer to an IplImage where the new frame will
-   *              be returned.
-   * @param clientUid The unique id of calling object.
-   */
-  virtual void captureFrame(IplImage** image, unsigned clientUid) = 0;
+  void getDistortedFrame(IplImage** image);// const;
 
-  /** Call the captureFrame method and rectify the captured frame.
-   * @param image A pointer to pointer to an IplImage where the new frame will
-   *              be returned.
-   * @param clientUid The unique id of calling object.
-   */
-  void captureRectFrame(IplImage** image, unsigned clientUid);
+  void getUndistortedFrame(IplImage** image);// const;
 
 protected:
 
   HardCamera(const scene::Hardware& config, unsigned bitsPerPixel);
 
+  /// This method must be called by derived classes when it read a new frame
+  void updateCurrentFrame(IplImage* frame);
+
   /// The IplImages must have color channels in bgr order, this function
   /// transform a wrong rgb IplImage in a bgr IplImage. The input and output
   /// cannot point to the same IplImage.
   void fixChannelOrder(const IplImage* const input, IplImage* const output);
-
-  void undistortFrame(IplImage* frame);
 
   /// Frame size measures in pixels.
   const unsigned frameSize;
@@ -110,11 +97,6 @@ protected:
 
   /// Camera frame bits per pixel
   const unsigned bitsPerPixel;
-
-  /// Each bool represents if one client read or not the last
-  /// received image from camera. Each client have one unique id,
-  /// which is it position on vector.
-  std::vector<bool> unreadImage;
 
 private:
 
@@ -127,9 +109,18 @@ private:
 
   virtual void initialize() = 0;
 
+  IplImage* distortedFrame;
+  IplImage* undistortedFrame;
+
+  IplImage* undistortedFrameBuffer[2];
+
   /// A string to differentiate this camera, e.g.: when saving images or
   /// in title of window where showing the captured images.
   const std::string cameraIdentifier;
+
+  /// Mutex to control the read/write operations in distortedFrame and
+  /// undistortedFrame.
+  boost::shared_mutex framesAccessMutex;
 
   /// Maps to distort captured images
   IplImage* mapx;
@@ -141,7 +132,7 @@ private:
   const bool saveDistortedImages;
   const bool saveUndistortedImages;
   boost::format saveImageFormat;
-  unsigned savedImagesCounter;
+  unsigned imagesCounter;
 };
 
 #endif /* _HARDCAMERA_HPP_ */

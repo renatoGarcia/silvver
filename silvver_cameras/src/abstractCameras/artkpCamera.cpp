@@ -138,15 +138,7 @@ ArtkpCamera::doWork()
     boost::this_thread::interruption_point();
 
     poses.clear();
-    try
-    {
-      this->updateFrame();
-    }
-    catch (const HardCamera::capture_image_error& exception)
-    {
-      std::cerr << exception.what() << std::endl;
-      return;
-    }
+    this->updateFrame();
 
     nMarkers = 0;
 

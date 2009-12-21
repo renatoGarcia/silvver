@@ -18,27 +18,31 @@
 
 #include <boost/noncopyable.hpp>
 #include <boost/shared_ptr.hpp>
-#include <boost/tuple/tuple.hpp>
+#include <boost/thread/mutex.hpp>
 #include <string>
 
 #include <opencv/cv.h>
 
 #include "../connection.hpp"
 #include "../hardCameras/hardCamera.hpp"
+#include "../observer.hpp"
 #include "../scene.hpp"
 
 /// Abstract base class to all abstract cameras.
-class AbstractCamera : boost::noncopyable
+class AbstractCamera
+  :boost::noncopyable
+  ,Observer
 {
 public:
+  virtual ~AbstractCamera();
+
+  virtual void update();
 
   /// Start the abstractCamera target finding.
-  virtual void run()=0;
+  virtual void run() = 0;
 
   /// Stop the abstractCamera.
-  virtual void stop()=0;
-
-  virtual ~AbstractCamera();
+  virtual void stop() = 0;
 
 protected:
 
@@ -57,10 +61,18 @@ protected:
   const boost::shared_ptr<Connection> serverConnection;
 
 private:
+  /// Hardware camera which provides images.
+  boost::shared_ptr<HardCamera> subjectHardCamera;
 
-  /// Hardware camera which provides images, and the uid of this abstract
-  /// camera related to that hardCamera.
-  const boost::tuple<boost::shared_ptr<HardCamera>, unsigned> hardCamera;
+  /// This boolean represents if the last image grabbed by hardCamera was
+  /// already precessed or not. Its access is thread safe.
+  bool unreadImage;
+
+  /// Controls the access to unreadImage attribute.
+  boost::mutex unreadImageAccess;
+
+  /// Condition to wait for an unread image from hardCamera.
+  boost::condition_variable unreadImageCondition;
 
   /// Rotation matrix of camera in world coordinates.
   const boost::array<double, 9> rot;

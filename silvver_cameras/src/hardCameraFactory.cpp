@@ -36,13 +36,13 @@ HardCameraFactory::createdHardCameras;
 boost::mutex
 HardCameraFactory::mutexCameraCreate;
 
-boost::tuple<boost::shared_ptr<HardCamera>, unsigned>
+boost::shared_ptr<HardCamera>
 HardCameraFactory::create(const scene::AnyHardwareCamera& cameraConfig)
 {
   // HardCameras can't be simultaneously initialized
   boost::mutex::scoped_lock lock(HardCameraFactory::mutexCameraCreate);
 
-  boost::tuple<boost::shared_ptr<HardCamera>, unsigned> hardCamera;
+  boost::shared_ptr<HardCamera> hardCamera;
 
   const scene::Hardware hardwareConfig =
     boost::apply_visitor(scene::GetHardware(), cameraConfig);
@@ -53,24 +53,21 @@ HardCameraFactory::create(const scene::AnyHardwareCamera& cameraConfig)
   // If hardCamera is already created
   if(iteHardCamera != HardCameraFactory::createdHardCameras.end())
   {
-    hardCamera.get<0>() = iteHardCamera->second;
+    hardCamera = iteHardCamera->second;
   }
   else
   {
 
-    hardCamera.get<0>().reset(boost::apply_visitor
-                              (HardCameraFactory::ConstructHardCamera(),
-                               cameraConfig));
+    hardCamera.reset(boost::apply_visitor
+                     (HardCameraFactory::ConstructHardCamera(),
+                      cameraConfig));
 
-    hardCamera.get<0>()->initialize();
+    hardCamera->initialize();
 
     HardCameraFactory::createdHardCameras.
       insert(std::pair< std::string, boost::shared_ptr<HardCamera> >
-             (hardwareConfig.identifier, hardCamera.get<0>()));
+             (hardwareConfig.identifier, hardCamera));
   }
-
-  // Set one more client to hardCamera already created and get the client uid.
-  hardCamera.get<1>() = hardCamera.get<0>()->addClient();
 
   return hardCamera;
 }

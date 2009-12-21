@@ -14,7 +14,8 @@ sources = Split("""cfParser.cpp
                    abstractCameras/artkpCamera.cpp
                    abstractCameraFactory.cpp
                    hardCameras/hardCamera.cpp
-                   hardCameras/pseudoCamera.cpp""")
+                   hardCameras/pseudoCamera.cpp
+                   observer.cpp""")
 
 if 'dc1394_control' in build_optional_flags or cleaning:
     sources += ['hardCameras/dc1394_1x.cpp',
