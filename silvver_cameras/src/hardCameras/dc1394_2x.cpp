@@ -34,7 +34,6 @@ DC1394::DC1394(const scene::DC1394& config)
   ,bufferSize((this->frameSize * this->bitsPerPixel) / 8)
   ,context(NULL)
   ,camera(NULL)
-  ,currentFrame(NULL)
   ,brightness(config.brightness)
   ,exposure(config.exposure)
   ,whiteBalance(config.whiteBalance)
@@ -47,7 +46,11 @@ DC1394::DC1394(const scene::DC1394& config)
     throw open_camera_error("Unable to create a libdc1394 context");
   }
 
-  createIplImage(&this->currentFrame);
+  createIplImage(&this->tmpFrame);
+  for (int i = 0; i < 2; ++i)
+  {
+    createIplImage(&this->frameBuffer[i]);
+  }
 }
 
 DC1394::~DC1394()
@@ -67,9 +70,16 @@ DC1394::~DC1394()
 
   dc1394_free(this->context);
 
-  if(this->currentFrame)
+  if(this->tmpFrame)
   {
-    cvReleaseImage(&this->currentFrame);
+    cvReleaseImage(&this->tmpFrame);
+  }
+  for (int i = 0; i < 2; ++i)
+  {
+    if(this->frameBuffer[i])
+    {
+      cvReleaseImage(&this->frameBuffer[i]);
+    }
   }
 }
 
@@ -347,14 +357,15 @@ DC1394::initialize()
     throw open_camera_error("Could not start camera iso transmission");
   }
   this->grabFrameThread.reset(new boost::thread(boost::bind<void>
-                                                (&DC1394::runCapturer,
+                                                (&DC1394::doWork,
                                                  this)));
 }
 
 void
-DC1394::runCapturer()
+DC1394::doWork()
 {
-  dc1394video_frame_t* tmpFrame = NULL;
+  dc1394video_frame_t* videoFrame = NULL;
+  int frameIdx = 0;
 
   while (true)
   {
@@ -362,17 +373,16 @@ DC1394::runCapturer()
 
     if (dc1394_capture_dequeue(this->camera,
                                DC1394_CAPTURE_POLICY_WAIT,
-                               &tmpFrame))
+                               &videoFrame))
     {
       throw capture_image_error("Could not capture a frame");
     }
 
-    this->bufferAccess.lock();
     // This don't work for images whith more than 1 byte per pixel
     if (this->bitsPerPixel == 8)
     {
-      if (dc1394_bayer_decoding_8bit((uint8_t*)tmpFrame->image,
-                                     (uint8_t*)this->currentFrame->imageData,
+      if (dc1394_bayer_decoding_8bit((uint8_t*)videoFrame->image,
+                                     (uint8_t*)this->tmpFrame->imageData,
                                      this->frameWidth,
                                      this->frameHeight,
                                      DC1394_COLOR_FILTER_RGGB,
@@ -384,8 +394,8 @@ DC1394::runCapturer()
     }
     else if (this->bitsPerPixel == 16)
     {
-      if (dc1394_bayer_decoding_16bit((uint16_t*)tmpFrame->image,
-                                      (uint16_t*)this->currentFrame->imageData,
+      if (dc1394_bayer_decoding_16bit((uint16_t*)videoFrame->image,
+                                      (uint16_t*)this->tmpFrame->imageData,
                                       this->frameWidth,
                                       this->frameHeight,
                                       DC1394_COLOR_FILTER_RGGB,
@@ -395,30 +405,16 @@ DC1394::runCapturer()
         throw capture_image_error("Error on bayer decoding");
       }
     }
-    this->bufferAccess.unlock();
 
-    std::fill(this->unreadImage.begin(), this->unreadImage.end(), true);
-    this->unreadFrameCondition.notify_all();
+    fixChannelOrder(this->tmpFrame, this->frameBuffer[frameIdx]);
+    updateCurrentFrame(this->frameBuffer[frameIdx]);
 
     // Release the buffer
-    if (dc1394_capture_enqueue(this->camera, tmpFrame))
+    if (dc1394_capture_enqueue(this->camera, videoFrame))
     {
       throw capture_image_error("Error on returning a frame to ring buffer");
     }
+
+    frameIdx = (frameIdx+1) % 2;
   }
-}
-
-void
-DC1394::captureFrame(IplImage** iplImage, unsigned clientUid)
-{
-  boost::shared_lock<boost::shared_mutex> lock(this->bufferAccess);
-
-  while (!this->unreadImage.at(clientUid))
-  {
-    this->unreadFrameCondition.wait(lock);
-  }
-
-  fixChannelOrder(this->currentFrame, *iplImage);
-
-  this->unreadImage.at(clientUid) = false;
 }

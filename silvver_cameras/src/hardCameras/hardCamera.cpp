@@ -234,6 +234,7 @@ void
 HardCamera::getDistortedFrame(IplImage** image)
 {
   boost::shared_lock<boost::shared_mutex> lock(this->framesAccessMutex);
+  cvReleaseImage(image);
   *image = cvCloneImage(this->distortedFrame);
 }
 
@@ -241,5 +242,6 @@ void
 HardCamera::getUndistortedFrame(IplImage** image)
 {
   boost::shared_lock<boost::shared_mutex> lock(this->framesAccessMutex);
+  cvReleaseImage(image);
   *image = cvCloneImage(this->undistortedFrame);
 }

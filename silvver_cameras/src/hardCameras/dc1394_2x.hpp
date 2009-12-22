@@ -35,11 +35,9 @@ public:
 
   void initialize();
 
-  void captureFrame(IplImage** iplImage, unsigned clientUid);
-
 private:
 
-  void runCapturer();
+  void doWork();
 
   static const int N_BUFFERS = 4;
 
@@ -71,10 +69,8 @@ private:
   dc1394camera_t* camera;
 
   /// Pointer to the last captured frame.
-  IplImage* currentFrame;
-
-  boost::shared_mutex bufferAccess;
-  boost::condition_variable_any unreadFrameCondition;
+  IplImage* frameBuffer[2];
+  IplImage* tmpFrame;
 
   boost::scoped_ptr<boost::thread> grabFrameThread;
 
