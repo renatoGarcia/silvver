@@ -1,9 +1,6 @@
-Import('env', 'build_optional_flags', 'install_nodes')
+Import('env', 'install_nodes', 'camera_libs')
 
-if 'cleaning' in build_optional_flags:
-    cleaning = True
-else:
-    cleaning = False
+cleaning = env.GetOption('clean')
 
 sources = Split("""cfParser.cpp
                    abstractCameras/abstractCamera.cpp
@@ -17,15 +14,16 @@ sources = Split("""cfParser.cpp
                    hardCameras/pseudoCamera.cpp
                    observer.cpp""")
 
-if 'dc1394_control' in build_optional_flags or cleaning:
+if camera_libs['dc1394v1'] or cleaning:
+    env.Append(CXXFLAGS = '-DHAVE_LIBDC1394_DC1394_CONTROL_H')
     sources += ['hardCameras/dc1394_1x.cpp',
                 'hardCameras/conversions/bayer.c',
                 'hardCameras/conversions/conversions.c']
-elif 'dc1394' in build_optional_flags or cleaning:
+if camera_libs['dc1394v2'] or cleaning:
+    env.Append(CXXFLAGS = '-DHAVE_DC1394_DC1394_H')
     sources += ['hardCameras/dc1394_2x.cpp']
 
 silvver_cameras_node = env.Program('silvver_cameras', sources)
 Default(env.Alias('silvver_cameras', silvver_cameras_node))
 
-install_nodes.append(env.Install(env['DESTDIR'] + env['bindir'],
-                                 silvver_cameras_node))
+install_nodes.append(env.Install(GetOption('bindir'), silvver_cameras_node))

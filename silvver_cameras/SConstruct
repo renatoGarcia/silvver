@@ -4,209 +4,172 @@ import sys
 sys.path.insert(0, '../common')
 from sconsUtilities import *
 
-from string import split
 from os.path import abspath
 
-build_optional_flags = []
+mandatory_libs = LibraryDict()
+mandatory_libs['boost'] = Library('Boost', 'boost',
+                                  ['boost/algorithm/string.hpp',
+                                   'boost/archive/text_iarchive.hpp',
+                                   'boost/archive/text_oarchive.hpp',
+                                   'boost/array.hpp',
+                                   'boost/asio.hpp',
+                                   'boost/bind.hpp',
+                                   'boost/foreach.hpp',
+                                   'boost/lexical_cast.hpp',
+                                   'boost/noncopyable.hpp',
+                                   'boost/program_options.hpp',
+                                   'boost/ref.hpp',
+                                   'boost/scoped_ptr.hpp',
+                                   'boost/serialization/variant.hpp',
+                                   'boost/shared_ptr.hpp',
+                                   'boost/thread/mutex.hpp',
+                                   'boost/thread/once.hpp',
+                                   'boost/thread/thread.hpp',
+                                   'boost/tokenizer.hpp',
+                                   'boost/tuple/tuple.hpp',
+                                   'boost/variant.hpp'],
+                                  ['boost_filesystem',
+                                   'boost_program_options',
+                                   'boost_thread',
+                                   'boost_serialization'])
+mandatory_libs['opencv'] = Library('OpenCv',
+                                   'opencv',
+                                   ['opencv/cv.h',
+                                    'opencv/highgui.h'],
+                                   ['cv',
+                                    'highgui'])
+mandatory_libs['lua'] = PkgConfig('Lua', 'lua',
+                                  pkg_config = 'lua')
 
-boost_libs = RelatedLibs('Boost',
-                         'boost',
-                         ['boost_filesystem',
-                          'boost_program_options',
-                          'boost_thread',
-                          'boost_serialization'])
+target_libs = LibraryDict()
+target_libs['artkp'] = Library('ARToolKitPlus',
+                               'artkp',
+                               ['ARToolKitPlus/TrackerSingleMarker.h',
+                                'ARToolKitPlus/TrackerSingleMarkerImpl.h'],
+                               ['ARToolKitPlus'])
 
-artkp_libs = RelatedLibs('ARToolKitPlus',
-                         'artkp',
-                         ['ARToolKitPlus'])
+camera_libs = LibraryDict()
 
-opencv_libs = RelatedLibs('OpenCv',
-                          'opencv',
-                          ['cv', 'highgui'])
+dc1394 = Conflict('DC1394', 'dc1394')
+dc1394['v1'] = Library('DC1394v1',
+                       'dc1394v1',
+                       ['libdc1394/dc1394_control.h'],
+                       ['dc1394_control'])
+dc1394['v1'].description = 'Cameras conform to the IEEE 1394-based Digital '\
+                           'Camera Specification'
 
-mandatory_libs = RelatedLibsGroup([boost_libs,
-                                   artkp_libs,
-                                   opencv_libs])
+dc1394['v2'] = Library('DC1394v2',
+                       'dc1394v2',
+                       ['dc1394/dc1394.h'],
+                       ['dc1394'])
+dc1394['v2'].description = 'Cameras conform to the IEEE 1394-based Digital '\
+                           'Camera Specification'
+
+camera_libs.add_conflict(dc1394)
+
+#------------------------------------------------------------------
+
+AddOption('--prefix',
+          default = '/usr/local',
+          dest    = 'prefix',
+          nargs   = 1,
+          type    = 'string',
+          action  = 'store',
+          metavar = 'DIR',
+          help    = 'Installation prefix')
+AddOption('--exec_prefix',
+          default = GetOption('prefix'),
+          dest    = 'exec_prefix',
+          nargs   = 1,
+          type    = 'string',
+          action  = 'store',
+          metavar = 'DIR',
+          help    = 'Installation prefix for executables and object '
+                    'code libraries')
+AddOption('--bindir',
+          default = GetOption('exec_prefix')+'/bin',
+          dest    = 'bindir',
+          nargs   = 1,
+          type    = 'string',
+          action  = 'store',
+          metavar = 'DIR',
+          help    = 'Installation prefix for user executables')
+AddOption('--datadir',
+          default = GetOption('prefix')+'/share',
+          dest    = 'datadir',
+          nargs   = 1,
+          type    = 'string',
+          action  = 'store',
+          metavar = 'DIR',
+          help    = 'Installation prefix for machine-independent data')
+AddOption('--lualibdir',
+          default = GetOption('datadir')+'/lua/5.1',
+          dest    = 'lualibdir',
+          nargs   = 1,
+          type    = 'string',
+          action  = 'store',
+          metavar = 'DIR',
+          help    = 'Installation prefix for lua libraries')
+AddOption('--docdir',
+          default = GetOption('datadir')+'/doc',
+          dest    = 'docdir',
+          nargs   = 1,
+          type    = 'string',
+          action  = 'store',
+          metavar = 'DIR',
+          help    = 'Installation prefix for documentation')
+
+mandatory_libs.add_options(AddOption)
+target_libs.add_options(AddOption)
+camera_libs.add_options(AddOption)
 
 var = Variables()
 
-var.AddVariables(
-    PathVariable('prefix',
-                 'Installation prefix',
-                 '/usr/local', PathVariable.PathAccept),
-    PathVariable('exec_prefix',
-                 'Installation prefix for executables and object code libraries',
-                 '$prefix', PathVariable.PathAccept),
-    PathVariable('bindir',
-                 'Installation prefix for user executables',
-                 '$exec_prefix/bin', PathVariable.PathAccept),
-    PathVariable('datadir',
-                 'Installation prefix for machine-independent data',
-                 '$prefix/share', PathVariable.PathAccept),
-    PathVariable('lualibdir',
-                 'Installation prefix for lua libraries',
-                 '$prefix/share/lua/5.1', PathVariable.PathAccept),
-    PathVariable('docdir',
-                 'Installation prefix for documentation',
-                 '$datadir/doc', PathVariable.PathAccept),
-    BoolVariable('enable_libdc1394',
-                 'Enable or disable the library dc1394',
-                 True),
-    EnumVariable('libdc1394_version',
-                 'Look for this version of dc1394 library','any',
-                 allowed_values=('any', '1', '2')))
-
-for related_libs in mandatory_libs:
-    var.Add('lib_' + related_libs.short_name + '_suffix',
-             'Suffix of ' + related_libs.long_name + ' libraries.',
-             '')
-
-var.Add('lua_pkgconfig',
-        'Name of pkg-config file of lua 5.1',
-        'lua')
-var.Add('DESTDIR',
-        'In installation the path inside DESTDIR will be prepended '
-        'to all instalation paths',
-        '')
-var.Add('CPPPATH',
-        'Directories that the C++ preprocessor will search for '
-        'include directories. List only directories, do not list '
-        'options flags like -I in gcc. Multiples directories must be '
-        'quoted and delimited by a semicolon',
-        '')
-var.Add('LIBPATH',
-        'The list of directories that will be searched for libraries. '
-        'List only directories, do not list options flags like -L in '
-        'gcc. Multiples directories must be quoted and delimited by '
-        'a semicolon',
-        '')
-var.Add('CPPFLAGS',
-        'C++ preprocessor flags',
-        '')
-
-env = Environment(options = var,
-                  CPPFLAGS = '${CPPFLAGS}')
-
-
-for related_libs in mandatory_libs:
-    related_libs.add_suffix(env['lib_' + related_libs.short_name + '_suffix'])
-
-env['DESTDIR'] = env['DESTDIR'] + '/'
-env['CPPPATH'] = env['CPPPATH'].split(';')
-env.Append(CPPPATH = [abspath('../common')])
-
-env['LIBPATH'] = env['LIBPATH'].split(';')
+env = Environment(variables = var)
+for name,value in var.UnknownVariables().iteritems():
+    env[name] = value
 
 try:
-    env.ParseConfig("pkg-config " + env['lua_pkgconfig'] + " --cflags --libs")
-except OSError:
-    if env.GetOption('clean') or env.GetOption('help'):
-        pass
-    else:
-        sys.exit(1)
-
-Help(var.GenerateHelpText(env))
-
-if env.GetOption('clean'):
-    build_optional_flags.append('cleaning')
+    env['CPPPATH'] = env['CPPPATH'].split(';')
+except:
+    pass
+env.Append(CPPPATH = [abspath('../common')])
+try:
+    env['LIBPATH'] = env['LIBPATH'].split(';')
+except:
+    pass
 
 if not env.GetOption('clean') and not env.GetOption('help'):
-#=======================================================
-#==== System Configuration
-#=======================================================
     conf = Configure(env)
 
-    supported_cameras = ['Pseudocamera']
-#-------------------------------------------------------
     print '\n' + 'Mandatory libraries...'
-#-------------------------------------------------------
-    for related_libs in mandatory_libs:
-        for lib in related_libs:
-            if not conf.CheckLib(lib):
-                print 'Did not find', lib, 'library'
-                exit(1)
+    if not mandatory_libs.check_libs(conf):
+        exit(1)
+    if not target_libs.check_libs(conf):
+        exit(1)
 
-#-------------------------------------------------------
     print '\n' + 'Optional libraries...'
-#-------------------------------------------------------
-    if env['enable_libdc1394']:
-        lib_header_dc1394 = []
-        if env['libdc1394_version'] in ['2', 'any']:
-            lib_header_dc1394.append(['dc1394', 'dc1394/dc1394.h'])
-        if env['libdc1394_version'] in ['1', 'any']:
-            lib_header_dc1394.append(['dc1394_control',
-                                      'libdc1394/dc1394_control.h'])
-
-        for [lib, header] in lib_header_dc1394:
-            have_library = conf.CheckLib(lib)
-            have_header = conf.CheckCXXHeader(header)
-            if have_library and have_header:
-                makeHeaderDefine(env, header)
-                build_optional_flags.append(lib)
-                supported_cameras.append('Cameras conform to the IEEE ' +\
-                                         '1394-based Digital Camera '+\
-                                         'Specification')
-                break
-            elif not have_library and env['libdc1394_version'] != 'any':
-                print 'Did not find the libdc1394 in version',
-                print env['libdc1394_version']
-                exit(1)
-            elif not have_header and env['libdc1394_version'] != 'any':
-                print 'Did not find the headers of libdc1394 in version',
-                print env['libdc1394_version']
-                exit(1)
-
-#-------------------------------------------------------
-    print '\n' + 'Mandatory headers...'
-#-------------------------------------------------------
-
-    headers = ['ARToolKitPlus/TrackerSingleMarker.h',
-               'ARToolKitPlus/TrackerSingleMarkerImpl.h',
-               'boost/algorithm/string.hpp',
-               'boost/archive/text_iarchive.hpp',
-               'boost/archive/text_oarchive.hpp',
-               'boost/array.hpp',
-               'boost/asio.hpp',
-               'boost/bind.hpp',
-               'boost/foreach.hpp',
-               'boost/lexical_cast.hpp',
-               'boost/noncopyable.hpp',
-               'boost/program_options.hpp',
-               'boost/ref.hpp',
-               'boost/scoped_ptr.hpp',
-               'boost/serialization/variant.hpp',
-               'boost/shared_ptr.hpp',
-               'boost/thread/mutex.hpp',
-               'boost/thread/once.hpp',
-               'boost/thread/thread.hpp',
-               'boost/tokenizer.hpp',
-               'boost/tuple/tuple.hpp',
-               'boost/variant.hpp',
-               'opencv/cv.h',
-               'opencv/highgui.h']
-
-    for header in headers:
-        if not conf.CheckCXXHeader(header):
-            print 'Did not find the', header, 'header.'
-            exit(1)
-
-    print
-    print 'Supported cameras:'
-    for camera in supported_cameras:
-        print '  * ' + camera
-    print
+    camera_libs.check_libs(conf)
 
     env = conf.Finish()
 
+print
+print 'Supported cameras:'
+print '  * Pseudocameras'
+for camera in camera_libs.itervalues():
+    if camera:
+        print '  * ' + camera.description
+print
+
 install_nodes = []
-install_nodes.append(env.Install(env['DESTDIR'] + env['lualibdir'],
+install_nodes.append(env.Install(GetOption('lualibdir'),
                                  ['lua/cameraId.lua',
                                   'lua/cameraConstructors.lua']))
-install_nodes.append(env.Install(env['DESTDIR'] + env['bindir'],
+install_nodes.append(env.Install(GetOption('bindir'),
                                  ['calibration/silvverExtCalib',
                                   'calibration/silvverIntCalib']))
 
-Export('env', 'build_optional_flags', 'install_nodes')
+Export('env', 'install_nodes', 'camera_libs')
 SConscript('src/SConscript', build_dir='build', duplicate=0)
 
 env.Alias('install', install_nodes)

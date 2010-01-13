@@ -7,117 +7,99 @@ from sconsUtilities import *
 from string import maketrans
 from os.path import abspath
 
-boost_libs = RelatedLibs('Boost',
-                         'boost',
-                         ['boost_program_options',
-                          'boost_serialization',
-                          'boost_system',
-                          'boost_thread'])
+mandatory_libs = LibraryDict()
+mandatory_libs['boost'] = Library('Boost',
+                                  'boost',
+                                  ['boost/archive/text_iarchive.hpp',
+                                   'boost/archive/text_oarchive.hpp',
+                                   'boost/asio.hpp',
+                                   'boost/bind.hpp',
+                                   'boost/enable_shared_from_this.hpp',
+                                   'boost/foreach.hpp',
+                                   'boost/lexical_cast.hpp',
+                                   'boost/program_options.hpp',
+                                   'boost/ref.hpp',
+                                   'boost/scoped_ptr.hpp',
+                                   'boost/serialization/vector.hpp',
+                                   'boost/shared_ptr.hpp',
+                                   'boost/system/system_error.hpp',
+                                   'boost/thread.hpp',
+                                   'boost/thread/mutex.hpp',
+                                   'boost/thread/thread.hpp',
+                                   'boost/tuple/tuple.hpp'],
+                                  ['boost_program_options',
+                                   'boost_serialization',
+                                   'boost_system',
+                                   'boost_thread'])
 
-mandatory_libs = RelatedLibsGroup([boost_libs])
+#------------------------------------------------------------------
+
+AddOption('--prefix',
+          default = '/usr/local',
+          dest    = 'prefix',
+          nargs   = 1,
+          type    = 'string',
+          action  = 'store',
+          metavar = 'DIR',
+          help    = 'Installation prefix')
+AddOption('--exec_prefix',
+          default = GetOption('prefix'),
+          dest    = 'exec_prefix',
+          nargs   = 1,
+          type    = 'string',
+          action  = 'store',
+          metavar = 'DIR',
+          help    = 'Installation prefix for executables and object '
+                    'code libraries')
+AddOption('--bindir',
+          default = GetOption('exec_prefix')+'/bin',
+          dest    = 'bindir',
+          nargs   = 1,
+          type    = 'string',
+          action  = 'store',
+          metavar = 'DIR',
+          help    = 'Installation prefix for user executables')
+AddOption('--datadir',
+          default = GetOption('prefix')+'/share',
+          dest    = 'datadir',
+          nargs   = 1,
+          type    = 'string',
+          action  = 'store',
+          metavar = 'DIR',
+          help    = 'Installation prefix for machine-independent data')
+AddOption('--docdir',
+          default = GetOption('datadir')+'/doc',
+          dest    = 'docdir',
+          nargs   = 1,
+          type    = 'string',
+          action  = 'store',
+          metavar = 'DIR',
+          help    = 'Installation prefix for documentation')
+
+mandatory_libs.add_options(AddOption)
 
 var = Variables()
 
-var.AddVariables(
-    PathVariable('prefix',
-                 'Installation prefix',
-                 '/usr/local', PathVariable.PathAccept),
-    PathVariable('exec_prefix',
-                 'Installation prefix for executables and object code libraries',
-                 '$prefix', PathVariable.PathAccept),
-    PathVariable('bindir',
-                 'Installation prefix for user executables',
-                 '$exec_prefix/bin', PathVariable.PathAccept),
-    PathVariable('datadir',
-                 'Installation prefix for machine-independent data',
-                 '$prefix/share', PathVariable.PathAccept),
-    PathVariable('docdir',
-                 'Installation prefix for documentation',
-                 '$datadir/doc', PathVariable.PathAccept))
+env = Environment(variables = var)
+for name,value in var.UnknownVariables().iteritems():
+    env[name] = value
 
-for related_libs in mandatory_libs:
-    var.Add('lib_' + related_libs.short_name + '_suffix',
-             'Suffix of ' + related_libs.long_name + ' libraries.',
-             '')
-
-var.Add('DESTDIR',
-        'In installation the path inside DESTDIR will be prepended '
-        'to all instalation paths',
-        '')
-var.Add('CPPPATH',
-        'Directories that the C++ preprocessor will search for '
-        'include directories. List only directories, do not list '
-        'options flags like -I in gcc. Multiples directories must be '
-        'quoted and delimited by a semicolon',
-        '')
-var.Add('LIBPATH',
-        'The list of directories that will be searched for libraries. '
-        'List only directories, do not list options flags like -L in '
-        'gcc. Multiples directories must be quoted and delimited by '
-        'a semicolon',
-        '')
-var.Add('CPPFLAGS',
-        'C++ preprocessor flags',
-        '')
-
-env = Environment(options = var,
-                  CPPFLAGS = '${CPPFLAGS}')
-
-for related_libs in mandatory_libs:
-    related_libs.add_suffix(env['lib_' + related_libs.short_name + '_suffix'])
-
-env['DESTDIR'] = env['DESTDIR'] + '/'
-env['CPPPATH'] = env['CPPPATH'].split(';')
+try:
+    env['CPPPATH'] = env['CPPPATH'].split(';')
+except:
+    pass
 env.Append(CPPPATH = [abspath('../common')])
-
-env['LIBPATH'] = env['LIBPATH'].split(';')
-
-Help(var.GenerateHelpText(env))
+try:
+    env['LIBPATH'] = env['LIBPATH'].split(';')
+except:
+    pass
 
 if not env.GetOption('clean') and not env.GetOption('help'):
-#=======================================================
-#==== System Configuration
-#=======================================================
     conf = Configure(env)
-#-------------------------------------------------------
+
     print '\n' + 'Mandatory libraries...'
-#-------------------------------------------------------
-    for related_libs in mandatory_libs:
-        for lib in related_libs:
-            if not conf.CheckLib(lib):
-                print "Did not find", lib, "library, or it don't work properly in your system."
-                exit(1)
-
-#-------------------------------------------------------
-    print '\n' + 'Mandatory headers...'
-#-------------------------------------------------------
-    headers = ['boost/archive/text_iarchive.hpp',
-               'boost/archive/text_oarchive.hpp',
-               'boost/asio.hpp',
-               'boost/bind.hpp',
-               'boost/enable_shared_from_this.hpp',
-               'boost/foreach.hpp',
-               'boost/lexical_cast.hpp',
-               'boost/program_options.hpp',
-               'boost/ref.hpp',
-               'boost/scoped_ptr.hpp',
-               'boost/serialization/vector.hpp',
-               'boost/shared_ptr.hpp',
-               'boost/system/system_error.hpp',
-               'boost/thread.hpp',
-               'boost/thread/mutex.hpp',
-               'boost/thread/thread.hpp',
-               'boost/tuple/tuple.hpp',
-               'iostream',
-               'map',
-               'string',
-               'vector']
-
-    for header in headers:
-        if not conf.CheckCXXHeader(header):
-            print "Did not find the", header, "header, or it don't work properly in your system."
-            exit(1)
-
+    if not mandatory_libs.check_libs(conf):
+        exit(1)
     print
 
     env = conf.Finish()
