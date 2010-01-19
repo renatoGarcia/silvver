@@ -7,65 +7,68 @@ from sconsUtilities import *
 from os.path import abspath
 
 mandatory_libs = LibraryDict()
-mandatory_libs['boost'] = Library('Boost', 'boost',
-                                  ['boost/algorithm/string.hpp',
-                                   'boost/archive/text_iarchive.hpp',
-                                   'boost/archive/text_oarchive.hpp',
-                                   'boost/array.hpp',
-                                   'boost/asio.hpp',
-                                   'boost/bind.hpp',
-                                   'boost/foreach.hpp',
-                                   'boost/lexical_cast.hpp',
-                                   'boost/noncopyable.hpp',
-                                   'boost/program_options.hpp',
-                                   'boost/ref.hpp',
-                                   'boost/scoped_ptr.hpp',
-                                   'boost/serialization/variant.hpp',
-                                   'boost/shared_ptr.hpp',
-                                   'boost/thread/mutex.hpp',
-                                   'boost/thread/once.hpp',
-                                   'boost/thread/thread.hpp',
-                                   'boost/tokenizer.hpp',
-                                   'boost/tuple/tuple.hpp',
-                                   'boost/variant.hpp'],
-                                  ['boost_filesystem',
-                                   'boost_program_options',
-                                   'boost_thread',
-                                   'boost_serialization'])
-mandatory_libs['opencv'] = Library('OpenCv',
-                                   'opencv',
-                                   ['opencv/cv.h',
-                                    'opencv/highgui.h'],
-                                   ['cv',
-                                    'highgui'])
-mandatory_libs['lua'] = PkgConfig('Lua', 'lua',
-                                  pkg_config = 'lua')
+mandatory_libs['boost'] = Library(name='Boost',
+                                  headers=['boost/algorithm/string.hpp',
+                                           'boost/archive/text_iarchive.hpp',
+                                           'boost/archive/text_oarchive.hpp',
+                                           'boost/array.hpp',
+                                           'boost/asio.hpp',
+                                           'boost/bind.hpp',
+                                           'boost/foreach.hpp',
+                                           'boost/lexical_cast.hpp',
+                                           'boost/noncopyable.hpp',
+                                           'boost/program_options.hpp',
+                                           'boost/ref.hpp',
+                                           'boost/scoped_ptr.hpp',
+                                           'boost/serialization/variant.hpp',
+                                           'boost/shared_ptr.hpp',
+                                           'boost/thread/mutex.hpp',
+                                           'boost/thread/once.hpp',
+                                           'boost/thread/thread.hpp',
+                                           'boost/tokenizer.hpp',
+                                           'boost/tuple/tuple.hpp',
+                                           'boost/variant.hpp'],
+                                  libs=['boost_filesystem',
+                                        'boost_program_options',
+                                        'boost_thread',
+                                        'boost_serialization'])
+mandatory_libs['opencv'] = Library(name='OpenCv',
+                                   headers=['opencv/cv.h',
+                                            'opencv/highgui.h'],
+                                   libs=['cv',
+                                         'highgui'])
+mandatory_libs['lua'] = PkgConfig(name='Lua',
+                                  file_name='lua')
 
 target_libs = LibraryDict()
-target_libs['artkp'] = Library('ARToolKitPlus',
-                               'artkp',
-                               ['ARToolKitPlus/TrackerSingleMarker.h',
-                                'ARToolKitPlus/TrackerSingleMarkerImpl.h'],
-                               ['ARToolKitPlus'])
+target_libs['artkp'] = Library(name='ARToolKitPlus',
+                               short_name='artkp',
+                               headers=['ARToolKitPlus/TrackerSingleMarker.h',
+                                        'ARToolKitPlus/TrackerSingleMarkerImpl.h'],
+                               libs=['ARToolKitPlus'])
 
 camera_libs = LibraryDict()
 
-dc1394 = Conflict('DC1394', 'dc1394')
-dc1394['v1'] = Library('DC1394v1',
-                       'dc1394v1',
-                       ['libdc1394/dc1394_control.h'],
-                       ['dc1394_control'])
+dc1394 = Conflict(name='DC1394', optional=True)
+dc1394['v1'] = Library(name='DC1394v1',
+                       headers=['libdc1394/dc1394_control.h'],
+                       libs=['dc1394_control'])
 dc1394['v1'].description = 'Cameras conform to the IEEE 1394-based Digital '\
                            'Camera Specification'
 
-dc1394['v2'] = Library('DC1394v2',
-                       'dc1394v2',
-                       ['dc1394/dc1394.h'],
-                       ['dc1394'])
+dc1394['v2'] = Library(name='DC1394v2',
+                       headers=['dc1394/dc1394.h'],
+                       libs=['dc1394'])
 dc1394['v2'].description = 'Cameras conform to the IEEE 1394-based Digital '\
                            'Camera Specification'
 
 camera_libs.add_conflict(dc1394)
+camera_libs['v4l2'] = Library(name='V4L2',
+                              optional = True,
+                              headers=['linux/videodev2.h'],
+                              libs=['v4l2'])
+camera_libs['v4l2'].description = 'WebCams supported by Video for Linux '\
+                                  'protocol'
 
 #------------------------------------------------------------------
 
@@ -153,13 +156,13 @@ if not env.GetOption('clean') and not env.GetOption('help'):
 
     env = conf.Finish()
 
-print
-print 'Supported cameras:'
-print '  * Pseudocameras'
-for camera in camera_libs.itervalues():
-    if camera:
-        print '  * ' + camera.description
-print
+    print
+    print 'Supported cameras:'
+    print '  * Pseudocameras'
+    for camera in camera_libs.itervalues():
+        if camera:
+            print '  * ' + camera.description
+    print
 
 install_nodes = []
 install_nodes.append(env.Install(GetOption('lualibdir'),
@@ -169,7 +172,8 @@ install_nodes.append(env.Install(GetOption('bindir'),
                                  ['calibration/silvverExtCalib',
                                   'calibration/silvverIntCalib']))
 
-Export('env', 'install_nodes', 'camera_libs')
-SConscript('src/SConscript', build_dir='build', duplicate=0)
+if not env.GetOption('help'):
+    Export('env', 'install_nodes', 'camera_libs')
+    SConscript('src/SConscript', build_dir='build', duplicate=0)
 
 env.Alias('install', install_nodes)

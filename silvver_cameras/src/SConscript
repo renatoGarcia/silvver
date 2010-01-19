@@ -14,14 +14,18 @@ sources = Split("""cfParser.cpp
                    hardCameras/pseudoCamera.cpp
                    observer.cpp""")
 
-if camera_libs['dc1394v1'] or cleaning:
+if cleaning or camera_libs['dc1394v1']:
     env.Append(CXXFLAGS = '-DHAVE_LIBDC1394_DC1394_CONTROL_H')
     sources += ['hardCameras/dc1394_1x.cpp',
                 'hardCameras/conversions/bayer.c',
                 'hardCameras/conversions/conversions.c']
-if camera_libs['dc1394v2'] or cleaning:
+if cleaning or camera_libs['dc1394v2']:
     env.Append(CXXFLAGS = '-DHAVE_DC1394_DC1394_H')
     sources += ['hardCameras/dc1394_2x.cpp']
+
+if cleaning or camera_libs['v4l2']:
+    env.Append(CXXFLAGS = '-DHAVE_LINUX_VIDEODEV2_H')
+    sources += ['hardCameras/v4l2.cpp']
 
 silvver_cameras_node = env.Program('silvver_cameras', sources)
 Default(env.Alias('silvver_cameras', silvver_cameras_node))

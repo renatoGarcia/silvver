@@ -13,23 +13,23 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 
-from string import maketrans
-
-def makeHeaderDefine(environment, header_path):
-    header_path = '-DHAVE_' + \
-                  header_path.translate(maketrans('/.','__')).upper()
-    environment.Append(CXXFLAGS = header_path)
+import string
 
 class NotCheckedError(Exception):
     pass
 
 class Library:
-    def __init__(self, long_name, short_name, headers=None,
-                 libraries=None):
-        self.LONG_NAME = long_name
-        self.SHORT_NAME = short_name
+    def __init__(self, name, short_name=None, libs=None,
+                 headers=None, optional=False):
+        self.LONG_NAME = name
+        if short_name:
+            self.SHORT_NAME = short_name
+        else:
+            self.SHORT_NAME = name.lower().translate(string.maketrans(' ','_'))
         self._headers = headers
-        self._libraries = libraries
+        self._libraries = libs
+        self._IS_OPTIONAL = optional
+        self._enabled = True
         self._found = None
 
     def __nonzero__(self):
@@ -38,6 +38,15 @@ class Library:
         return self._found
 
     def add_options(self, function):
+        if self._IS_OPTIONAL:
+            function('--enable_' + self.SHORT_NAME,
+                     type = 'choice',
+                     choices = ['yes', 'no'],
+                     action = 'callback',
+                     callback = self._enable_lib,
+                     metavar = '(yes|no)',
+                     help = 'Enable or disable the ' + self.LONG_NAME +
+                            ' libraries. Default is yes')
         function('--lib_' + self.SHORT_NAME + '_suffix',
                  nargs = 1,
                  type = 'string',
@@ -46,28 +55,43 @@ class Library:
                  metavar = 'SUFFIX',
                  help = 'Suffix of ' + self.LONG_NAME + ' libraries')
 
+    def _enable_lib(self, option, opt, value, parser):
+        if value == 'yes':
+            self._enabled = True
+        else:
+            self._enabled = False
+
     def _add_suffix(self, option, opt, value, parser):
         for index in range(len(self._libraries)):
             self._libraries[index] += value
 
     def check(self, conf):
-        for lib in self._libraries:
-            if not conf.CheckLib(lib):
-                self._found = False
-                return False
-        for header in self._headers:
-            if not conf.CheckCXXHeader(header):
-                self._found = False
-                return False
+        if self._enabled:
+            for lib in self._libraries:
+                if not conf.CheckLib(lib):
+                    self._found = False
+                    return False
+            for header in self._headers:
+                if not conf.CheckCXXHeader(header):
+                    self._found = False
+                    return False
 
-        self._found = True
-        return True
+            self._found = True
+            return True
+        else:
+            self._found = False
+            return False
 
 class PkgConfig:
-    def __init__(self, long_name, short_name, pkg_config):
-        self.LONG_NAME = long_name
-        self.SHORT_NAME = short_name
-        self._pkg_config = pkg_config
+    def __init__(self, name, file_name, short_name=None, optional=False):
+        self.LONG_NAME = name
+        if short_name:
+            self.SHORT_NAME = short_name
+        else:
+            self.SHORT_NAME = name.lower().translate(string.maketrans(' ','_'))
+        self._pkg_config = file_name
+        self._IS_OPTIONAL = optional
+        self._enabled = True
         self._found = None
 
     def __nonzero__(self):
@@ -76,6 +100,15 @@ class PkgConfig:
         return self._found
 
     def add_options(self, function):
+        if self._IS_OPTIONAL:
+            function('--enable_' + self.SHORT_NAME,
+                     type = 'choice',
+                     choices = ['yes', 'no'],
+                     action = 'callback',
+                     callback = self._enable_lib,
+                     metavar = '(yes|no)',
+                     help = 'Enable or disable the ' + self.LONG_NAME +
+                            ' libraries. Default is yes')
         function('--' + self.SHORT_NAME + '_pkgconfig',
                  nargs = 1,
                  type = 'string',
@@ -85,22 +118,32 @@ class PkgConfig:
                  help = 'Name of pkg-config file of ' + self.LONG_NAME +
                         ' library')
 
+    def _enable_lib(self, option, opt, value, parser):
+        if value == 'yes':
+            self._enabled = True
+        else:
+            self._enabled = False
+
     def _rename_pkgconfig(self, option, opt, value, parser):
         self._pkg_config = value
 
     def check(self, conf):
-        print 'Checking for pkg-config %s...' %  self.LONG_NAME,
-        try:
-            conf.env.ParseConfig("pkg-config " + self._pkg_config +
-                                 " --cflags --libs")
-        except OSError:
-            print 'no'
+        if self._enabled:
+            print 'Checking for pkg-config %s...' %  self.LONG_NAME,
+            try:
+                conf.env.ParseConfig("pkg-config " + self._pkg_config +
+                                     " --cflags --libs")
+            except OSError:
+                print 'no'
+                self._found = False
+                return False
+
+            print 'yes'
+            self._found = True
+            return True
+        else:
             self._found = False
             return False
-
-        print 'yes'
-        self._found = True
-        return True
 
 class LibraryDict(dict):
 
@@ -139,20 +182,29 @@ class LibraryDict(dict):
         return found_all
 
 class Conflict(dict):
-    def __init__(self, long_name, short_name):
+    def __init__(self, name, short_name=None, optional=False):
         dict.__init__(self)
-        self.LONG_NAME = long_name
-        self.SHORT_NAME = short_name
+        self.LONG_NAME = name
+        if short_name:
+            self.SHORT_NAME = short_name
+        else:
+            self.SHORT_NAME = name.lower().translate(string.maketrans(' ','_'))
+        self._IS_OPTIONAL = optional
 
     def add_options(self, function):
+        if self._IS_OPTIONAL:
+            alternatives = ['any', 'none'] + self.keys()
+            desc = '(any|none|'+'|'.join(self.keys())+')'
+        else:
+            alternatives = ['any'] + self.keys()
+            desc = '(any|'+'|'.join(self.keys())+')'
         function('--enable_' + self.SHORT_NAME,
-                 dest = 'enable_' + self.SHORT_NAME,
                  nargs = 1,
                  type = 'choice',
-                 choices = ['any', 'none'] + self.keys(),
+                 choices = alternatives,
                  action = 'callback',
                  callback = self._select_lib,
-                 metavar = '(any|none|'+'|'.join(self.keys())+')',
+                 metavar = desc,
                  help = 'Enable one of ' + self.LONG_NAME + ' libraries')
         for lib in self.itervalues():
             lib.add_options(function)
