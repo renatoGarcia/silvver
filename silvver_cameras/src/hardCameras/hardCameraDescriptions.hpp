@@ -58,7 +58,7 @@ namespace scene
     boost::array<double, 2> tangentialCoef;
   };
 
-  struct PseudoCamera : public Hardware
+  struct PseudoCamera :public Hardware
   {
     /// Path to directory where are the input images.
     std::string imagesPath;
@@ -67,7 +67,7 @@ namespace scene
     float frameRate;
   };
 
-  struct DC1394 : public Hardware
+  struct DC1394 :public Hardware
   {
     /// String representation of camera unique identifier in decimal base.
     std::string uid;
@@ -111,15 +111,24 @@ namespace scene
     std::string gain;
   };
 
+  struct V4l2 :public Hardware
+  {
+    /// This is the uid of v4l2 camera, it is given by order which they was
+    /// connected in computer.
+    unsigned uid;
+  };
+
   /** This is a boost::variant with all hardware camera models,
    * i.e. all structs which inherit from Hardware struct.
    */
-  typedef boost::variant<PseudoCamera, DC1394> AnyHardwareCamera;
+  typedef boost::variant<PseudoCamera,
+                         DC1394,
+                         V4l2         > AnyHardwareCamera;
 
   /** Functor which receives a AnyHardwareCamera and return a copy
    * of its Hardware base class.
    */
-  struct GetHardware : public boost::static_visitor<Hardware>
+  struct GetHardware :public boost::static_visitor<Hardware>
   {
     template <class T>
     const Hardware operator()(const T& config) const

@@ -18,16 +18,22 @@
 #include <stdexcept>
 
 #include "hardCameras/pseudoCamera.hpp"
+
 #ifdef HAVE_PGRFLYCAPTURE_HEADERS
- #include "hardCameras/pgr.hpp"
+#  include "hardCameras/pgr.hpp"
 #endif
+
 #ifdef HAVE_LIBDC1394_DC1394_CONTROL_H
- #include "hardCameras/dc1394_1x.hpp"
- #define HAVE_DC1394
+#  include "hardCameras/dc1394_1x.hpp"
+#  define HAVE_DC1394
 #endif
 #ifdef HAVE_DC1394_DC1394_H
- #include "hardCameras/dc1394_2x.hpp"
- #define HAVE_DC1394
+#  include "hardCameras/dc1394_2x.hpp"
+#  define HAVE_DC1394
+#endif
+
+#ifdef HAVE_LINUX_VIDEODEV2_H
+#  include "hardCameras/v4l2.hpp"
 #endif
 
 std::map < std::string, boost::shared_ptr<HardCamera> >
@@ -86,5 +92,16 @@ HardCameraFactory::ConstructHardCamera::operator()(const scene::DC1394& config) 
 #else
   throw std::invalid_argument("This program don't was compiled with support "\
                               "to ieee 1394 cameras");
+#endif
+}
+
+HardCamera*
+HardCameraFactory::ConstructHardCamera::operator()(const scene::V4l2& config) const
+{
+#ifdef HAVE_LINUX_VIDEODEV2_H
+  return (new V4L2(config));
+#else
+  throw std::invalid_argument("This program don't was compiled with support "\
+                              "to v4l2 cameras");
 #endif
 }

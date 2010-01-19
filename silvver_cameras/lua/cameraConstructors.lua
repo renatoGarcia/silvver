@@ -81,3 +81,10 @@ function Dragonfly(parameters)
 
     return camera
 end
+
+function V4l2(parameters)
+    camera = {}
+    camera.__name = 'v4l2'
+
+    return camera
+end

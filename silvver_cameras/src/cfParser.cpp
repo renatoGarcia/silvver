@@ -136,14 +136,18 @@ CfParser::readCamera(lua_State* L)
 {
   scene::Camera camera;
 
-  std::string name = readValue<std::string>(L, "__name");
-  if (name == "pseudocamera")
+  std::string driver = readValue<std::string>(L, "__driver");
+  if (driver == "pseudocamera")
   {
     camera.hardware = this->readPseudoCameraConfig(L);
   }
-  else if (name == "dc1394")
+  else if (driver == "dc1394")
   {
     camera.hardware = this->readDC1394Config(L);
+  }
+  else if (driver == "v4l2")
+  {
+    camera.hardware = this->readV4l2Config(L);
   }
   else
   {
@@ -197,6 +201,17 @@ CfParser::readDC1394Config(lua_State* L)
   this->readHardware(L, dc1394);
 
   return dc1394;
+}
+
+scene::V4l2
+CfParser::readV4l2Config(lua_State* L)
+{
+  scene::V4l2 v4l2;
+
+  v4l2.uid  = readValue<unsigned>(L, "uid");
+  this->readHardware(L, v4l2);
+
+  return v4l2;
 }
 
 void

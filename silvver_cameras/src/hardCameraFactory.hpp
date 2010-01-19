@@ -45,6 +45,7 @@ private:
   {
     HardCamera* operator()(const scene::PseudoCamera& config) const;
     HardCamera* operator()(const scene::DC1394& config) const;
+    HardCamera* operator()(const scene::V4l2& config) const;
   };
 
   HardCameraFactory();
