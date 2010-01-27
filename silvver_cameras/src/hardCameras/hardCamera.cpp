@@ -27,18 +27,15 @@ namespace bfs = boost::filesystem;
 extern globalOptions::Options global_options;
 
 HardCamera::HardCamera(const scene::Hardware& config, unsigned bitsPerPixel)
-  :frameSize(config.resolution.at(0) * config.resolution.at(1))
-  ,frameWidth(config.resolution.at(0))
-  ,frameHeight(config.resolution.at(1))
+  :framePixels(config.resolution.at(0) * config.resolution.at(1))
+  ,frameSize(cvSize(config.resolution.at(0), config.resolution.at(1)))
   ,bitsPerPixel(bitsPerPixel)
   ,distortedFrame(NULL)
   ,undistortedFrame(NULL)
   ,cameraIdentifier(config.identifier)
   ,framesAccessMutex()
-  ,mapx(cvCreateImage(cvSize(this->frameWidth, this->frameHeight),
-                      IPL_DEPTH_32F, 1))
-  ,mapy(cvCreateImage(cvSize(this->frameWidth, this->frameHeight),
-                      IPL_DEPTH_32F, 1))
+  ,mapx(cvCreateImage(this->frameSize, IPL_DEPTH_32F, 1))
+  ,mapy(cvCreateImage(this->frameSize, IPL_DEPTH_32F, 1))
   ,showImages(global_options.showImages)
   ,windowName("Camera_" + cameraIdentifier)
   ,saveDistortedImages(global_options.saveDistortedImages &&
@@ -127,8 +124,7 @@ HardCamera::createIplImage(IplImage** iplImage) const
     throw camera_parameter_error("Invalid image depth");
   }
 
-  *iplImage = cvCreateImage(cvSize(this->frameWidth, this->frameHeight),
-                            depth, 3);
+  *iplImage = cvCreateImage(this->frameSize, depth, 3);
 }
 
 template <class T>

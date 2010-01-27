@@ -22,7 +22,7 @@ end
 
 function PseudoCamera(parameters)
     camera = {}
-    camera.__name = 'pseudocamera'
+    camera.__driver = 'pseudocamera'
     camera.identifier = string.gsub(parameters.images_path, "/", "_")
 
     camera.save_image_format = __getOptional(parameters.save_image_format,
@@ -49,7 +49,7 @@ end
 
 function Dragonfly(parameters)
     camera = {}
-    camera.__name = 'dc1394'
+    camera.__driver = 'dc1394'
     camera.identifier = parameters.uid
 
     camera.save_image_format = __getOptional(parameters.save_image_format,
@@ -82,9 +82,27 @@ function Dragonfly(parameters)
     return camera
 end
 
-function V4l2(parameters)
+function Webcam(parameters)
     camera = {}
-    camera.__name = 'v4l2'
+    camera.__driver = 'v4l2'
+
+    camera.save_image_format = __getOptional(parameters.save_image_format,
+                                             "%1%_%2%_%3%.jpg")
+    camera.identifier = parameters.uid
+
+    camera.focal_length = parameters.focal_length
+    camera.principal_point = parameters.principal_point
+    camera.radial_coef = parameters.radial_coef
+    camera.tangential_coef = parameters.tangential_coef
+
+    camera.translation_vector = __getOptional(parameters.translation_vector,
+                                              {0, 0, 0})
+    camera.rotation_matrix = __getOptional(parameters.rotation_matrix,
+                                           {1, 0, 0,
+                                            0, 1, 0,
+                                            0, 0, 1})
+
+    camera.resolution = __getOptional(parameters.resolution, {640, 480})
 
     return camera
 end

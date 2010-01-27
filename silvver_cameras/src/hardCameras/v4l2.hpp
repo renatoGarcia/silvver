@@ -21,6 +21,7 @@
 #include <boost/thread/thread.hpp>
 
 #include <string>
+#include <map>
 #include <string.h>
 #include <linux/videodev2.h>
 #include <fcntl.h>
@@ -40,6 +41,8 @@ private:
 
   void doWork();
 
+  void setFeatures(const scene::V4l2& config);
+
   static const int N_BUFFERS = 4;
 
   template<class T>
@@ -53,6 +56,9 @@ private:
   int cameraFd;
 
   boost::scoped_ptr<boost::thread> grabFrameThread;
+
+  /// Holds the limits values of cameras controls
+  std::map<int, v4l2_queryctrl> controlsBounds;
 
   struct Buffers
   {

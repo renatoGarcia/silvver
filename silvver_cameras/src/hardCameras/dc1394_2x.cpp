@@ -24,16 +24,20 @@
 #include <boost/tuple/tuple.hpp>
 #include <stdint.h>
 
+#include "../iplImageWrapper.hpp"
+
 using namespace boost::assign;
 
 DC1394::DC1394(const scene::DC1394& config)
   :HardCamera(config, getBitsPerPixel(config.colorMode))
   ,uid(config.uid)
   ,frameRate(config.frameRate)
+  ,depth(getDepth(this->bitsPerPixel))
   ,videoMode(getDc1394VideoMode(config.colorMode))
-  ,bufferSize((this->frameSize * this->bitsPerPixel) / 8)
+  ,bufferSize((this->framePixels * this->bitsPerPixel) / 8)
   ,context(NULL)
   ,camera(NULL)
+  ,grabFrameThread()
   ,brightness(config.brightness)
   ,exposure(config.exposure)
   ,whiteBalance(config.whiteBalance)
@@ -44,12 +48,6 @@ DC1394::DC1394(const scene::DC1394& config)
   if (!this->context)
   {
     throw open_camera_error("Unable to create a libdc1394 context");
-  }
-
-  createIplImage(&this->tmpFrame);
-  for (int i = 0; i < 2; ++i)
-  {
-    createIplImage(&this->frameBuffer[i]);
   }
 }
 
@@ -69,25 +67,13 @@ DC1394::~DC1394()
   }
 
   dc1394_free(this->context);
-
-  if(this->tmpFrame)
-  {
-    cvReleaseImage(&this->tmpFrame);
-  }
-  for (int i = 0; i < 2; ++i)
-  {
-    if(this->frameBuffer[i])
-    {
-      cvReleaseImage(&this->frameBuffer[i]);
-    }
-  }
 }
 
 dc1394video_mode_t
 DC1394::getDc1394VideoMode(const std::string& colorMode) const
 {
-  const unsigned fw = this->frameWidth;
-  const unsigned fh = this->frameHeight;
+  const unsigned fw = this->frameSize.width;
+  const unsigned fh = this->frameSize.height;
   const std::string& cm = colorMode;
 
   if      (fw==640  && fh==480  && cm=="yuv444")
@@ -139,9 +125,8 @@ DC1394::getDc1394VideoMode(const std::string& colorMode) const
   else
   {
     throw open_camera_error("Invalid resolution " +
-                            boost::lexical_cast<std::string>(this->frameWidth) +
-                            " x " +
-                            boost::lexical_cast<std::string>(this->frameHeight)+
+                            boost::lexical_cast<std::string>(fw) + " x " +
+                            boost::lexical_cast<std::string>(fh) +
                             " with color mode " + colorMode);
   }
 }
@@ -219,6 +204,26 @@ DC1394::getDc1394FrameRate() const
     throw open_camera_error("Invalid frame rate " +
                             boost::lexical_cast<std::string>(this->frameRate));
   }
+}
+
+int
+DC1394::getDepth(unsigned bitsPerPixel) const
+{
+  int depth;
+  if (bitsPerPixel == 8)
+  {
+    depth = IPL_DEPTH_8U;
+  }
+  else if (bitsPerPixel == 16)
+  {
+    depth = IPL_DEPTH_16U;
+  }
+  else
+  {
+    throw camera_parameter_error("Invalid image depth");
+  }
+
+  return depth;
 }
 
 void
@@ -365,7 +370,14 @@ void
 DC1394::doWork()
 {
   dc1394video_frame_t* videoFrame = NULL;
+  IplImageWrapper tmpFrame(this->frameSize, this->depth, 3);
+  IplImageWrapper frameBuffer[2];
   int frameIdx = 0;
+
+  for (int i = 0; i < 2; ++i)
+  {
+    frameBuffer[i] = IplImageWrapper(this->frameSize, this->depth, 3);
+  }
 
   while (true)
   {
@@ -382,9 +394,9 @@ DC1394::doWork()
     if (this->bitsPerPixel == 8)
     {
       if (dc1394_bayer_decoding_8bit((uint8_t*)videoFrame->image,
-                                     (uint8_t*)this->tmpFrame->imageData,
-                                     this->frameWidth,
-                                     this->frameHeight,
+                                     (uint8_t*)tmpFrame.data(),
+                                     this->frameSize.width,
+                                     this->frameSize.height,
                                      DC1394_COLOR_FILTER_RGGB,
                                      DC1394_BAYER_METHOD_SIMPLE))
       {
@@ -395,9 +407,9 @@ DC1394::doWork()
     else if (this->bitsPerPixel == 16)
     {
       if (dc1394_bayer_decoding_16bit((uint16_t*)videoFrame->image,
-                                      (uint16_t*)this->tmpFrame->imageData,
-                                      this->frameWidth,
-                                      this->frameHeight,
+                                      (uint16_t*)tmpFrame.data(),
+                                      this->frameSize.width,
+                                      this->frameSize.height,
                                       DC1394_COLOR_FILTER_RGGB,
                                       DC1394_BAYER_METHOD_SIMPLE,
                                       this->bitsPerPixel))
@@ -406,8 +418,8 @@ DC1394::doWork()
       }
     }
 
-    fixChannelOrder(this->tmpFrame, this->frameBuffer[frameIdx]);
-    updateCurrentFrame(this->frameBuffer[frameIdx]);
+    fixChannelOrder(tmpFrame, frameBuffer[frameIdx]);
+    updateCurrentFrame(frameBuffer[frameIdx]);
 
     // Release the buffer
     if (dc1394_capture_enqueue(this->camera, videoFrame))

@@ -92,8 +92,8 @@ protected:
   void fixChannelOrder(const IplImage* const input, IplImage* const output);
 
   /// Frame size measures in pixels.
-  const unsigned frameSize;
-  const unsigned frameWidth, frameHeight;
+  const unsigned framePixels;
+  const CvSize frameSize;
 
   /// Camera frame bits per pixel
   const unsigned bitsPerPixel;

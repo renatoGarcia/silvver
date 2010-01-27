@@ -18,6 +18,7 @@
 
 #include "hardCamera.hpp"
 
+#include <boost/array.hpp>
 #include <boost/scoped_ptr.hpp>
 #include <boost/thread/condition.hpp>
 #include <boost/thread/shared_mutex.hpp>
@@ -47,6 +48,8 @@ private:
 
   const float frameRate;
 
+  const int depth;
+
   // Convert the HardCamera frameWidth and frameHeight attributes to an
   // equivalent dc1394video_mode_t
   dc1394video_mode_t getDc1394VideoMode(const std::string& colorMode) const;
@@ -56,6 +59,8 @@ private:
   // Convert the HardCamera frameRate to an equivalent dc1394framerate_t
   dc1394framerate_t getDc1394FrameRate() const;
 
+  int getDepth(unsigned bitsPerPixel) const;
+
   void setFeatures();
 
   const dc1394video_mode_t videoMode;
@@ -63,14 +68,9 @@ private:
   /// Frame buffer size in bytes
   const unsigned bufferSize;
 
-  // dc1394 context
   dc1394_t* context;
 
   dc1394camera_t* camera;
-
-  /// Pointer to the last captured frame.
-  IplImage* frameBuffer[2];
-  IplImage* tmpFrame;
 
   boost::scoped_ptr<boost::thread> grabFrameThread;
 

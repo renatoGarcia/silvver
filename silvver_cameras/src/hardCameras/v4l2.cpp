@@ -6,6 +6,9 @@
 
 #include <stropts.h>
 #include <sys/mman.h>
+
+#include "../iplImageWrapper.hpp"
+
 // color conversion functions from Bart Nabbe.
 // corrected by Damien: bad coeficients in YUV2RGB
 #define YUV2RGB(y, u, v, r, g, b) {\
@@ -75,7 +78,7 @@ YUV422_to_BGR8(uint8_t *src, uint8_t *dest,
 
 V4L2::V4L2(const scene::V4l2& config)
   :HardCamera(config, 8)//getBitsPerPixel(config.colorMode))
-  ,cameraPath("path")
+  ,cameraPath("/dev/video0")
 {}
 
 V4L2::~V4L2()
@@ -93,6 +96,36 @@ V4L2::~V4L2()
 }
 
 void
+V4L2::setFeatures(const scene::V4l2& config)
+{
+}
+
+// std::string
+// V4L2::findVideo1394Device(unsigned cardNumber)
+// {
+//   std::string strCardNumber(boost::lexical_cast<std::string>(cardNumber));
+
+//   boost::array<std::string, 3> possibleDevices;
+//   possibleDevices.at(0) = "/dev/video1394/" + strCardNumber;
+//   possibleDevices.at(1) = "/dev/video1394-" + strCardNumber;
+//   possibleDevices.at(2) = "/dev/video1394" + strCardNumber;
+
+//   struct stat statbuf;
+//   std::string device;
+//   BOOST_FOREACH (device, possibleDevices)
+//   {
+//     if (stat(device.c_str(), &statbuf) == 0 && S_ISCHR(statbuf.st_mode))
+//     {
+//       return device;
+//     }
+//   }
+
+//   // If here, didn't found camera devide
+//   throw open_camera_error("Don't found the device of camera with uid " +
+//                           this->uid);
+// }
+
+void
 V4L2::initialize()
 {
   this->cameraFd = open(this->cameraPath.c_str(), O_RDWR);
@@ -104,6 +137,7 @@ V4L2::initialize()
                  "with v4l2 especification"
               << std::endl;
   }
+
   // Check if the device is a video capture with streaming capability.
   if (!((capability.capabilities & V4L2_CAP_VIDEO_CAPTURE) &&
         (capability.capabilities & V4L2_CAP_STREAMING)))
@@ -112,6 +146,67 @@ V4L2::initialize()
                  "capture with streaming capabilities."
               << std::endl;
   }
+
+  struct v4l2_format imgFormat;
+  imgFormat.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
+  if (ioctl(this->cameraFd, VIDIOC_G_FMT, &imgFormat))
+  {
+    throw open_camera_error("Cannot get the images format from V4l2 camera "
+                            " in " + this->cameraPath);
+  }
+
+  // struct v4l2_standard camStandard;
+  // camStandard.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
+  //-----------------------------------------------------------------------
+  struct v4l2_querymenu querymenu;
+  struct v4l2_queryctrl queryctrl;
+
+  memset (&queryctrl, 0, sizeof (queryctrl));
+
+  for (queryctrl.id = V4L2_CID_BASE;
+       queryctrl.id < V4L2_CID_LASTP1;
+       queryctrl.id++)
+  {
+    if (ioctl (this->cameraFd, VIDIOC_QUERYCTRL, &queryctrl))
+    {
+      std::cout << "biziu" << std::endl;
+      // if (queryctrl.flags & V4L2_CTRL_FLAG_DISABLED)
+      //   continue;
+
+      // std::cout << "Control " << queryctrl.name << std::endl;
+
+      //           if (queryctrl.type == V4L2_CTRL_TYPE_MENU)
+      //                   enumerate_menu ();
+      //   } else {
+      //           if (errno == EINVAL)
+      //                   continue;
+
+      //           perror ("VIDIOC_QUERYCTRL");
+      //           exit (EXIT_FAILURE);
+      //   }
+    }
+
+// for (queryctrl.id = V4L2_CID_PRIVATE_BASE;;
+//      queryctrl.id++) {
+//         if (0 == ioctl (fd, VIDIOC_QUERYCTRL, &queryctrl)) {
+//                 if (queryctrl.flags & V4L2_CTRL_FLAG_DISABLED)
+//                         continue;
+
+//                 printf ("Control %s\n", queryctrl.name);
+
+//                 if (queryctrl.type == V4L2_CTRL_TYPE_MENU)
+//                         enumerate_menu ();
+//         } else {
+//                 if (errno == EINVAL)
+//                         break;
+
+//                 perror ("VIDIOC_QUERYCTRL");
+//                 exit (EXIT_FAILURE);
+//         }
+  }
+
+  //-----------------------------------------------------------------------
+
 
   struct v4l2_requestbuffers requestbuffers;
   requestbuffers.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
@@ -178,6 +273,8 @@ V4L2::initialize()
   {
     std::cout << "Fudeu!" << std::endl;
   }
+
+  this->grabFrameThread.reset(new boost::thread(&V4L2::doWork, this));
 }
 
 void
@@ -185,35 +282,35 @@ V4L2::doWork()
 {
   struct v4l2_buffer buf;
   this->clear(buf);
-
   buf.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
   buf.memory = V4L2_MEMORY_MMAP;
 
-  if (ioctl(this->cameraFd, VIDIOC_DQBUF, &buf))
+  IplImageWrapper frameBuffer[2];
+  int depth = IPL_DEPTH_8U;
+  frameBuffer[0] = IplImageWrapper(this->frameSize, depth, 3);
+  frameBuffer[1] = IplImageWrapper(this->frameSize, depth, 3);
+  int frameIdx = 0;
+
+  while (true)
   {
-    // printf("VIDIOC_DQBUF");
-  }
+    boost::this_thread::interruption_point();
 
-  IplImage *img, *dest;
-  dest = cvCreateImage(cvSize(640,480),IPL_DEPTH_8U , 3);
-  img = cvCreateImageHeader(cvSize(640,480),IPL_DEPTH_8U , 1);
-  img->imageData = (char*)buffers[buf.index].start;
-  YUV422_to_BGR8((uint8_t*)img->imageData, (uint8_t*)dest->imageData,
-                 640, 480, BYTE_ORDER_YUYV);
+    if (ioctl(this->cameraFd, VIDIOC_DQBUF, &buf))
+    {
+      // printf("VIDIOC_DQBUF");
+    }
 
-  cvSaveImage("oi.png", dest);
-  cvReleaseImage(&dest);
+    YUV422_to_BGR8((uint8_t*)buffers[buf.index].start,
+                   (uint8_t*)frameBuffer[frameIdx].data(),
+                   640, 480, BYTE_ORDER_YUYV);
 
-  if (ioctl(this->cameraFd, VIDIOC_QBUF, &buf))
-  {
-    // printf("VIDIOC_QBUF");
+    updateCurrentFrame(frameBuffer[frameIdx]);
+
+    if (ioctl(this->cameraFd, VIDIOC_QBUF, &buf))
+    {
+      // printf("VIDIOC_QBUF");
+    }
+
+    frameIdx = (frameIdx+1) % 2;
   }
 }
-
-// int main(int argc, char *argv[])
-// {
-//   V4L2 cam("/dev/video0");
-//   cam.initialize();
-//   cam.captureFrame();
-//   return 0;
-// }

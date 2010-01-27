@@ -208,7 +208,7 @@ CfParser::readV4l2Config(lua_State* L)
 {
   scene::V4l2 v4l2;
 
-  v4l2.uid  = readValue<unsigned>(L, "uid");
+  v4l2.uid  = readValue<unsigned>(L, "identifier");
   this->readHardware(L, v4l2);
 
   return v4l2;
