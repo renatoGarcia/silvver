@@ -1,0 +1,12 @@
+CMAKE_MINIMUM_REQUIRED(VERSION 2.8)
+
+PROJECT(silvver_client CXX)
+
+INCLUDE_DIRECTORIES(../common)
+
+ADD_SUBDIRECTORY(src)
+
+INSTALL(DIRECTORY doc
+        DESTINATION share/doc/silvver_client
+        PATTERN "*~" EXCLUDE
+        PATTERN ".*" EXCLUDE)

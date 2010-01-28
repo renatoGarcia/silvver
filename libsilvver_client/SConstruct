@@ -7,27 +7,26 @@ from sconsUtilities import *
 from os.path import abspath
 
 mandatory_libs = LibraryDict()
-mandatory_libs['boost'] = Library('Boost',
-                                  'boost',
-                                  ['boost/archive/text_iarchive.hpp',
-                                   'boost/archive/text_oarchive.hpp',
-                                   'boost/asio/buffer.hpp',
-                                   'boost/asio/ip/tcp.hpp',
-                                   'boost/asio/ip/udp.hpp',
-                                   'boost/asio/placeholders.hpp',
-                                   'boost/asio/read.hpp',
-                                   'boost/asio/write.hpp',
-                                   'boost/bind.hpp',
-                                   'boost/lexical_cast.hpp',
-                                   'boost/ref.hpp',
-                                   'boost/scoped_ptr.hpp',
-                                   'boost/thread/mutex.hpp',
-                                   'boost/thread/once.hpp',
-                                   'boost/thread/thread.hpp',
-                                   'boost/tuple/tuple.hpp'],
-                                  ['boost_serialization',
-                                   'boost_system',
-                                   'boost_thread'])
+mandatory_libs['boost'] = Library(name='Boost',
+                                  headers=['boost/archive/text_iarchive.hpp',
+                                           'boost/archive/text_oarchive.hpp',
+                                           'boost/asio/buffer.hpp',
+                                           'boost/asio/ip/tcp.hpp',
+                                           'boost/asio/ip/udp.hpp',
+                                           'boost/asio/placeholders.hpp',
+                                           'boost/asio/read.hpp',
+                                           'boost/asio/write.hpp',
+                                           'boost/bind.hpp',
+                                           'boost/lexical_cast.hpp',
+                                           'boost/ref.hpp',
+                                           'boost/scoped_ptr.hpp',
+                                           'boost/thread/mutex.hpp',
+                                           'boost/thread/once.hpp',
+                                           'boost/thread/thread.hpp',
+                                           'boost/tuple/tuple.hpp'],
+                                  libs=['boost_serialization',
+                                        'boost_system',
+                                        'boost_thread'])
 
 #------------------------------------------------------------------
 

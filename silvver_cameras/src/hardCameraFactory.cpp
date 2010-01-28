@@ -27,12 +27,12 @@
 #  include "hardCameras/dc1394_1x.hpp"
 #  define HAVE_DC1394
 #endif
-#ifdef HAVE_DC1394_DC1394_H
+#ifdef HAS_DC1394V2
 #  include "hardCameras/dc1394_2x.hpp"
-#  define HAVE_DC1394
+#  define HAS_DC1394
 #endif
 
-#ifdef HAVE_LINUX_VIDEODEV2_H
+#ifdef HAS_V4L2
 #  include "hardCameras/v4l2.hpp"
 #endif
 
@@ -87,7 +87,7 @@ HardCameraFactory::ConstructHardCamera::operator()(const scene::PseudoCamera& co
 HardCamera*
 HardCameraFactory::ConstructHardCamera::operator()(const scene::DC1394& config) const
 {
-#ifdef HAVE_DC1394
+#ifdef HAS_DC1394
   return (new DC1394(config));
 #else
   throw std::invalid_argument("This program don't was compiled with support "\
@@ -98,7 +98,7 @@ HardCameraFactory::ConstructHardCamera::operator()(const scene::DC1394& config) 
 HardCamera*
 HardCameraFactory::ConstructHardCamera::operator()(const scene::V4l2& config) const
 {
-#ifdef HAVE_LINUX_VIDEODEV2_H
+#ifdef HAS_V4L2
   return (new V4L2(config));
 #else
   throw std::invalid_argument("This program don't was compiled with support "\
