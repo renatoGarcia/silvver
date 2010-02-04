@@ -174,7 +174,7 @@ V4L2::initialize()
   // struct v4l2_standard camStandard;
   // camStandard.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
   //-----------------------------------------------------------------------
-  struct v4l2_querymenu querymenu;
+  // struct v4l2_querymenu querymenu;
   struct v4l2_queryctrl queryctrl;
 
   memset (&queryctrl, 0, sizeof (queryctrl));
@@ -234,7 +234,7 @@ V4L2::initialize()
                  this->cameraPath + ". Maybe it is being used by other application."
               << std::endl;
   }
-  if (requestbuffers.count != V4L2::N_BUFFERS)
+  if (requestbuffers.count != (uint)V4L2::N_BUFFERS)
   {
     std::cout << "Fudeu!" << std::endl;
   }

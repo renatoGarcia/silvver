@@ -35,6 +35,7 @@ public:
       :runtime_error(whatArg){}
   };
 
+  /// Tuple with image size, depth and number of channels.
   typedef boost::tuple<CvSize,int,int> IplParameters;
 
   /// Default constructor.
@@ -67,6 +68,15 @@ public:
   /// @param iscolor Same as cvLoadImage,
   ///                CV_LOAD_IMAGE_<COLOR|GRAYSCALE|UNCHANGED>.
   void loadImage(std::string filename, int iscolor=CV_LOAD_IMAGE_UNCHANGED);
+
+  /// Transform the color space of IplImageWrapper.
+  /// @param code The same code of cvCvt.
+  void convertColor(int code);
+
+  /// Transform the color space of IplImageWrapper.
+  /// @param destine The IplImageWrapper where apply the result.
+  /// @param code The same code of cvCvt.
+  void convertColor(IplImageWrapper& destine, int code) const;
 
   /// Get the size of image.
   /// @return A CvSize representing the image size.
@@ -168,6 +178,19 @@ IplImageWrapper::loadImage(std::string filename, int iscolor)
   {
     throw load_image_error("Unable to load image " + filename);
   }
+}
+
+inline void
+IplImageWrapper::convertColor(int code)
+{
+  IplImageWrapper tmpImage(*this);
+  cvCvtColor(tmpImage.iplImage, this->iplImage, code);
+}
+
+inline void
+IplImageWrapper::convertColor(IplImageWrapper& destine, int code) const
+{
+  cvCvtColor(this->iplImage, destine.iplImage, code);
 }
 
 inline CvSize

@@ -407,7 +407,7 @@ DC1394::doWork()
     //   }
     // }
 
-    fixChannelOrder(tmpFrame, *frameBuffer[frameIdx]);
+    tmpFrame.convertColor(*frameBuffer[frameIdx], CV_RGB2BGR);
     updateCurrentFrame(frameBuffer[frameIdx]);
 
     // Release the buffer

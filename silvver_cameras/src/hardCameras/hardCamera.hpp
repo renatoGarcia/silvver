@@ -82,7 +82,7 @@ protected:
   /// The IplImages must have color channels in bgr order, this function
   /// transform a wrong rgb IplImage in a bgr IplImage. The input and output
   /// cannot point to the same IplImage.
-  void fixChannelOrder(const IplImage* const input, IplImage* const output);
+  // void fixChannelOrder(const IplImage* const input, IplImage* const output);
 
   /// Frame size measures in pixels.
   const unsigned framePixels;
@@ -100,10 +100,10 @@ private:
 
   unsigned getBitsPerPixel(int iplDepth) const;
 
-  /// Swap the channels red and blue. The input and output cannot point to
-  /// the same image.
-  template <class T>
-  void rgb2bgr(const T* const input, T* const output, const unsigned nPixels);
+  // /// Swap the channels red and blue. The input and output cannot point to
+  // /// the same image.
+  // template <class T>
+  // void rgb2bgr(const T* const input, T* const output, const unsigned nPixels);
 
   virtual void initialize() = 0;
 

@@ -57,6 +57,7 @@ namespace silvver
       this->x = position.x;
       this->y = position.y;
       this->z = position.z;
+      return *this;
     }
   };
 
@@ -111,6 +112,7 @@ namespace silvver
 
       Position::operator=(pose);
       this->rotationMatrix = pose.rotationMatrix;
+      return *this;
     }
   };
 
@@ -155,6 +157,7 @@ namespace silvver
 
       BaseClass::operator=(identity);
       this->uid = identity.uid;
+      return *this;
     }
   };
 
