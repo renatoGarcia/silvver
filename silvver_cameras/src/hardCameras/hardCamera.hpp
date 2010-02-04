@@ -18,6 +18,7 @@
 
 #include <boost/format.hpp>
 #include <boost/noncopyable.hpp>
+#include <boost/shared_ptr.hpp>
 #include <boost/thread/shared_mutex.hpp>
 #include <stdexcept>
 #include <string>
@@ -25,8 +26,9 @@
 
 #include <opencv/cv.h>
 
-#include "hardCameraDescriptions.hpp"
+#include "../iplImageWrapper.hpp"
 #include "../observer.hpp"
+#include "hardCameraDescriptions.hpp"
 
 /** Base class to all classes which manage camera hardware.
  * All hardware camera class must fill the following requeriments:
@@ -37,9 +39,7 @@
  *   -# Each call to captureFrame method must return only a frame still unread
  *      by calling object
  */
-class HardCamera
-  :public boost::noncopyable
-  ,public Subject
+class HardCamera: public boost::noncopyable, public Subject
 {
 public:
 
@@ -66,25 +66,18 @@ public:
 
   virtual ~HardCamera();
 
-  /** Return an IplImage ready to receive the captured frames.
-   * This method won't free a supposed IplImage pointed by iplImage parameter.
-   * The iplImage is supposed pointing to null, and the new IplImage allocated
-   * will be assigned to it.
-   * @param iplImage A pointer to pointer to IplImage, which will point to
-   *                 created image
-   */
-  void createIplImage(IplImage** iplImage) const;
+  IplImageWrapper::IplParameters getImageParameters() const;
 
-  void getDistortedFrame(IplImage** image);// const;
+  void getDistortedFrame(IplImageWrapper& image);
 
-  void getUndistortedFrame(IplImage** image);// const;
+  void getUndistortedFrame(IplImageWrapper& image);
 
 protected:
 
-  HardCamera(const scene::Hardware& config, unsigned bitsPerPixel);
+  HardCamera(const scene::Hardware& config, int iplDepth, int nChannels);
 
   /// This method must be called by derived classes when it read a new frame
-  void updateCurrentFrame(IplImage* frame);
+  void updateCurrentFrame(boost::shared_ptr<IplImageWrapper> frame);
 
   /// The IplImages must have color channels in bgr order, this function
   /// transform a wrong rgb IplImage in a bgr IplImage. The input and output
@@ -95,12 +88,17 @@ protected:
   const unsigned framePixels;
   const CvSize frameSize;
 
-  /// Camera frame bits per pixel
-  const unsigned bitsPerPixel;
+  /// Number of channels in image.
+  const int nChannels;
+
+  /// Image depth in IPL format.
+  const int iplDepth;
 
 private:
 
   friend class HardCameraFactory;
+
+  unsigned getBitsPerPixel(int iplDepth) const;
 
   /// Swap the channels red and blue. The input and output cannot point to
   /// the same image.
@@ -109,10 +107,10 @@ private:
 
   virtual void initialize() = 0;
 
-  IplImage* distortedFrame;
-  IplImage* undistortedFrame;
+  boost::shared_ptr<IplImageWrapper> distortedFrame;
+  boost::shared_ptr<IplImageWrapper> undistortedFrame;
 
-  IplImage* undistortedFrameBuffer[2];
+  boost::shared_ptr<IplImageWrapper> undistortedFrameBuffer[2];
 
   /// A string to differentiate this camera, e.g.: when saving images or
   /// in title of window where showing the captured images.
@@ -123,8 +121,8 @@ private:
   boost::shared_mutex framesAccessMutex;
 
   /// Maps to distort captured images
-  IplImage* mapx;
-  IplImage* mapy;
+  IplImageWrapper mapx;
+  IplImageWrapper mapy;
 
   const bool showImages;
   const std::string windowName;

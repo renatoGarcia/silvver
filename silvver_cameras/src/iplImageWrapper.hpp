@@ -16,19 +16,34 @@
 #ifndef _IPLIMAGEWRAPPER_HPP_
 #define _IPLIMAGEWRAPPER_HPP_
 
-#include <opencv/cv.h>
-
+#include <boost/tuple/tuple.hpp>
 #include <cstddef>
+#include <stdexcept>
+#include <string>
+
+#include <opencv/cv.h>
+#include <opencv/highgui.h>
 
 class IplImageWrapper
 {
 public:
 
+  class load_image_error : public std::runtime_error
+  {
+  public:
+    load_image_error(const std::string& whatArg)
+      :runtime_error(whatArg){}
+  };
+
+  typedef boost::tuple<CvSize,int,int> IplParameters;
+
   /// Default constructor.
   /// Build a empty image, don't allocating any data.
   IplImageWrapper();
 
-  IplImageWrapper(CvSize size, int depth, int channels);
+  IplImageWrapper(const IplParameters& parameters);
+
+  IplImageWrapper(CvSize size, int depth, int nChannels);
 
   /// Construct a new IplImageWrapper cloning the iplImageSrc.
   /// @param iplImageSrc Pointer to image which will be cloned.
@@ -45,6 +60,13 @@ public:
   operator const IplImage* const() const;
 
   operator IplImage*();
+
+  /// Load an image in disk.
+  /// This method can throw load_image_error.
+  /// @param filename The path to image.
+  /// @param iscolor Same as cvLoadImage,
+  ///                CV_LOAD_IMAGE_<COLOR|GRAYSCALE|UNCHANGED>.
+  void loadImage(std::string filename, int iscolor=CV_LOAD_IMAGE_UNCHANGED);
 
   /// Get the size of image.
   /// @return A CvSize representing the image size.
@@ -73,8 +95,14 @@ IplImageWrapper::IplImageWrapper()
 {}
 
 inline
-IplImageWrapper::IplImageWrapper(CvSize size, int depth, int channels)
-  :iplImage(cvCreateImage(size, depth, channels))
+IplImageWrapper::IplImageWrapper(const IplParameters& parameters)
+  :iplImage(cvCreateImage(parameters.get<0>(), parameters.get<1>(),
+                          parameters.get<2>()))
+{}
+
+inline
+IplImageWrapper::IplImageWrapper(CvSize size, int depth, int nChannels)
+  :iplImage(cvCreateImage(size, depth, nChannels))
 {}
 
 inline
@@ -124,6 +152,22 @@ inline
 IplImageWrapper::operator IplImage*()
 {
   return this->iplImage;
+}
+
+inline void
+IplImageWrapper::loadImage(std::string filename, int iscolor)
+{
+  if (this->iplImage)
+  {
+    cvReleaseImage(&this->iplImage);
+  }
+
+ this->iplImage = cvLoadImage(filename.c_str(), iscolor);
+
+  if (this->iplImage == NULL)
+  {
+    throw load_image_error("Unable to load image " + filename);
+  }
 }
 
 inline CvSize

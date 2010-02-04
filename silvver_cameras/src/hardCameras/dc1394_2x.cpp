@@ -15,26 +15,24 @@
 
 #include "dc1394_2x.hpp"
 
-#include <algorithm>
 #include <boost/assign/std/vector.hpp>
-#include <boost/lexical_cast.hpp>
 #include <boost/foreach.hpp>
-#include <boost/ref.hpp>
-#include <boost/bind.hpp>
+#include <boost/lexical_cast.hpp>
+#include <boost/shared_ptr.hpp>
 #include <boost/tuple/tuple.hpp>
 #include <stdint.h>
+#include <utility>
 
 #include "../iplImageWrapper.hpp"
 
 using namespace boost::assign;
 
 DC1394::DC1394(const scene::DC1394& config)
-  :HardCamera(config, getBitsPerPixel(config.colorMode))
+  :HardCamera(config, getIplDepth(config.colorMode),
+              getNChannels(config.colorMode))
   ,uid(config.uid)
   ,frameRate(config.frameRate)
-  ,depth(getDepth(this->bitsPerPixel))
   ,videoMode(getDc1394VideoMode(config.colorMode))
-  ,bufferSize((this->framePixels * this->bitsPerPixel) / 8)
   ,context(NULL)
   ,camera(NULL)
   ,grabFrameThread()
@@ -131,37 +129,49 @@ DC1394::getDc1394VideoMode(const std::string& colorMode) const
   }
 }
 
-unsigned
-DC1394::getBitsPerPixel(const std::string& colorMode) const
+std::pair<int,int>
+DC1394::getPairDepthChannels(const std::string& colorMode) const
 {
   if (colorMode == "yuv444")
   {
-    return 12;
+    return std::make_pair(IPL_DEPTH_8U,3);
   }
   else if (colorMode == "yuv422")
   {
-    return 8;
+    return std::make_pair(IPL_DEPTH_8U,3);
   }
   else if (colorMode == "yuv411")
   {
-    return 6;
+    return std::make_pair(IPL_DEPTH_8U,3);
   }
   else if (colorMode == "rgb8")
   {
-    return 8;
+    return std::make_pair(IPL_DEPTH_8U,3);
   }
-  else if (colorMode == "mono8")
+  else if (colorMode == "mono8") // There aren't supporto to bw camera, TODO?
   {
-    return 8;
+    return std::make_pair(IPL_DEPTH_8U,3);
   }
-  else if (colorMode == "mono16")
+  else if (colorMode == "mono16") // There aren't supporto to bw camera, TODO?
   {
-    return 16;
+    return std::make_pair(IPL_DEPTH_16U,3);
   }
   else
   {
     throw std::invalid_argument("Invalid color mode: " + colorMode);
   }
+}
+
+int
+DC1394::getIplDepth(const std::string& colorMode) const
+{
+  return getPairDepthChannels(colorMode).first;
+}
+
+int
+DC1394::getNChannels(const std::string& colorMode) const
+{
+  return getPairDepthChannels(colorMode).second;
 }
 
 dc1394framerate_t
@@ -204,26 +214,6 @@ DC1394::getDc1394FrameRate() const
     throw open_camera_error("Invalid frame rate " +
                             boost::lexical_cast<std::string>(this->frameRate));
   }
-}
-
-int
-DC1394::getDepth(unsigned bitsPerPixel) const
-{
-  int depth;
-  if (bitsPerPixel == 8)
-  {
-    depth = IPL_DEPTH_8U;
-  }
-  else if (bitsPerPixel == 16)
-  {
-    depth = IPL_DEPTH_16U;
-  }
-  else
-  {
-    throw camera_parameter_error("Invalid image depth");
-  }
-
-  return depth;
 }
 
 void
@@ -361,23 +351,22 @@ DC1394::initialize()
   {
     throw open_camera_error("Could not start camera iso transmission");
   }
-  this->grabFrameThread.reset(new boost::thread(boost::bind<void>
-                                                (&DC1394::doWork,
-                                                 this)));
+  this->grabFrameThread.reset(new boost::thread(&DC1394::doWork, this));
 }
 
 void
 DC1394::doWork()
 {
   dc1394video_frame_t* videoFrame = NULL;
-  IplImageWrapper tmpFrame(this->frameSize, this->depth, 3);
-  IplImageWrapper frameBuffer[2];
+  IplImageWrapper tmpFrame(this->frameSize, this->iplDepth, 3);
+  boost::shared_ptr<IplImageWrapper> frameBuffer[2];
   int frameIdx = 0;
 
-  for (int i = 0; i < 2; ++i)
-  {
-    frameBuffer[i] = IplImageWrapper(this->frameSize, this->depth, 3);
-  }
+  frameBuffer[0].reset(new IplImageWrapper(this->frameSize,
+                                           this->iplDepth, 3));
+  frameBuffer[1].reset(new IplImageWrapper(this->frameSize,
+                                           this->iplDepth, 3));
+
 
   while (true)
   {
@@ -391,8 +380,8 @@ DC1394::doWork()
     }
 
     // This don't work for images whith more than 1 byte per pixel
-    if (this->bitsPerPixel == 8)
-    {
+    // if (this->bitsPerPixel == 8)
+    // {
       if (dc1394_bayer_decoding_8bit((uint8_t*)videoFrame->image,
                                      (uint8_t*)tmpFrame.data(),
                                      this->frameSize.width,
@@ -403,22 +392,22 @@ DC1394::doWork()
         throw capture_image_error("Error on bayer decoding");
 
       }
-    }
-    else if (this->bitsPerPixel == 16)
-    {
-      if (dc1394_bayer_decoding_16bit((uint16_t*)videoFrame->image,
-                                      (uint16_t*)tmpFrame.data(),
-                                      this->frameSize.width,
-                                      this->frameSize.height,
-                                      DC1394_COLOR_FILTER_RGGB,
-                                      DC1394_BAYER_METHOD_SIMPLE,
-                                      this->bitsPerPixel))
-      {
-        throw capture_image_error("Error on bayer decoding");
-      }
-    }
+    // }
+    // else if (this->bitsPerPixel == 16)
+    // {
+    //   if (dc1394_bayer_decoding_16bit((uint16_t*)videoFrame->image,
+    //                                   (uint16_t*)tmpFrame.data(),
+    //                                   this->frameSize.width,
+    //                                   this->frameSize.height,
+    //                                   DC1394_COLOR_FILTER_RGGB,
+    //                                   DC1394_BAYER_METHOD_SIMPLE,
+    //                                   this->bitsPerPixel))
+    //   {
+    //     throw capture_image_error("Error on bayer decoding");
+    //   }
+    // }
 
-    fixChannelOrder(tmpFrame, frameBuffer[frameIdx]);
+    fixChannelOrder(tmpFrame, *frameBuffer[frameIdx]);
     updateCurrentFrame(frameBuffer[frameIdx]);
 
     // Release the buffer

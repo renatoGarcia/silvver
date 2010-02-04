@@ -15,26 +15,20 @@
 
 #include "pseudoCamera.hpp"
 
-#include <boost/bind.hpp>
-#include "boost/date_time/posix_time/posix_time_types.hpp"
-
-#include <opencv/highgui.h>
+#include "../iplImageWrapper.hpp"
 
 namespace bfs = boost::filesystem;
 namespace bpt = boost::posix_time;
 
 PseudoCamera::PseudoCamera(const scene::PseudoCamera& config)
-  :HardCamera(config, PseudoCamera::BITS_PER_PIXEL)
+  :HardCamera(config, IPL_DEPTH_8U, 3)
   ,path(config.imagesPath)
   ,frameRate(config.frameRate)
   ,dirIterator()
   ,endIterator()
   ,delay((static_cast<long>((1.0 / this->frameRate) * 1.0e3)))
   ,grabFrameThread()
-{
-  frameBuffer[0] = NULL;
-  frameBuffer[1] = NULL;
-}
+{}
 
 PseudoCamera::~PseudoCamera()
 {
@@ -42,14 +36,6 @@ PseudoCamera::~PseudoCamera()
   {
     this->grabFrameThread->interrupt();
     this->grabFrameThread->join();
-  }
-
-  for (int i=0; i<2; ++i)
-  {
-    if (this->frameBuffer[i] != NULL)
-    {
-      cvReleaseImage(&this->frameBuffer[i]);
-    }
   }
 }
 
@@ -64,9 +50,7 @@ PseudoCamera::initialize()
 
   this->dirIterator = bfs::directory_iterator(this->path);
 
-  this->grabFrameThread.reset(new boost::thread(boost::bind<void>
-                                                (&PseudoCamera::doWork,
-                                                 this)));
+  this->grabFrameThread.reset(new boost::thread(&PseudoCamera::doWork, this));
 }
 
 void
@@ -75,15 +59,15 @@ PseudoCamera::doWork()
   int frameIdx = 0;
   bool imageLoaded = false;
 
+  boost::shared_ptr<IplImageWrapper> frameBuffer[2];
+  for (int i = 0; i < 2; ++i)
+  {
+    frameBuffer[i].reset(new IplImageWrapper());
+  }
+
   while (true)
   {
     boost::this_thread::interruption_point();
-
-    // Release the buffer
-    if (this->frameBuffer[frameIdx] != NULL)
-    {
-      cvReleaseImage(&this->frameBuffer[frameIdx]);
-    }
 
     imageLoaded = false;
     do
@@ -101,22 +85,22 @@ PseudoCamera::doWork()
         continue;
       }
 
-      this->frameBuffer[frameIdx] =
-        cvLoadImage(dirIterator->path().file_string().c_str(),
-                    CV_LOAD_IMAGE_COLOR);
-      if(this->frameBuffer[frameIdx] == NULL)
+      try
+      {
+        frameBuffer[frameIdx]->loadImage(dirIterator->path().file_string(),
+                                         CV_LOAD_IMAGE_COLOR);
+      }
+      catch (IplImageWrapper::load_image_error& e)
       {
         this->dirIterator++;
         continue;
-        // throw capture_image_error("Error loading image: " +
-        //                           dirIterator->path().file_string());
       }
 
       imageLoaded = true;
       this->dirIterator++;
     }while(!imageLoaded);
 
-    updateCurrentFrame(this->frameBuffer[frameIdx]);
+    updateCurrentFrame(frameBuffer[frameIdx]);
 
     frameIdx = (frameIdx+1) % 2;
 

@@ -16,33 +16,26 @@
 #include "abstractCamera.hpp"
 
 #include <cstddef>
-#include <boost/bind.hpp>
 
 #include "../hardCameraFactory.hpp"
 // #include "tsPrint.hpp"
 
 AbstractCamera::AbstractCamera(const scene::Camera& cameraConfig,
                                boost::shared_ptr<Connection> connection)
-  :currentFrame(NULL)
+  :subjectHardCamera(HardCameraFactory::create(cameraConfig.hardware))
+  ,currentFrame(this->subjectHardCamera->getImageParameters())
   ,serverConnection(connection)
-  ,subjectHardCamera(HardCameraFactory::create(cameraConfig.hardware))
   ,rot(cameraConfig.rotationMatrix)
   ,trans(cameraConfig.translationVector)
   ,frameCounter(0)
   ,frameRate(0)
 {
   this->subjectHardCamera->attach(this);
-  this->subjectHardCamera->createIplImage(&this->currentFrame);
 }
 
 AbstractCamera::~AbstractCamera()
 {
   this->subjectHardCamera->detach(this);
-
-  if (this->currentFrame != NULL)
-  {
-    cvReleaseImage(&this->currentFrame);
-  }
 }
 
 void
@@ -64,7 +57,7 @@ AbstractCamera::updateFrame()
     this->unreadImageCondition.wait(lock);
   }
 
-  this->subjectHardCamera->getUndistortedFrame(&this->currentFrame);
+  this->subjectHardCamera->getUndistortedFrame(this->currentFrame);
 
   this->unreadImage = false;
 }

@@ -18,6 +18,7 @@
 
 #include "hardCamera.hpp"
 
+#include <boost/date_time/posix_time/posix_time_types.hpp>
 #include <boost/filesystem.hpp>
 #include <boost/scoped_ptr.hpp>
 #include <boost/thread/thread.hpp>
@@ -45,10 +46,8 @@ private:
   boost::filesystem::directory_iterator dirIterator;
   const boost::filesystem::directory_iterator  endIterator;
 
-  // Tempo que pseudoCamera ficará ociosa para simular uma dada frequência
+  /// Delay time to simulate the correct fps
   const boost::posix_time::millisec delay;
-
-  IplImage* frameBuffer[2];
 
   boost::scoped_ptr<boost::thread> grabFrameThread;
 };

@@ -20,9 +20,8 @@
 
 #include <boost/array.hpp>
 #include <boost/scoped_ptr.hpp>
-#include <boost/thread/condition.hpp>
-#include <boost/thread/shared_mutex.hpp>
 #include <boost/thread/thread.hpp>
+#include <string>
 
 #include <dc1394/dc1394.h>
 
@@ -48,25 +47,22 @@ private:
 
   const float frameRate;
 
-  const int depth;
-
   // Convert the HardCamera frameWidth and frameHeight attributes to an
   // equivalent dc1394video_mode_t
   dc1394video_mode_t getDc1394VideoMode(const std::string& colorMode) const;
 
-  unsigned getBitsPerPixel(const std::string& colorMode) const;
-
   // Convert the HardCamera frameRate to an equivalent dc1394framerate_t
   dc1394framerate_t getDc1394FrameRate() const;
 
-  int getDepth(unsigned bitsPerPixel) const;
+  std::pair<int,int> getPairDepthChannels(const std::string& colorMode) const;
+
+  int getIplDepth(const std::string& colorMode) const;
+
+  int getNChannels(const std::string& colorMode) const;
 
   void setFeatures();
 
   const dc1394video_mode_t videoMode;
-
-  /// Frame buffer size in bytes
-  const unsigned bufferSize;
 
   dc1394_t* context;
 

@@ -18,24 +18,24 @@
 
 #include <boost/noncopyable.hpp>
 #include <boost/shared_ptr.hpp>
+#include <boost/thread/condition.hpp>
 #include <boost/thread/mutex.hpp>
 #include <string>
 
-#include <opencv/cv.h>
-
 #include "../connection.hpp"
 #include "../hardCameras/hardCamera.hpp"
+#include "../iplImageWrapper.hpp"
 #include "../observer.hpp"
 #include "../scene.hpp"
 
 /// Abstract base class to all abstract cameras.
-class AbstractCamera
-  :boost::noncopyable
-  ,Observer
+class AbstractCamera: public boost::noncopyable, public Observer
 {
 public:
   virtual ~AbstractCamera();
 
+  /// Update the status of incoming image to available.
+  /// This mothod is called by Subject class.
   virtual void update();
 
   /// Start the abstractCamera target finding.
@@ -43,6 +43,10 @@ public:
 
   /// Stop the abstractCamera.
   virtual void stop() = 0;
+
+private:
+  /// Hardware camera which provides images.
+  boost::shared_ptr<HardCamera> subjectHardCamera;
 
 protected:
 
@@ -55,15 +59,12 @@ protected:
   /// Tranform a pose in camera coordinates do world coordinates.
   void toWorld(silvver::Pose& pose) const;
 
-  IplImage* currentFrame;
+  IplImageWrapper currentFrame;
 
   /// Connection with the silvver-server used to send the target localizations.
   const boost::shared_ptr<Connection> serverConnection;
 
 private:
-  /// Hardware camera which provides images.
-  boost::shared_ptr<HardCamera> subjectHardCamera;
-
   /// This boolean represents if the last image grabbed by hardCamera was
   /// already precessed or not. Its access is thread safe.
   bool unreadImage;

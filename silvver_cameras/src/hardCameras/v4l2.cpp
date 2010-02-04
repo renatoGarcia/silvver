@@ -1,6 +1,22 @@
+/* Copyright 2010 Renato Florentino Garcia <fgar.renato@gmail.com>
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License version 3, as
+ * published by the Free Software Foundation.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
 #include <iostream>
 #include <opencv/cv.h>
 #include <opencv/highgui.h>
+#include <boost/shared_ptr.hpp>
 
 #include "v4l2.hpp"
 
@@ -77,7 +93,7 @@ YUV422_to_BGR8(uint8_t *src, uint8_t *dest,
 
 
 V4L2::V4L2(const scene::V4l2& config)
-  :HardCamera(config, 8)//getBitsPerPixel(config.colorMode))
+  :HardCamera(config, IPL_DEPTH_8U, 3)//getBitsPerPixel(config.colorMode))
   ,cameraPath("/dev/video0")
 {}
 
@@ -285,10 +301,10 @@ V4L2::doWork()
   buf.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
   buf.memory = V4L2_MEMORY_MMAP;
 
-  IplImageWrapper frameBuffer[2];
+  boost::shared_ptr<IplImageWrapper> frameBuffer[2];
   int depth = IPL_DEPTH_8U;
-  frameBuffer[0] = IplImageWrapper(this->frameSize, depth, 3);
-  frameBuffer[1] = IplImageWrapper(this->frameSize, depth, 3);
+  frameBuffer[0].reset(new IplImageWrapper(this->frameSize, depth, 3));
+  frameBuffer[1].reset(new IplImageWrapper(this->frameSize, depth, 3));
   int frameIdx = 0;
 
   while (true)
@@ -301,7 +317,7 @@ V4L2::doWork()
     }
 
     YUV422_to_BGR8((uint8_t*)buffers[buf.index].start,
-                   (uint8_t*)frameBuffer[frameIdx].data(),
+                   (uint8_t*)frameBuffer[frameIdx]->data(),
                    640, 480, BYTE_ORDER_YUYV);
 
     updateCurrentFrame(frameBuffer[frameIdx]);

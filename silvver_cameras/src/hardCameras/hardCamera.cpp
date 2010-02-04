@@ -26,16 +26,19 @@ namespace bfs = boost::filesystem;
 
 extern globalOptions::Options global_options;
 
-HardCamera::HardCamera(const scene::Hardware& config, unsigned bitsPerPixel)
+HardCamera::HardCamera(const scene::Hardware& config,
+                       int iplDepth, int nChannels)
+
   :framePixels(config.resolution.at(0) * config.resolution.at(1))
   ,frameSize(cvSize(config.resolution.at(0), config.resolution.at(1)))
-  ,bitsPerPixel(bitsPerPixel)
-  ,distortedFrame(NULL)
-  ,undistortedFrame(NULL)
+  ,nChannels(nChannels)
+  ,iplDepth(iplDepth)
+  ,distortedFrame()
+  ,undistortedFrame()
   ,cameraIdentifier(config.identifier)
   ,framesAccessMutex()
-  ,mapx(cvCreateImage(this->frameSize, IPL_DEPTH_32F, 1))
-  ,mapy(cvCreateImage(this->frameSize, IPL_DEPTH_32F, 1))
+  ,mapx(this->frameSize, IPL_DEPTH_32F, 1)
+  ,mapy(this->frameSize, IPL_DEPTH_32F, 1)
   ,showImages(global_options.showImages)
   ,windowName("Camera_" + cameraIdentifier)
   ,saveDistortedImages(global_options.saveDistortedImages &&
@@ -45,8 +48,12 @@ HardCamera::HardCamera(const scene::Hardware& config, unsigned bitsPerPixel)
   ,saveImageFormat(config.saveImageFormat)
   ,imagesCounter(0)
 {
-  createIplImage(&this->undistortedFrameBuffer[0]);
-  createIplImage(&this->undistortedFrameBuffer[1]);
+  undistortedFrameBuffer[0].reset(new IplImageWrapper(this->frameSize,
+                                                      this->iplDepth,
+                                                      this->nChannels));
+  undistortedFrameBuffer[1].reset(new IplImageWrapper(this->frameSize,
+                                                      this->iplDepth,
+                                                      this->nChannels));
 
   CvMat* intrinsic = cvCreateMat(3, 3, CV_32FC1);
   CvMat* distortion = cvCreateMat(5, 1, CV_32FC1);
@@ -93,38 +100,17 @@ HardCamera::HardCamera(const scene::Hardware& config, unsigned bitsPerPixel)
 
 HardCamera::~HardCamera()
 {
-  cvReleaseImage(&this->mapx);
-  cvReleaseImage(&this->mapy);
-
-  for (int i = 0; i < 2; ++i)
-  {
-    cvReleaseImage(&this->undistortedFrameBuffer[i]);
-  }
-
   if (this->showImages)
   {
     cvDestroyWindow(this->windowName.c_str());
   }
 }
 
-void
-HardCamera::createIplImage(IplImage** iplImage) const
+IplImageWrapper::IplParameters
+HardCamera::getImageParameters() const
 {
-  int depth;
-  if (this->bitsPerPixel == 8)
-  {
-    depth = IPL_DEPTH_8U;
-  }
-  else if (this->bitsPerPixel == 16)
-  {
-    depth = IPL_DEPTH_16U;
-  }
-  else
-  {
-    throw camera_parameter_error("Invalid image depth");
-  }
-
-  *iplImage = cvCreateImage(this->frameSize, depth, 3);
+  return IplImageWrapper::IplParameters(this->frameSize, this->iplDepth,
+                                        this->nChannels);
 }
 
 template <class T>
@@ -186,11 +172,11 @@ HardCamera::fixChannelOrder(const IplImage* const input,
 }
 
 void
-HardCamera::updateCurrentFrame(IplImage* frame)
+HardCamera::updateCurrentFrame(boost::shared_ptr<IplImageWrapper> frame)
 {
   static int undistortedIdx = 0;
 
-  cvRemap(frame, this->undistortedFrameBuffer[undistortedIdx],
+  cvRemap(*frame, *this->undistortedFrameBuffer[undistortedIdx],
           this->mapx, this->mapy,
           CV_INTER_LINEAR+CV_WARP_FILL_OUTLIERS, cvScalarAll(0));
 
@@ -206,19 +192,19 @@ HardCamera::updateCurrentFrame(IplImage* frame)
   {
     this->saveImageFormat % this->cameraIdentifier % this->imagesCounter
                           % "d";
-    cvSaveImage(this->saveImageFormat.str().c_str(), this->distortedFrame);
+    cvSaveImage(this->saveImageFormat.str().c_str(), *this->distortedFrame);
   }
 
   if (this->saveUndistortedImages)
   {
     this->saveImageFormat % this->cameraIdentifier % this->imagesCounter
                           % "u";
-    cvSaveImage(this->saveImageFormat.str().c_str(), this->undistortedFrame);
+    cvSaveImage(this->saveImageFormat.str().c_str(), *this->undistortedFrame);
   }
 
   if (this->showImages)
   {
-    cvShowImage(this->windowName.c_str(), this->undistortedFrame);
+    cvShowImage(this->windowName.c_str(), *this->undistortedFrame);
     cvWaitKey(5);
   }
 
@@ -227,17 +213,15 @@ HardCamera::updateCurrentFrame(IplImage* frame)
 }
 
 void
-HardCamera::getDistortedFrame(IplImage** image)
+HardCamera::getDistortedFrame(IplImageWrapper& image)
 {
   boost::shared_lock<boost::shared_mutex> lock(this->framesAccessMutex);
-  cvReleaseImage(image);
-  *image = cvCloneImage(this->distortedFrame);
+  image = *this->distortedFrame;
 }
 
 void
-HardCamera::getUndistortedFrame(IplImage** image)
+HardCamera::getUndistortedFrame(IplImageWrapper& image)
 {
   boost::shared_lock<boost::shared_mutex> lock(this->framesAccessMutex);
-  cvReleaseImage(image);
-  *image = cvCloneImage(this->undistortedFrame);
+  image = *this->undistortedFrame;
 }
