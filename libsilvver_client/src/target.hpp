@@ -27,6 +27,14 @@
 
 namespace silvver
 {
+
+  class time_expired_error : public std::runtime_error
+  {
+  public:
+    time_expired_error(const std::string& whatArg)
+      :runtime_error(whatArg){}
+  };
+
   template<class U> class CheshireCat;
 
   /// Represents a target looked by Silvver.
@@ -34,14 +42,6 @@ namespace silvver
   class Target
   {
   public:
-
-    class time_expired_error : public std::runtime_error
-    {
-    public:
-      time_expired_error(const std::string& whatArg)
-        :runtime_error(whatArg){}
-    };
-
 
     /** Target class constructor.
      * @param targetId Target identifier.
@@ -55,8 +55,12 @@ namespace silvver
     ~Target() throw();
 
     /// Connect to the silvver-server.
+    /// Can throw boost::system::system_error when silvver-server
+    /// is unreachable.
     void connect();
 
+    /// Can throw boost::system::system_error when silvver-server
+    /// is unreachable.
     void disconnect();
 
     /** Get the id of target.

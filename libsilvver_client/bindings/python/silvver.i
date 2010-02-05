@@ -1,8 +1,21 @@
 %module silvver
+
 %{
 #include "silvverTypes.hpp"
 #include "target.hpp"
+#include <boost/system/system_error.hpp>
+static PyObject* pTimeExpired;
+static PyObject* pConnectionError;
 %}
+
+%init{
+pTimeExpired = PyErr_NewException(const_cast<char*>("_silvver.TimeExpired"),
+                                  NULL, NULL);
+pConnectionError = PyErr_NewException(const_cast<char*>("_silvver.ConnectionError"),
+                                      NULL, NULL);
+PyModule_AddObject(m, "TimeExpired", pTimeExpired);
+PyModule_AddObject(m, "ConnectionError", pConnectionError);
+}
 
 %include "std_string.i"
 
@@ -125,9 +138,33 @@ namespace silvver
     ~Target() throw();
 
     /// Connect to the silvver-server.
+    /// Can throw boost::system::system_error when silvver-server
+    /// is unreachable.
     void connect();
+    %exception connect{
+      try
+      {
+        $action
+      }
+      catch (boost::system::system_error& e)
+      {
+        PyErr_SetString(pConnectionError, const_cast<char*>(e.what()));
+        return NULL;
+      }
+    }
 
     void disconnect();
+    %exception disconnect{
+      try
+      {
+        $action
+      }
+      catch (boost::system::system_error& e)
+      {
+        PyErr_SetString(pConnectionError, const_cast<char*>(e.what()));
+        return NULL;
+      }
+    }
 
     /** Get the id of target.
      * @return The id of this target.
@@ -146,14 +183,85 @@ namespace silvver
     Identity<T> getNew(const boost::posix_time::time_duration&
                        waitTime = boost::date_time::pos_infin);
 
+    %extend{
+      Identity<T> _getNew(int days, int seconds, int microseconds)
+      {
+        return $self->getNew(boost::posix_time::hours(days*24) +
+                             boost::posix_time::seconds(seconds) +
+                             boost::posix_time::microseconds(microseconds));
+      }
+
+      Identity<T> _getNew()
+      {
+        return $self->getNew(boost::date_time::pos_infin);
+      }
+    }
+
+    %pythoncode{
+      def getNew(self, timedelta='infinity'):
+          if timedelta == 'infinity':
+              return self._getNew()
+          else:
+              return self._getNew(timedelta.days, timedelta.seconds,
+                                  timedelta.microseconds)
+    }
+
+    %exception _getNew{
+      try
+      {
+        $action
+      }
+      catch (silvver::time_expired_error& e)
+      {
+        PyErr_SetString(pTimeExpired, const_cast<char*>(e.what()));
+        return NULL;
+      }
+    }
+
     /** Return the next received target localization.
      * This function wait until a new Pose arrives and returns;
      */
     Identity<T> getNext(const boost::posix_time::time_duration&
                         waitTime = boost::date_time::pos_infin);
+
+    %extend{
+      Identity<T> _getNext(int days, int seconds, int microseconds)
+      {
+        return $self->getNext(boost::posix_time::hours(days*24) +
+                              boost::posix_time::seconds(seconds) +
+                              boost::posix_time::microseconds(microseconds));
+      }
+
+      Identity<T> _getNext()
+      {
+        return $self->getNext(boost::date_time::pos_infin);
+      }
+    }
+
+    %pythoncode{
+      def getNext(self, timedelta='infinity'):
+          if timedelta == 'infinity':
+              return self._getNext()
+          else:
+              return self._getNext(timedelta.days, timedelta.seconds,
+                                   timedelta.microseconds)
+    }
+
+    %exception _getNext{
+      try
+      {
+        $action
+      }
+      catch (silvver::time_expired_error& e)
+      {
+        PyErr_SetString(pTimeExpired, const_cast<char*>(e.what()));
+        return NULL;
+      }
+    }
+
   };
 
-  // %template(TargetPosition) Target<Position>;
+  %template(TargetPosition) Target<Position>;
   %template(TargetPose) Target<Pose>;
 
 } //silvver namespace
