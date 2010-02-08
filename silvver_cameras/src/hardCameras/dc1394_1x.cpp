@@ -31,22 +31,19 @@
 using namespace boost::assign;
 
 DC1394::DC1394(const scene::DC1394& config)
-  :HardCamera(config, getBitsPerPixel(config.colorMode))
+  :HardCamera(config, getIplDepth(config.colorMode),
+              getNChannels(config.colorMode))
   ,uid(config.uid)
   ,frameRate(config.frameRate)
   ,raw1394Handle(NULL)
   ,bDc1394CameraCreated(false)
   ,videoMode(getDc1394VideoMode(config.colorMode))
-  ,bufferSize((this->frameSize * this->bitsPerPixel) / 8)
-  ,currentFrame(NULL)
   ,brightness(config.brightness)
   ,exposure(config.exposure)
   ,whiteBalance(config.whiteBalance)
   ,shutter(config.shutter)
   ,gain(config.gain)
-{
-  createIplImage(&this->currentFrame);
-}
+{}
 
 DC1394::~DC1394()
 {
@@ -58,20 +55,15 @@ DC1394::~DC1394()
 
   dc1394_stop_iso_transmission(this->raw1394Handle, this->dc1394Camera.node);
 
-  if(this->bDc1394CameraCreated)
+  if (this->bDc1394CameraCreated)
   {
     dc1394_dma_unlisten(this->raw1394Handle, &(this->dc1394Camera));
     dc1394_dma_release_camera(this->raw1394Handle, &(this->dc1394Camera));
   }
 
-  if(this->raw1394Handle)
+  if (this->raw1394Handle)
   {
     raw1394_destroy_handle(this->raw1394Handle);
-  }
-
-  if(this->currentFrame)
-  {
-    cvReleaseImage(&this->currentFrame);
   }
 }
 
@@ -187,8 +179,8 @@ DC1394::getDc1394FrameRate() const
 unsigned
 DC1394::getDc1394VideoMode(const std::string& colorMode) const
 {
-  const unsigned fw = this->frameWidth;
-  const unsigned fh = this->frameHeight;
+  const unsigned fw = this->frameSize.width;
+  const unsigned fh = this->frameSize.height;
   const std::string& cm = colorMode;
 
   if      (fw==640  && fh==480  && cm=="yuv444") return MODE_160x120_YUV444;
@@ -217,44 +209,56 @@ DC1394::getDc1394VideoMode(const std::string& colorMode) const
   else
   {
     throw open_camera_error("Invalid resolution " +
-                            boost::lexical_cast<std::string>(this->frameWidth) +
+                            boost::lexical_cast<std::string>(fw) +
                             " x " +
-                            boost::lexical_cast<std::string>(this->frameHeight)+
+                            boost::lexical_cast<std::string>(fh)+
                             " with color mode " + colorMode);
   }
 }
 
-unsigned
-DC1394::getBitsPerPixel(const std::string& colorMode) const
+std::pair<int,int>
+DC1394::getPairDepthChannels(const std::string& colorMode) const
 {
   if (colorMode == "yuv444")
   {
-    return 12;
+    return std::make_pair(IPL_DEPTH_8U,3);
   }
   else if (colorMode == "yuv422")
   {
-    return 8;
+    return std::make_pair(IPL_DEPTH_8U,3);
   }
   else if (colorMode == "yuv411")
   {
-    return 6;
+    return std::make_pair(IPL_DEPTH_8U,3);
   }
   else if (colorMode == "rgb8")
   {
-    return 8;
+    return std::make_pair(IPL_DEPTH_8U,3);
   }
-  else if (colorMode == "mono8")
+  else if (colorMode == "mono8") // There aren't supporto to bw camera, TODO?
   {
-    return 8;
+    return std::make_pair(IPL_DEPTH_8U,3);
   }
-  else if (colorMode == "mono16")
+  else if (colorMode == "mono16") // There aren't supporto to bw camera, TODO?
   {
-    return 16;
+    return std::make_pair(IPL_DEPTH_16U,3);
   }
   else
   {
     throw std::invalid_argument("Invalid color mode: " + colorMode);
   }
+}
+
+int
+DC1394::getIplDepth(const std::string& colorMode) const
+{
+  return getPairDepthChannels(colorMode).first;
+}
+
+int
+DC1394::getNChannels(const std::string& colorMode) const
+{
+  return getPairDepthChannels(colorMode).second;
 }
 
 void
@@ -430,15 +434,21 @@ DC1394::initialize()
   // }
 
   this->grabFrameThread.reset(new boost::thread(boost::bind<void>
-                                                (&DC1394::runCapturer,
+                                                (&DC1394::doWork,
                                                  this)));
 }
 
 void
-DC1394::runCapturer()
+DC1394::doWork()
 {
-  IplImage* tmpFrame;
-  createIplImage(&tmpFrame);
+  IplImageWrapper tmpFrame(this->frameSize, this->iplDepth, 3);
+  boost::shared_ptr<IplImageWrapper> frameBuffer[2];
+  int frameIdx = 0;
+
+  frameBuffer[0].reset(new IplImageWrapper(this->frameSize,
+                                           this->iplDepth, 3));
+  frameBuffer[1].reset(new IplImageWrapper(this->frameSize,
+                                           this->iplDepth, 3));
 
   while (true)
   {
@@ -449,39 +459,18 @@ DC1394::runCapturer()
       throw capture_image_error("Unable to capture a frame");
     }
 
-    memcpy(tmpFrame->imageData,
-           this->dc1394Camera.capture_buffer,
-           this->bufferSize);
-
-    this->bufferAccess.lock();
-    dc1394_bayer_decoding_8bit((uint8_t*)tmpFrame->imageData,
-                               (uint8_t*)(this->currentFrame)->imageData,
+    dc1394_bayer_decoding_8bit((uint8_t*)this->dc1394Camera.capture_buffer,
+                               (uint8_t*)tmpFrame.data(),
                                this->dc1394Camera.frame_width,
                                this->dc1394Camera.frame_height,
                                LIBDC1394_COLOR_FILTER_RGGB,
                                LIBDC1394_BAYER_METHOD_SIMPLE);
-    this->bufferAccess.unlock();
-
-    std::fill(this->unreadImage.begin(), this->unreadImage.end(), true);
-    this->unreadFrameCondition.notify_all();
 
     dc1394_dma_done_with_buffer(&(this->dc1394Camera));
+
+    tmpFrame.convertColor(*frameBuffer[frameIdx], CV_RGB2BGR);
+    updateCurrentFrame(frameBuffer[frameIdx]);
+
+    frameIdx = (frameIdx+1) % 2;
   }
-
-  cvReleaseImage(&tmpFrame);
-}
-
-void
-DC1394::captureFrame(IplImage** iplImage, unsigned clientUid)
-{
-  boost::shared_lock<boost::shared_mutex> lock(this->bufferAccess);
-
-  while (!this->unreadImage.at(clientUid))
-  {
-    this->unreadFrameCondition.wait(lock);
-  }
-
-  fixChannelOrder(this->currentFrame, *iplImage);
-
-  this->unreadImage.at(clientUid) = false;
 }

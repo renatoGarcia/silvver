@@ -1,3 +1,5 @@
+SET(WITH_DC1394V1 ON
+    CACHE BOOL "Enable or disable the seek for dc1394v1 library")
 SET(WITH_DC1394V2 ON
     CACHE BOOL "Enable or disable the seek for dc1394v2 library")
 SET(WITH_V4L2 ON
@@ -21,11 +23,24 @@ IF(WITH_DC1394V2)
   FIND_PACKAGE(DC1394V2)
   IF(DC1394V2_FOUND)
     SET(SUPPORTED_CAMERAS ${SUPPORTED_CAMERAS}
-        "Cameras conform to the IEEE 1394-based Digital Camera Specification")
+        "Cameras conform to the IEEE 1394-based Digital Camera Specification (using libdc1394v2).")
     ADD_DEFINITIONS(-DHAS_DC1394V2)
     SET(silvver_cameras_SRCS ${silvver_cameras_SRCS} hardCameras/dc1394_2x.cpp)
   ENDIF(DC1394V2_FOUND)
 ENDIF(WITH_DC1394V2)
+
+IF(WITH_DC1394V1 AND NOT DC1394V2_FOUND)
+  FIND_PACKAGE(DC1394V1)
+  IF(DC1394V1_FOUND)
+    SET(SUPPORTED_CAMERAS ${SUPPORTED_CAMERAS}
+        "Cameras conform to the IEEE 1394-based Digital Camera Specification (using libdc1394v1).")
+    ADD_DEFINITIONS(-DHAS_DC1394V1)
+    SET(silvver_cameras_SRCS ${silvver_cameras_SRCS}
+                             hardCameras/dc1394_1x.cpp
+                             hardCameras/conversions/conversions.c
+                             hardCameras/conversions/bayer.c)
+  ENDIF(DC1394V1_FOUND)
+ENDIF(WITH_DC1394V1 AND NOT DC1394V2_FOUND)
 
 IF(WITH_V4L2)
   FIND_PACKAGE(V4L2)
@@ -45,18 +60,29 @@ FIND_PACKAGE(ARTKP REQUIRED)
 INCLUDE_DIRECTORIES(${Boost_INCLUDE_DIR}
                     ${LUA_INCLUDE_DIR}
                     ${OpenCV_INCLUDE_DIR}
-                    ${ARTKP_INCLUDE_DIRS}
-                    ${DC1394V2_INCLUDE_DIRS}
-                    ${V4L2_INCLUDE_DIRS})
+                    ${ARTKP_INCLUDE_DIRS})
 
 ADD_EXECUTABLE(silvver_cameras ${silvver_cameras_SRCS})
 
 TARGET_LINK_LIBRARIES(silvver_cameras ${Boost_LIBRARIES}
                                       ${LUA_LIBRARIES}
                                       ${OpenCV_LIBRARIES}
-                                      ${ARTKP_LIBRARIES}
-                                      ${DC1394V2_LIBRARIES}
-                                      ${V4L2_LIBRARIES})
+                                      ${ARTKP_LIBRARIES})
+
+IF(DC1394V2_FOUND)
+  INCLUDE_DIRECTORIES(${DC1394V2_INCLUDE_DIRS})
+  TARGET_LINK_LIBRARIES(silvver_cameras ${DC1394V2_LIBRARIES})
+ENDIF(DC1394V2_FOUND)
+
+IF(DC1394V1_FOUND)
+  INCLUDE_DIRECTORIES(${DC1394V1_INCLUDE_DIRS})
+  TARGET_LINK_LIBRARIES(silvver_cameras ${DC1394V1_LIBRARIES})
+ENDIF(DC1394V1_FOUND)
+
+IF(V4L2_FOUND)
+  INCLUDE_DIRECTORIES(${V4L2_INCLUDE_DIRS})
+  TARGET_LINK_LIBRARIES(silvver_cameras ${V4L2_LIBRARIES})
+ENDIF(V4L2_FOUND)
 
 INSTALL(TARGETS silvver_cameras
         RUNTIME DESTINATION bin)

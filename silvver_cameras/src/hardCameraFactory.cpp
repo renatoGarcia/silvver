@@ -23,9 +23,9 @@
 #  include "hardCameras/pgr.hpp"
 #endif
 
-#ifdef HAVE_LIBDC1394_DC1394_CONTROL_H
+#ifdef HAS_DC1394V1
 #  include "hardCameras/dc1394_1x.hpp"
-#  define HAVE_DC1394
+#  define HAS_DC1394
 #endif
 #ifdef HAS_DC1394V2
 #  include "hardCameras/dc1394_2x.hpp"

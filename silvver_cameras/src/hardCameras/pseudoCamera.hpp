@@ -23,7 +23,8 @@
 #include <boost/scoped_ptr.hpp>
 #include <boost/thread/thread.hpp>
 
-class PseudoCamera : public HardCamera
+class PseudoCamera
+  :public HardCamera
 {
 public:
 

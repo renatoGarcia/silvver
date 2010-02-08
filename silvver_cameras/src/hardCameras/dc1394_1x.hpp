@@ -20,13 +20,15 @@
 
 #include <boost/array.hpp>
 #include <boost/scoped_ptr.hpp>
-#include <boost/thread/condition.hpp>
 #include <boost/thread/shared_mutex.hpp>
 #include <boost/thread/thread.hpp>
 #include <string>
+#include <utility>
 
 #include <libdc1394/dc1394_control.h>
 #include <libraw1394/raw1394.h>
+
+#include "../iplImageWrapper.hpp"
 
 #include "conversions/conversions.h"
 
@@ -40,11 +42,9 @@ public:
 
   void initialize();
 
-  void captureFrame(IplImage** iplImage, unsigned clientUid);
-
 private:
 
-  void runCapturer();
+  void doWork();
 
   void findThisCamera(nodeid_t& node, int& cardIndex);
 
@@ -55,7 +55,11 @@ private:
 
   unsigned getDc1394VideoMode(const std::string& colorMode) const;
 
-  unsigned getBitsPerPixel(const std::string& colorMode) const;
+  std::pair<int,int> getPairDepthChannels(const std::string& colorMode) const;
+
+  int getIplDepth(const std::string& colorMode) const;
+
+  int getNChannels(const std::string& colorMode) const;
 
   void setFeatures(nodeid_t cameraNode);
 
@@ -73,16 +77,6 @@ private:
   bool                 bDc1394CameraCreated;
 
   const int videoMode;
-
-  /// Frame buffer size in bytes
-  const unsigned bufferSize;
-
-  IplImage* currentFrame;
-
-  // bayer_pattern_t pattern;
-
-  boost::shared_mutex bufferAccess;
-  boost::condition_variable_any unreadFrameCondition;
 
   boost::scoped_ptr<boost::thread> grabFrameThread;
 

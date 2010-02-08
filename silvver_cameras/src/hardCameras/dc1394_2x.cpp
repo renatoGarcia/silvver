@@ -367,7 +367,6 @@ DC1394::doWork()
   frameBuffer[1].reset(new IplImageWrapper(this->frameSize,
                                            this->iplDepth, 3));
 
-
   while (true)
   {
     boost::this_thread::interruption_point();
