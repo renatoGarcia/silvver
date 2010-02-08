@@ -456,7 +456,9 @@ DC1394::doWork()
 
     if (dc1394_dma_single_capture(&(this->dc1394Camera)) != DC1394_SUCCESS)
     {
-      throw capture_image_error("Unable to capture a frame");
+      // throw capture_image_error("Unable to capture a frame");
+      dc1394_dma_done_with_buffer(&(this->dc1394Camera));
+      continue;
     }
 
     dc1394_bayer_decoding_8bit((uint8_t*)this->dc1394Camera.capture_buffer,

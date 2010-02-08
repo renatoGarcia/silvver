@@ -156,21 +156,23 @@ ArtkpCamera::doWork()
         continue;
       }
 
+      /// Apparently the rppGetTransMat don't work in multithread environment
+      ///
       // The transMatrix will be the marker pose in relation to camera.
-      error = this->tracker->rppGetTransMat(&markerInfo[marker],
-                                    pattCenter,
-                                    (ARFloat)this->patternWidth,
-                                    transMatrix);
+      // error = this->tracker->rppGetTransMat(&markerInfo[marker],
+      //                               pattCenter,
+      //                               (ARFloat)this->patternWidth,
+      //                               transMatrix);
 
       // If the error in the pose estimated is 1e10, the rppGetTransMat has
       // failed.
-      if (error == 1e10)
-      {
+      // if (error == 1e10)
+      // {
         error = this->tracker->arGetTransMat(&markerInfo[marker],
                                              pattCenter,
                                              (ARFloat)this->patternWidth,
                                              transMatrix);
-      }
+      // }
 
       pose.uid = this->idMap.at(markerInfo[marker].id);
       pose.x = transMatrix[0][3];
