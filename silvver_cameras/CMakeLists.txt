@@ -6,3 +6,13 @@ PROJECT(silvver_cameras CXX)
 INCLUDE_DIRECTORIES(../common)
 
 ADD_SUBDIRECTORY(src)
+
+INSTALL(DIRECTORY lua/
+        DESTINATION share/lua/5.1
+        PATTERN "*~" EXCLUDE
+        PATTERN ".*" EXCLUDE)
+
+INSTALL(DIRECTORY calibration/
+        DESTINATION bin
+        PATTERN "*~" EXCLUDE
+        PATTERN ".*" EXCLUDE)
