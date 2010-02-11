@@ -16,8 +16,6 @@
 #include "sceneMounter.hpp"
 
 #include <boost/foreach.hpp>
-#include <boost/preprocessor/repetition/repeat.hpp>
-#include <boost/preprocessor/seq/size.hpp>
 #include <boost/shared_ptr.hpp>
 
 #include "connection.hpp"
@@ -42,32 +40,25 @@ SceneMounter::mount()
   const scene::Scene scene = cfParser.parseFile(this->sceneDescriptorFile);
 
   scene::Camera camera;
+  scene::AnyTarget target;
   BOOST_FOREACH(camera, scene.cameras)
   {
-#define CALL_construct_macro(z, n, text)                        \
-    if(scene.targets.get<n>())                                  \
-    {                                                           \
-      this->constructAbstractCamera(camera,                     \
-                                    *scene.targets.get<n>());   \
+    BOOST_FOREACH(target, scene.targets)
+    {
+      this->constructAbstractCamera(camera, target);
     }
-
-    // Repeat CALL_construct_macro with one indice "n" for each type
-    // in ALL_TARGETS_SEQ.
-    BOOST_PP_REPEAT(BOOST_PP_SEQ_SIZE(ALL_TARGETS_SEQ),
-                    CALL_construct_macro, _)
   }
 }
-#undef CALL_construct_macro
 
 void
 SceneMounter::constructAbstractCamera(const scene::Camera& camera,
-                                      const scene::AnyTarget& targets)
+                                      const scene::AnyTarget& target)
 {
   boost::shared_ptr<Connection>
     connection(new Connection(this->serverIp, this->receptionistPort));
 
   this->abstractCameras.push_back(AbstractCameraFactory::create(camera,
-                                                                targets,
+                                                                target,
                                                                 connection));
 
   this->abstractCameras.back().run();

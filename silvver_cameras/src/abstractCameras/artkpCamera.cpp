@@ -16,20 +16,21 @@
 #include "artkpCamera.hpp"
 
 #include <boost/foreach.hpp>
+#include <boost/lexical_cast.hpp>
 #include <fstream>
 
 #include <ARToolKitPlus/TrackerSingleMarkerImpl.h>
 
 #include "../connection.ipp"
-#include <silvverTypes.hpp>
 
 ArtkpCamera::ArtkpCamera(const scene::Camera& cameraConfig,
                          const scene::ArtkpTargets& targets,
                          boost::shared_ptr<Connection> connection)
   :AbstractCamera(cameraConfig, connection)
-  ,camConfigFileName("/tmp/artkpCamera" +
-                     boost::apply_visitor(scene::GetHardware(),
-                                          cameraConfig.hardware).identifier)
+  ,bodyTranslation(targets.bodyTranslation)
+  ,bodyRotation(targets.bodyRotation)
+  ,camConfigFileName("/tmp/artkp" +
+                     boost::lexical_cast<std::string>(targets.uniqueKey))
   ,patternWidth(targets.patternWidth)
   ,threshold(targets.threshold)
   ,logger()
@@ -120,6 +121,69 @@ ArtkpCamera::stop()
 }
 
 void
+ArtkpCamera::localizeBody(silvver::Pose& pose) const
+{
+  silvver::Pose tempPose(pose);
+
+  //------------------------------- Rrc = Rtc x Rrt
+  // Rotation of body in camera coordinates is Rotation of target in camera
+  // coordinates vec rotation of body in target coordinates
+  pose.rotationMatrix[0] =
+    tempPose.rotationMatrix[0] * this->bodyRotation[0] +
+    tempPose.rotationMatrix[1] * this->bodyRotation[3] +
+    tempPose.rotationMatrix[2] * this->bodyRotation[6];
+  pose.rotationMatrix[1] =
+    tempPose.rotationMatrix[0] * this->bodyRotation[1] +
+    tempPose.rotationMatrix[1] * this->bodyRotation[4] +
+    tempPose.rotationMatrix[2] * this->bodyRotation[7];
+  pose.rotationMatrix[2] =
+    tempPose.rotationMatrix[0] * this->bodyRotation[2] +
+    tempPose.rotationMatrix[1] * this->bodyRotation[5] +
+    tempPose.rotationMatrix[2] * this->bodyRotation[8];
+  pose.rotationMatrix[3] =
+    tempPose.rotationMatrix[3] * this->bodyRotation[0] +
+    tempPose.rotationMatrix[4] * this->bodyRotation[3] +
+    tempPose.rotationMatrix[5] * this->bodyRotation[6];
+  pose.rotationMatrix[4] =
+    tempPose.rotationMatrix[3] * this->bodyRotation[1] +
+    tempPose.rotationMatrix[4] * this->bodyRotation[4] +
+    tempPose.rotationMatrix[5] * this->bodyRotation[7];
+  pose.rotationMatrix[5] =
+    tempPose.rotationMatrix[3] * this->bodyRotation[2] +
+    tempPose.rotationMatrix[4] * this->bodyRotation[5] +
+    tempPose.rotationMatrix[5] * this->bodyRotation[8];
+  pose.rotationMatrix[6] =
+    tempPose.rotationMatrix[6] * this->bodyRotation[0] +
+    tempPose.rotationMatrix[7] * this->bodyRotation[3] +
+    tempPose.rotationMatrix[8] * this->bodyRotation[6];
+  pose.rotationMatrix[7] =
+    tempPose.rotationMatrix[6] * this->bodyRotation[1] +
+    tempPose.rotationMatrix[7] * this->bodyRotation[4] +
+    tempPose.rotationMatrix[8] * this->bodyRotation[7];
+  pose.rotationMatrix[8] =
+    tempPose.rotationMatrix[6] * this->bodyRotation[2] +
+    tempPose.rotationMatrix[7] * this->bodyRotation[5] +
+    tempPose.rotationMatrix[8] * this->bodyRotation[8];
+
+  //------------------------------- Trc = Ttc + Rtc x Trt
+  // Translation of body in camera coordinates is translation of target in
+  // camera coordinates plus rotation of target in camera coordinates vec
+  // translation of body in target coordinates
+  pose.x = tempPose.x +
+    tempPose.rotationMatrix[0] * this->bodyTranslation[0] +
+    tempPose.rotationMatrix[1] * this->bodyTranslation[1] +
+    tempPose.rotationMatrix[2] * this->bodyTranslation[2];
+  pose.y = tempPose.y +
+    tempPose.rotationMatrix[3] * this->bodyTranslation[0] +
+    tempPose.rotationMatrix[4] * this->bodyTranslation[1] +
+    tempPose.rotationMatrix[5] * this->bodyTranslation[2];
+  pose.z = tempPose.z +
+    tempPose.rotationMatrix[6] * this->bodyTranslation[0] +
+    tempPose.rotationMatrix[7] * this->bodyTranslation[1] +
+    tempPose.rotationMatrix[8] * this->bodyTranslation[2];
+}
+
+void
 ArtkpCamera::doWork()
 {
   std::vector<silvver::Identity<silvver::Pose> > poses;
@@ -168,10 +232,10 @@ ArtkpCamera::doWork()
       // failed.
       // if (error == 1e10)
       // {
-        error = this->tracker->arGetTransMat(&markerInfo[marker],
-                                             pattCenter,
-                                             (ARFloat)this->patternWidth,
-                                             transMatrix);
+      error = this->tracker->arGetTransMat(&markerInfo[marker],
+                                           pattCenter,
+                                           (ARFloat)this->patternWidth,
+                                           transMatrix);
       // }
 
       pose.uid = this->idMap.at(markerInfo[marker].id);
@@ -182,7 +246,8 @@ ArtkpCamera::doWork()
         for(int j = 0; j < 3; ++j)
           pose.rotationMatrix[(3*i)+j] = transMatrix[i][j];
 
-      this->toWorld(pose);
+      localizeBody(pose);
+      toWorld(pose);
 
       poses.push_back(pose);
     }

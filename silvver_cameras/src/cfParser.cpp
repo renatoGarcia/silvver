@@ -1,4 +1,4 @@
-/* Copyright 2009 Renato Florentino Garcia <fgar.renato@gmail.com>
+/* Copyright 2009,2010 Renato Florentino Garcia <fgar.renato@gmail.com>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3, as
@@ -215,12 +215,38 @@ CfParser::readV4l2Config(lua_State* L)
 }
 
 void
+CfParser::readTarget(lua_State* L)
+{
+  scene::AnyTarget target;
+
+  std::string type = readValue<std::string>(L, "__type");
+  if (type == "artkp")
+  {
+    target = this->readArtkpTargets(L);
+  }
+  else
+  {
+    throw file_load_error("Unknown target system name");
+  }
+
+  this->sc.targets.push_back(target);
+}
+
+scene::ArtkpTargets
 CfParser::readArtkpTargets(lua_State* L)
 {
+  // Each artkp config struct must have a unique key. What is the value is
+  // indifferent, but it must be unique.
+  static unsigned uniqueKey = 0;
+  uniqueKey++;
+
   scene::ArtkpTargets artkpTargets;
 
+  artkpTargets.uniqueKey = uniqueKey;
   artkpTargets.patternWidth = readValue<int>(L, "pattern_width");
   artkpTargets.threshold    = readValue<int>(L, "threshold");
+  artkpTargets.bodyTranslation = readArray<double, 3>(L, "body_translation");
+  artkpTargets.bodyRotation = readArray<double, 9>(L, "body_rotation");
 
   std::string patternPath;
   unsigned uid;
@@ -239,7 +265,7 @@ CfParser::readArtkpTargets(lua_State* L)
     lua_pop(L, 1); // pop the i artkp target
   }
 
-  boost::get<0>(this->sc.targets).reset(artkpTargets);
+  return artkpTargets;
 }
 
 scene::Scene
@@ -260,10 +286,11 @@ CfParser::parseFile(const std::string& configFile)
     throw file_load_error("Don't found scene variable in config file");
   }
 
+  //------------------------------------ Cameras
   lua_getfield(L, -1, "cameras");
   if (!lua_istable(L, -1))
   {
-    throw file_load_error("Don't found cameras variable in config file");
+    throw file_load_error("Don't found cameras table in config file");
   }
 
   lua_pushnil(L);// first key
@@ -276,12 +303,24 @@ CfParser::parseFile(const std::string& configFile)
   }
   lua_pop(L, 1); // pop camera field
 
-  if (hasField(L, "artp_targets"))
+  //------------------------------------ Targets
+  lua_getfield(L, -1, "targets");
+  if (!lua_istable(L, -1))
   {
-    lua_getfield(L, -1, "artp_targets");
-    readArtkpTargets(L);
-    lua_pop(L, 1); // pop artp_targets field
+    throw file_load_error("Don't found targets table in config file");
   }
+
+  lua_pushnil(L);// first key
+  while (lua_next(L, -2) != 0)
+  {
+    readTarget(L);
+
+    // removes 'value', keeps 'key' for next iteration
+    lua_pop(L, 1);
+  }
+  lua_pop(L, 1); // pop targets field
+
+  //----------------------------------------------
 
   return this->sc;
 }

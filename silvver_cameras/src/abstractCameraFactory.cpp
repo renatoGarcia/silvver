@@ -18,7 +18,7 @@
 #include "boost/variant/get.hpp"
 #include <stdexcept>
 
-#include <processorOptions.hpp>
+#include "processorOptions.hpp"
 
 #include "abstractCameras/artkpCamera.hpp"
 

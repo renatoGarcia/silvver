@@ -23,44 +23,39 @@
 #ifndef _TARGET_DESCRIPTIONS_HPP_
 #define _TARGET_DESCRIPTIONS_HPP_
 
-#include <boost/preprocessor/seq/for_each_i.hpp>
+#include <boost/array.hpp>
 #include <boost/tuple/tuple.hpp>
 #include <boost/variant.hpp>
 #include <string>
 #include <vector>
-
-// This is the sequence which contain all target description structs.
-// It will be expanded in places where a list of all targets types is required.
-#define ALL_TARGETS_SEQ (ArtkpTargets)
 
 namespace scene
 {
   /// Struct with definitions of ARToolKitPlus targets.
   struct ArtkpTargets
   {
+    /// Key unique to each artkp targets set.
+    unsigned uniqueKey;
+
     /// ARToolKitPlus patter width [mm].
     int patternWidth;
 
     /// Grey level threshold between black and white.
     int threshold;
 
-    /// Each tuple is a pair of: the unique identifier that silvver will
-    /// attribute to this pattern, and the path to the file describing
-    /// the pattern.
+    /// Translation of body center in target coordinate system.
+    boost::array<double,3> bodyTranslation;
+
+    /// Rotation matrix of body in target coordinate system.
+    boost::array<double,9> bodyRotation;
+
+    /// Each tuple is: the unique identifier that silvver will attribute to
+    /// this pattern, and the path to the file describing the pattern.
     std::vector< boost::tuple<unsigned, std::string> > patterns;
   };
 
-  // This macro will expand to a list of all structs in ALL_TARGETS_SEQ.
-  // Except in the first struct there will be a comma before each of.
-#define ANY_target_macro(r, data, i, elem) BOOST_PP_COMMA_IF(i) elem
-
-  /** The AnyTarget is a type which can handle any of target structs listed in
-   * ALL_TARGETS_SEQ. */
-  typedef boost::variant<BOOST_PP_SEQ_FOR_EACH_I(ANY_target_macro,
-                                                 _,
-                                                 ALL_TARGETS_SEQ) > AnyTarget;
+  /// The AnyTarget is a type which can handle any of target structs.
+  typedef boost::variant<ArtkpTargets> AnyTarget;
 }
-
-#undef ANY_target_macro
 
 #endif /* _TARGET_DESCRIPTIONS_HPP_ */

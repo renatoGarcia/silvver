@@ -13,10 +13,9 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-/** \file scene.hpp
- * \brief This file contain all structs with the configuration of scene.
- * In this structs be put all data read from lua config file.
- */
+/// \file scene.hpp
+/// \brief This file contain all structs with the configuration of scene.
+/// In this structs be put all data read from lua config file.
 
 #ifndef _SCENE_HPP_
 #define _SCENE_HPP_
@@ -33,10 +32,9 @@
 
 namespace scene
 {
-  /** Struct with all configurations of a camera.
-   * This struct groups the hardware camera specific configurations and the
-   * commons camera extrinsic parameters.
-   */
+  /// Struct with all configurations of a camera.
+  /// This struct groups the hardware camera specific configurations and the
+  /// commons camera extrinsic parameters.
   struct Camera
   {
     AnyHardwareCamera hardware;
@@ -44,9 +42,9 @@ namespace scene
     /// Translation vector of camera, in origin referential.
     boost::array<double, 3> translationVector;
 
-    /** Rotation matrix of camera, in origin referential.
-     * The format must be {U11, U12, U13, U21, U22, U23, U31, U32, U33},
-     * where Uxy is the item of row x and column y. */
+    /// Rotation matrix of camera, in origin referential.
+    /// The format must be {U11, U12, U13, U21, U22, U23, U31, U32, U33},
+    /// where Uxy is the item of row x and column y. */
     boost::array<double, 9> rotationMatrix;
   };
 
@@ -58,13 +56,15 @@ namespace scene
     // expansion to each struct in ALL_TARGETS_SEQ, which is defined in file
     // targetDescriptions.hpp. Except in the first expansion there will be a
     // comma before each of.
-#define OPTIONAL_targets_macro(r, data, i, elem) BOOST_PP_COMMA_IF(i) boost::optional<elem>
+// #define OPTIONAL_targets_macro(r, data, i, elem) BOOST_PP_COMMA_IF(i) std::vector<elem>
 
-    /// Tuple with configuration structs of all targets in scene,
-    /// and only if it is in scene.
-     boost::tuple<BOOST_PP_SEQ_FOR_EACH_I(OPTIONAL_targets_macro,
-                                          _,
-                                          ALL_TARGETS_SEQ        )> targets;
+    // /// Tuple with configuration structs of all targets in scene,
+    // /// and only if it is in scene.
+    //  boost::tuple<BOOST_PP_SEQ_FOR_EACH_I(OPTIONAL_targets_macro,
+    //                                       _,
+    //                                       ALL_TARGETS_SEQ        )> targets;
+
+    std::vector<AnyTarget> targets;
 
     /// Vector with configuration structs of all camera in scene.
     std::vector<Camera> cameras;

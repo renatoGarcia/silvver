@@ -1,4 +1,4 @@
-/* Copyright 2009 Renato Florentino Garcia <fgar.renato@gmail.com>
+/* Copyright 2009,2010 Renato Florentino Garcia <fgar.renato@gmail.com>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3, as
@@ -65,7 +65,9 @@ private:
   scene::DC1394 readDC1394Config(lua_State* L);
   scene::V4l2 readV4l2Config(lua_State* L);
 
-  void readArtkpTargets(lua_State* L);
+  void readTarget(lua_State* L);
+
+  scene::ArtkpTargets readArtkpTargets(lua_State* L);
 };
 
 

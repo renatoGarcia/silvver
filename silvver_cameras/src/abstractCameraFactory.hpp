@@ -36,5 +36,4 @@ private:
   AbstractCameraFactory();
 };
 
-
 #endif /* _ABSTRACT_CAMERA_FACTORY_HPP_ */

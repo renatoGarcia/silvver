@@ -379,18 +379,15 @@ DC1394::doWork()
     }
 
     // This don't work for images whith more than 1 byte per pixel
-    // if (this->bitsPerPixel == 8)
-    // {
-      if (dc1394_bayer_decoding_8bit((uint8_t*)videoFrame->image,
-                                     (uint8_t*)tmpFrame.data(),
-                                     this->frameSize.width,
-                                     this->frameSize.height,
-                                     DC1394_COLOR_FILTER_RGGB,
-                                     DC1394_BAYER_METHOD_SIMPLE))
-      {
-        throw capture_image_error("Error on bayer decoding");
-
-      }
+    if (dc1394_bayer_decoding_8bit((uint8_t*)videoFrame->image,
+                                   (uint8_t*)tmpFrame.data(),
+                                   this->frameSize.width,
+                                   this->frameSize.height,
+                                   DC1394_COLOR_FILTER_RGGB,
+                                   DC1394_BAYER_METHOD_SIMPLE))
+    {
+      throw capture_image_error("Error on bayer decoding");
+    }
     // }
     // else if (this->bitsPerPixel == 16)
     // {
