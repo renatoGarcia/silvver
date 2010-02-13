@@ -22,7 +22,7 @@ CfParser::CfParser()
 
 template <typename Type, int nItens>
 boost::array<Type, nItens>
-CfParser::readArray(lua_State* L, std::string name)
+CfParser::readArray(lua_State* L, const std::string& name) const
 {
   lua_getfield(L, -1, name.c_str());
 
@@ -67,7 +67,7 @@ CfParser::readArray(lua_State* L, std::string name)
       returnArray.at(nItens + i) =
         boost::lexical_cast<Type>(lua_tostring(L, i));
     }
-    catch (boost::bad_lexical_cast &)
+    catch (const boost::bad_lexical_cast &)
     {
       throw file_load_error("The index " +
                             boost::lexical_cast<std::string>(nItens+i+1) +
@@ -83,7 +83,7 @@ CfParser::readArray(lua_State* L, std::string name)
 
 template <typename Type>
 Type
-CfParser::readValue(lua_State* L, std::string name)
+CfParser::readValue(lua_State* L, const std::string& name) const
 {
   lua_getfield(L, -1, name.c_str());
 
@@ -103,7 +103,7 @@ CfParser::readValue(lua_State* L, std::string name)
   {
     returnValue = boost::lexical_cast<Type>(lua_tostring(L, -1));
   }
-  catch (boost::bad_lexical_cast &)
+  catch (const boost::bad_lexical_cast &)
   {
     throw file_load_error("The field <" + name +
                           "> couldn't be converted to the appropriated type");
@@ -115,7 +115,7 @@ CfParser::readValue(lua_State* L, std::string name)
 }
 
 bool
-CfParser::hasField(lua_State* L, std::string name)
+CfParser::hasField(lua_State* L, const std::string& name) const
 {
   lua_getfield(L, -1, name.c_str());
 

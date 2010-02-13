@@ -28,12 +28,12 @@
 
 namespace scene
 {
-  /** Base struct to all hardware camera configuration structs.
-   * This struct have all common configurations for all hardware cameras.
-   */
+  /// Base struct to all hardware camera configuration structs.
+  /// This struct have all common configurations for all hardware cameras.
   struct Hardware
   {
-    /// An unique string which differentiate this hardCamera from others hardCamera.
+    /// An unique string which differentiate this hardCamera from
+    /// others hardCamera.
     std::string identifier;
 
     /// String configuring the name of saved images. This string can have
@@ -58,7 +58,7 @@ namespace scene
     boost::array<double, 2> tangentialCoef;
   };
 
-  struct PseudoCamera :public Hardware
+  struct PseudoCamera: public Hardware
   {
     /// Path to directory where are the input images.
     std::string imagesPath;
@@ -67,7 +67,7 @@ namespace scene
     float frameRate;
   };
 
-  struct DC1394 :public Hardware
+  struct DC1394: public Hardware
   {
     /// String representation of camera unique identifier in decimal base.
     std::string uid;
@@ -75,59 +75,51 @@ namespace scene
     /// The rate which the input images will be read.
     float frameRate;
 
-    /** The color mode of the camera.
-     * One of: yuv444, yuv422, yuv411, rgb8, mono8 or mono16. All letters must
-     * be in lower case.
-     */
+    /// The color mode of the camera.
+    /// One of: yuv444, yuv422, yuv411, rgb8, mono8 or mono16. All letters must
+    /// be in lower case.
     std::string colorMode;
 
-    /** The brightness control.
-     * One of: "untouched" or an unsigned integer between 0 and 255.
-     */
+    /// The brightness control.
+    /// One of: "untouched" or an unsigned integer between 0 and 255.
     std::string brightness;
 
-    /** The auto exposure control.
-     * One of: "untouched", "off", "auto" or an unsigned integer between
-     * 1 and 1023.
-     */
+    /// The auto exposure control.
+    /// One of: "untouched", "off", "auto" or an unsigned integer between
+    /// 1 and 1023.
     std::string exposure;
 
-    /** The white balance control.
-     * An array with [(blue/v), (red/v)].
-     * Each position must be one of (the same in both): "untouched", "off" or
-     * an unsigned integer between 0 and 63.
-     */
+    /// The white balance control.
+    /// An array with [(blue/v), (red/v)].
+    /// Each position must be one of (the same in both): "untouched", "off" or
+    /// an unsigned integer between 0 and 63.
     boost::array<std::string, 2> whiteBalance;
 
-    /** The shuter timer control.
-     * One of: "untouched", "auto" or an unsigned integer greater than  2.
-     */
+    /// The shuter timer control.
+    /// One of: "untouched", "auto" or an unsigned integer greater than  2.
     std::string shutter;
 
-    /** The gain control.
-     * One of: "untouched", "auto" or an unsigned integer
-     * between 220 and 1023.
-     */
+    /// The gain control.
+    /// One of: "untouched", "auto" or an unsigned integer
+    /// between 220 and 1023.
     std::string gain;
   };
 
-  struct V4l2 :public Hardware
+  struct V4l2: public Hardware
   {
     /// This is the uid of v4l2 camera, it is given by order which they was
     /// connected in computer.
     unsigned uid;
   };
 
-  /** This is a boost::variant with all hardware camera models,
-   * i.e. all structs which inherit from Hardware struct.
-   */
+  /// This is a boost::variant with all hardware camera models,
+  /// i.e. all structs which inherit from Hardware struct.
   typedef boost::variant<PseudoCamera,
                          DC1394,
                          V4l2         > AnyHardwareCamera;
 
-  /** Functor which receives a AnyHardwareCamera and return a copy
-   * of its Hardware base class.
-   */
+  /// Functor which receives a AnyHardwareCamera and return a copy
+  /// of its Hardware base class.
   struct GetHardware :public boost::static_visitor<Hardware>
   {
     template <class T>

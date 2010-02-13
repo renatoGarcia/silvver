@@ -20,7 +20,6 @@
 #include <boost/shared_ptr.hpp>
 #include <boost/thread/condition.hpp>
 #include <boost/thread/mutex.hpp>
-#include <string>
 
 #include "../connection.hpp"
 #include "../hardCameras/hardCamera.hpp"
@@ -53,7 +52,7 @@ protected:
   AbstractCamera(const scene::Camera& cameraConfig,
                  boost::shared_ptr<Connection> connection);
 
-  /// Update the frame pointed by currentFrame.
+  /// Update the frame in currentFrame.
   void updateFrame();
 
   /// Tranform a pose in camera coordinates do world coordinates.
@@ -80,11 +79,6 @@ private:
 
   /// Translation vector of camera in world coordinates.
   const boost::array<double, 3> trans;
-
-  // Número de imagens processadas, usado para calcular a taxa média
-  // de quadros por segundo.
-  unsigned frameCounter;
-  float frameRate;
 };
 
-#endif
+#endif /* _ABSTRACT_CAMERA_HPP_ */

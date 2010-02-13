@@ -95,6 +95,7 @@ YUV422_to_BGR8(uint8_t *src, uint8_t *dest,
 V4L2::V4L2(const scene::V4l2& config)
   :HardCamera(config, IPL_DEPTH_8U, 3)//getBitsPerPixel(config.colorMode))
   ,cameraPath("/dev/video0")
+  ,cameraFd(open(this->cameraPath.c_str(), O_RDWR))
 {}
 
 V4L2::~V4L2()
@@ -144,7 +145,7 @@ V4L2::setFeatures(const scene::V4l2& config)
 void
 V4L2::initialize()
 {
-  this->cameraFd = open(this->cameraPath.c_str(), O_RDWR);
+  // this->cameraFd = open(this->cameraPath.c_str(), O_RDWR);
 
   struct v4l2_capability capability;
   if (ioctl(this->cameraFd, VIDIOC_QUERYCAP, &capability))

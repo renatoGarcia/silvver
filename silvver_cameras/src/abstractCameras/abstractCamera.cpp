@@ -25,10 +25,11 @@ AbstractCamera::AbstractCamera(const scene::Camera& cameraConfig,
   :subjectHardCamera(HardCameraFactory::create(cameraConfig.hardware))
   ,currentFrame(this->subjectHardCamera->getImageParameters())
   ,serverConnection(connection)
+  ,unreadImage(false)
+  ,unreadImageAccess()
+  ,unreadImageCondition()
   ,rot(cameraConfig.rotationMatrix)
   ,trans(cameraConfig.translationVector)
-  ,frameCounter(0)
-  ,frameRate(0)
 {
   this->subjectHardCamera->attach(this);
 }

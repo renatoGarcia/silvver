@@ -50,13 +50,14 @@ private:
   scene::Scene sc;
 
   template <typename Type, int nItens>
-  boost::array<Type, nItens> readArray(lua_State* L, std::string name);
+  boost::array<Type, nItens> readArray(lua_State* L,
+                                       const std::string& name) const;
 
   template <typename Type>
-  Type readValue(lua_State* L, std::string name);
+  Type readValue(lua_State* L, const std::string& name) const;
 
   // Return true if the field name exists
-  bool hasField(lua_State* L, std::string name);
+  bool hasField(lua_State* L, const std::string& name) const;
 
   void readCamera(lua_State* L);
 

@@ -42,16 +42,16 @@ int main(int argc, char **argv)
   desc.add_options()
     ("help,h", "Print this help message and exit")
     ("version,V", "Print version and exit")
-    ("server-ip",
+    ("server-ip,s",
      po::value<std::string>(&serverIP)->default_value("127.0.0.1"),
-     "IP address of silvver_servidor")
+     "IP address of silvver-server")
     ("receptionist-port,p",
      po::value<int>(&receptionistPort)->default_value(12000),
      "Port on the server where the receptionist is hearing")
     ("scene-config,c",
      po::value<std::string>(&luaFile)->default_value("scene.lua"),
      "Lua file with the scene configuration")
-    ("show-images,s", "Show the images captured by cameras")
+    ("show", "Show the images captured by cameras")
     ("save-undistorted",
      "Save the images captured by cameras with intrinsic distortion corrected")
     ("save-distorted",
@@ -83,7 +83,7 @@ int main(int argc, char **argv)
     global_options.saveDistortedImages = vm.count("save-distorted");
     global_options.saveUndistortedImages = vm.count("save-undistorted");
 
-    SceneMounter sceneMounter(serverIP,receptionistPort,luaFile);
+    SceneMounter sceneMounter(serverIP, receptionistPort, luaFile);
     sceneMounter.mount();
 
     getchar();

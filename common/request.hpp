@@ -29,7 +29,7 @@
 struct NullRequest
 {
   template<typename Archive>
-  void serialize(Archive& ar, const unsigned version)
+  void serialize(Archive& ar, const unsigned)
   {}
 };
 
@@ -49,7 +49,7 @@ struct AddOutput
   {}
 
   template<typename Archive>
-  void serialize(Archive& ar, const unsigned version)
+  void serialize(Archive& ar, const unsigned)
   {
     ar & targetId;
     ar & localPort;
@@ -72,7 +72,7 @@ struct DelOutput
   {}
 
   template<typename Archive>
-  void serialize(Archive& ar, const unsigned version)
+  void serialize(Archive& ar, const unsigned)
   {
     ar & targetId;
     ar & localPort;
@@ -96,7 +96,7 @@ struct AddCamera
   {}
 
   template<typename Archive>
-  void serialize(Archive& ar, const unsigned version)
+  void serialize(Archive& ar, const unsigned)
   {
     ar & processorOpt;
     ar & localPort;
@@ -116,7 +116,7 @@ struct DelCamera
   {}
 
   template<typename Archive>
-  void serialize(Archive& ar, const unsigned version)
+  void serialize(Archive& ar, const unsigned)
   {
     ar & localPort;
   }

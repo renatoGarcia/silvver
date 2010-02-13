@@ -29,8 +29,6 @@ ArtkpCamera::ArtkpCamera(const scene::Camera& cameraConfig,
   :AbstractCamera(cameraConfig, connection)
   ,bodyTranslation(targets.bodyTranslation)
   ,bodyRotation(targets.bodyRotation)
-  ,camConfigFileName("/tmp/artkp" +
-                     boost::lexical_cast<std::string>(targets.uniqueKey))
   ,patternWidth(targets.patternWidth)
   ,threshold(targets.threshold)
   ,logger()
@@ -38,19 +36,13 @@ ArtkpCamera::ArtkpCamera(const scene::Camera& cameraConfig,
            (this->currentFrame.size().width, this->currentFrame.size().height))
   ,runThread()
 {
-  int targetNum = 0;
-  boost::tuple<unsigned, std::string> pattern;
-  BOOST_FOREACH(pattern, targets.patterns)
-  {
-    this->vecDescriptionFilePath.push_back(boost::get<1>(pattern));
-    this->idMap.at(targetNum) = boost::get<0>(pattern); // Get silvver uid
-    targetNum++;
-  }
-
   const scene::Hardware hardwareConfig =
     boost::apply_visitor(scene::GetHardware(), cameraConfig.hardware);
 
-  std::ofstream tmpConfig(this->camConfigFileName.c_str());
+  const std::string camConfigFileName("/tmp/artkp" +
+                          boost::lexical_cast<std::string>(targets.uniqueKey));
+
+  std::ofstream tmpConfig(camConfigFileName.c_str());
   tmpConfig.precision(10);
   tmpConfig << "ARToolKitPlus_CamCal_Rev02" << "\n"
             << this->currentFrame.size().width << " "
@@ -64,7 +56,7 @@ ArtkpCamera::ArtkpCamera(const scene::Camera& cameraConfig,
             << 0;
   tmpConfig.close();
 
-  if(!this->tracker->init(this->camConfigFileName.c_str(),
+  if(!this->tracker->init(camConfigFileName.c_str(),
                           1000.0f,
                           7000.0f,
                           &this->logger))
@@ -89,9 +81,13 @@ ArtkpCamera::ArtkpCamera(const scene::Camera& cameraConfig,
 
   this->tracker->setImageProcessingMode(ARToolKitPlus::IMAGE_FULL_RES);
 
-  BOOST_FOREACH(std::string filePath, this->vecDescriptionFilePath)
+  int targetNum = 0;
+  boost::tuple<unsigned, std::string> pattern;
+  BOOST_FOREACH(pattern, targets.patterns)
   {
-    this->tracker->addPattern(filePath.c_str());
+    this->tracker->addPattern(boost::get<1>(pattern).c_str());
+    this->idMap.at(targetNum) = boost::get<0>(pattern); // Get silvver uid
+    targetNum++;
   }
 }
 

@@ -31,7 +31,7 @@
 #include "../connection.hpp"
 #include "silvverTypes.hpp"
 
-class ArtkpCamera  : public AbstractCamera
+class ArtkpCamera: public AbstractCamera
 {
 public:
 
@@ -65,7 +65,7 @@ private:
 
   /// It's the method which will be called when a new thread was created, and
   /// will make all camera work.
- void doWork();
+  void doWork();
 
   class MyLogger : public ARToolKitPlus::Logger
   {
@@ -94,8 +94,6 @@ private:
   /// The order of items is: r11, r12, r13, r21, r22, r23, r31, r32, r33
   const boost::array<double,9> bodyRotation;
 
-  std::string camConfigFileName;
-
   /// Width of pattern, counting with border. [mm]
   const int patternWidth;
 
@@ -105,8 +103,6 @@ private:
   MyLogger logger;
 
   const boost::scoped_ptr<ARToolKitPlus::TrackerSingleMarker> tracker;
-
-  std::vector<std::string> vecDescriptionFilePath;
 
   /// Translates the inner artkp id to silvver id
   boost::array<int, MAX_TARGETS> idMap;

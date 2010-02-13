@@ -39,16 +39,16 @@ public:
   typedef boost::tuple<CvSize,int,int> IplParameters;
 
   /// Default constructor.
-  /// Build a empty image, don't allocating any data.
+  /// Build a empty image, allocating no data.
   IplImageWrapper();
 
   IplImageWrapper(const IplParameters& parameters);
 
-  IplImageWrapper(CvSize size, int depth, int nChannels);
+  IplImageWrapper(const CvSize& size, int depth, int nChannels);
 
   /// Construct a new IplImageWrapper cloning the iplImageSrc.
   /// @param iplImageSrc Pointer to image which will be cloned.
-  IplImageWrapper(IplImage* iplImageSrc);
+  IplImageWrapper(const IplImage* const iplImageSrc);
 
   /// IplImageWrapper copy constructor.
   /// @param iplImageWrapper Source image.
@@ -58,7 +58,7 @@ public:
 
   const IplImageWrapper& operator=(const IplImageWrapper& iplImageWrapper);
 
-  operator const IplImage* const() const;
+  operator const IplImage*() const;
 
   operator IplImage*();
 
@@ -67,15 +67,16 @@ public:
   /// @param filename The path to image.
   /// @param iscolor Same as cvLoadImage,
   ///                CV_LOAD_IMAGE_<COLOR|GRAYSCALE|UNCHANGED>.
-  void loadImage(std::string filename, int iscolor=CV_LOAD_IMAGE_UNCHANGED);
+  void loadImage(const std::string& filename,
+                 int iscolor=CV_LOAD_IMAGE_UNCHANGED);
 
   /// Transform the color space of IplImageWrapper.
-  /// @param code The same code of cvCvt.
+  /// @param code The same code used in cvCvt function.
   void convertColor(int code);
 
   /// Transform the color space of IplImageWrapper.
   /// @param destine The IplImageWrapper where apply the result.
-  /// @param code The same code of cvCvt.
+  /// @param code The same code used in cvCvt function.
   void convertColor(IplImageWrapper& destine, int code) const;
 
   /// Get the size of image.
@@ -86,7 +87,7 @@ public:
 
   int channels() const;
 
-  const char* const data() const;
+  const char* data() const;
 
   /// Get the image data.
   /// @return A char* to beginning of image data.
@@ -111,12 +112,12 @@ IplImageWrapper::IplImageWrapper(const IplParameters& parameters)
 {}
 
 inline
-IplImageWrapper::IplImageWrapper(CvSize size, int depth, int nChannels)
+IplImageWrapper::IplImageWrapper(const CvSize& size, int depth, int nChannels)
   :iplImage(cvCreateImage(size, depth, nChannels))
 {}
 
 inline
-IplImageWrapper::IplImageWrapper(IplImage* iplImageSrc)
+IplImageWrapper::IplImageWrapper(const IplImage* const iplImageSrc)
   :iplImage(cvCloneImage(iplImageSrc))
 {}
 
@@ -153,7 +154,7 @@ IplImageWrapper::operator=(const IplImageWrapper& iplImageWrapper)
 }
 
 inline
-IplImageWrapper::operator const IplImage* const() const
+IplImageWrapper::operator const IplImage*() const
 {
   return this->iplImage;
 }
@@ -165,7 +166,7 @@ IplImageWrapper::operator IplImage*()
 }
 
 inline void
-IplImageWrapper::loadImage(std::string filename, int iscolor)
+IplImageWrapper::loadImage(const std::string& filename, int iscolor)
 {
   if (this->iplImage)
   {
@@ -212,7 +213,7 @@ IplImageWrapper::channels() const
   return this->iplImage ? this->iplImage->nChannels : 0;
 }
 
-inline const char* const
+inline const char*
 IplImageWrapper::data() const
 {
   return this->iplImage ? this->iplImage->imageData : 0;
