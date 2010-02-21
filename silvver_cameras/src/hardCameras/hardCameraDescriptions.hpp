@@ -23,6 +23,7 @@
 #define _CAMERA_DESCRIPTIONS_HPP_
 
 #include <boost/array.hpp>
+#include <boost/optional.hpp>
 #include <boost/variant.hpp>
 #include <string>
 
@@ -110,6 +111,68 @@ namespace scene
     /// This is the uid of v4l2 camera, it is given by order which they was
     /// connected in computer.
     unsigned uid;
+
+    /// The descriptions of below controls was grabbed of
+    /// http://v4l2spec.bytesex.org/spec/x542.htm
+
+    /// Picture brightness, or more precisely, the black level.
+    boost::optional<int> brightness;
+
+    /// Picture contrast or luma gain.
+    boost::optional<int> contrast;
+
+    /// Picture color saturation or chroma gain.
+    boost::optional<int> saturation;
+
+    /// Hue or color balance.
+    boost::optional<int> hue;
+
+    /// Automatic white balance.
+    boost::optional<bool> autoWhiteBalance;
+
+    /// Red chroma balance.
+    boost::optional<int> redBalance;
+
+    /// Blue chroma balance.
+    boost::optional<int> blueBalance;
+
+    /// Gamma adjust.
+    boost::optional<int> gamma;
+
+    /// Exposure.
+    boost::optional<int> exposure;
+
+    /// Automatic gain/exposure control.
+    boost::optional<bool> autogain;
+
+    /// Gain control.
+    boost::optional<int> gain;
+
+    /// Mirror the picture horizontally.
+    boost::optional<bool> horizontalFlip;
+
+    /// Mirror the picture vertically.
+    boost::optional<bool> verticalFlip;
+
+    /// Enables a power line frequency filter to avoid flicker.
+    /// Possible values are: 0 (disabled), 50 [Hz] and 60 [Hz].
+    boost::optional<int> powerLineFrequency;
+
+    /// Enables automatic hue control by the device.
+    boost::optional<bool> hueAuto;
+
+    /// This control specifies the white balance settings as a color
+    /// temperature in Kelvin. A driver should have a minimum of 2800
+    /// (incandescent) to 6500 (daylight).
+    boost::optional<int> whiteBalanceTemperature;
+
+    /// Adjusts the sharpness filters in a camera. The minimum value disables
+    /// the filters, higher values give a sharper picture.
+    boost::optional<int> sharpness;
+
+    /// Adjusts the backlight compensation in a camera. The minimum value
+    /// disables backlight compensation.
+    boost::optional<int> backlightCompensation;
   };
 
   /// This is a boost::variant with all hardware camera models,

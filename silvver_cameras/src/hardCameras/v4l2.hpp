@@ -39,26 +39,19 @@ public:
 
 private:
 
+  static const int N_BUFFERS = 4;
+
   void doWork();
 
   void setFeatures(const scene::V4l2& config);
 
-  static const int N_BUFFERS = 4;
-
-  template<class T>
-  inline void clear(T& t)
-  {
-    memset(&t, 0, sizeof(T));
-  }
+  const unsigned uid;
 
   const std::string cameraPath;
 
   int cameraFd;
 
   boost::scoped_ptr<boost::thread> grabFrameThread;
-
-  /// Holds the limits values of cameras controls
-  std::map<int, v4l2_queryctrl> controlsBounds;
 
   struct Buffers
   {

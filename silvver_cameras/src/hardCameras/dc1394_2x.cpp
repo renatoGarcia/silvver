@@ -221,7 +221,7 @@ DC1394::setFeatures()
 {
   typedef boost::tuple<std::string, dc1394feature_t, std::string> FeatureTuple;
 
-  std::vector<FeatureTuple > features;
+  std::vector<FeatureTuple> features;
   features += FeatureTuple(this->brightness, DC1394_FEATURE_BRIGHTNESS,
                            "brightness"),
               FeatureTuple(this->exposure, DC1394_FEATURE_EXPOSURE,

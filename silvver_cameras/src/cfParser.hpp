@@ -17,6 +17,7 @@
 #define _CF_PARSER_HPP_
 
 #include <boost/array.hpp>
+#include <boost/optional.hpp>
 #include <stdexcept>
 #include <string>
 
@@ -33,31 +34,61 @@ class CfParser
 {
 public:
 
-  class file_load_error : public std::logic_error
+  class file_parsing_error: public std::logic_error
   {
   public:
-    file_load_error(const std::string& whatArg)
+    file_parsing_error(const std::string& whatArg)
       :logic_error(whatArg){};
+  };
+
+  class field_read_error: public file_parsing_error
+  {
+  public:
+    field_read_error(const std::string& whatArg)
+      :file_parsing_error(whatArg){};
+  };
+
+  class missing_field: public file_parsing_error
+  {
+  public:
+    missing_field(const std::string& whatArg)
+      :file_parsing_error(whatArg){};
   };
 
   CfParser();
 
   scene::Scene parseFile(const std::string& configFile);
 
-
 private:
 
   scene::Scene sc;
 
-  template <typename Type, int nItens>
-  boost::array<Type, nItens> readArray(lua_State* L,
-                                       const std::string& name) const;
+  void getTop(double& output, lua_State* L) const;
 
-  template <typename Type>
-  Type readValue(lua_State* L, const std::string& name) const;
+  void getTop(float& output, lua_State* L) const;
+
+  void getTop(int& output, lua_State* L) const;
+
+  void getTop(unsigned int& output, lua_State* L) const;
+
+  void getTop(bool& output, lua_State* L) const;
+
+  void getTop(std::string& output, lua_State* L) const;
+
+  template<class Type>
+  void readValue(Type& output,
+                 lua_State* L, const std::string& fieldName) const;
+
+  template <class Type, std::size_t nItens>
+  void readValue(boost::array<Type, nItens>& output,
+                 lua_State* L, const std::string& fieldName) const;
+
+  template<class Type>
+  void readValue(boost::optional<Type>& output,
+                 lua_State* L, const std::string& fieldName) const;
 
   // Return true if the field name exists
-  bool hasField(lua_State* L, const std::string& name) const;
+  bool hasField(lua_State* L, const std::string& fieldName) const;
 
   void readCamera(lua_State* L);
 

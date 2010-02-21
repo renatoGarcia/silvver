@@ -79,7 +79,7 @@ int main(int argc, char **argv)
               << "----------------------------------------------\n"
               << std::endl;
 
-    global_options.showImages = vm.count("show-images");
+    global_options.showImages = vm.count("show");
     global_options.saveDistortedImages = vm.count("save-distorted");
     global_options.saveUndistortedImages = vm.count("save-undistorted");
 

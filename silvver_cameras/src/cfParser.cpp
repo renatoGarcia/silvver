@@ -20,98 +20,173 @@
 CfParser::CfParser()
 {}
 
-template <typename Type, int nItens>
-boost::array<Type, nItens>
-CfParser::readArray(lua_State* L, const std::string& name) const
+void
+CfParser::getTop(double& output, lua_State* L) const
 {
-  lua_getfield(L, -1, name.c_str());
+  if (lua_isnil(L, -1))
+  {
+    throw missing_field("");
+  }
+  else if (!lua_isnumber(L, -1))
+  {
+    throw field_read_error("is not a number");
+  }
+  else
+  {
+    output = lua_tonumber(L, -1);
+  }
+}
+
+void
+CfParser::getTop(float& output, lua_State* L) const
+{
+  double d;
+  getTop(d, L);
+  output = float(d);
+}
+
+void
+CfParser::getTop(int& output, lua_State* L) const
+{
+  double d;
+  getTop(d, L);
+  output = (int)d;
+}
+
+void
+CfParser::getTop(unsigned int& output, lua_State* L) const
+{
+  double d;
+  getTop(d, L);
+  output = unsigned(d);
+}
+
+void
+CfParser::getTop(bool& output, lua_State* L) const
+{
+  if (lua_isnil(L, -1))
+  {
+    throw missing_field("");
+  }
+  else if (!lua_isboolean(L, -1))
+  {
+    throw field_read_error("is not a boolean");
+  }
+  else
+  {
+    output = lua_toboolean(L, -1);
+  }
+}
+
+void
+CfParser::getTop(std::string& output, lua_State* L) const
+{
+  if (lua_isnil(L, -1))
+  {
+    throw missing_field("");
+  }
+  else if (!lua_isstring(L, -1))
+  {
+    throw field_read_error("is not a string");
+  }
+  else
+  {
+    output = lua_tostring(L, -1);
+  }
+}
+
+template<class Type>
+void
+CfParser::readValue(Type& output,
+                    lua_State* L, const std::string& fieldName) const
+{
+  lua_getfield(L, -1, fieldName.c_str());
+  try
+  {
+    getTop(output, L);
+    lua_pop(L, 1);
+  }
+  catch(missing_field& e)
+  {
+    lua_pop(L, 1);
+    throw missing_field("An instance of field <" + fieldName +
+                        "> was not found in config file");
+  }
+  catch(field_read_error& e)
+  {
+    lua_pop(L, 1);
+    throw field_read_error("The field <" + fieldName + "> " + e.what());
+  }
+}
+
+template <class Type, std::size_t nItens>
+void
+CfParser::readValue(boost::array<Type, nItens>& output,
+                    lua_State* L, const std::string& fieldName) const
+{
+  lua_getfield(L, -1, fieldName.c_str());
 
   if (lua_isnil(L, -1))
   {
-    throw file_load_error("An instance of array <" + name +
-                          "> was don't found in config file");
+    throw missing_field("An instance of array <" + fieldName +
+                        "> was not found in config file");
   }
   if (!lua_istable(L, -1))
   {
-    throw file_load_error("Field name <" + name + "> isn't an array");
+    throw field_read_error("Field name <" + fieldName + "> is not an array");
   }
 
-  boost::array<Type, nItens> returnArray;
-
-  // Put all items on stack
   for (int i = 1; i <= nItens; ++i)
   {
     lua_pushnumber(L, i);
-    lua_gettable(L, -(i + 1));
+    lua_gettable(L, -2);
 
-    if (lua_isnil(L, -1))
-    {
-      throw file_load_error("Index " +
-                            boost::lexical_cast<std::string>(i) +
-                            " from <" + name + "> array don't exists");
-    }
-    if (!lua_isstring(L, -1))
-    {
-      throw file_load_error("The index " +
-                            boost::lexical_cast<std::string>(i) +
-                            " from <" + name +
-                            "> array isn't a number or string");
-    }
-  }
-
-  // Convert all items on stack and put on boost::array
-  for (int i = -nItens; i < 0; ++i)
-  {
     try
     {
-      returnArray.at(nItens + i) =
-        boost::lexical_cast<Type>(lua_tostring(L, i));
+      getTop(output.at(i-1), L);
+      lua_pop(L, 1); // Pop the current item
     }
-    catch (const boost::bad_lexical_cast &)
+    catch (missing_field& e)
     {
-      throw file_load_error("The index " +
-                            boost::lexical_cast<std::string>(nItens+i+1) +
-                            " from <" + name + "> array " +
-                            "couldn't be converted to appropriated type");
+      lua_pop(L, 1); // Pop the current nil item
+
+      // The field (the table) is not nil, thus throws a field_read_error
+      throw field_read_error("Index " + boost::lexical_cast<std::string>(i) +
+                            " from <" + fieldName + "> array don't exists");
+    }
+    catch (field_read_error& e)
+    {
+      lua_pop(L,1); // Pop the current wrong item
+      throw field_read_error("The index "+boost::lexical_cast<std::string>(i) +
+                             "from <" + fieldName + "> array " + e.what());
     }
   }
-
-  lua_pop(L, nItens + 1);
-
-  return returnArray;
+  lua_pop(L, 1); // Pop the table
 }
 
-template <typename Type>
-Type
-CfParser::readValue(lua_State* L, const std::string& name) const
+template <class Type>
+void
+CfParser::readValue(boost::optional<Type>& output,
+                    lua_State* L, const std::string& fieldName) const
 {
-  lua_getfield(L, -1, name.c_str());
-
-  if (lua_isnil(L, -1))
-  {
-    throw file_load_error("An instance of field <" + name +
-                          "> was don't found in config file");
-  }
-  if (!lua_isstring(L, -1))
-  {
-    throw file_load_error("Field name <" + name +
-                          "> isn't a number or string");
-  }
-
-  Type returnValue;
+  lua_getfield(L, -1, fieldName.c_str());
   try
   {
-    returnValue = boost::lexical_cast<Type>(lua_tostring(L, -1));
+    Type tmp;
+    getTop(tmp, L);
+    output = tmp;
+    lua_pop(L, 1);
   }
-  catch (const boost::bad_lexical_cast &)
+  catch(missing_field& e)
   {
-    throw file_load_error("The field <" + name +
-                          "> couldn't be converted to the appropriated type");
+    output.reset();
+    lua_pop(L, 1);
   }
-
-  lua_pop(L,1);
-
-  return returnValue;
+  catch(field_read_error& e)
+  {
+    lua_pop(L, 1);
+    throw field_read_error("The field <" + fieldName + "> " + e.what());
+  }
 }
 
 bool
@@ -136,7 +211,8 @@ CfParser::readCamera(lua_State* L)
 {
   scene::Camera camera;
 
-  std::string driver = readValue<std::string>(L, "__driver");
+  std::string driver;
+  readValue(driver, L, "__driver");
   if (driver == "pseudocamera")
   {
     camera.hardware = this->readPseudoCameraConfig(L);
@@ -151,11 +227,11 @@ CfParser::readCamera(lua_State* L)
   }
   else
   {
-    throw file_load_error("Unknown hardware camera name");
+    throw file_parsing_error("Unknown hardware camera name");
   }
 
-  camera.translationVector = readArray<double, 3>(L, "translation_vector");
-  camera.rotationMatrix = readArray<double, 9>(L, "rotation_matrix");
+  readValue(camera.translationVector, L, "translation_vector");
+  readValue(camera.rotationMatrix, L, "rotation_matrix");
 
   this->sc.cameras.push_back(camera);
 }
@@ -163,14 +239,14 @@ CfParser::readCamera(lua_State* L)
 void
 CfParser::readHardware(lua_State* L, scene::Hardware& hardware)
 {
-  hardware.identifier = readValue<std::string>(L, "identifier");
-  hardware.saveImageFormat = readValue<std::string>(L, "save_image_format");
-  hardware.resolution = readArray<unsigned, 2>(L, "resolution");
+  readValue(hardware.identifier, L, "identifier");
+  readValue(hardware.saveImageFormat, L, "save_image_format");
+  readValue(hardware.resolution, L, "resolution");
 
-  hardware.focalLength = readArray<double, 2>(L, "focal_length");
-  hardware.principalPoint = readArray<double, 2>(L, "principal_point");
-  hardware.radialCoef = readArray<double, 3>(L, "radial_coef");
-  hardware.tangentialCoef = readArray<double, 2>(L, "tangential_coef");
+  readValue(hardware.focalLength, L, "focal_length");
+  readValue(hardware.principalPoint, L, "principal_point");
+  readValue(hardware.radialCoef, L, "radial_coef");
+  readValue(hardware.tangentialCoef, L, "tangential_coef");
 }
 
 scene::PseudoCamera
@@ -178,8 +254,8 @@ CfParser::readPseudoCameraConfig(lua_State* L)
 {
   scene::PseudoCamera pseudoCamera;
 
-  pseudoCamera.imagesPath = readValue<std::string>(L, "images_path");
-  pseudoCamera.frameRate = readValue<float>(L, "frame_rate");
+  readValue(pseudoCamera.imagesPath, L, "images_path");
+  readValue(pseudoCamera.frameRate, L, "frame_rate");
   this->readHardware(L, pseudoCamera);
 
   return pseudoCamera;
@@ -190,14 +266,14 @@ CfParser::readDC1394Config(lua_State* L)
 {
   scene::DC1394 dc1394;
 
-  dc1394.uid          = readValue<std::string>(L, "uid");
-  dc1394.frameRate    = readValue<float>(L, "frame_rate");
-  dc1394.colorMode    = readValue<std::string>(L, "color_mode");
-  dc1394.brightness   = readValue<std::string>(L, "brightness");
-  dc1394.exposure     = readValue<std::string>(L, "exposure");
-  dc1394.whiteBalance = readArray<std::string, 2>(L, "white_balance");
-  dc1394.shutter      = readValue<std::string>(L, "shutter");
-  dc1394.gain         = readValue<std::string>(L, "gain");
+  readValue(dc1394.uid, L, "uid");
+  readValue(dc1394.frameRate, L, "frame_rate");
+  readValue(dc1394.colorMode, L, "color_mode");
+  readValue(dc1394.brightness, L, "brightness");
+  readValue(dc1394.exposure, L, "exposure");
+  readValue(dc1394.whiteBalance, L, "white_balance");
+  readValue(dc1394.shutter, L, "shutter");
+  readValue(dc1394.gain, L, "gain");
   this->readHardware(L, dc1394);
 
   return dc1394;
@@ -208,8 +284,27 @@ CfParser::readV4l2Config(lua_State* L)
 {
   scene::V4l2 v4l2;
 
-  v4l2.uid  = readValue<unsigned>(L, "identifier");
+  readValue(v4l2.uid, L, "identifier");
   this->readHardware(L, v4l2);
+
+  readValue(v4l2.brightness, L, "brightness");
+  readValue(v4l2.contrast, L, "contrast");
+  readValue(v4l2.saturation, L, "saturation");
+  readValue(v4l2.hue, L, "hue");
+  readValue(v4l2.autoWhiteBalance, L, "auto_white_balance");
+  readValue(v4l2.redBalance, L, "red_balance");
+  readValue(v4l2.blueBalance, L, "blue_balance");
+  readValue(v4l2.gamma, L, "gamma");
+  readValue(v4l2.exposure, L, "exposure");
+  readValue(v4l2.autogain, L, "autogain");
+  readValue(v4l2.gain, L, "gain");
+  readValue(v4l2.horizontalFlip, L, "horizontal_flip");
+  readValue(v4l2.verticalFlip, L, "vertical_flip");
+  readValue(v4l2.powerLineFrequency, L, "power_line_frequency");
+  readValue(v4l2.hueAuto, L, "hue_auto");
+  readValue(v4l2.whiteBalanceTemperature, L, "white_balance_temperature");
+  readValue(v4l2.sharpness, L, "sharpness");
+  readValue(v4l2.backlightCompensation, L, "backlight_compensation");
 
   return v4l2;
 }
@@ -219,14 +314,15 @@ CfParser::readTarget(lua_State* L)
 {
   scene::AnyTarget target;
 
-  std::string type = readValue<std::string>(L, "__type");
+  std::string type;
+  readValue(type, L, "__type");
   if (type == "artkp")
   {
     target = this->readArtkpTargets(L);
   }
   else
   {
-    throw file_load_error("Unknown target system name");
+    throw file_parsing_error("Unknown target system name");
   }
 
   this->sc.targets.push_back(target);
@@ -243,10 +339,10 @@ CfParser::readArtkpTargets(lua_State* L)
   scene::ArtkpTargets artkpTargets;
 
   artkpTargets.uniqueKey = uniqueKey;
-  artkpTargets.patternWidth = readValue<int>(L, "pattern_width");
-  artkpTargets.threshold    = readValue<int>(L, "threshold");
-  artkpTargets.bodyTranslation = readArray<double, 3>(L, "body_translation");
-  artkpTargets.bodyRotation = readArray<double, 9>(L, "body_rotation");
+  readValue(artkpTargets.patternWidth, L, "pattern_width");
+  readValue(artkpTargets.threshold, L, "threshold");
+  readValue(artkpTargets.bodyTranslation, L, "body_translation");
+  readValue(artkpTargets.bodyRotation, L, "body_rotation");
 
   std::string patternPath;
   unsigned uid;
@@ -257,8 +353,8 @@ CfParser::readArtkpTargets(lua_State* L)
     lua_pushnumber(L, i);
     lua_gettable(L, -2); // Get the i artkp target
 
-    patternPath = readValue<std::string>(L, "pattern_file");
-    uid = readValue<unsigned>(L, "uid");
+    readValue(patternPath, L, "pattern_file");
+    readValue(uid, L, "uid");
 
     artkpTargets.patterns.push_back(boost::make_tuple(uid, patternPath));
 
@@ -283,14 +379,14 @@ CfParser::parseFile(const std::string& configFile)
   lua_getglobal(L, "scene");
   if (!lua_istable(L, -1))
   {
-    throw file_load_error("Don't found scene variable in config file");
+    throw file_parsing_error("Don't found scene variable in config file");
   }
 
   //------------------------------------ Cameras
   lua_getfield(L, -1, "cameras");
   if (!lua_istable(L, -1))
   {
-    throw file_load_error("Don't found cameras table in config file");
+    throw file_parsing_error("Don't found cameras table in config file");
   }
 
   lua_pushnil(L);// first key
@@ -307,7 +403,7 @@ CfParser::parseFile(const std::string& configFile)
   lua_getfield(L, -1, "targets");
   if (!lua_istable(L, -1))
   {
-    throw file_load_error("Don't found targets table in config file");
+    throw file_parsing_error("Don't found targets table in config file");
   }
 
   lua_pushnil(L);// first key

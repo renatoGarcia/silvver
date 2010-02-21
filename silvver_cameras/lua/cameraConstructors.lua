@@ -104,5 +104,25 @@ function Webcam(parameters)
 
     camera.resolution = __getOptional(parameters.resolution, {640, 480})
 
+    -- The values below are optionals, they can be nil
+    camera.brightness                = parameters.brightness
+    camera.contrast                  = parameters.contrast
+    camera.saturation                = parameters.saturation
+    camera.hue                       = parameters.hue
+    camera.auto_white_balance        = parameters.auto_white_balance
+    camera.red_balance               = parameters.red_balance
+    camera.blue_balance              = parameters.blue_balance
+    camera.gamma                     = parameters.gamma
+    camera.exposure                  = parameters.exposure
+    camera.autogain                  = parameters.autogain
+    camera.gain                      = parameters.gain
+    camera.horizontal_flip           = parameters.horizontal_flip
+    camera.vertical_flip             = parameters.vertical_flip
+    camera.power_line_frequency      = parameters.power_line_frequency
+    camera.hue_auto                  = parameters.hue_auto
+    camera.white_balance_temperature = parameters.white_balance_temperature
+    camera.sharpness                 = parameters.sharpness
+    camera.backlight_compensation    = parameters.backlight_compensation
+
     return camera
 end
