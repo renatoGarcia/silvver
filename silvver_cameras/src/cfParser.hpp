@@ -75,12 +75,11 @@ private:
 
   void getTop(std::string& output, lua_State* L) const;
 
+  template <class Type, std::size_t nItens>
+  void getTop(boost::array<Type, nItens>& output, lua_State* L) const;
+
   template<class Type>
   void readValue(Type& output,
-                 lua_State* L, const std::string& fieldName) const;
-
-  template <class Type, std::size_t nItens>
-  void readValue(boost::array<Type, nItens>& output,
                  lua_State* L, const std::string& fieldName) const;
 
   template<class Type>

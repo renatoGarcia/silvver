@@ -20,7 +20,6 @@
 
 #include <boost/array.hpp>
 #include <boost/scoped_ptr.hpp>
-#include <boost/thread/shared_mutex.hpp>
 #include <boost/thread/thread.hpp>
 #include <string>
 #include <utility>
@@ -44,14 +43,16 @@ public:
 
 private:
 
+  static const int N_BUFFERS = 4;
+
   void doWork();
 
   void findThisCamera(nodeid_t& node, int& cardIndex);
 
   std::string findVideo1394Device(unsigned cardNumber);
 
-  // Convert the HardCamera frameRate to an equivalent DC1394 frame rate
-  int getDc1394FrameRate() const;
+  // Convert a float frameRate to an equivalent DC1394 frame rate
+  int getDc1394FrameRate(float frameRate) const;
 
   unsigned getDc1394VideoMode(const std::string& colorMode) const;
 
@@ -61,15 +62,43 @@ private:
 
   int getNChannels(const std::string& colorMode) const;
 
-  void setFeatures(nodeid_t cameraNode);
+  /// Set all features of this camera.
+  /// @param config The configurations of this camera.
+  /// @param cameraNode The node of this camera.
+  void setFeatures(const scene::DC1394& config, nodeid_t cameraNode);
 
-  static const int N_BUFFERS = 4;
+  /// Set the on/off mode of a feature.
+  /// This method is called by setFeatures method.
+  /// @param cameraNode The node of this camera.
+  /// @param featureInfo The information about the feature.
+  /// @param strValue The value to set in string format.
+  /// @param featureName A string representation of feature.
+  /// @return True if set on, false else.
+  bool setOnOffFeature(nodeid_t cameraNode, dc1394_feature_info featureInfo,
+                       std::string strValue, std::string featureName);
+
+  /// Set the auto mode of a feature.
+  /// This method is called by setFeatures method.
+  /// @param cameraNode The node of this camera.
+  /// @param featureInfo The information about the feature.
+  /// @param strValue The value to set in string format.
+  /// @param featureName A string representation of feature.
+  /// @return True if set auto, false else.
+  bool setAutoFeature(nodeid_t cameraNode, dc1394_feature_info featureInfo,
+                      std::string strValue, std::string featureName);
+
+  void setFeatureValue(nodeid_t cameraNode, dc1394_feature_info featureInfo,
+                       std::string strValue, std::string featureName);
+
+  void setWhiteBalance(nodeid_t cameraNode, dc1394_feature_info featureInfo,
+                       std::string blueU, std::string redV);
+
+  void setWhiteShading(nodeid_t cameraNode, dc1394_feature_info featureInfo,
+                       std::string red, std::string green, std::string blue);
 
   /// A string representing the uid of the camera.
   /// It must be numbers in decimal base.
   const std::string uid;
-
-  const float frameRate;
 
   raw1394handle_t raw1394Handle;
 
@@ -79,12 +108,6 @@ private:
   const int videoMode;
 
   boost::scoped_ptr<boost::thread> grabFrameThread;
-
-  const std::string brightness;
-  const std::string exposure;
-  const boost::array<std::string, 2> whiteBalance;
-  const std::string shutter;
-  const std::string gain;
 };
 
 #endif /* _DC1394_1X_HPP_ */

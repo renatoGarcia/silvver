@@ -81,29 +81,33 @@ namespace scene
     /// be in lower case.
     std::string colorMode;
 
-    /// The brightness control.
-    /// One of: "untouched" or an unsigned integer between 0 and 255.
-    std::string brightness;
+    // os valores abaixo podem ser "off", "auto", ou um inteiro sem sinal
 
-    /// The auto exposure control.
-    /// One of: "untouched", "off", "auto" or an unsigned integer between
-    /// 1 and 1023.
-    std::string exposure;
+    /// An array with [(blue/u), (red/v)].
+    boost::optional<boost::array<std::string, 2> > whiteBalance;
 
-    /// The white balance control.
-    /// An array with [(blue/v), (red/v)].
-    /// Each position must be one of (the same in both): "untouched", "off" or
-    /// an unsigned integer between 0 and 63.
-    boost::array<std::string, 2> whiteBalance;
+    /// An array with [red, green, blue].
+    boost::optional<boost::array<std::string, 3> > whiteShading;
 
-    /// The shuter timer control.
-    /// One of: "untouched", "auto" or an unsigned integer greater than  2.
-    std::string shutter;
-
-    /// The gain control.
-    /// One of: "untouched", "auto" or an unsigned integer
-    /// between 220 and 1023.
-    std::string gain;
+    boost::optional<std::string> brightness;
+    boost::optional<std::string> exposure;
+    boost::optional<std::string> sharpness;
+    boost::optional<std::string> hue;
+    boost::optional<std::string> saturation;
+    boost::optional<std::string> gamma;
+    boost::optional<std::string> shutter;
+    boost::optional<std::string> gain;
+    boost::optional<std::string> iris;
+    boost::optional<std::string> focus;
+    boost::optional<std::string> temperature;
+    boost::optional<std::string> trigger;
+    boost::optional<std::string> triggerDelay;
+    boost::optional<std::string> zoom;
+    boost::optional<std::string> pan;
+    boost::optional<std::string> tilt;
+    boost::optional<std::string> opticalFilter;
+    boost::optional<std::string> captureSize;
+    boost::optional<std::string> captureQuality;
   };
 
   struct V4l2: public Hardware

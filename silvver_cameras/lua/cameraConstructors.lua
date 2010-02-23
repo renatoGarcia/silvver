@@ -70,14 +70,44 @@ function Dragonfly(parameters)
 
     camera.resolution = __getOptional(parameters.resolution, {640, 480})
     camera.frame_rate = __getOptional(parameters.frame_rate, 30)
-
     camera.color_mode = __getOptional(parameters.color_mode, 'mono8')
-    camera.brightness = __getOptional(parameters.brightness, 'untouched')
-    camera.exposure = __getOptional(parameters.exposure, 'untouched')
-    camera.shutter = __getOptional(parameters.shutter, 'untouched')
-    camera.gain = __getOptional(parameters.gain, 'untouched')
-    camera.white_balance = __getOptional(parameters.white_balance,
-                                         {'untouched', 'untouched'})
+
+    -- The values below are optionals, they can be nil
+    camera.brightness = parameters.brightness
+    camera.exposure = parameters.exposure
+    camera.sharpness = parameters.sharpness
+    camera.hue = parameters.hue
+    camera.saturation = parameters.saturation
+    camera.gamma = parameters.gamma
+    camera.shutter = parameters.shutter
+    camera.gain = parameters.gain
+    camera.iris = parameters.iris
+    camera.focus = parameters.focus
+    camera.temperature = parameters.temperature
+    camera.trigger = parameters.trigger
+    camera.trigger_delay = parameters.trigger_delay
+    camera.zoom = parameters.zoom
+    camera.pan = parameters.pan
+    camera.tilt = parameters.tilt
+    camera.optical_filter = parameters.optical_filter
+    camera.capture_size = parameters.capture_size
+    camera.capture_quality = parameters.capture_quality
+
+    if parameters.white_balance == "off" then
+        camera.white_balance = {"off","off"}
+    elseif parameters.white_balance == "auto" then
+        camera.white_balance = {"auto","auto"}
+    else
+        camera.white_balance = parameters.white_balance
+    end
+
+    if parameters.white_shading == "off" then
+        camera.white_shading = {"off", "off", "off"}
+    elseif parameters.white_shading == "auto" then
+        camera.white_shading = {"auto", "auto", "auto"}
+    else
+        camera.white_shading = parameters.white_shading
+    end
 
     return camera
 end

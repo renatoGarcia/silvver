@@ -56,7 +56,9 @@ HardCamera::HardCamera(const scene::Hardware& config,
                                                       this->nChannels));
 
   CvMat* intrinsic = cvCreateMat(3, 3, CV_32FC1);
-  CvMat* distortion = cvCreateMat(5, 1, CV_32FC1);
+  // Opencv 1.0.0 can handle only 4x1 distortion matrix
+  // CvMat* distortion = cvCreateMat(5, 1, CV_32FC1);
+  CvMat* distortion = cvCreateMat(4, 1, CV_32FC1);
 
   CV_MAT_ELEM(*intrinsic, float, 0, 0) = config.focalLength.at(0);
   CV_MAT_ELEM(*intrinsic, float, 0, 1) = 0;
@@ -72,7 +74,7 @@ HardCamera::HardCamera(const scene::Hardware& config,
   CV_MAT_ELEM(*distortion, float, 1, 0) = config.radialCoef.at(1);
   CV_MAT_ELEM(*distortion, float, 2, 0) = config.tangentialCoef.at(0);
   CV_MAT_ELEM(*distortion, float, 3, 0) = config.tangentialCoef.at(1);
-  CV_MAT_ELEM(*distortion, float, 4, 0) = config.radialCoef.at(2);
+  // CV_MAT_ELEM(*distortion, float, 4, 0) = config.radialCoef.at(2);
 
   cvInitUndistortMap(intrinsic, distortion, this->mapx, this->mapy);
 

@@ -95,6 +95,46 @@ CfParser::getTop(std::string& output, lua_State* L) const
   }
 }
 
+template <class Type, std::size_t nItens>
+void
+CfParser::getTop(boost::array<Type, nItens>& output, lua_State* L) const
+{
+  if (lua_isnil(L, -1))
+  {
+    throw missing_field("");
+  }
+  if (!lua_istable(L, -1))
+  {
+    throw field_read_error("is not an array");
+  }
+
+  for (int i = 1; i <= nItens; ++i)
+  {
+    lua_pushnumber(L, i);
+    lua_gettable(L, -2);
+
+    try
+    {
+      getTop(output.at(i-1), L);
+      lua_pop(L, 1); // Pop the current item
+    }
+    catch (missing_field& e)
+    {
+      lua_pop(L, 1); // Pop the current nil item
+
+      // The table is not nil, thus throws a field_read_error
+      throw field_read_error("has not the array index " +
+                             boost::lexical_cast<std::string>(i));
+    }
+    catch (field_read_error& e)
+    {
+      lua_pop(L,1); // Pop the current wrong item
+      throw field_read_error(",index " + boost::lexical_cast<std::string>(i) +
+                             " " + e.what());
+    }
+  }
+}
+
 template<class Type>
 void
 CfParser::readValue(Type& output,
@@ -117,51 +157,6 @@ CfParser::readValue(Type& output,
     lua_pop(L, 1);
     throw field_read_error("The field <" + fieldName + "> " + e.what());
   }
-}
-
-template <class Type, std::size_t nItens>
-void
-CfParser::readValue(boost::array<Type, nItens>& output,
-                    lua_State* L, const std::string& fieldName) const
-{
-  lua_getfield(L, -1, fieldName.c_str());
-
-  if (lua_isnil(L, -1))
-  {
-    throw missing_field("An instance of array <" + fieldName +
-                        "> was not found in config file");
-  }
-  if (!lua_istable(L, -1))
-  {
-    throw field_read_error("Field name <" + fieldName + "> is not an array");
-  }
-
-  for (int i = 1; i <= nItens; ++i)
-  {
-    lua_pushnumber(L, i);
-    lua_gettable(L, -2);
-
-    try
-    {
-      getTop(output.at(i-1), L);
-      lua_pop(L, 1); // Pop the current item
-    }
-    catch (missing_field& e)
-    {
-      lua_pop(L, 1); // Pop the current nil item
-
-      // The field (the table) is not nil, thus throws a field_read_error
-      throw field_read_error("Index " + boost::lexical_cast<std::string>(i) +
-                            " from <" + fieldName + "> array don't exists");
-    }
-    catch (field_read_error& e)
-    {
-      lua_pop(L,1); // Pop the current wrong item
-      throw field_read_error("The index "+boost::lexical_cast<std::string>(i) +
-                             "from <" + fieldName + "> array " + e.what());
-    }
-  }
-  lua_pop(L, 1); // Pop the table
 }
 
 template <class Type>
@@ -269,11 +264,29 @@ CfParser::readDC1394Config(lua_State* L)
   readValue(dc1394.uid, L, "uid");
   readValue(dc1394.frameRate, L, "frame_rate");
   readValue(dc1394.colorMode, L, "color_mode");
+
   readValue(dc1394.brightness, L, "brightness");
   readValue(dc1394.exposure, L, "exposure");
-  readValue(dc1394.whiteBalance, L, "white_balance");
+  readValue(dc1394.sharpness, L, "sharpness");
+  readValue(dc1394.hue, L, "hue");
+  readValue(dc1394.saturation, L, "saturation");
+  readValue(dc1394.gamma, L, "gamma");
   readValue(dc1394.shutter, L, "shutter");
   readValue(dc1394.gain, L, "gain");
+  readValue(dc1394.iris, L, "iris");
+  readValue(dc1394.focus, L, "focus");
+  readValue(dc1394.temperature, L, "temperature");
+  readValue(dc1394.trigger, L, "trigger");
+  readValue(dc1394.triggerDelay, L, "trigger_delay");
+  readValue(dc1394.zoom, L, "zoom");
+  readValue(dc1394.pan, L, "pan");
+  readValue(dc1394.tilt, L, "tilt");
+  readValue(dc1394.opticalFilter, L, "optical_filter");
+  readValue(dc1394.captureSize, L, "capture_size");
+  readValue(dc1394.captureQuality, L, "capture_quality");
+  readValue(dc1394.whiteBalance, L, "white_balance");
+  readValue(dc1394.whiteShading, L, "white_shading");
+
   this->readHardware(L, dc1394);
 
   return dc1394;
