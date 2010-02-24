@@ -385,11 +385,6 @@ V4L2::setFeatures(const scene::V4l2& config)
 // }
 
 void
-V4L2::initialize()
-{
-}
-
-void
 V4L2::doWork()
 {
   struct v4l2_buffer buf;

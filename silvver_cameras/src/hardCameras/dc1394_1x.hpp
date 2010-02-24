@@ -39,8 +39,6 @@ public:
 
   ~DC1394();
 
-  void initialize();
-
 private:
 
   static const int N_BUFFERS = 4;

@@ -57,18 +57,15 @@ HardCameraFactory::create(const scene::AnyHardwareCamera& cameraConfig)
     iteHardCamera = HardCameraFactory::createdHardCameras.find(hardwareConfig.identifier);
 
   // If hardCamera is already created
-  if(iteHardCamera != HardCameraFactory::createdHardCameras.end())
+  if (iteHardCamera != HardCameraFactory::createdHardCameras.end())
   {
     hardCamera = iteHardCamera->second;
   }
   else
   {
-
     hardCamera.reset(boost::apply_visitor
                      (HardCameraFactory::ConstructHardCamera(),
                       cameraConfig));
-
-    hardCamera->initialize();
 
     HardCameraFactory::createdHardCameras.
       insert(std::pair< std::string, boost::shared_ptr<HardCamera> >

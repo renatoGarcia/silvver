@@ -35,8 +35,6 @@ public:
 
   ~V4L2();
 
-  void initialize();
-
 private:
 
   static const int N_BUFFERS = 4;

@@ -656,11 +656,6 @@ DC1394::setFeatures(const scene::DC1394& config, nodeid_t cameraNode)
 }
 
 void
-DC1394::initialize()
-{
-}
-
-void
 DC1394::doWork()
 {
   IplImageWrapper tmpFrame(this->frameSize, this->iplDepth, 3);

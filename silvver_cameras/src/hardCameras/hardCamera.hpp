@@ -90,11 +90,6 @@ protected:
   /// This method must be called by derived classes when it read a new frame
   void updateCurrentFrame(boost::shared_ptr<IplImageWrapper> frame);
 
-  /// The IplImages must have color channels in bgr order, this function
-  /// transform a wrong rgb IplImage in a bgr IplImage. The input and output
-  /// cannot point to the same IplImage.
-  // void fixChannelOrder(const IplImage* const input, IplImage* const output);
-
   /// Frame size measures in pixels.
   const unsigned framePixels;
   const CvSize frameSize;
@@ -110,13 +105,6 @@ private:
   friend class HardCameraFactory;
 
   unsigned getBitsPerPixel(int iplDepth) const;
-
-  // /// Swap the channels red and blue. The input and output cannot point to
-  // /// the same image.
-  // template <class T>
-  // void rgb2bgr(const T* const input, T* const output, const unsigned nPixels);
-
-  virtual void initialize() = 0;
 
   boost::shared_ptr<IplImageWrapper> distortedFrame;
   boost::shared_ptr<IplImageWrapper> undistortedFrame;
