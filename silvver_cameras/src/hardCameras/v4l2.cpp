@@ -99,33 +99,29 @@ YUV422_to_BGR8(uint8_t *src, uint8_t *dest,
 V4L2::V4L2(const scene::V4l2& config)
   :HardCamera(config, IPL_DEPTH_8U, 3)//getBitsPerPixel(config.colorMode))
   ,uid(config.uid)
-  ,cameraPath("/dev/video0")
-  ,cameraFd(open(this->cameraPath.c_str(), O_RDWR))
+  ,cameraFd(open(this->findDevice().c_str(), O_RDWR))
+  ,width(config.resolution.at(0))
+  ,height(config.resolution.at(1))
 {
+  std::string cameraPath(findDevice());
+
+  // Check if the device is compatible with v4l2
   struct v4l2_capability capability;
   if (ioctl(this->cameraFd, VIDIOC_QUERYCAP, &capability))
   {
-    std::cout << "The device in " + this->cameraPath + " is not compatible "
-                 "with v4l2 especification"
-              << std::endl;
+    throw open_camera_error("The device in " + cameraPath + " is not "
+                            "compatible with v4l2 especification");
   }
 
   // Check if the device is a video capture with streaming capability.
   if (!((capability.capabilities & V4L2_CAP_VIDEO_CAPTURE) &&
         (capability.capabilities & V4L2_CAP_STREAMING)))
   {
-    std::cout << "The device in " + this->cameraPath + " is not a video "
-                 "capture with streaming capabilities."
-              << std::endl;
+    throw open_camera_error("The device in " + cameraPath + " is not a video "
+                            "capture with streaming capabilities.");
   }
 
-  struct v4l2_format imgFormat;
-  imgFormat.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
-  if (ioctl(this->cameraFd, VIDIOC_G_FMT, &imgFormat))
-  {
-    throw open_camera_error("Cannot get the images format from V4l2 camera "
-                            " in " + this->cameraPath);
-  }
+  setFormat(config);
 
   // struct v4l2_standard camStandard;
   // camStandard.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
@@ -139,7 +135,7 @@ V4L2::V4L2(const scene::V4l2& config)
   if (ioctl(this->cameraFd, VIDIOC_REQBUFS, &requestbuffers))
   {
     std::cout << "Could not request buffers to the device in " +
-                 this->cameraPath + ". Maybe it is being used by other application."
+                 cameraPath + ". Maybe it is being used by other application."
               << std::endl;
   }
   if (requestbuffers.count != (uint)V4L2::N_BUFFERS)
@@ -200,7 +196,7 @@ V4L2::V4L2(const scene::V4l2& config)
   this->grabFrameThread.reset(new boost::thread(&V4L2::doWork, this));
 }
 
-V4L2::~V4L2()
+V4L2::~V4L2() throw()
 {
   if (this->grabFrameThread)
   {
@@ -211,13 +207,37 @@ V4L2::~V4L2()
   enum v4l2_buf_type type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
   if (ioctl(this->cameraFd, VIDIOC_STREAMOFF, &type))
   {
-    std::cout << "Fudeu!" << std::endl;
+    std::cerr << "Failed to stop the streaming of v4l2 camera uid "
+              << this->uid << std::endl;
   }
 
   for (int i = 0; i < V4L2::N_BUFFERS; ++i)
     munmap(this->buffers[i].start, this->buffers[i].length);
 
   close(this->cameraFd);
+}
+
+std::string
+V4L2::findDevice() const
+{
+  std::string strUid(boost::lexical_cast<std::string>(this->uid));
+
+  boost::array<std::string, 1> possibleDevices;
+  possibleDevices.at(0) = "/dev/video" + strUid;
+
+  struct stat statbuf;
+  std::string device;
+  BOOST_FOREACH (device, possibleDevices)
+  {
+    if (stat(device.c_str(), &statbuf) == 0 && S_ISCHR(statbuf.st_mode))
+    {
+      return device;
+    }
+  }
+
+  // If here, didn't found camera devide
+  throw open_camera_error("Didn't found the device of v4l2 camera with uid " +
+                          strUid);
 }
 
 void
@@ -302,28 +322,30 @@ V4L2::setFeatures(const scene::V4l2& config)
     memset(&queryctrl, 0, sizeof(queryctrl));
     queryctrl.id = feature.get<0>();
 
+    // Query about the current feature
     if (ioctl(this->cameraFd, VIDIOC_QUERYCTRL, &queryctrl) == -1)
     {
-      if (errno != EINVAL)
+      if (errno != EINVAL) // If an unknown error
       {
         throw camera_parameter_error
-          ("Error when querying about the " + featureName + " feature of " +
-           "v4l2 camera with id " + boost::lexical_cast<std::string>(uid));
+          ("Error when querying about the " + featureName + " feature of v4l2"+
+           " camera with id " + boost::lexical_cast<std::string>(this->uid));
       }
-      else
+      else // The current feature is not supported
       {
         throw camera_parameter_error
           (featureName + " feature is not supported by v4l2 camera uid " +
-           boost::lexical_cast<std::string>(uid));
+           boost::lexical_cast<std::string>(this->uid));
       }
     }
+    // If the support to current feature is disabled (not supported)
     else if (queryctrl.flags & V4L2_CTRL_FLAG_DISABLED)
     {
       throw camera_parameter_error
         (featureName + " feature is not supported by v4l2 camera uid " +
-         boost::lexical_cast<std::string>(uid));
+         boost::lexical_cast<std::string>(this->uid));
     }
-    else
+    else // There are support to this feature
     {
       memset(&control, 0, sizeof (control));
       control.id = feature.get<0>();
@@ -333,7 +355,7 @@ V4L2::setFeatures(const scene::V4l2& config)
       {
         throw camera_parameter_error
           ("The " + featureName + " feature of v4l2 camera with id " +
-           boost::lexical_cast<std::string>(uid) + " must be between " +
+           boost::lexical_cast<std::string>(this->uid) + " must be between " +
            boost::lexical_cast<std::string>(queryctrl.minimum) + " and " +
            boost::lexical_cast<std::string>(queryctrl.maximum));
       }
@@ -344,7 +366,7 @@ V4L2::setFeatures(const scene::V4l2& config)
         {
           throw camera_parameter_error
             ("Error when setting the " + featureName + " feature of v4l2 " +
-             " camera uid " + boost::lexical_cast<std::string>(uid) +
+             " camera uid " + boost::lexical_cast<std::string>(this->uid) +
              ". Possibly this is because another applications took over "
              "control of the device function this control belongs to.");
         }
@@ -352,37 +374,35 @@ V4L2::setFeatures(const scene::V4l2& config)
         {
           throw camera_parameter_error
             ("Error when setting the " + featureName + " feature of v4l2 " +
-             " camera uid " + boost::lexical_cast<std::string>(uid));
+             " camera uid " + boost::lexical_cast<std::string>(this->uid));
         }
       }
     }
   }
 }
 
-// std::string
-// V4L2::findVideo1394Device(unsigned cardNumber)
-// {
-//   std::string strCardNumber(boost::lexical_cast<std::string>(cardNumber));
+void
+V4L2::setFormat(const scene::V4l2& config)
+{
+  struct v4l2_format imgFormat;
+  imgFormat.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
+  if (ioctl(this->cameraFd, VIDIOC_G_FMT, &imgFormat))
+  {
+    throw open_camera_error
+      ("Cannot get the images format from V4l2 camera uid " +
+       boost::lexical_cast<std::string>(this->uid));
+  }
 
-//   boost::array<std::string, 3> possibleDevices;
-//   possibleDevices.at(0) = "/dev/video1394/" + strCardNumber;
-//   possibleDevices.at(1) = "/dev/video1394-" + strCardNumber;
-//   possibleDevices.at(2) = "/dev/video1394" + strCardNumber;
+  imgFormat.fmt.pix.width = config.resolution.at(0);
+  imgFormat.fmt.pix.height = config.resolution.at(1);
 
-//   struct stat statbuf;
-//   std::string device;
-//   BOOST_FOREACH (device, possibleDevices)
-//   {
-//     if (stat(device.c_str(), &statbuf) == 0 && S_ISCHR(statbuf.st_mode))
-//     {
-//       return device;
-//     }
-//   }
-
-//   // If here, didn't found camera devide
-//   throw open_camera_error("Don't found the device of camera with uid " +
-//                           this->uid);
-// }
+  if (ioctl(this->cameraFd, VIDIOC_S_FMT, &imgFormat))
+  {
+    throw open_camera_error
+      ("Cannot set the images format from V4l2 camera uid " +
+       boost::lexical_cast<std::string>(this->uid));
+  }
+}
 
 void
 V4L2::doWork()
@@ -409,7 +429,7 @@ V4L2::doWork()
 
     YUV422_to_BGR8((uint8_t*)buffers[buf.index].start,
                    (uint8_t*)frameBuffer[frameIdx]->data(),
-                   640, 480, BYTE_ORDER_YUYV);
+                   this->width, this->height, BYTE_ORDER_YUYV);
 
     updateCurrentFrame(frameBuffer[frameIdx]);
 

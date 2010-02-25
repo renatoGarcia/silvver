@@ -33,7 +33,7 @@ public:
 
   V4L2(const scene::V4l2& config);
 
-  ~V4L2();
+  ~V4L2() throw();
 
 private:
 
@@ -41,13 +41,21 @@ private:
 
   void doWork();
 
+  /// Find the device path bounded to this v4l2 camera.
+  /// @return A string with the device path.
+  std::string findDevice() const;
+
   void setFeatures(const scene::V4l2& config);
+
+  void setFormat(const scene::V4l2& config);
 
   const unsigned uid;
 
-  const std::string cameraPath;
+  const int cameraFd;
 
-  int cameraFd;
+  const unsigned width;
+
+  const unsigned height;
 
   boost::scoped_ptr<boost::thread> grabFrameThread;
 

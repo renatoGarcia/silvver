@@ -644,8 +644,8 @@ DC1394::setFeatures(const scene::DC1394& config, nodeid_t cameraNode)
                            "white shading");
     if (isOn)
     {
-      setAutoFeature(cameraNode, featureInfo, config.whiteShading->at(0),
-                     "white shading");
+      isAuto = setAutoFeature(cameraNode, featureInfo,
+                              config.whiteShading->at(0), "white shading");
     }
     if (isOn && !isAuto)
     {

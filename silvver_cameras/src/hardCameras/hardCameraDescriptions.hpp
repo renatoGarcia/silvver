@@ -116,6 +116,8 @@ namespace scene
     /// connected in computer.
     unsigned uid;
 
+    std::string colorMode;
+
     /// The descriptions of below controls was grabbed of
     /// http://v4l2spec.bytesex.org/spec/x542.htm
 
