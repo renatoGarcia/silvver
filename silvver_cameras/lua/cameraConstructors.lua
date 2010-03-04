@@ -71,6 +71,7 @@ function Dragonfly(parameters)
     camera.resolution = __getOptional(parameters.resolution, {640, 480})
     camera.frame_rate = __getOptional(parameters.frame_rate, 30)
     camera.color_mode = __getOptional(parameters.color_mode, 'mono8')
+    camera.bayer_method = parameters.bayer_method -- Optional
 
     -- The values below are optionals, they can be nil
     camera.brightness = parameters.brightness

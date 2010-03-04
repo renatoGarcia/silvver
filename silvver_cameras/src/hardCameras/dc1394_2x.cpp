@@ -20,6 +20,7 @@
 #include <boost/lexical_cast.hpp>
 #include <boost/shared_ptr.hpp>
 #include <boost/tuple/tuple.hpp>
+#include <map>
 #include <stdint.h>
 #include <utility>
 
@@ -28,12 +29,12 @@
 using namespace boost::assign;
 
 DC1394::DC1394(const scene::DC1394& config)
-  :HardCamera(config, getIplDepth(config.colorMode),
-              getNChannels(config.colorMode))
+  :HardCamera(config, DC1394::getIplDepth(config.colorMode))
   ,uid(config.uid)
-  ,videoMode(getDc1394VideoMode(config.colorMode))
+  ,videoMode(DC1394::getDc1394VideoMode(config))
   ,context(NULL)
   ,camera(NULL)
+  ,colorConverter(DC1394::createColorConverter(config))
   ,grabFrameThread()
 {
   this->context = dc1394_new();
@@ -60,7 +61,7 @@ DC1394::DC1394(const scene::DC1394& config)
   }
 
   if (dc1394_video_set_framerate(camera,
-                                 this->getDc1394FrameRate(config.frameRate)))
+                                 DC1394::getDc1394FrameRate(config.frameRate)))
   {
     throw open_camera_error("Could not set framerate");
   }
@@ -99,11 +100,11 @@ DC1394::~DC1394()
 }
 
 dc1394video_mode_t
-DC1394::getDc1394VideoMode(const std::string& colorMode) const
+DC1394::getDc1394VideoMode(const scene::DC1394& config)
 {
-  const unsigned fw = this->frameSize.width;
-  const unsigned fh = this->frameSize.height;
-  const std::string& cm = colorMode;
+  const unsigned fw = config.resolution.at(0);
+  const unsigned fh = config.resolution.at(1);
+  const std::string& cm = config.colorMode;
 
   if      (fw==640  && fh==480  && cm=="yuv444")
     return DC1394_VIDEO_MODE_160x120_YUV444;
@@ -156,36 +157,36 @@ DC1394::getDc1394VideoMode(const std::string& colorMode) const
     throw open_camera_error("Invalid resolution " +
                             boost::lexical_cast<std::string>(fw) + " x " +
                             boost::lexical_cast<std::string>(fh) +
-                            " with color mode " + colorMode);
+                            " with color mode " + config.colorMode);
   }
 }
 
-std::pair<int,int>
-DC1394::getPairDepthChannels(const std::string& colorMode) const
+int
+DC1394::getIplDepth(const std::string& colorMode)
 {
   if (colorMode == "yuv444")
   {
-    return std::make_pair(IPL_DEPTH_8U,3);
+    return IPL_DEPTH_8U;
   }
   else if (colorMode == "yuv422")
   {
-    return std::make_pair(IPL_DEPTH_8U,3);
+    return IPL_DEPTH_8U;
   }
   else if (colorMode == "yuv411")
   {
-    return std::make_pair(IPL_DEPTH_8U,3);
+    return IPL_DEPTH_8U;
   }
   else if (colorMode == "rgb8")
   {
-    return std::make_pair(IPL_DEPTH_8U,3);
+    return IPL_DEPTH_8U;
   }
-  else if (colorMode == "mono8") // There aren't supporto to bw camera, TODO?
+  else if (colorMode == "mono8")
   {
-    return std::make_pair(IPL_DEPTH_8U,3);
+    return IPL_DEPTH_8U;
   }
-  else if (colorMode == "mono16") // There aren't supporto to bw camera, TODO?
+  else if (colorMode == "mono16")
   {
-    return std::make_pair(IPL_DEPTH_16U,3);
+    return IPL_DEPTH_16U;
   }
   else
   {
@@ -193,20 +194,8 @@ DC1394::getPairDepthChannels(const std::string& colorMode) const
   }
 }
 
-int
-DC1394::getIplDepth(const std::string& colorMode) const
-{
-  return getPairDepthChannels(colorMode).first;
-}
-
-int
-DC1394::getNChannels(const std::string& colorMode) const
-{
-  return getPairDepthChannels(colorMode).second;
-}
-
 dc1394framerate_t
-DC1394::getDc1394FrameRate(const float frameRate) const
+DC1394::getDc1394FrameRate(const float frameRate)
 {
   if (frameRate == 1.875)
   {
@@ -244,6 +233,46 @@ DC1394::getDc1394FrameRate(const float frameRate) const
   {
     throw open_camera_error("Invalid frame rate " +
                             boost::lexical_cast<std::string>(frameRate));
+  }
+}
+
+ColorConverter
+DC1394::createColorConverter(const scene::DC1394& config)
+{
+  std::map<std::string,ColorConverter::ColorSpace> colorSpaceMap;
+  colorSpaceMap["yuv411"] = ColorConverter::ColorSpace::YUV411;
+  colorSpaceMap["yuyv"] = ColorConverter::ColorSpace::YUYV;
+  colorSpaceMap["uyvy"] = ColorConverter::ColorSpace::UYVY;
+  colorSpaceMap["rgb8"] = ColorConverter::ColorSpace::RGB8;
+  colorSpaceMap["mono8"] = ColorConverter::ColorSpace::MONO8;
+  colorSpaceMap["mono16"] =ColorConverter::ColorSpace::MONO16;
+
+  std::map<std::string,ColorConverter::BayerMethod> bayerMap;
+  bayerMap["nearest"] = ColorConverter::BayerMethod::NEAREST;
+  bayerMap["bilinear"] = ColorConverter::BayerMethod::BILINEAR;
+
+  if (config.bayerMethod)
+  {
+    if (config.colorMode == "mono8")
+    {
+      return ColorConverter(ColorConverter::ColorSpace::RAW8,
+                            config.resolution.at(0), config.resolution.at(1),
+                            ColorConverter::ColorFilter::RGGB,
+                            bayerMap[*(config.bayerMethod)]);
+    }
+    else if (config.colorMode == "mono16")
+    {
+      return ColorConverter(ColorConverter::ColorSpace::RAW16,
+                            config.resolution.at(0), config.resolution.at(1),
+                            ColorConverter::ColorFilter::RGGB,
+                            bayerMap[*(config.bayerMethod)]);
+    }
+  }
+  else
+  {
+    return ColorConverter(colorSpaceMap[config.colorMode],
+                          config.resolution.at(0), config.resolution.at(1));
+
   }
 }
 
@@ -610,7 +639,6 @@ void
 DC1394::doWork()
 {
   dc1394video_frame_t* videoFrame = NULL;
-  IplImageWrapper tmpFrame(this->frameSize, this->iplDepth, 3);
   boost::shared_ptr<IplImageWrapper> frameBuffer[2];
   int frameIdx = 0;
 
@@ -630,32 +658,8 @@ DC1394::doWork()
       throw capture_image_error("Could not capture a frame");
     }
 
-    // This don't work for images whith more than 1 byte per pixel
-    if (dc1394_bayer_decoding_8bit((uint8_t*)videoFrame->image,
-                                   (uint8_t*)tmpFrame.data(),
-                                   this->frameSize.width,
-                                   this->frameSize.height,
-                                   DC1394_COLOR_FILTER_RGGB,
-                                   DC1394_BAYER_METHOD_SIMPLE))
-    {
-      throw capture_image_error("Error on bayer decoding");
-    }
-    // }
-    // else if (this->bitsPerPixel == 16)
-    // {
-    //   if (dc1394_bayer_decoding_16bit((uint16_t*)videoFrame->image,
-    //                                   (uint16_t*)tmpFrame.data(),
-    //                                   this->frameSize.width,
-    //                                   this->frameSize.height,
-    //                                   DC1394_COLOR_FILTER_RGGB,
-    //                                   DC1394_BAYER_METHOD_SIMPLE,
-    //                                   this->bitsPerPixel))
-    //   {
-    //     throw capture_image_error("Error on bayer decoding");
-    //   }
-    // }
+    this->colorConverter((uint8_t*)videoFrame->image, *frameBuffer[frameIdx]);
 
-    tmpFrame.convertColor(*frameBuffer[frameIdx], CV_RGB2BGR);
     updateCurrentFrame(frameBuffer[frameIdx]);
 
     // Release the buffer

@@ -26,12 +26,9 @@ namespace bfs = boost::filesystem;
 
 extern globalOptions::Options global_options;
 
-HardCamera::HardCamera(const scene::Hardware& config,
-                       int iplDepth, int nChannels)
-
+HardCamera::HardCamera(const scene::Hardware& config, int iplDepth)
   :framePixels(config.resolution.at(0) * config.resolution.at(1))
   ,frameSize(cvSize(config.resolution.at(0), config.resolution.at(1)))
-  ,nChannels(nChannels)
   ,iplDepth(iplDepth)
   ,distortedFrame()
   ,undistortedFrame()
@@ -49,11 +46,9 @@ HardCamera::HardCamera(const scene::Hardware& config,
   ,imagesCounter(0)
 {
   undistortedFrameBuffer[0].reset(new IplImageWrapper(this->frameSize,
-                                                      this->iplDepth,
-                                                      this->nChannels));
+                                                      this->iplDepth, 3));
   undistortedFrameBuffer[1].reset(new IplImageWrapper(this->frameSize,
-                                                      this->iplDepth,
-                                                      this->nChannels));
+                                                      this->iplDepth, 3));
 
   CvMat* intrinsic = cvCreateMat(3, 3, CV_32FC1);
   // Opencv 1.0.0 can handle only 4x1 distortion matrix
@@ -111,8 +106,7 @@ HardCamera::~HardCamera()
 IplImageWrapper::IplParameters
 HardCamera::getImageParameters() const
 {
-  return IplImageWrapper::IplParameters(this->frameSize, this->iplDepth,
-                                        this->nChannels);
+  return IplImageWrapper::IplParameters(this->frameSize, this->iplDepth, 3);
 }
 
 void

@@ -75,6 +75,8 @@ public:
       :hard_camera_error(whatArg){}
   };
 
+public:
+
   virtual ~HardCamera();
 
   IplImageWrapper::IplParameters getImageParameters() const;
@@ -85,7 +87,7 @@ public:
 
 protected:
 
-  HardCamera(const scene::Hardware& config, int iplDepth, int nChannels);
+  HardCamera(const scene::Hardware& config, int iplDepth);
 
   /// This method must be called by derived classes when it read a new frame
   void updateCurrentFrame(boost::shared_ptr<IplImageWrapper> frame);
@@ -93,9 +95,6 @@ protected:
   /// Frame size measures in pixels.
   const unsigned framePixels;
   const CvSize frameSize;
-
-  /// Number of channels in image.
-  const int nChannels;
 
   /// Image depth in IPL format.
   const int iplDepth;

@@ -17,6 +17,7 @@ SET(silvver_cameras_SRCS cfParser.cpp
                          abstractCameraFactory.cpp
                          hardCameras/hardCamera.cpp
                          hardCameras/pseudoCamera.cpp
+                         hardCameras/colorConverter.cpp
                          observer.cpp)
 
 IF(WITH_DC1394V2)

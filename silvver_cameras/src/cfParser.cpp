@@ -264,6 +264,7 @@ CfParser::readDC1394Config(lua_State* L)
   readValue(dc1394.uid, L, "uid");
   readValue(dc1394.frameRate, L, "frame_rate");
   readValue(dc1394.colorMode, L, "color_mode");
+  readValue(dc1394.bayerMethod, L, "bayer_method");
 
   readValue(dc1394.brightness, L, "brightness");
   readValue(dc1394.exposure, L, "exposure");

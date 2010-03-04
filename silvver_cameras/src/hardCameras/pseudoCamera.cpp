@@ -21,7 +21,7 @@ namespace bfs = boost::filesystem;
 namespace bpt = boost::posix_time;
 
 PseudoCamera::PseudoCamera(const scene::PseudoCamera& config)
-  :HardCamera(config, IPL_DEPTH_8U, 3)
+  :HardCamera(config, IPL_DEPTH_8U)
   ,path(config.imagesPath)
   ,frameRate(config.frameRate)
   ,dirIterator()

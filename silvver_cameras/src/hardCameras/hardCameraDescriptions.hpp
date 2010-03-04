@@ -81,6 +81,8 @@ namespace scene
     /// be in lower case.
     std::string colorMode;
 
+    boost::optional<std::string> bayerMethod;
+
     // os valores abaixo podem ser "off", "auto", ou um inteiro sem sinal
 
     /// An array with [(blue/u), (red/v)].
