@@ -16,7 +16,6 @@
 #ifndef _DC1394_2X_HPP_
 #define _DC1394_2X_HPP_
 
-#include <boost/array.hpp>
 #include <boost/scoped_ptr.hpp>
 #include <boost/thread/thread.hpp>
 #include <string>

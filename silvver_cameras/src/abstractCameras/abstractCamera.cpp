@@ -18,7 +18,6 @@
 #include <cstddef>
 
 #include "../hardCameraFactory.hpp"
-// #include "tsPrint.hpp"
 
 AbstractCamera::AbstractCamera(const scene::Camera& cameraConfig,
                                boost::shared_ptr<Connection> connection)

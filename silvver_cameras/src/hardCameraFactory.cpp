@@ -87,7 +87,7 @@ HardCameraFactory::ConstructHardCamera::operator()(const scene::DC1394& config) 
 #ifdef HAS_DC1394
   return (new DC1394(config));
 #else
-  throw std::invalid_argument("This program don't was compiled with support "\
+  throw std::invalid_argument("This program don't was compiled with support "
                               "to ieee 1394 cameras");
 #endif
 }
@@ -98,7 +98,7 @@ HardCameraFactory::ConstructHardCamera::operator()(const scene::V4l2& config) co
 #ifdef HAS_V4L2
   return (new V4L2(config));
 #else
-  throw std::invalid_argument("This program don't was compiled with support "\
+  throw std::invalid_argument("This program don't was compiled with support "
                               "to v4l2 cameras");
 #endif
 }

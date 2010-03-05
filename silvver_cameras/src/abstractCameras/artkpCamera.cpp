@@ -206,7 +206,7 @@ ArtkpCamera::doWork()
                                       &nMarkers)
         < 0 )
     {
-      throw detect_marker_error("Error in arDetectMarker method.");
+      // throw detect_marker_error("Error in arDetectMarker method.");
     }
     for (int marker = 0; marker < nMarkers; marker++)
     {

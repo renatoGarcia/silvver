@@ -31,6 +31,25 @@
 class AbstractCamera: public boost::noncopyable, public Observer
 {
 public:
+
+  class abstract_camera_error: public std::exception
+  {
+  public:
+    abstract_camera_error(const std::string& whatArg) :msg(whatArg) {}
+    ~abstract_camera_error() throw() {}
+    const char* what() const throw() { return msg.c_str(); }
+  private:
+    const std::string msg;
+  };
+
+  class initialize_error: public abstract_camera_error
+  {
+  public:
+    initialize_error(const std::string& whatArg)
+      :abstract_camera_error(whatArg){}
+  };
+
+public:
   virtual ~AbstractCamera();
 
   /// Update the status of incoming image to available.

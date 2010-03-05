@@ -15,7 +15,7 @@
 
 #include "abstractCameraFactory.hpp"
 
-#include "boost/variant/get.hpp"
+#include <boost/variant/get.hpp>
 #include <stdexcept>
 
 #include "processorOptions.hpp"

@@ -642,10 +642,8 @@ DC1394::doWork()
   boost::shared_ptr<IplImageWrapper> frameBuffer[2];
   int frameIdx = 0;
 
-  frameBuffer[0].reset(new IplImageWrapper(this->frameSize,
-                                           this->iplDepth, 3));
-  frameBuffer[1].reset(new IplImageWrapper(this->frameSize,
-                                           this->iplDepth, 3));
+  frameBuffer[0].reset(new IplImageWrapper(this->frameSize,this->iplDepth,3));
+  frameBuffer[1].reset(new IplImageWrapper(this->frameSize,this->iplDepth,3));
 
   while (true)
   {

@@ -35,22 +35,6 @@ class ArtkpCamera: public AbstractCamera
 {
 public:
 
-  class initialize_error : public std::logic_error
-  {
-  public:
-    initialize_error(const std::string& what)
-      :logic_error(what)
-    {}
-  };
-
-  class detect_marker_error : public std::logic_error
-  {
-  public:
-    detect_marker_error(const std::string& what)
-      :logic_error(what)
-    {}
-  };
-
   ArtkpCamera(const scene::Camera& cameraConfig,
               const scene::ArtkpTargets& targets,
               boost::shared_ptr<Connection> connection);
