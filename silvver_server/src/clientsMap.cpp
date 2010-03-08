@@ -24,7 +24,7 @@ void
 ClientsMap::addOutput(unsigned targetId,
                       boost::shared_ptr<IoConnection> outputConnection)
 {
-  boost::mutex::scoped_lock lock(this->accessMap);
+  boost::unique_lock<boost::shared_mutex> lock(this->accessMap);
 
   this->client.insert(std::pair< unsigned, boost::shared_ptr<IoConnection> >
                       (targetId, outputConnection));
@@ -33,7 +33,7 @@ ClientsMap::addOutput(unsigned targetId,
 void
 ClientsMap::delOutput(unsigned idTarget, unsigned remotePort)
 {
-  boost::mutex::scoped_lock lock(this->accessMap);
+  boost::unique_lock<boost::shared_mutex> lock(this->accessMap);
 
   // Get all clients whit the idTarget
   std::pair< TMultiMap::iterator, TMultiMap::iterator >
@@ -57,7 +57,7 @@ ClientsMap::findClients(unsigned idTarget,
 {
   clientsConnections.clear();
 
-  boost::mutex::scoped_lock lock(this->accessMap);
+  boost::shared_lock<boost::shared_mutex> lock(this->accessMap);
 
   std::pair< TMultiMap::iterator, TMultiMap::iterator >
     range(this->client.equal_range(idTarget));

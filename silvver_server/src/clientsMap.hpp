@@ -1,4 +1,4 @@
-/* Copyright 2009 Renato Florentino Garcia <fgar.renato@gmail.com>
+/* Copyright 2009, 2010 Renato Florentino Garcia <fgar.renato@gmail.com>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3, as
@@ -16,11 +16,10 @@
 #ifndef _CLIENTS_MAP_HPP_
 #define _CLIENTS_MAP_HPP_
 
+#include <boost/shared_ptr.hpp>
+#include <boost/thread/shared_mutex.hpp>
 #include <map>
 #include <vector>
-
-#include <boost/shared_ptr.hpp>
-#include <boost/thread/mutex.hpp>
 
 #include "ioConnection.hpp"
 #include <singleton.hpp>
@@ -28,7 +27,7 @@
 /** A class to hold the connected clients.
  * This class wrap the STL multimap for thread safety.
  */
-class ClientsMap : public Singleton<ClientsMap>
+class ClientsMap: public Singleton<ClientsMap>
 {
 public:
 
@@ -62,14 +61,13 @@ private:
 
   typedef std::multimap< unsigned, boost::shared_ptr<IoConnection> > TMultiMap;
 
-  boost::mutex accessMap;
+  boost::shared_mutex accessMap;
 
   /// A dummy private constructor.
   ClientsMap();
 
   /// The key of multimap is the id of target
   TMultiMap client;
-
 };
 
 #endif /* _CLIENTS_MAP_HPP_ */
