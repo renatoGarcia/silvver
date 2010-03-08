@@ -20,7 +20,7 @@
 #include <boost/bind.hpp>
 #include <boost/ref.hpp>
 
-#include "debugOutputs.hpp"
+#include "log.hpp"
 #include "inputFactory.hpp"
 #include "ioConnection.ipp"
 #include "streamConnection.ipp"
@@ -97,7 +97,7 @@ Receptionist::operator()(NullRequest& request) const
 void
 Receptionist::operator()(AddOutput& request) const
 {
-  debug::messageOutput(REQUEST)
+  message(MessageLogLevel::INFO)
     << ts_output::lock
     << "Add output request. Id:" << request.targetId
     << std::endl
@@ -114,7 +114,7 @@ Receptionist::operator()(AddOutput& request) const
 void
 Receptionist::operator()(DelOutput& request) const
 {
-  debug::messageOutput(REQUEST)
+  message(MessageLogLevel::INFO)
     << ts_output::lock
     << "Delete output request" << std::endl
     << ts_output::unlock;
@@ -125,7 +125,7 @@ Receptionist::operator()(DelOutput& request) const
 void
 Receptionist::operator()(AddCamera& request)
 {
-  debug::messageOutput(REQUEST)
+  message(MessageLogLevel::INFO)
     << ts_output::lock
     << "Add camera request" << std::endl
     << ts_output::unlock;
@@ -148,14 +148,14 @@ Receptionist::operator()(AddCamera& request)
 void
 Receptionist::operator()(DelCamera& request)
 {
-  debug::messageOutput(REQUEST)
+  message(MessageLogLevel::INFO)
     << ts_output::lock
     << "Delete camera request" << std::endl
     << ts_output::unlock;
 
   if (this->mapInputs.erase(request.localPort) != 1)
   {
-    debug::messageOutput(WARNING)
+    message(MessageLogLevel::INFO)
       << ts_output::lock
       << "Unknown camera delete request" << std::endl
       << ts_output::unlock;

@@ -1,4 +1,4 @@
-/* Copyright 2009 Renato Florentino Garcia <fgar.renato@gmail.com>
+/* Copyright 2009, 2010 Renato Florentino Garcia <fgar.renato@gmail.com>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3, as
@@ -13,21 +13,25 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef _DEBUG_OUTPUTS_HPP_
-#define _DEBUG_OUTPUTS_HPP_
+#ifndef _LOG_HPP_
+#define _LOG_HPP_
 
+#include <boost/enum.hpp>
 #include <logging.hpp>
 #include <tsostream.hpp>
 
-// Message levels
-const int STARTUP = 1;
-const int WARNING = 1;
-const int REQUEST = 2;
+BOOST_ENUM(MessageLogLevel,
+           (TRACE)
+           (INFO)
+           (WARN)
+           (ERROR)
+           (NOTHING));
 
-namespace debug
-{
-  extern logging messageOutput;
-  extern logging logOut;
-}
+BOOST_ENUM(TargetsLogLevel,
+           (INFO)
+           (NOTHING));
 
-#endif /* _DEBUG_OUTPUTS_HPP_ */
+extern logging message;
+extern logging targetsLog;
+
+#endif /* _LOG_HPP_ */

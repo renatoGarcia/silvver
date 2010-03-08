@@ -1,5 +1,5 @@
 SET(silvver_server_SRCS clientsMap.cpp
-                        debugOutputs.cpp
+                        log.cpp
                         inputFactory.cpp
                         ioConnection.cpp
                         main.cpp
