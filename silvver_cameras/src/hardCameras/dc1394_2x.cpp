@@ -252,20 +252,26 @@ DC1394::createColorConverter(const scene::DC1394& config)
   bayerMap["nearest"] = ColorConverter::BayerMethod::NEAREST;
   bayerMap["bilinear"] = ColorConverter::BayerMethod::BILINEAR;
 
+  std::map<std::string,ColorConverter::ColorFilter> colorFilterMap;
+  colorFilterMap["rggb"] = ColorConverter::ColorFilter::RGGB;
+  colorFilterMap["gbrg"] = ColorConverter::ColorFilter::GBRG;
+  colorFilterMap["grbg"] = ColorConverter::ColorFilter::GRBG;
+  colorFilterMap["bggr"] = ColorConverter::ColorFilter::BGGR;
+
   if (config.bayerMethod)
   {
     if (config.colorMode == "mono8")
     {
       return ColorConverter(ColorConverter::ColorSpace::RAW8,
                             config.resolution.at(0), config.resolution.at(1),
-                            ColorConverter::ColorFilter::RGGB,
+                            colorFilterMap[*(config.colorFilter)],
                             bayerMap[*(config.bayerMethod)]);
     }
     else if (config.colorMode == "mono16")
     {
       return ColorConverter(ColorConverter::ColorSpace::RAW16,
                             config.resolution.at(0), config.resolution.at(1),
-                            ColorConverter::ColorFilter::RGGB,
+                            colorFilterMap[*(config.colorFilter)],
                             bayerMap[*(config.bayerMethod)]);
     }
   }
