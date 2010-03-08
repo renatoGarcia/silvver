@@ -120,6 +120,8 @@ namespace scene
 
     std::string colorMode;
 
+    boost::optional<std::string> bayerMethod;
+
     /// The descriptions of below controls was grabbed of
     /// http://v4l2spec.bytesex.org/spec/x542.htm
 

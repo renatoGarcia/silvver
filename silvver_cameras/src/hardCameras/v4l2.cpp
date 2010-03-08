@@ -26,75 +26,9 @@
 #include <sys/mman.h>
 
 #include "../iplImageWrapper.hpp"
+#include "../log.hpp"
 
 using namespace boost::assign;
-
-// // color conversion functions from Bart Nabbe.
-// // corrected by Damien: bad coeficients in YUV2RGB
-// #define YUV2RGB(y, u, v, r, g, b) {\
-//   r = y + ((v*1436) >> 10);\
-//   g = y - ((u*352 + v*731) >> 10);\
-//   b = y + ((u*1814) >> 10);\
-//   r = r < 0 ? 0 : r;\
-//   g = g < 0 ? 0 : g;\
-//   b = b < 0 ? 0 : b;\
-//   r = r > 255 ? 255 : r;\
-//   g = g > 255 ? 255 : g;\
-//   b = b > 255 ? 255 : b; }
-
-typedef enum {
-    BYTE_ORDER_UYVY,
-    BYTE_ORDER_YUYV
-} byte_order_t;
-
-void
-YUV422_to_BGR8(uint8_t *src, uint8_t *dest,
-               uint32_t width, uint32_t height, uint32_t byte_order)
-{
-    register int i = ((width*height) << 1)-1;
-    register int j = (width*height) + ( (width*height) << 1 ) -1;
-    register int y0, y1, u, v;
-    register int r, g, b;
-
-
-    switch (byte_order) {
-    case BYTE_ORDER_YUYV:
-        while (i >= 0) {
-            v  = (uint8_t) src[i--] -128;
-            y1 = (uint8_t) src[i--];
-            u  = (uint8_t) src[i--] -128;
-            y0  = (uint8_t) src[i--];
-            YUV2RGB (y1, u, v, r, g, b);
-            dest[j--] = r;
-            dest[j--] = g;
-            dest[j--] = b;
-            YUV2RGB (y0, u, v, r, g, b);
-            dest[j--] = r;
-            dest[j--] = g;
-            dest[j--] = b;
-        }
-        return;// LIBDC1394_SUCCESS;
-    case BYTE_ORDER_UYVY:
-        while (i >= 0) {
-            y1 = (uint8_t) src[i--];
-            v  = (uint8_t) src[i--] - 128;
-            y0 = (uint8_t) src[i--];
-            u  = (uint8_t) src[i--] - 128;
-            YUV2RGB (y1, u, v, r, g, b);
-            dest[j--] = r;
-            dest[j--] = g;
-            dest[j--] = b;
-            YUV2RGB (y0, u, v, r, g, b);
-            dest[j--] = r;
-            dest[j--] = g;
-            dest[j--] = b;
-        }
-        return;// LIBDC1394_SUCCESS;
-    default:
-      return;// LIBDC1394_INVALID_BYTE_ORDER;
-    }
-}
-
 
 V4L2::V4L2(const scene::V4l2& config)
   :HardCamera(config, IPL_DEPTH_8U, 3)//getBitsPerPixel(config.colorMode))
@@ -102,6 +36,7 @@ V4L2::V4L2(const scene::V4l2& config)
   ,cameraFd(open(this->findDevice().c_str(), O_RDWR))
   ,width(config.resolution.at(0))
   ,height(config.resolution.at(1))
+  ,colorConverter(DC1394::createColorConverter(config))
 {
   std::string cameraPath(findDevice());
 
@@ -238,6 +173,46 @@ V4L2::findDevice() const
   // If here, didn't found camera devide
   throw open_camera_error("Didn't found the device of v4l2 camera with uid " +
                           strUid);
+}
+
+ColorConverter
+V4L2::createColorConverter(const scene::V4L2& config)
+{
+  std::map<std::string,ColorConverter::ColorSpace> colorSpaceMap;
+  colorSpaceMap["yuv411"] = ColorConverter::ColorSpace::YUV411;
+  colorSpaceMap["yuyv"] = ColorConverter::ColorSpace::YUYV;
+  colorSpaceMap["uyvy"] = ColorConverter::ColorSpace::UYVY;
+  colorSpaceMap["rgb8"] = ColorConverter::ColorSpace::RGB8;
+  colorSpaceMap["mono8"] = ColorConverter::ColorSpace::MONO8;
+  colorSpaceMap["mono16"] =ColorConverter::ColorSpace::MONO16;
+
+  std::map<std::string,ColorConverter::BayerMethod> bayerMap;
+  bayerMap["nearest"] = ColorConverter::BayerMethod::NEAREST;
+  bayerMap["bilinear"] = ColorConverter::BayerMethod::BILINEAR;
+
+  if (config.bayerMethod)
+  {
+    if (config.colorMode == "mono8")
+    {
+      return ColorConverter(ColorConverter::ColorSpace::RAW8,
+                            config.resolution.at(0), config.resolution.at(1),
+                            ColorConverter::ColorFilter::RGGB,
+                            bayerMap[*(config.bayerMethod)]);
+    }
+    else if (config.colorMode == "mono16")
+    {
+      return ColorConverter(ColorConverter::ColorSpace::RAW16,
+                            config.resolution.at(0), config.resolution.at(1),
+                            ColorConverter::ColorFilter::RGGB,
+                            bayerMap[*(config.bayerMethod)]);
+    }
+  }
+  else
+  {
+    return ColorConverter(colorSpaceMap[config.colorMode],
+                          config.resolution.at(0), config.resolution.at(1));
+
+  }
 }
 
 void
@@ -424,18 +399,25 @@ V4L2::doWork()
 
     if (ioctl(this->cameraFd, VIDIOC_DQBUF, &buf))
     {
-      // printf("VIDIOC_DQBUF");
+      message(LogLevel::ERROR)
+        << ts_output::lock
+        << "Error dequeuing buffer on v4l2 camera uid: "
+        << this->uid << std::endl
+        << ts_output::unlock;
     }
 
-    YUV422_to_BGR8((uint8_t*)buffers[buf.index].start,
-                   (uint8_t*)frameBuffer[frameIdx]->data(),
-                   this->width, this->height, BYTE_ORDER_YUYV);
+    this->colorConverter((uint8_t*)buffers[buf.index].start,
+                         *frameBuffer[frameIdx]);
 
     updateCurrentFrame(frameBuffer[frameIdx]);
 
     if (ioctl(this->cameraFd, VIDIOC_QBUF, &buf))
     {
-      // printf("VIDIOC_QBUF");
+      message(LogLevel::ERROR)
+        << ts_output::lock
+        << "Error enqueuing buffer on v4l2 camera uid: "
+        << this->uid << std::endl
+        << ts_output::unlock;
     }
 
     frameIdx = (frameIdx+1) % 2;

@@ -18,7 +18,8 @@ SET(silvver_cameras_SRCS cfParser.cpp
                          hardCameras/hardCamera.cpp
                          hardCameras/pseudoCamera.cpp
                          hardCameras/colorConverter.cpp
-                         observer.cpp)
+                         observer.cpp
+                         log.cpp)
 
 IF(WITH_DC1394V2)
   FIND_PACKAGE(DC1394V2)

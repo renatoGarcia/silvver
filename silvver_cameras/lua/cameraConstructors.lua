@@ -135,6 +135,9 @@ function Webcam(parameters)
 
     camera.resolution = __getOptional(parameters.resolution, {640, 480})
 
+    camera.color_mode = __getOptional(parameters.color_mode, 'yuv')
+    camera.bayer_method = parameters.bayer_method -- Optional
+
     -- The values below are optionals, they can be nil
     camera.brightness                = parameters.brightness
     camera.contrast                  = parameters.contrast

@@ -16,6 +16,7 @@
 #include "pseudoCamera.hpp"
 
 #include "../iplImageWrapper.hpp"
+#include "../log.hpp"
 
 namespace bfs = boost::filesystem;
 namespace bpt = boost::posix_time;
@@ -28,19 +29,6 @@ PseudoCamera::PseudoCamera(const scene::PseudoCamera& config)
   ,endIterator()
   ,delay((static_cast<long>((1.0 / this->frameRate) * 1.0e3)))
   ,grabFrameThread()
-{}
-
-PseudoCamera::~PseudoCamera()
-{
-  if (this->grabFrameThread)
-  {
-    this->grabFrameThread->interrupt();
-    this->grabFrameThread->join();
-  }
-}
-
-void
-PseudoCamera::initialize()
 {
   if(!bfs::is_directory(this->path))
   {
@@ -51,6 +39,15 @@ PseudoCamera::initialize()
   this->dirIterator = bfs::directory_iterator(this->path);
 
   this->grabFrameThread.reset(new boost::thread(&PseudoCamera::doWork, this));
+}
+
+PseudoCamera::~PseudoCamera()
+{
+  if (this->grabFrameThread)
+  {
+    this->grabFrameThread->interrupt();
+    this->grabFrameThread->join();
+  }
 }
 
 void
@@ -74,8 +71,12 @@ PseudoCamera::doWork()
     {
       if(this->dirIterator == this->endIterator)
       {
-        // std::cout << "PseudoCamera already readed all images in "
-        //   "directory " + this->path.file_string());
+        message(LogLevel::INFO)
+          << ts_output::lock
+          << "PseudoCamera already readed all images in directory "
+          << this->path.file_string() << std::endl
+          << ts_output::unlock;
+
         return;
       }
 
@@ -92,6 +93,12 @@ PseudoCamera::doWork()
       }
       catch (IplImageWrapper::load_image_error& e)
       {
+        message(LogLevel::WARN)
+          << ts_output::lock
+          << "PseudoCamera could not load file "
+          << this->dirIterator->path().file_string() << std::endl
+          << ts_output::unlock;
+
         this->dirIterator++;
         continue;
       }

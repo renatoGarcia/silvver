@@ -13,13 +13,18 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include <boost/algorithm/string/case_conv.hpp>
+#include <boost/algorithm/string/erase.hpp>
+#include <boost/any.hpp>
 #include <boost/program_options.hpp>
 #include <boost/version.hpp>
+#include <cstdlib>
 #include <iostream>
 #include <string>
 
 #include "globalOptions.hpp"
 #include "sceneMounter.hpp"
+#include "log.hpp"
 
 namespace po = boost::program_options;
 
@@ -27,15 +32,51 @@ namespace po = boost::program_options;
 
 globalOptions::Options global_options;
 
+void validate(boost::any& v,
+              const std::vector<std::string>& values,
+              LogLevel* verbosityLevel, int)
+{
+  po::validators::check_first_occurrence(v);
+
+  std::string s = po::validators::get_single_string(values);
+  boost::to_upper(s);
+
+  LogLevel::optional verbosity = LogLevel::get_by_name(s.c_str());
+  if (verbosity)
+  {
+    v = boost::any(*verbosity);
+  }
+  else
+  {
+    std::cerr << "Error: Invalid verbosity level " + s + ". Aborting."
+              << std::endl;
+    exit(EXIT_FAILURE);
+  }
+}
+
+std::string getLevelsNames()
+{
+  std::string levelsNames;
+  LogLevel::const_iterator iterLevel = LogLevel::begin();
+  for(; iterLevel < LogLevel::end(); iterLevel++)
+  {
+    levelsNames += '|';
+    levelsNames += iterLevel->str();
+  }
+  boost::erase_first(levelsNames, "|");
+
+  return levelsNames;
+}
+
 int main(int argc, char **argv)
 {
   std::string serverIP;
   int receptionistPort;
   std::string luaFile;
+  LogLevel verbosity;
 
   po::options_description desc("silvver_cameras " VERSION " \n\n"
                                "Compiled with boost version " BOOST_LIB_VERSION "\n\n"
-
                                "Capture images with the cameras and process it\n"
                                "Usage: silvver_cameras [OPTIONS]...\n\n"
                                "Options list");
@@ -51,6 +92,10 @@ int main(int argc, char **argv)
     ("scene-config,c",
      po::value<std::string>(&luaFile)->default_value("scene.lua"),
      "Lua file with the scene configuration")
+    ("verbosity,v",
+     po::value<LogLevel>(&verbosity)->default_value(LogLevel::WARN),
+     std::string("Minimum level of messages. ["  +
+                 getLevelsNames() + ']').c_str())
     ("show", "Show the images captured by cameras")
     ("save-undistorted",
      "Save the images captured by cameras with intrinsic distortion corrected")
@@ -59,8 +104,18 @@ int main(int argc, char **argv)
     ;
 
   po::variables_map vm;
-  po::store(po::parse_command_line(argc, argv, desc), vm);
-  po::notify(vm);
+
+  try
+  {
+    po::store(po::parse_command_line(argc, argv, desc), vm);
+    po::notify(vm);
+  }
+  catch(const boost::program_options::multiple_occurrences& e)
+  {
+    std::cerr << "Error: multiple occurrences of one command line option."
+              << std::endl;
+    exit(EXIT_FAILURE);
+  }
 
   if(vm.count("help"))
   {
@@ -82,6 +137,7 @@ int main(int argc, char **argv)
     global_options.showImages = vm.count("show");
     global_options.saveDistortedImages = vm.count("save-distorted");
     global_options.saveUndistortedImages = vm.count("save-undistorted");
+    message.setThreshold(verbosity.value());
 
     SceneMounter sceneMounter(serverIP, receptionistPort, luaFile);
     sceneMounter.mount();
@@ -90,5 +146,5 @@ int main(int argc, char **argv)
     std::cout << "Quitting..." << std::endl << std::endl;
   }
 
-  return 0;
+  return EXIT_SUCCESS;
 }

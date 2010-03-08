@@ -22,6 +22,7 @@
 #include <ARToolKitPlus/TrackerSingleMarkerImpl.h>
 
 #include "../connection.ipp"
+#include "../log.hpp"
 
 ArtkpCamera::ArtkpCamera(const scene::Camera& cameraConfig,
                          const scene::ArtkpTargets& targets,
@@ -206,7 +207,10 @@ ArtkpCamera::doWork()
                                       &nMarkers)
         < 0 )
     {
-      // throw detect_marker_error("Error in arDetectMarker method.");
+      message(LogLevel::ERROR)
+        << ts_output::lock
+        << "Error in arDetectMarker message." << std::endl
+        << ts_output::unlock;
     }
     for (int marker = 0; marker < nMarkers; marker++)
     {

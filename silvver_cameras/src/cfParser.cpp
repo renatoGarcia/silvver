@@ -299,7 +299,8 @@ CfParser::readV4l2Config(lua_State* L)
   scene::V4l2 v4l2;
 
   readValue(v4l2.uid, L, "identifier");
-  this->readHardware(L, v4l2);
+  readValue(v4l2.colorMode, L, "color_mode");
+  readValue(v4l2.bayerMethod, L, "bayer_method");
 
   readValue(v4l2.brightness, L, "brightness");
   readValue(v4l2.contrast, L, "contrast");
@@ -319,6 +320,8 @@ CfParser::readV4l2Config(lua_State* L)
   readValue(v4l2.whiteBalanceTemperature, L, "white_balance_temperature");
   readValue(v4l2.sharpness, L, "sharpness");
   readValue(v4l2.backlightCompensation, L, "backlight_compensation");
+
+  this->readHardware(L, v4l2);
 
   return v4l2;
 }

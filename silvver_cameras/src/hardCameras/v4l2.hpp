@@ -16,16 +16,17 @@
 #ifndef _V4L2_HPP_
 #define _V4L2_HPP_
 
-#include "hardCamera.hpp"
 #include <boost/scoped_ptr.hpp>
 #include <boost/thread/thread.hpp>
 
 #include <string>
-#include <map>
 #include <string.h>
 #include <linux/videodev2.h>
 #include <fcntl.h>
 #include <stdint.h>
+
+#include "colorConverter.hpp"
+#include "hardCamera.hpp"
 
 class V4L2: public HardCamera
 {
@@ -44,6 +45,8 @@ private:
   /// Find the device path bounded to this v4l2 camera.
   /// @return A string with the device path.
   std::string findDevice() const;
+
+  ColorConverter createColorConverter(const scene::V4L2& config);
 
   void setFeatures(const scene::V4l2& config);
 
@@ -65,6 +68,7 @@ private:
     size_t length;
   } buffers[N_BUFFERS];
 
+  ColorConverter colorConverter;
 };
 
 #endif /* _V4L2_HPP_ */

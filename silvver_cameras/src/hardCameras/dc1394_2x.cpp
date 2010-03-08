@@ -25,6 +25,7 @@
 #include <utility>
 
 #include "../iplImageWrapper.hpp"
+#include "../log.hpp"
 
 using namespace boost::assign;
 
@@ -653,7 +654,11 @@ DC1394::doWork()
                                DC1394_CAPTURE_POLICY_WAIT,
                                &videoFrame))
     {
-      throw capture_image_error("Could not capture a frame");
+      message(LogLevel::ERROR)
+        << ts_output::lock
+        << "Could not capture a frame in dc1394 camera uid: "
+        << this->uid << std::endl
+        << ts_output::unlock;
     }
 
     this->colorConverter((uint8_t*)videoFrame->image, *frameBuffer[frameIdx]);
@@ -663,7 +668,11 @@ DC1394::doWork()
     // Release the buffer
     if (dc1394_capture_enqueue(this->camera, videoFrame))
     {
-      throw capture_image_error("Error on returning a frame to ring buffer");
+      message(LogLevel::ERROR)
+        << ts_output::lock
+        << "Error on returning a frame to ring buffer in dc1394 camera uid: "
+        << this->uid << std::endl
+        << ts_output::unlock;
     }
 
     frameIdx = (frameIdx+1) % 2;

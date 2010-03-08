@@ -23,7 +23,7 @@ class basic_logging
 {
 public:
   basic_logging(std::basic_ostream<CharT, Traits>& os, unsigned threshold=0)
-    :os(&os)
+    :os(os)
     ,threshold(threshold)
   {}
 
@@ -39,16 +39,15 @@ public:
   std::basic_ostream<CharT, Traits>&
   operator()(unsigned level)
   {
-    if (level > this->threshold)
+    if (level < this->threshold)
     {
       return this->nullStream;
     }
     else
     {
-      return *(this->os);
+      return this->os;
     }
   }
-
 
 private:
 
@@ -61,7 +60,7 @@ private:
     }
   };
 
-  std::basic_ostream<CharT, Traits>* os;
+  std::basic_ostream<CharT, Traits>& os;
 
   unsigned threshold;
 

@@ -32,8 +32,6 @@ public:
 
   ~PseudoCamera();
 
-  void initialize();
-
 private:
 
   static const unsigned BITS_PER_PIXEL = 8;
