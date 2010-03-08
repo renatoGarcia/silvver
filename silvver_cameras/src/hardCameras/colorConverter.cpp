@@ -25,6 +25,9 @@ ColorConverter::ColorConverter(const ColorSpace& colorSpace,
 {
   switch (colorSpace.value())
   {
+  case ColorSpace::RGB8:
+    this->convertFunc = &ColorConverter::rgb;
+    break;
   case ColorSpace::YUV411:
     this->convertFunc = &ColorConverter::yuv411;
     break;
@@ -34,15 +37,17 @@ ColorConverter::ColorConverter(const ColorSpace& colorSpace,
   case ColorSpace::UYVY:
     this->convertFunc = &ColorConverter::uyvy;
     break;
-  case ColorSpace::RGB8:
-    this->convertFunc = &ColorConverter::rgb;
-    break;
   case ColorSpace::MONO8:
     this->convertFunc = &ColorConverter::mono8;
     break;
   case ColorSpace::MONO16:
     this->convertFunc = &ColorConverter::mono16;
     break;
+  default:
+    throw std::invalid_argument("When using color space RAW8 or RAW16, the "
+                                "color filter and the bayer method must be "
+                                "informed.");
+
   }
 }
 

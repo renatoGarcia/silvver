@@ -25,22 +25,25 @@
 
 #include <sys/stat.h>
 
+#include "../iplImageWrapper.hpp"
+#include "../log.hpp"
+
 using namespace boost::assign;
 
 DC1394::DC1394(const scene::DC1394& config)
-  :HardCamera(config, getIplDepth(config.colorMode),
-              getNChannels(config.colorMode))
+  :HardCamera(config, DC1394::getIplDepth(config.colorMode))
   ,uid(config.uid)
   ,raw1394Handle(NULL)
   ,bDc1394CameraCreated(false)
-  ,videoMode(getDc1394VideoMode(config.colorMode))
+  ,videoMode(DC1394::getDc1394VideoMode(config))
+  ,colorConverter(DC1394::createColorConverter(config))
   ,grabFrameThread()
 {
   nodeid_t cameraNode;
   int cardIndex;
   findThisCamera(cameraNode, cardIndex);
 
-  int dc1394FrameRate = this->getDc1394FrameRate(config.frameRate);
+  int dc1394FrameRate = DC1394::getDc1394FrameRate(config.frameRate);
 
   unsigned int channel;
   unsigned int speed;
@@ -81,34 +84,6 @@ DC1394::DC1394(const scene::DC1394& config)
   {
     throw open_camera_error("Unable to start camera iso transmission");
   }
-
-
-  // // Query the camera to determine the Bayer pattern
-  // quadlet_t qValue;
-  // GetCameraControlRegister(this->raw1394Handle,
-  //                          cameraNode,
-  //                          0x1040,         /* Bayer Tile Mapping register */
-  //                          &qValue );
-
-  // switch(qValue)
-  // {
-  // case 0x42474752:      /* BGGR */
-  //   this->pattern = BAYER_PATTERN_BGGR;
-  //   break;
-  // case 0x47524247:      /* GRBG */
-  //   this->pattern = BAYER_PATTERN_GRBG;
-  //   break;
-  // case 0x52474742:      /* RGGB */
-  //   this->pattern = BAYER_PATTERN_RGGB;
-  //   break;
-  // case 0x47425247:      /* GBRG */
-  //   this->pattern = BAYER_PATTERN_GBRG;
-  //   break;
-  // case 0x59595959:      /* YYYY = BW */
-  //   throw open_camera_error("Camera is black and white");
-  // default:
-  //   throw open_camera_error("Camera BAYER_TILE_MAPPING register has an unexpected value");
-  // }
 
   this->grabFrameThread.reset(new boost::thread(&DC1394::doWork,this));
 }
@@ -203,7 +178,7 @@ DC1394::findVideo1394Device(unsigned cardNumber)
 }
 
 int
-DC1394::getDc1394FrameRate(float frameRate) const
+DC1394::getDc1394FrameRate(float frameRate)
 {
   if (frameRate == 1.875)
   {
@@ -245,11 +220,11 @@ DC1394::getDc1394FrameRate(float frameRate) const
 }
 
 unsigned
-DC1394::getDc1394VideoMode(const std::string& colorMode) const
+DC1394::getDc1394VideoMode(const scene::DC1394& config)
 {
-  const unsigned fw = this->frameSize.width;
-  const unsigned fh = this->frameSize.height;
-  const std::string& cm = colorMode;
+  const unsigned fw = config.resolution.at(0);
+  const unsigned fh = config.resolution.at(1);
+  const std::string& cm = config.colorMode;
 
   if      (fw==640  && fh==480  && cm=="yuv444") return MODE_160x120_YUV444;
   else if (fw==320  && fh==240  && cm=="yuv422") return MODE_320x240_YUV422;
@@ -280,53 +255,66 @@ DC1394::getDc1394VideoMode(const std::string& colorMode) const
                             boost::lexical_cast<std::string>(fw) +
                             " x " +
                             boost::lexical_cast<std::string>(fh)+
-                            " with color mode " + colorMode);
+                            " with color mode " + config.colorMode);
   }
 }
 
-std::pair<int,int>
-DC1394::getPairDepthChannels(const std::string& colorMode) const
+int
+DC1394::getIplDepth(const std::string& colorMode)
 {
-  if (colorMode == "yuv444")
+  if (colorMode == "yuv444")      return IPL_DEPTH_8U;
+  else if (colorMode == "yuv422") return IPL_DEPTH_8U;
+  else if (colorMode == "yuv411") return IPL_DEPTH_8U;
+  else if (colorMode == "rgb8")   return IPL_DEPTH_8U;
+  else if (colorMode == "mono8")  return IPL_DEPTH_8U;
+  else if (colorMode == "mono16") return IPL_DEPTH_16U;
+  else throw std::invalid_argument("Invalid color mode: " + colorMode);
+}
+
+ColorConverter
+DC1394::createColorConverter(const scene::DC1394& config)
+{
+  std::map<std::string,ColorConverter::ColorSpace> colorSpaceMap;
+  colorSpaceMap["yuv411"] = ColorConverter::ColorSpace::YUV411;
+  colorSpaceMap["yuyv"] = ColorConverter::ColorSpace::YUYV;
+  colorSpaceMap["uyvy"] = ColorConverter::ColorSpace::UYVY;
+  colorSpaceMap["rgb8"] = ColorConverter::ColorSpace::RGB8;
+  colorSpaceMap["mono8"] = ColorConverter::ColorSpace::MONO8;
+  colorSpaceMap["mono16"] =ColorConverter::ColorSpace::MONO16;
+
+  std::map<std::string,ColorConverter::BayerMethod> bayerMap;
+  bayerMap["nearest"] = ColorConverter::BayerMethod::NEAREST;
+  bayerMap["bilinear"] = ColorConverter::BayerMethod::BILINEAR;
+
+  std::map<std::string,ColorConverter::ColorFilter> colorFilterMap;
+  colorFilterMap["rggb"] = ColorConverter::ColorFilter::RGGB;
+  colorFilterMap["gbrg"] = ColorConverter::ColorFilter::GBRG;
+  colorFilterMap["grbg"] = ColorConverter::ColorFilter::GRBG;
+  colorFilterMap["bggr"] = ColorConverter::ColorFilter::BGGR;
+
+  if (config.bayerMethod)
   {
-    return std::make_pair(IPL_DEPTH_8U,3);
-  }
-  else if (colorMode == "yuv422")
-  {
-    return std::make_pair(IPL_DEPTH_8U,3);
-  }
-  else if (colorMode == "yuv411")
-  {
-    return std::make_pair(IPL_DEPTH_8U,3);
-  }
-  else if (colorMode == "rgb8")
-  {
-    return std::make_pair(IPL_DEPTH_8U,3);
-  }
-  else if (colorMode == "mono8") // There aren't supporto to bw camera, TODO?
-  {
-    return std::make_pair(IPL_DEPTH_8U,3);
-  }
-  else if (colorMode == "mono16") // There aren't supporto to bw camera, TODO?
-  {
-    return std::make_pair(IPL_DEPTH_16U,3);
+    if (config.colorMode == "mono8")
+    {
+      return ColorConverter(ColorConverter::ColorSpace::RAW8,
+                            config.resolution.at(0), config.resolution.at(1),
+                            colorFilterMap[*(config.colorFilter)],
+                            bayerMap[*(config.bayerMethod)]);
+    }
+    else if (config.colorMode == "mono16")
+    {
+      return ColorConverter(ColorConverter::ColorSpace::RAW16,
+                            config.resolution.at(0), config.resolution.at(1),
+                            colorFilterMap[*(config.colorFilter)],
+                            bayerMap[*(config.bayerMethod)]);
+    }
   }
   else
   {
-    throw std::invalid_argument("Invalid color mode: " + colorMode);
+    return ColorConverter(colorSpaceMap[config.colorMode],
+                          config.resolution.at(0), config.resolution.at(1));
+
   }
-}
-
-int
-DC1394::getIplDepth(const std::string& colorMode) const
-{
-  return getPairDepthChannels(colorMode).first;
-}
-
-int
-DC1394::getNChannels(const std::string& colorMode) const
-{
-  return getPairDepthChannels(colorMode).second;
 }
 
 bool
@@ -658,14 +646,11 @@ DC1394::setFeatures(const scene::DC1394& config, nodeid_t cameraNode)
 void
 DC1394::doWork()
 {
-  IplImageWrapper tmpFrame(this->frameSize, this->iplDepth, 3);
   boost::shared_ptr<IplImageWrapper> frameBuffer[2];
   int frameIdx = 0;
 
-  frameBuffer[0].reset(new IplImageWrapper(this->frameSize,
-                                           this->iplDepth, 3));
-  frameBuffer[1].reset(new IplImageWrapper(this->frameSize,
-                                           this->iplDepth, 3));
+  frameBuffer[0].reset(new IplImageWrapper(this->frameSize,this->iplDepth,3));
+  frameBuffer[1].reset(new IplImageWrapper(this->frameSize,this->iplDepth,3));
 
   while (true)
   {
@@ -673,21 +658,21 @@ DC1394::doWork()
 
     if (dc1394_dma_single_capture(&(this->dc1394Camera)) != DC1394_SUCCESS)
     {
-      // throw capture_image_error("Unable to capture a frame");
+      message(LogLevel::ERROR)
+        << ts_output::lock
+        << "Could not capture a frame in dc1394 camera uid: "
+        << this->uid << std::endl
+        << ts_output::unlock;
+
       dc1394_dma_done_with_buffer(&(this->dc1394Camera));
       continue;
     }
 
-    dc1394_bayer_decoding_8bit((uint8_t*)this->dc1394Camera.capture_buffer,
-                               (uint8_t*)tmpFrame.data(),
-                               this->dc1394Camera.frame_width,
-                               this->dc1394Camera.frame_height,
-                               LIBDC1394_COLOR_FILTER_RGGB,
-                               LIBDC1394_BAYER_METHOD_SIMPLE);
+    this->colorConverter((uint8_t*)this->dc1394Camera.capture_buffer,
+                         *frameBuffer[frameIdx]);
 
     dc1394_dma_done_with_buffer(&(this->dc1394Camera));
 
-    tmpFrame.convertColor(*frameBuffer[frameIdx], CV_RGB2BGR);
     updateCurrentFrame(frameBuffer[frameIdx]);
 
     frameIdx = (frameIdx+1) % 2;

@@ -83,7 +83,8 @@ namespace scene
 
     boost::optional<std::string> bayerMethod;
 
-    // os valores abaixo podem ser "off", "auto", ou um inteiro sem sinal
+    /// The order or color filter. One of rggb, gbrg, grbg or bggr.
+    boost::optional<std::string> colorFilter;
 
     /// An array with [(blue/u), (red/v)].
     boost::optional<boost::array<std::string, 2> > whiteBalance;

@@ -37,10 +37,7 @@ IF(WITH_DC1394V1 AND NOT DC1394V2_FOUND)
     SET(SUPPORTED_CAMERAS ${SUPPORTED_CAMERAS}
         "Cameras conform to the IEEE 1394-based Digital Camera Specification (using libdc1394v1).")
     ADD_DEFINITIONS(-DHAS_DC1394V1)
-    SET(silvver_cameras_SRCS ${silvver_cameras_SRCS}
-                             hardCameras/dc1394_1x.cpp
-                             hardCameras/conversions/conversions.c
-                             hardCameras/conversions/bayer.c)
+    SET(silvver_cameras_SRCS ${silvver_cameras_SRCS} hardCameras/dc1394_1x.cpp)
   ENDIF(DC1394V1_FOUND)
 ENDIF(WITH_DC1394V1 AND NOT DC1394V2_FOUND)
 

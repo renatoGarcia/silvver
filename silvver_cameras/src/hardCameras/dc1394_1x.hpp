@@ -16,8 +16,6 @@
 #ifndef _DC1394_1X_HPP_
 #define _DC1394_1X_HPP_
 
-#include "hardCamera.hpp"
-
 #include <boost/array.hpp>
 #include <boost/scoped_ptr.hpp>
 #include <boost/thread/thread.hpp>
@@ -27,9 +25,8 @@
 #include <libdc1394/dc1394_control.h>
 #include <libraw1394/raw1394.h>
 
-#include "../iplImageWrapper.hpp"
-
-#include "conversions/conversions.h"
+#include "colorConverter.hpp"
+#include "hardCamera.hpp"
 
 class DC1394: public HardCamera
 {
@@ -50,15 +47,13 @@ private:
   std::string findVideo1394Device(unsigned cardNumber);
 
   // Convert a float frameRate to an equivalent DC1394 frame rate
-  int getDc1394FrameRate(float frameRate) const;
+  static int getDc1394FrameRate(float frameRate);
 
-  unsigned getDc1394VideoMode(const std::string& colorMode) const;
+  static unsigned getDc1394VideoMode(const scene::DC1394& config);
 
-  std::pair<int,int> getPairDepthChannels(const std::string& colorMode) const;
+  static int getIplDepth(const std::string& colorMode);
 
-  int getIplDepth(const std::string& colorMode) const;
-
-  int getNChannels(const std::string& colorMode) const;
+  static ColorConverter createColorConverter(const scene::DC1394& config);
 
   /// Set all features of this camera.
   /// @param config The configurations of this camera.
@@ -104,6 +99,8 @@ private:
   bool                 bDc1394CameraCreated;
 
   const int videoMode;
+
+  ColorConverter colorConverter;
 
   boost::scoped_ptr<boost::thread> grabFrameThread;
 };
