@@ -18,6 +18,8 @@
 
 #include <boost/scoped_ptr.hpp>
 #include <boost/thread/thread.hpp>
+#include <boost/tuple/tuple.hpp>
+#include <map>
 
 #include <string>
 #include <string.h>
@@ -38,7 +40,12 @@ public:
 
 private:
 
+  /// Map to color space 
+  typedef std::map<std::string,boost::tuple<__u32,ColorSpace> > ColorFormatMap;
+
   static const int N_BUFFERS = 4;
+
+  static const ColorFormatMap COLOR_FORMAT;
 
   void doWork();
 
@@ -46,7 +53,7 @@ private:
   /// @return A string with the device path.
   std::string findDevice() const;
 
-  ColorConverter createColorConverter(const scene::V4L2& config);
+  ColorConverter createColorConverter(const scene::V4l2& config);
 
   void setFeatures(const scene::V4l2& config);
 

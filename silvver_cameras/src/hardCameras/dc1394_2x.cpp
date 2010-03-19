@@ -24,6 +24,7 @@
 #include <stdint.h>
 #include <utility>
 
+#include "../exceptions.hpp"
 #include "../iplImageWrapper.hpp"
 #include "../log.hpp"
 
@@ -41,43 +42,57 @@ DC1394::DC1394(const scene::DC1394& config)
   this->context = dc1394_new();
   if (!this->context)
   {
-    throw open_camera_error("Unable to create a libdc1394 context");
+    throw open_camera_error("Unable to create a libdc1394 context")
+      << info_cameraUid(this->uid);
   }
 
   this->camera = dc1394_camera_new(this->context,
                                    boost::lexical_cast<uint64_t>(this->uid));
   if (!this->camera)
   {
-    throw open_camera_error("Don't found camera with uid " + this->uid);
+    throw open_camera_error("Don't found specified camera")
+      << info_cameraUid(this->uid);
   }
 
   if (dc1394_video_set_iso_speed(this->camera, DC1394_ISO_SPEED_400))
   {
-    throw open_camera_error("Could not set 400Mbps iso speed");
+    throw open_camera_error("Could not set 400Mbps iso speed")
+      << info_cameraUid(this->uid);
   }
 
   if (dc1394_video_set_mode(camera, this->videoMode))
   {
-    throw open_camera_error("Could not set video mode");
+    throw open_camera_error("Could not set video mode")
+      << info_cameraUid(this->uid);
   }
 
   if (dc1394_video_set_framerate(camera,
                                  DC1394::getDc1394FrameRate(config.frameRate)))
   {
-    throw open_camera_error("Could not set framerate");
+    throw open_camera_error("Could not set framerate")
+      << info_cameraUid(this->uid);
   }
 
   if (dc1394_capture_setup(this->camera, DC1394::N_BUFFERS,
                            DC1394_CAPTURE_FLAGS_DEFAULT))
   {
-    throw open_camera_error("Could not setup camera. Make sure that the resolution and framerate are supported by your camera");
+    throw open_camera_error("Could not setup camera. Make sure that the resolution and framerate are supported by your camera")
+      << info_cameraUid(this->uid);
   }
 
-  this->setFeatures(config);
+  try
+  {
+    this->setFeatures(config);
+  }
+  catch(silvver_cameras_exception& e)
+  {
+    throw e << info_cameraUid(this->uid);
+  }
 
   if (dc1394_video_set_transmission(this->camera, DC1394_ON))
   {
-    throw open_camera_error("Could not start camera iso transmission");
+    throw open_camera_error("Could not start camera iso transmission")
+      << info_cameraUid(this->uid);
   }
   this->grabFrameThread.reset(new boost::thread(&DC1394::doWork, this));
 }
@@ -155,10 +170,10 @@ DC1394::getDc1394VideoMode(const scene::DC1394& config)
     return DC1394_VIDEO_MODE_1600x1200_MONO16;
   else
   {
-    throw open_camera_error("Invalid resolution " +
-                            boost::lexical_cast<std::string>(fw) + " x " +
-                            boost::lexical_cast<std::string>(fh) +
-                            " with color mode " + config.colorMode);
+    throw open_camera_error("Could not set resolution and color mode together")
+      << info_cameraUid(config.uid)
+      << info_resolution(config.resolution)
+      << info_colorMode(config.colorMode);
   }
 }
 
@@ -191,7 +206,8 @@ DC1394::getIplDepth(const std::string& colorMode)
   }
   else
   {
-    throw std::invalid_argument("Invalid color mode: " + colorMode);
+    throw invalid_argument("Invalid color mode")
+      << info_colorMode(colorMode);
   }
 }
 
@@ -232,54 +248,71 @@ DC1394::getDc1394FrameRate(const float frameRate)
   }
   else
   {
-    throw open_camera_error("Invalid frame rate " +
-                            boost::lexical_cast<std::string>(frameRate));
+    throw open_camera_error("Invalid frame rate")
+      << info_frameRate(frameRate);
   }
 }
 
 ColorConverter
 DC1394::createColorConverter(const scene::DC1394& config)
 {
-  std::map<std::string,ColorConverter::ColorSpace> colorSpaceMap;
-  colorSpaceMap["yuv411"] = ColorConverter::ColorSpace::YUV411;
-  colorSpaceMap["yuyv"] = ColorConverter::ColorSpace::YUYV;
-  colorSpaceMap["uyvy"] = ColorConverter::ColorSpace::UYVY;
-  colorSpaceMap["rgb8"] = ColorConverter::ColorSpace::RGB8;
-  colorSpaceMap["mono8"] = ColorConverter::ColorSpace::MONO8;
-  colorSpaceMap["mono16"] =ColorConverter::ColorSpace::MONO16;
+  std::map<std::string, ColorSpace> colorSpaceMap;
+  colorSpaceMap["yuv411"] = ColorSpace::YUV411;
+  colorSpaceMap["yuyv"] = ColorSpace::YUYV;
+  colorSpaceMap["uyvy"] = ColorSpace::UYVY;
+  colorSpaceMap["rgb8"] = ColorSpace::RGB8;
+  colorSpaceMap["mono8"] = ColorSpace::MONO8;
+  colorSpaceMap["mono16"] = ColorSpace::MONO16;
 
-  std::map<std::string,ColorConverter::BayerMethod> bayerMap;
-  bayerMap["nearest"] = ColorConverter::BayerMethod::NEAREST;
-  bayerMap["bilinear"] = ColorConverter::BayerMethod::BILINEAR;
+  std::map<std::string,BayerMethod> bayerMap;
+  bayerMap["nearest"] = BayerMethod::NEAREST;
+  bayerMap["bilinear"] = BayerMethod::BILINEAR;
 
-  std::map<std::string,ColorConverter::ColorFilter> colorFilterMap;
-  colorFilterMap["rggb"] = ColorConverter::ColorFilter::RGGB;
-  colorFilterMap["gbrg"] = ColorConverter::ColorFilter::GBRG;
-  colorFilterMap["grbg"] = ColorConverter::ColorFilter::GRBG;
-  colorFilterMap["bggr"] = ColorConverter::ColorFilter::BGGR;
+  std::map<std::string,ColorFilter> colorFilterMap;
+  colorFilterMap["rggb"] = ColorFilter::RGGB;
+  colorFilterMap["gbrg"] = ColorFilter::GBRG;
+  colorFilterMap["grbg"] = ColorFilter::GRBG;
+  colorFilterMap["bggr"] = ColorFilter::BGGR;
 
   if (config.bayerMethod)
   {
-    if (config.colorMode == "mono8")
+    try
     {
-      return ColorConverter(ColorConverter::ColorSpace::RAW8,
-                            config.resolution.at(0), config.resolution.at(1),
-                            colorFilterMap[*(config.colorFilter)],
-                            bayerMap[*(config.bayerMethod)]);
+      if (config.colorMode == "mono8")
+      {
+        return ColorConverter(ColorSpace::RAW8,
+                              config.resolution.at(0), config.resolution.at(1),
+                              colorFilterMap[*(config.colorFilter)],
+                              bayerMap[*(config.bayerMethod)]);
+      }
+      else if (config.colorMode == "mono16")
+      {
+        return ColorConverter(ColorSpace::RAW16,
+                              config.resolution.at(0), config.resolution.at(1),
+                              colorFilterMap[*(config.colorFilter)],
+                              bayerMap[*(config.bayerMethod)]);
+      }
     }
-    else if (config.colorMode == "mono16")
+    catch (invalid_argument& e)
     {
-      return ColorConverter(ColorConverter::ColorSpace::RAW16,
-                            config.resolution.at(0), config.resolution.at(1),
-                            colorFilterMap[*(config.colorFilter)],
-                            bayerMap[*(config.bayerMethod)]);
+      throw e << info_cameraUid(config.uid)
+              << info_colorMode(config.colorMode)
+              << info_bayer(*(config.bayerMethod))
+              << info_colorFilter(*(config.colorFilter));
     }
   }
   else
   {
-    return ColorConverter(colorSpaceMap[config.colorMode],
-                          config.resolution.at(0), config.resolution.at(1));
-
+    try
+    {
+      return ColorConverter(colorSpaceMap[config.colorMode],
+                            config.resolution.at(0), config.resolution.at(1));
+    }
+    catch (invalid_argument& e)
+    {
+      throw e << info_cameraUid(config.uid)
+              << info_colorMode(config.colorMode);
+    }
   }
 }
 
@@ -292,9 +325,8 @@ DC1394::setPower(dc1394feature_info_t featureInfo,
     dc1394switch_t power = (strValue=="off") ? DC1394_OFF : DC1394_ON;
     if (dc1394_feature_set_power(this->camera, featureInfo.id, power))
     {
-      throw camera_parameter_error("Error on setting on/off mode to " +
-                                   featureName + " feature of dc1394 camera "
-                                   "uid: " + this->uid);
+      throw camera_parameter_error("Error on setting on/off mode of a feature")
+        << info_featureName(featureName);
     }
 
     if (power == DC1394_ON)
@@ -308,9 +340,8 @@ DC1394::setPower(dc1394feature_info_t featureInfo,
   }
   else if (strValue == "off") //Is not on/off capable and tried set off
   {
-    throw camera_parameter_error("Trying set on/off mode to " + featureName +
-                                 " feature of dc1394 camera uid: " + this->uid
-                                 + ", but the camera is not capable.");
+    throw camera_parameter_error("Feature is not on/off mode capable")
+      << info_featureName(featureName);
   }
 
   // If here the feature cannot be set off
@@ -324,9 +355,8 @@ DC1394::setAutoMode(dc1394feature_info_t featureInfo,
   dc1394feature_modes_t featureModes;
   if (dc1394_feature_get_modes(this->camera, featureInfo.id, &featureModes))
   {
-    throw camera_parameter_error("Error on queryng auto mode capability of " +
-                                 featureName + " feature of dc1394 camera "
-                                 "uid: " + this->uid);
+    throw camera_parameter_error("Error on queryng auto mode capability of a feature")
+      << info_featureName(featureName);
   }
 
   dc1394bool_t hasAutoMode = DC1394_FALSE;
@@ -344,9 +374,8 @@ DC1394::setAutoMode(dc1394feature_info_t featureInfo,
                         DC1394_FEATURE_MODE_AUTO : DC1394_FEATURE_MODE_MANUAL;
     if (dc1394_feature_set_mode(this->camera, featureInfo.id, mode))
     {
-      throw camera_parameter_error("Error on setting auto mode to " +
-                                   featureName + " feature of dc1394 camera "
-                                   "uid: " + this->uid);
+      throw camera_parameter_error("Error on setting auto mode to a feature")
+        << info_featureName(featureName);
     }
 
     if (mode == DC1394_FEATURE_MODE_AUTO)
@@ -360,9 +389,8 @@ DC1394::setAutoMode(dc1394feature_info_t featureInfo,
   }
   else if (strValue == "auto") // Is not auto capable and tried set auto mode
   {
-    throw camera_parameter_error("Trying set auto mode to " + featureName +
-                                 " feature of dc1394 camera uid: " + this->uid
-                                 + ", but the camera is not capable.");
+    throw camera_parameter_error("Feature is not auto mode capable")
+      << info_featureName(featureName);
   }
 
   //If here the feature cannot be set auto
@@ -380,23 +408,23 @@ DC1394::setFeatureValue(dc1394feature_info_t featureInfo,
   }
   catch (const boost::bad_lexical_cast& error)
   {
-    throw camera_parameter_error("Invalid value of " + featureName + " feature"
-                                 " of dc1394 camera uid: " + this->uid);
+    throw camera_parameter_error("Invalid feature value type")
+      << info_featureName(featureName);
   }
 
   if(value<(unsigned)featureInfo.min || value>(unsigned)featureInfo.max)
   {
-    throw camera_parameter_error
-      ("The value of " + featureName + " feature of dc1394 camera uid " +
-       this->uid + " must be between " +
-       boost::lexical_cast<std::string>(featureInfo.min) + " and " +
-       boost::lexical_cast<std::string>(featureInfo.max));
+    throw camera_parameter_error("Feature value out of rage")
+      << info_featureName(featureName)
+      << info_featureRange(boost::lexical_cast<std::string>(featureInfo.min) +
+                           '-' +
+                           boost::lexical_cast<std::string>(featureInfo.max));
   }
 
   if (dc1394_feature_set_value(this->camera, featureInfo.id, value))
   {
-    throw camera_parameter_error("Error on setting " + featureName + " feature"
-                                 " to dc1394 camera uid: " + this->uid);
+    throw camera_parameter_error("Error on setting feature")
+      << info_featureName(featureName);
   }
 }
 
@@ -412,24 +440,24 @@ DC1394::setWhiteBalance(dc1394feature_info_t featureInfo,
   }
   catch (const boost::bad_lexical_cast& error)
   {
-    throw camera_parameter_error("Invalid value in white balance feature "
-                                 "of dc1394 camera uid: " + this->uid);
+    throw camera_parameter_error("Invalid feature value type")
+      << info_featureName("White balance");
   }
 
   if(valueB<(unsigned)featureInfo.min || valueB>(unsigned)featureInfo.max ||
      valueR<(unsigned)featureInfo.min || valueR>(unsigned)featureInfo.max)
   {
-    throw camera_parameter_error
-      ("The values in white balance feature of dc1394 camera uid " +
-       this->uid + " must be between " +
-       boost::lexical_cast<std::string>(featureInfo.min) + " and " +
-       boost::lexical_cast<std::string>(featureInfo.max));
+    throw camera_parameter_error("Feature value out of rage")
+      << info_featureName("White balance")
+      << info_featureRange(boost::lexical_cast<std::string>(featureInfo.min) +
+                           '-' +
+                           boost::lexical_cast<std::string>(featureInfo.max));
   }
 
   if (dc1394_feature_whitebalance_set_value(this->camera, valueB, valueR))
   {
-    throw open_camera_error("Error on setting white balance to dc1394 "
-                            "camera uid: " + this->uid);
+    throw camera_parameter_error("Error on setting feature")
+      << info_featureName("White balance");
   }
 }
 
@@ -446,26 +474,26 @@ DC1394::setWhiteShading(dc1394feature_info_t featureInfo,
   }
   catch (const boost::bad_lexical_cast& error)
   {
-    throw camera_parameter_error("Invalid value in white shading feature "
-                                 "of dc1394 camera uid: " + this->uid);
+    throw camera_parameter_error("Invalid feature value type")
+      << info_featureName("White shading");
   }
 
   if(valueR<(unsigned)featureInfo.min || valueR>(unsigned)featureInfo.max ||
      valueG<(unsigned)featureInfo.min || valueG>(unsigned)featureInfo.max ||
      valueB<(unsigned)featureInfo.min || valueB>(unsigned)featureInfo.max)
   {
-    throw camera_parameter_error
-      ("The values in white shading feature of dc1394 camera uid " +
-       this->uid + " must be between " +
-       boost::lexical_cast<std::string>(featureInfo.min) + " and " +
-       boost::lexical_cast<std::string>(featureInfo.max));
+    throw camera_parameter_error("Feature value out of rage")
+      << info_featureName("White shading")
+      << info_featureRange(boost::lexical_cast<std::string>(featureInfo.min) +
+                           '-' +
+                           boost::lexical_cast<std::string>(featureInfo.max));
   }
 
   if (dc1394_feature_whiteshading_set_value(this->camera,
                                             valueR, valueG, valueB))
   {
-    throw open_camera_error("Error on setting white shading to dc1394 "
-                            "camera uid: " + this->uid);
+    throw camera_parameter_error("Error on setting feature")
+      << info_featureName("White shading");
   }
 }
 
@@ -550,16 +578,14 @@ DC1394::setFeatures(const scene::DC1394& config)
     featureInfo.id = featureTuple.get<0>();
     if (dc1394_feature_get(this->camera, &featureInfo))
     {
-      throw camera_parameter_error("Could not get information about " +
-                                   featureName + " feature of dc1394 camera "
-                                   "uid: " + this->uid);
+      throw camera_parameter_error("Could not get feature informations")
+        << info_featureName(featureName);
     }
 
     if (!featureInfo.available)
     {
-      throw camera_parameter_error("The " + featureName + " feature is not "
-                                   "avaible in dc1394 camera uid: " +
-                                   this->uid);
+      throw camera_parameter_error("feature not available")
+        << info_featureName(featureName);
     }
 
     bool isOn(false);
@@ -581,16 +607,14 @@ DC1394::setFeatures(const scene::DC1394& config)
     featureInfo.id = DC1394_FEATURE_WHITE_BALANCE;
     if (dc1394_feature_get(this->camera, &featureInfo))
     {
-      throw camera_parameter_error("Could not get information about white "
-                                   "balance feature of dc1394 camera uid: " +
-                                   this->uid);
+      throw camera_parameter_error("Could not get feature informations")
+        << info_featureName("White balance");
     }
 
     if (!featureInfo.available)
     {
-      throw camera_parameter_error("The white balance feature is not "
-                                   "avaible in dc1394 camera uid: " +
-                                   this->uid);
+      throw camera_parameter_error("Feature not available")
+        << info_featureName("White balance");
     }
 
     bool isOn(false);
@@ -614,16 +638,14 @@ DC1394::setFeatures(const scene::DC1394& config)
     featureInfo.id = DC1394_FEATURE_WHITE_SHADING;
     if (dc1394_feature_get(this->camera, &featureInfo))
     {
-      throw camera_parameter_error("Could not get information about white "
-                                   "shading feature of dc1394 camera uid: " +
-                                   this->uid);
+      throw camera_parameter_error("Could not get feature informations")
+        << info_featureName("White shading");
     }
 
     if (!featureInfo.available)
     {
-      throw camera_parameter_error("The white shading feature is not "
-                                   "avaible in dc1394 camera uid: " +
-                                   this->uid);
+      throw camera_parameter_error("Feature not available")
+        << info_featureName("White shading");
     }
 
     bool isOn(false);

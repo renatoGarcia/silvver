@@ -15,7 +15,8 @@
 
 #include "colorConverter.hpp"
 
-#include <stdexcept>
+#include "../exceptions.hpp"
+#include "../log.hpp"
 
 ColorConverter::ColorConverter(const ColorSpace& colorSpace,
                                const unsigned width, const unsigned height)
@@ -43,11 +44,12 @@ ColorConverter::ColorConverter(const ColorSpace& colorSpace,
   case ColorSpace::MONO16:
     this->convertFunc = &ColorConverter::mono16;
     break;
+  case ColorSpace::RAW8:
+  case ColorSpace::RAW16:
+    throw invalid_argument("Using color space RAW8 or RAW16 without inform "
+                           "the bayer method");
   default:
-    throw std::invalid_argument("When using color space RAW8 or RAW16, the "
-                                "color filter and the bayer method must be "
-                                "informed.");
-
+    throw invalid_argument("Invalid color space");
   }
 }
 
@@ -70,6 +72,8 @@ ColorConverter::ColorConverter(const ColorSpace& colorSpace,
     case BayerMethod::BILINEAR:
       this->convertFunc = &ColorConverter::bayer_Bilinear<uint8_t>;
       break;
+    default:
+      throw invalid_argument("Invalid bayer method");
     }
   }
   else if (colorSpace == ColorSpace::RAW16)
@@ -82,13 +86,14 @@ ColorConverter::ColorConverter(const ColorSpace& colorSpace,
     case BayerMethod::BILINEAR:
       this->convertFunc = &ColorConverter::bayer_Bilinear<uint16_t>;
       break;
+    default:
+      throw invalid_argument("Invalid bayer method");
     }
   }
   else
   {
-    throw std::invalid_argument("The color space to bayer operations must be "
-                                "either RAW8 or RAW16, tried use " +
-                                std::string(bayer.str()));
+    throw invalid_argument("The color space to bayer operations must be "
+                           "either RAW8 or RAW16");
   }
 }
 

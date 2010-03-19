@@ -20,7 +20,6 @@
 #include <boost/noncopyable.hpp>
 #include <boost/shared_ptr.hpp>
 #include <boost/thread/shared_mutex.hpp>
-#include <exception>
 #include <string>
 #include <vector>
 
@@ -41,40 +40,6 @@
  */
 class HardCamera: public boost::noncopyable, public Subject
 {
-public:
-
-  class hard_camera_error: public std::exception
-  {
-  public:
-    hard_camera_error(const std::string& whatArg) :msg(whatArg) {}
-    ~hard_camera_error() throw() {}
-    const char* what() const throw() { return msg.c_str(); }
-  private:
-    const std::string msg;
-  };
-
-  class open_camera_error: public hard_camera_error
-  {
-  public:
-    open_camera_error(const std::string& whatArg)
-      :hard_camera_error(whatArg){}
-  };
-
-  /// Threw when a parameter or feature is invalid
-  class camera_parameter_error: public hard_camera_error
-  {
-  public:
-    camera_parameter_error(const std::string& whatArg)
-      :hard_camera_error(whatArg){}
-  };
-
-  class capture_image_error: public hard_camera_error
-  {
-  public:
-    capture_image_error(const std::string& whatArg)
-      :hard_camera_error(whatArg){}
-  };
-
 public:
 
   virtual ~HardCamera();

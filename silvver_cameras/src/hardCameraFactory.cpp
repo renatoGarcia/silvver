@@ -15,7 +15,7 @@
 
 #include "hardCameraFactory.hpp"
 
-#include <stdexcept>
+#include "exceptions.hpp"
 
 #include "hardCameras/pseudoCamera.hpp"
 
@@ -85,10 +85,17 @@ HardCamera*
 HardCameraFactory::ConstructHardCamera::operator()(const scene::DC1394& config) const
 {
 #ifdef HAS_DC1394
-  return (new DC1394(config));
+  try
+  {
+    return (new DC1394(config));
+  }
+  catch(silvver_cameras_exception& e)
+  {
+    throw e << info_cameraModel("DC1394");
+  }
 #else
-  throw std::invalid_argument("This program don't was compiled with support "
-                              "to ieee 1394 cameras");
+  throw invalid_argument("This program don't was compiled with support "
+                         "to ieee 1394 cameras");
 #endif
 }
 
@@ -96,9 +103,16 @@ HardCamera*
 HardCameraFactory::ConstructHardCamera::operator()(const scene::V4l2& config) const
 {
 #ifdef HAS_V4L2
-  return (new V4L2(config));
+  try
+  {
+    return (new V4L2(config));
+  }
+  catch(silvver_cameras_exception& e)
+  {
+    throw e << info_cameraModel("V4l2");
+  }
 #else
-  throw std::invalid_argument("This program don't was compiled with support "
-                              "to v4l2 cameras");
+  throw invalid_argument("This program don't was compiled with support "
+                         "to v4l2 cameras");
 #endif
 }

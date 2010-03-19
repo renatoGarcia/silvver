@@ -18,7 +18,6 @@
 
 #include <boost/array.hpp>
 #include <boost/optional.hpp>
-#include <stdexcept>
 #include <string>
 
 extern "C"
@@ -33,34 +32,11 @@ extern "C"
 class CfParser
 {
 public:
-
-  class file_parsing_error: public std::logic_error
-  {
-  public:
-    file_parsing_error(const std::string& whatArg)
-      :logic_error(whatArg){};
-  };
-
-  class field_read_error: public file_parsing_error
-  {
-  public:
-    field_read_error(const std::string& whatArg)
-      :file_parsing_error(whatArg){};
-  };
-
-  class missing_field: public file_parsing_error
-  {
-  public:
-    missing_field(const std::string& whatArg)
-      :file_parsing_error(whatArg){};
-  };
-
   CfParser();
 
   scene::Scene parseFile(const std::string& configFile);
 
 private:
-
   scene::Scene sc;
 
   void getTop(double& output, lua_State* L) const;

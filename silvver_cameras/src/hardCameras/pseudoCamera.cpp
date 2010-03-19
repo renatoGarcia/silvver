@@ -15,6 +15,7 @@
 
 #include "pseudoCamera.hpp"
 
+#include "../exceptions.hpp"
 #include "../iplImageWrapper.hpp"
 #include "../log.hpp"
 
@@ -32,8 +33,8 @@ PseudoCamera::PseudoCamera(const scene::PseudoCamera& config)
 {
   if(!bfs::is_directory(this->path))
   {
-    throw camera_parameter_error(this->path.directory_string() +
-                                 " is not a directory");
+    throw open_camera_error(this->path.directory_string() +
+                            " is not a directory");
   }
 
   this->dirIterator = bfs::directory_iterator(this->path);
@@ -91,7 +92,7 @@ PseudoCamera::doWork()
         frameBuffer[frameIdx]->loadImage(dirIterator->path().file_string(),
                                          CV_LOAD_IMAGE_COLOR);
       }
-      catch (IplImageWrapper::load_image_error& e)
+      catch (load_file_error& e)
       {
         message(LogLevel::WARN)
           << ts_output::lock

@@ -21,6 +21,8 @@
 #include "connection.hpp"
 #include "cfParser.hpp"
 #include "abstractCameraFactory.hpp"
+#include "log.hpp"
+#include "exceptions.hpp"
 
 SceneMounter::SceneMounter(const std::string& serverIp,
                            const int receptionistPort,
@@ -45,7 +47,16 @@ SceneMounter::mount()
   {
     BOOST_FOREACH(target, scene.targets)
     {
-      this->constructAbstractCamera(camera, target);
+      try
+      {
+        this->constructAbstractCamera(camera, target);
+      }
+      catch(const silvver_cameras_exception& e)
+      {
+        message(LogLevel::ERROR)
+          << "[Fatal error]\n" << errorsInfo2string(e) << std::endl;
+        exit(EXIT_FAILURE);
+      }
     }
   }
 }

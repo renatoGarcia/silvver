@@ -119,9 +119,11 @@ namespace scene
     /// connected in computer.
     unsigned uid;
 
+    /// The color mode of camera. One of:
+    /// rgb1, r444, rgbo, rgbp, rgbq, rgbr, bgr3, rgb3, bgr4, rgb4, y444, yuvo,
+    /// yuvp, yuv4, grey, y16, yuyv, uyvy, y41p, yv12, yu12, yvu9, yuv9, 422p,
+    /// 411p, nv12, nv21, mjpg.
     std::string colorMode;
-
-    boost::optional<std::string> bayerMethod;
 
     /// The descriptions of below controls was grabbed of
     /// http://v4l2spec.bytesex.org/spec/x542.htm

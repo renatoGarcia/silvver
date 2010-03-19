@@ -127,6 +127,8 @@ function Webcam(parameters)
     camera.radial_coef = parameters.radial_coef
     camera.tangential_coef = parameters.tangential_coef
 
+    camera.color_mode = parameters.color_mode
+
     camera.translation_vector = __getOptional(parameters.translation_vector,
                                               {0, 0, 0})
     camera.rotation_matrix = __getOptional(parameters.rotation_matrix,
@@ -135,9 +137,6 @@ function Webcam(parameters)
                                             0, 0, 1})
 
     camera.resolution = __getOptional(parameters.resolution, {640, 480})
-
-    camera.color_mode = __getOptional(parameters.color_mode, 'yuv')
-    camera.bayer_method = parameters.bayer_method -- Optional
 
     -- The values below are optionals, they can be nil
     camera.brightness                = parameters.brightness

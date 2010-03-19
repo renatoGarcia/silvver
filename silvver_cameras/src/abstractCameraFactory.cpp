@@ -16,8 +16,8 @@
 #include "abstractCameraFactory.hpp"
 
 #include <boost/variant/get.hpp>
-#include <stdexcept>
 
+#include "exceptions.hpp"
 #include "processorOptions.hpp"
 
 #include "abstractCameras/artkpCamera.hpp"
@@ -41,7 +41,7 @@ AbstractCameraFactory::create(const scene::Camera& cameraConfig,
   }
   else
   {
-    throw std::invalid_argument("Unknown target type");
+    throw invalid_argument("Unknown target type");
   }
 
   return abstractCamera;

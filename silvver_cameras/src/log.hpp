@@ -22,6 +22,7 @@
 
 BOOST_ENUM(LogLevel,
            (TRACE)
+           (DEBUG)
            (INFO)
            (WARN)
            (ERROR)

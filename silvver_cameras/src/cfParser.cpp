@@ -17,6 +17,8 @@
 
 #include <boost/lexical_cast.hpp>
 
+#include "exceptions.hpp"
+
 CfParser::CfParser()
 {}
 
@@ -25,11 +27,11 @@ CfParser::getTop(double& output, lua_State* L) const
 {
   if (lua_isnil(L, -1))
   {
-    throw missing_field("");
+    throw missing_field("Missing field");
   }
   else if (!lua_isnumber(L, -1))
   {
-    throw field_read_error("is not a number");
+    throw type_error("Field is not a number");
   }
   else
   {
@@ -66,11 +68,11 @@ CfParser::getTop(bool& output, lua_State* L) const
 {
   if (lua_isnil(L, -1))
   {
-    throw missing_field("");
+    throw missing_field("Missing field");
   }
   else if (!lua_isboolean(L, -1))
   {
-    throw field_read_error("is not a boolean");
+    throw type_error("Field is not a boolean");
   }
   else
   {
@@ -83,11 +85,11 @@ CfParser::getTop(std::string& output, lua_State* L) const
 {
   if (lua_isnil(L, -1))
   {
-    throw missing_field("");
+    throw missing_field("Missing field");
   }
   else if (!lua_isstring(L, -1))
   {
-    throw field_read_error("is not a string");
+    throw type_error("Field is not a string");
   }
   else
   {
@@ -101,11 +103,11 @@ CfParser::getTop(boost::array<Type, nItens>& output, lua_State* L) const
 {
   if (lua_isnil(L, -1))
   {
-    throw missing_field("");
+    throw missing_field("Missing field");
   }
   if (!lua_istable(L, -1))
   {
-    throw field_read_error("is not an array");
+    throw type_error("Field is not an array");
   }
 
   for (int i = 1; i <= nItens; ++i)
@@ -118,19 +120,10 @@ CfParser::getTop(boost::array<Type, nItens>& output, lua_State* L) const
       getTop(output.at(i-1), L);
       lua_pop(L, 1); // Pop the current item
     }
-    catch (missing_field& e)
+    catch (file_parsing_error& e)
     {
-      lua_pop(L, 1); // Pop the current nil item
-
-      // The table is not nil, thus throws a field_read_error
-      throw field_read_error("has not the array index " +
-                             boost::lexical_cast<std::string>(i));
-    }
-    catch (field_read_error& e)
-    {
-      lua_pop(L,1); // Pop the current wrong item
-      throw field_read_error(",index " + boost::lexical_cast<std::string>(i) +
-                             " " + e.what());
+      lua_pop(L, 1); // Pop the current failed item
+      throw e << info_arrayIndex(i);
     }
   }
 }
@@ -146,16 +139,10 @@ CfParser::readValue(Type& output,
     getTop(output, L);
     lua_pop(L, 1);
   }
-  catch(missing_field& e)
+  catch (file_parsing_error& e)
   {
-    lua_pop(L, 1);
-    throw missing_field("An instance of field <" + fieldName +
-                        "> was not found in config file");
-  }
-  catch(field_read_error& e)
-  {
-    lua_pop(L, 1);
-    throw field_read_error("The field <" + fieldName + "> " + e.what());
+    lua_pop(L, 1); // Pop the current failed field
+    throw e << info_fieldName(fieldName);
   }
 }
 
@@ -177,10 +164,10 @@ CfParser::readValue(boost::optional<Type>& output,
     output.reset();
     lua_pop(L, 1);
   }
-  catch(field_read_error& e)
+  catch(type_error& e)
   {
     lua_pop(L, 1);
-    throw field_read_error("The field <" + fieldName + "> " + e.what());
+    throw;
   }
 }
 
@@ -222,7 +209,8 @@ CfParser::readCamera(lua_State* L)
   }
   else
   {
-    throw file_parsing_error("Unknown hardware camera name");
+    throw file_parsing_error("Unknown driver name")
+      << info_fieldName("__driver");
   }
 
   readValue(camera.translationVector, L, "translation_vector");
@@ -301,7 +289,6 @@ CfParser::readV4l2Config(lua_State* L)
 
   readValue(v4l2.uid, L, "identifier");
   readValue(v4l2.colorMode, L, "color_mode");
-  readValue(v4l2.bayerMethod, L, "bayer_method");
 
   readValue(v4l2.brightness, L, "brightness");
   readValue(v4l2.contrast, L, "contrast");
@@ -340,7 +327,8 @@ CfParser::readTarget(lua_State* L)
   }
   else
   {
-    throw file_parsing_error("Unknown target system name");
+    throw file_parsing_error("Unknown target system name")
+      << info_fieldName("__type");
   }
 
   this->sc.targets.push_back(target);
@@ -390,21 +378,23 @@ CfParser::parseFile(const std::string& configFile)
 
   if (luaL_dofile(L, configFile.c_str()))
   {
-    throw std::invalid_argument("Error on loading config file, " +
-                                std::string(lua_tostring(L, -1)));
+    throw load_file_error("Error on loading lua config file, " +
+                           std::string(lua_tostring(L, -1)));
   }
 
   lua_getglobal(L, "scene");
   if (!lua_istable(L, -1))
   {
-    throw file_parsing_error("Don't found scene variable in config file");
+    throw type_error("Field is not a table")
+      << info_fieldName("scene");
   }
 
   //------------------------------------ Cameras
   lua_getfield(L, -1, "cameras");
   if (!lua_istable(L, -1))
   {
-    throw file_parsing_error("Don't found cameras table in config file");
+    throw type_error("Field is not a table")
+      << info_fieldName("cameras");
   }
 
   lua_pushnil(L);// first key

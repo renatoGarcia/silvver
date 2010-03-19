@@ -18,22 +18,16 @@
 
 #include <boost/tuple/tuple.hpp>
 #include <cstddef>
-#include <stdexcept>
 #include <string>
 
 #include <opencv/cv.h>
 #include <opencv/highgui.h>
 
+#include "exceptions.hpp"
+
 class IplImageWrapper
 {
 public:
-
-  class load_image_error : public std::runtime_error
-  {
-  public:
-    load_image_error(const std::string& whatArg)
-      :runtime_error(whatArg){}
-  };
 
   /// Tuple with image size, depth and number of channels.
   typedef boost::tuple<CvSize,int,int> IplParameters;
@@ -63,7 +57,7 @@ public:
   operator IplImage*();
 
   /// Load an image in disk.
-  /// This method can throw load_image_error.
+  /// This method can throw load_file_error.
   /// @param filename The path to image.
   /// @param iscolor Same as cvLoadImage,
   ///                CV_LOAD_IMAGE_<COLOR|GRAYSCALE|UNCHANGED>.
@@ -177,7 +171,8 @@ IplImageWrapper::loadImage(const std::string& filename, int iscolor)
 
   if (this->iplImage == NULL)
   {
-    throw load_image_error("Unable to load image " + filename);
+    throw load_file_error("Unable to load image ")
+      << boost::errinfo_file_name(filename);
   }
 }
 

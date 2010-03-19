@@ -23,30 +23,31 @@
 
 #define restrict __restrict
 
+BOOST_ENUM(ColorSpace,
+           (NONE)
+           (RGB8)
+           (YUV411)
+           (YUYV)
+           (UYVY)
+           (MONO8)
+           (MONO16)
+           (RAW8)
+           (RAW16));
+
+BOOST_ENUM(ColorFilter,
+           (NONE)
+           (RGGB)
+           (GBRG)
+           (GRBG)
+           (BGGR));
+
+BOOST_ENUM(BayerMethod,
+           (NONE)
+           (NEAREST)
+           (BILINEAR));
+
 class ColorConverter
 {
-public:
-
-  BOOST_ENUM(ColorSpace,
-             (RGB8)
-             (YUV411)
-             (YUYV)
-             (UYVY)
-             (MONO8)
-             (MONO16)
-             (RAW8)
-             (RAW16));
-
-  BOOST_ENUM(ColorFilter,
-             (RGGB)
-             (GBRG)
-             (GRBG)
-             (BGGR));
-
-  BOOST_ENUM(BayerMethod,
-             (NEAREST)
-             (BILINEAR));
-
 public:
 
   ColorConverter(const ColorSpace& colorSpace,
