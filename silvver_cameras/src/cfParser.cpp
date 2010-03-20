@@ -27,11 +27,11 @@ CfParser::getTop(double& output, lua_State* L) const
 {
   if (lua_isnil(L, -1))
   {
-    throw missing_field("Missing field");
+    throw missing_field() << info_what("Missing field");
   }
   else if (!lua_isnumber(L, -1))
   {
-    throw type_error("Field is not a number");
+    throw type_error() << info_what("Field is not a number");
   }
   else
   {
@@ -68,11 +68,11 @@ CfParser::getTop(bool& output, lua_State* L) const
 {
   if (lua_isnil(L, -1))
   {
-    throw missing_field("Missing field");
+    throw missing_field() << info_what("Missing field");
   }
   else if (!lua_isboolean(L, -1))
   {
-    throw type_error("Field is not a boolean");
+    throw type_error() << info_what("Field is not a boolean");
   }
   else
   {
@@ -85,11 +85,11 @@ CfParser::getTop(std::string& output, lua_State* L) const
 {
   if (lua_isnil(L, -1))
   {
-    throw missing_field("Missing field");
+    throw missing_field() << info_what("Missing field");
   }
   else if (!lua_isstring(L, -1))
   {
-    throw type_error("Field is not a string");
+    throw type_error() << info_what("Field is not a string");
   }
   else
   {
@@ -103,11 +103,11 @@ CfParser::getTop(boost::array<Type, nItens>& output, lua_State* L) const
 {
   if (lua_isnil(L, -1))
   {
-    throw missing_field("Missing field");
+    throw missing_field() << info_what("Missing field");
   }
   if (!lua_istable(L, -1))
   {
-    throw type_error("Field is not an array");
+    throw type_error() << info_what("Field is not an array");
   }
 
   for (int i = 1; i <= nItens; ++i)
@@ -209,7 +209,8 @@ CfParser::readCamera(lua_State* L)
   }
   else
   {
-    throw file_parsing_error("Unknown driver name")
+    throw file_parsing_error()
+      << info_what("Unknown driver name")
       << info_fieldName("__driver");
   }
 
@@ -327,7 +328,8 @@ CfParser::readTarget(lua_State* L)
   }
   else
   {
-    throw file_parsing_error("Unknown target system name")
+    throw file_parsing_error()
+      << info_what("Unknown target system name")
       << info_fieldName("__type");
   }
 
@@ -378,14 +380,16 @@ CfParser::parseFile(const std::string& configFile)
 
   if (luaL_dofile(L, configFile.c_str()))
   {
-    throw load_file_error("Error on loading lua config file, " +
-                           std::string(lua_tostring(L, -1)));
+    throw load_file_error()
+      << info_what("Error on loading lua config file, " +
+                   std::string(lua_tostring(L, -1)));
   }
 
   lua_getglobal(L, "scene");
   if (!lua_istable(L, -1))
   {
-    throw type_error("Field is not a table")
+    throw type_error()
+      << info_what("Field is not a table")
       << info_fieldName("scene");
   }
 
@@ -393,14 +397,22 @@ CfParser::parseFile(const std::string& configFile)
   lua_getfield(L, -1, "cameras");
   if (!lua_istable(L, -1))
   {
-    throw type_error("Field is not a table")
+    throw type_error()
+      << info_what("Field is not a table")
       << info_fieldName("cameras");
   }
 
   lua_pushnil(L);// first key
   while (lua_next(L, -2) != 0)
   {
-    readCamera(L);
+    try
+    {
+      readCamera(L);
+    }
+    catch (file_parsing_error& e)
+    {
+      throw e << info_cameraIndex(lua_tonumber(L, -2));
+    }
 
     // removes 'value', keeps 'key' for next iteration
     lua_pop(L, 1);
@@ -411,13 +423,21 @@ CfParser::parseFile(const std::string& configFile)
   lua_getfield(L, -1, "targets");
   if (!lua_istable(L, -1))
   {
-    throw file_parsing_error("Don't found targets table in config file");
+    throw file_parsing_error()
+      << info_what("Don't found targets table in config file");
   }
 
   lua_pushnil(L);// first key
   while (lua_next(L, -2) != 0)
   {
-    readTarget(L);
+    try
+    {
+      readTarget(L);
+    }
+    catch (file_parsing_error& e)
+    {
+      throw e << info_targetIndex(lua_tonumber(L, -2));
+    }
 
     // removes 'value', keeps 'key' for next iteration
     lua_pop(L, 1);

@@ -20,8 +20,8 @@
 std::string errorsInfo2string(const silvver_cameras_exception& e)
 {
   std::ostringstream ostr;
-  if (!e.message.empty())
-    ostr << "What: " << e.what() << std::endl;
+  if (const std::string* mi = boost::get_error_info<info_what>(e))
+    ostr << "What: " << *mi << std::endl;
   if (const std::string* mi = boost::get_error_info<info_cameraModel>(e))
     ostr << "Camera model: " << *mi << std::endl;
   if (const std::string* mi = boost::get_error_info<info_cameraUid>(e))
@@ -44,43 +44,29 @@ std::string errorsInfo2string(const silvver_cameras_exception& e)
     ostr << "Bayer method: " << *mi << std::endl;
   if (const std::string* mi = boost::get_error_info<info_colorFilter>(e))
     ostr << "Color filter: " << *mi << std::endl;
+
+  if (const int* mi = boost::get_error_info<info_cameraIndex>(e))
+    ostr << "Camera index: " << *mi << std::endl;
+  if (const int* mi = boost::get_error_info<info_targetIndex>(e))
+    ostr << "Target index: " << *mi << std::endl;
   if (const std::string* mi = boost::get_error_info<info_fieldName>(e))
     ostr << "Field name: " << *mi << std::endl;
   if (const int* mi = boost::get_error_info<info_arrayIndex>(e))
     ostr << "Array index: " << *mi << std::endl;
 
+
   return ostr.str();
 }
-
-silvver_cameras_exception::silvver_cameras_exception(const std::string& message)
-  :message(message)
-{}
 
 char const *
 silvver_cameras_exception::what() const throw()
 {
-  return this->message.c_str();
+  if (const std::string* mi = boost::get_error_info<info_what>(*this))
+  {
+    return mi->c_str();
+  }
+  else
+  {
+    return "";
+  }
 }
-
-silvver_cameras_exception::~silvver_cameras_exception() throw()
-{}
-
-invalid_argument::invalid_argument(const std::string& message)
-  :silvver_cameras_exception(message)
-{}
-
-load_file_error::load_file_error(const std::string& message)
-  :silvver_cameras_exception(message)
-{}
-
-open_camera_error::open_camera_error(const std::string& message)
-  :silvver_cameras_exception(message)
-{}
-
-camera_parameter_error::camera_parameter_error(const std::string& message)
-  :silvver_cameras_exception(message)
-{}
-
-file_parsing_error::file_parsing_error(const std::string& message)
-  :silvver_cameras_exception(message)
-{}

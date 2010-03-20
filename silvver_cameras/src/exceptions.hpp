@@ -26,58 +26,25 @@ struct silvver_cameras_exception: public virtual std::exception,
                                   public virtual boost::exception
 {
   friend std::string errorsInfo2string(const silvver_cameras_exception& e);
-
-  silvver_cameras_exception(const std::string& message="");
   const char* what() const throw();
-  ~silvver_cameras_exception() throw();
-
-private:
-  std::string message;
 };
 
-struct invalid_argument: public virtual silvver_cameras_exception
-{
-  invalid_argument(const std::string& message="");
-};
+struct invalid_argument: public virtual silvver_cameras_exception {};
+struct load_file_error: public virtual silvver_cameras_exception {};
+struct open_camera_error: public virtual silvver_cameras_exception {};
+struct camera_parameter_error: public virtual silvver_cameras_exception {};
 
-struct load_file_error: public virtual silvver_cameras_exception
-{
-  load_file_error(const std::string& message="");
-};
+struct init_target_error: public virtual silvver_cameras_exception {};
 
-struct open_camera_error: public virtual silvver_cameras_exception
-{
-  open_camera_error(const std::string& message="");
-};
-
-struct camera_parameter_error: public virtual silvver_cameras_exception
-{
-  camera_parameter_error(const std::string& message="");
-};
-
-struct file_parsing_error: public virtual silvver_cameras_exception
-{
-  file_parsing_error(const std::string& message="");
-};
-
-struct missing_field: public virtual file_parsing_error
-{
-  missing_field(const std::string& message="")
-    :file_parsing_error(message)
-  {}
-};
-
-struct type_error: public virtual file_parsing_error
-{
-  type_error(const std::string& message="")
-    :file_parsing_error(message)
-  {}
-};
-
+struct file_parsing_error: public virtual silvver_cameras_exception {};
+struct missing_field: public virtual file_parsing_error {};
+struct type_error: public virtual file_parsing_error {};
 
 std::string errorsInfo2string(const silvver_cameras_exception& e);
 
-
+typedef boost::error_info<struct tag_what, std::string>
+  info_what;
+//-------------
 typedef boost::error_info<struct tag_cameraModel, std::string>
   info_cameraModel;
 
@@ -107,12 +74,19 @@ typedef boost::error_info<struct tag_bayer, std::string>
 
 typedef boost::error_info<struct tag_colorFilter, std::string>
   info_colorFilter;
+//-------------
+typedef boost::error_info<struct tag_cameraIndex, int>
+  info_cameraIndex;
+
+typedef boost::error_info<struct tag_targetIndex, int>
+  info_targetIndex;
 
 typedef boost::error_info<struct tag_fieldName, std::string>
   info_fieldName;
 
 typedef boost::error_info<struct tag_arrayIndex, int>
   info_arrayIndex;
+
 
 
 #endif /* _EXCEPTIONS_HPP_ */

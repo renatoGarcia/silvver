@@ -33,8 +33,8 @@ PseudoCamera::PseudoCamera(const scene::PseudoCamera& config)
 {
   if(!bfs::is_directory(this->path))
   {
-    throw open_camera_error(this->path.directory_string() +
-                            " is not a directory");
+    throw open_camera_error()
+      << info_what(this->path.directory_string() + " is not a directory");
   }
 
   this->dirIterator = bfs::directory_iterator(this->path);

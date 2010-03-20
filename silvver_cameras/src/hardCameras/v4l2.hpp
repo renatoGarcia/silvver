@@ -42,6 +42,8 @@ private:
 
   /// Map to color space 
   typedef std::map<std::string,boost::tuple<__u32,ColorSpace> > ColorFormatMap;
+  typedef std::map<std::string,boost::tuple<__u32,ColorSpace> >::const_iterator
+  IterColorFormatMap;
 
   static const int N_BUFFERS = 4;
 

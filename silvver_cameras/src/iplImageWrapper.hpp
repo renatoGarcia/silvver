@@ -171,7 +171,8 @@ IplImageWrapper::loadImage(const std::string& filename, int iscolor)
 
   if (this->iplImage == NULL)
   {
-    throw load_file_error("Unable to load image ")
+    throw load_file_error()
+      << info_what("Unable to load image ")
       << boost::errinfo_file_name(filename);
   }
 }

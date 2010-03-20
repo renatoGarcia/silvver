@@ -1,4 +1,4 @@
-/* Copyright 2009 Renato Florentino Garcia <fgar.renato@gmail.com>
+/* Copyright 2009, 2010 Renato Florentino Garcia <fgar.renato@gmail.com>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3, as
@@ -38,26 +38,32 @@ SceneMounter::SceneMounter(const std::string& serverIp,
 void
 SceneMounter::mount()
 {
-  CfParser cfParser;
-  const scene::Scene scene = cfParser.parseFile(this->sceneDescriptorFile);
-
-  scene::Camera camera;
-  scene::AnyTarget target;
-  BOOST_FOREACH(camera, scene.cameras)
+  try
   {
-    BOOST_FOREACH(target, scene.targets)
+    CfParser cfParser;
+    const scene::Scene scene = cfParser.parseFile(this->sceneDescriptorFile);
+
+    scene::Camera camera;
+    scene::AnyTarget target;
+    BOOST_FOREACH(camera, scene.cameras)
     {
-      try
+      BOOST_FOREACH(target, scene.targets)
       {
         this->constructAbstractCamera(camera, target);
       }
-      catch(const silvver_cameras_exception& e)
-      {
-        message(LogLevel::ERROR)
-          << "[Fatal error]\n" << errorsInfo2string(e) << std::endl;
-        exit(EXIT_FAILURE);
-      }
     }
+  }
+  catch(const file_parsing_error& e)
+  {
+    message(LogLevel::ERROR)
+      << "[Config file parsing error]\n" << errorsInfo2string(e) << std::endl;
+    exit(EXIT_FAILURE);
+  }
+  catch(const silvver_cameras_exception& e)
+  {
+    message(LogLevel::ERROR)
+      << "[Fatal error]\n" << errorsInfo2string(e) << std::endl;
+    exit(EXIT_FAILURE);
   }
 }
 

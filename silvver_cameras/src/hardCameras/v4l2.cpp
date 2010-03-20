@@ -76,7 +76,8 @@ V4L2::V4L2(const scene::V4l2& config)
   struct v4l2_capability capability;
   if (ioctl(this->cameraFd, VIDIOC_QUERYCAP, &capability))
   {
-    throw open_camera_error("Device not compatible with v4l2 especification")
+    throw open_camera_error()
+      << info_what("Device not compatible with v4l2 especification")
       << info_cameraUid(boost::lexical_cast<std::string>(this->uid));
   }
 
@@ -84,7 +85,8 @@ V4L2::V4L2(const scene::V4l2& config)
   if (!((capability.capabilities & V4L2_CAP_VIDEO_CAPTURE) &&
         (capability.capabilities & V4L2_CAP_STREAMING)))
   {
-    throw open_camera_error("Device is not a video capture with streaming capabilities")
+    throw open_camera_error()
+      << info_what("Device is not a video capture with streaming capabilities")
       << info_cameraUid(boost::lexical_cast<std::string>(this->uid));
   }
 
@@ -108,12 +110,14 @@ V4L2::V4L2(const scene::V4l2& config)
   requestbuffers.memory = V4L2_MEMORY_MMAP;
   if (ioctl(this->cameraFd, VIDIOC_REQBUFS, &requestbuffers))
   {
-    throw open_camera_error("Could not request buffers")
+    throw open_camera_error()
+      << info_what("Could not request buffers")
       << info_cameraUid(boost::lexical_cast<std::string>(this->uid));
   }
   if (requestbuffers.count != (uint)V4L2::N_BUFFERS)
   {
-    throw open_camera_error("Could not request all buffers")
+    throw open_camera_error()
+      << info_what("Could not request all buffers")
       << info_cameraUid(boost::lexical_cast<std::string>(this->uid));
   }
 
@@ -128,7 +132,8 @@ V4L2::V4L2(const scene::V4l2& config)
 
     if (ioctl(this->cameraFd, VIDIOC_QUERYBUF, &buffer))
     {
-      throw open_camera_error("Coud not query the status of a buffer")
+      throw open_camera_error()
+        << info_what("Coud not query the status of a buffer")
         << info_cameraUid(boost::lexical_cast<std::string>(this->uid));
     }
 
@@ -140,7 +145,8 @@ V4L2::V4L2(const scene::V4l2& config)
 
     if (MAP_FAILED == this->buffers[i].start)
     {
-      throw open_camera_error("Coud not map the memory of buffer")
+      throw open_camera_error()
+        << info_what("Coud not map the memory of buffer")
         << info_cameraUid(boost::lexical_cast<std::string>(this->uid));
     }
   }
@@ -156,7 +162,8 @@ V4L2::V4L2(const scene::V4l2& config)
 
     if (ioctl(this->cameraFd, VIDIOC_QBUF, &buffer))
     {
-      throw open_camera_error("Coud not enqueue a buffer")
+      throw open_camera_error()
+        << info_what("Coud not enqueue a buffer")
         << info_cameraUid(boost::lexical_cast<std::string>(this->uid));
     }
   }
@@ -164,7 +171,8 @@ V4L2::V4L2(const scene::V4l2& config)
   enum v4l2_buf_type type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
   if (ioctl(this->cameraFd, VIDIOC_STREAMON, &type))
   {
-    throw open_camera_error("Failed when starting streaming")
+    throw open_camera_error()
+      << info_what("Failed when starting streaming")
       << info_cameraUid(boost::lexical_cast<std::string>(this->uid));
   }
 
@@ -214,16 +222,24 @@ V4L2::findDevice() const
   }
 
   // If here, didn't found camera devide
-  throw open_camera_error("Didn't found the path to camera device")
+  throw open_camera_error()
+    << info_what("Didn't found the path to camera device")
     << info_cameraUid(boost::lexical_cast<std::string>(this->uid));
 }
 
 ColorConverter
 V4L2::createColorConverter(const scene::V4l2& config)
 {
-  ColorSpace colorSpace = V4L2::COLOR_FORMAT.find(config.colorMode)->second.get<1>();
-  return ColorConverter(colorSpace,
-                        config.resolution.at(0), config.resolution.at(1));
+  try
+  {
+    return ColorConverter(V4L2::COLOR_FORMAT.find(config.colorMode)->second.get<1>(),
+                          config.resolution.at(0), config.resolution.at(1));
+  }
+  catch (silvver_cameras_exception& e)
+  {
+    throw e << info_cameraUid(boost::lexical_cast<std::string>(config.uid))
+            << info_colorMode(config.colorMode);
+  }
 }
 
 void
@@ -313,19 +329,22 @@ V4L2::setFeatures(const scene::V4l2& config)
     {
       if (errno != EINVAL) // If an unknown error
       {
-        throw camera_parameter_error("Error querying about feature")
+        throw camera_parameter_error()
+          << info_what("Error querying about feature")
           << info_featureName(featureName);
       }
       else // The current feature is not supported
       {
-        throw camera_parameter_error("Feature not supported")
+        throw camera_parameter_error()
+          << info_what("Feature not supported")
           << info_featureName(featureName);
       }
     }
     // If the support to current feature is disabled (not supported)
     else if (queryctrl.flags & V4L2_CTRL_FLAG_DISABLED)
     {
-      throw camera_parameter_error( "feature not supported")
+      throw camera_parameter_error()
+        << info_what( "feature not supported")
         << info_featureName(featureName);
     }
     else // There are support to this feature
@@ -336,7 +355,8 @@ V4L2::setFeatures(const scene::V4l2& config)
 
       if (control.value<queryctrl.minimum || control.value>queryctrl.maximum)
       {
-        throw camera_parameter_error("Feature value out of rage")
+        throw camera_parameter_error()
+          << info_what("Feature value out of rage")
           << info_featureName(featureName)
           << info_featureRange(boost::lexical_cast<std::string>(queryctrl.minimum)
                                + '-' +
@@ -347,12 +367,14 @@ V4L2::setFeatures(const scene::V4l2& config)
       {
         if (errno == EBUSY)
         {
-          throw camera_parameter_error("Error setting feature")
+          throw camera_parameter_error()
+            << info_what("Error setting feature")
             << info_featureName(featureName);
         }
         else
         {
-          throw camera_parameter_error("Error setting feature")
+          throw camera_parameter_error()
+            << info_what("Error setting feature")
             << info_featureName(featureName);
         }
       }
@@ -367,19 +389,34 @@ V4L2::setFormat(const scene::V4l2& config)
   imgFormat.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
   if (ioctl(this->cameraFd, VIDIOC_G_FMT, &imgFormat))
   {
-    throw open_camera_error();
-    //   ("Cannot get the images format from V4l2 camera uid " +
-    //    boost::lexical_cast<std::string>(this->uid));
+    throw open_camera_error()
+      << info_what("Cannot get the camera images format")
+      << info_cameraUid(boost::lexical_cast<std::string>(this->uid));
   }
 
-  imgFormat.fmt.pix.width = config.resolution.at(0);
-  imgFormat.fmt.pix.height = config.resolution.at(1);
-
-  if (ioctl(this->cameraFd, VIDIOC_S_FMT, &imgFormat))
+  IterColorFormatMap pixelFormat = V4L2::COLOR_FORMAT.find(config.colorMode);
+  if (pixelFormat != V4L2::COLOR_FORMAT.end())
   {
-    throw open_camera_error();
-    //   ("Cannot set the images format from V4l2 camera uid " +
-    //    boost::lexical_cast<std::string>(this->uid));
+    imgFormat.fmt.pix.width = config.resolution.at(0);
+    imgFormat.fmt.pix.height = config.resolution.at(1);
+    imgFormat.fmt.pix.pixelformat = pixelFormat->second.get<0>();
+
+    if (ioctl(this->cameraFd, VIDIOC_S_FMT, &imgFormat))
+    {
+      throw open_camera_error()
+        << info_what("Could not set resolution and color mode together")
+        << info_cameraUid(boost::lexical_cast<std::string>(this->uid))
+        << info_resolution(config.resolution)
+        << info_colorMode(config.colorMode);
+    }
+  }
+  else //Color mode is not in V4L2::COLOR_FORMAT
+  {
+    throw invalid_argument()
+      << info_what("Invalid color mode")
+      << info_cameraUid(boost::lexical_cast<std::string>(this->uid))
+      << info_resolution(config.resolution)
+      << info_colorMode(config.colorMode);
   }
 }
 

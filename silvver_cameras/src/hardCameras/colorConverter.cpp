@@ -46,10 +46,10 @@ ColorConverter::ColorConverter(const ColorSpace& colorSpace,
     break;
   case ColorSpace::RAW8:
   case ColorSpace::RAW16:
-    throw invalid_argument("Using color space RAW8 or RAW16 without inform "
-                           "the bayer method");
+    throw invalid_argument()
+      << info_what("Using color space RAW8 or RAW16 without bayer method");
   default:
-    throw invalid_argument("Invalid color space");
+    throw invalid_argument() << info_what("Invalid color space");
   }
 }
 
@@ -73,7 +73,7 @@ ColorConverter::ColorConverter(const ColorSpace& colorSpace,
       this->convertFunc = &ColorConverter::bayer_Bilinear<uint8_t>;
       break;
     default:
-      throw invalid_argument("Invalid bayer method");
+      throw invalid_argument() << info_what("Invalid bayer method");
     }
   }
   else if (colorSpace == ColorSpace::RAW16)
@@ -87,13 +87,14 @@ ColorConverter::ColorConverter(const ColorSpace& colorSpace,
       this->convertFunc = &ColorConverter::bayer_Bilinear<uint16_t>;
       break;
     default:
-      throw invalid_argument("Invalid bayer method");
+      throw invalid_argument() << info_what("Invalid bayer method");
     }
   }
   else
   {
-    throw invalid_argument("The color space to bayer operations must be "
-                           "either RAW8 or RAW16");
+    throw invalid_argument()
+      << info_what("The color space to bayer operations must be "
+                   "either RAW8 or RAW16");
   }
 }
 

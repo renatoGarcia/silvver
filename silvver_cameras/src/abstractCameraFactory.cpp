@@ -41,7 +41,7 @@ AbstractCameraFactory::create(const scene::Camera& cameraConfig,
   }
   else
   {
-    throw invalid_argument("Unknown target type");
+    throw invalid_argument() << info_what("Unknown target type");
   }
 
   return abstractCamera;
