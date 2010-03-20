@@ -1,4 +1,4 @@
--- Copyright 2009 Renato Florentino Garcia <fgar.renato@gmail.com>
+-- Copyright 2009,2010 Renato Florentino Garcia <fgar.renato@gmail.com>
 --
 -- This program is free software: you can redistribute it and/or modify
 -- it under the terms of the GNU General Public License version 3, as
@@ -47,7 +47,7 @@ function PseudoCamera(parameters)
     return camera
 end
 
-function Dragonfly(parameters)
+function Dc1394(parameters)
     camera = {}
     camera.__driver = 'dc1394'
     camera.identifier = parameters.uid
@@ -68,9 +68,9 @@ function Dragonfly(parameters)
                                             0, 1, 0,
                                             0, 0, 1})
 
-    camera.resolution = __getOptional(parameters.resolution, {640, 480})
-    camera.frame_rate = __getOptional(parameters.frame_rate, 30)
-    camera.color_mode = __getOptional(parameters.color_mode, 'mono8')
+    camera.resolution = parameters.resolution
+    camera.frame_rate = parameters.frame_rate
+    camera.color_mode = parameters.color_mode
     camera.bayer_method = parameters.bayer_method -- Optional
     camera.color_filter = parameters.color_filter -- Optional
 
@@ -114,7 +114,7 @@ function Dragonfly(parameters)
     return camera
 end
 
-function Webcam(parameters)
+function V4l2(parameters)
     camera = {}
     camera.__driver = 'v4l2'
 
@@ -136,7 +136,7 @@ function Webcam(parameters)
                                             0, 1, 0,
                                             0, 0, 1})
 
-    camera.resolution = __getOptional(parameters.resolution, {640, 480})
+    camera.resolution = parameters.resolution
 
     -- The values below are optionals, they can be nil
     camera.brightness                = parameters.brightness
@@ -157,6 +157,73 @@ function Webcam(parameters)
     camera.white_balance_temperature = parameters.white_balance_temperature
     camera.sharpness                 = parameters.sharpness
     camera.backlight_compensation    = parameters.backlight_compensation
+
+    return camera
+end
+
+function Dragonfly(parameters)
+    camera = {}
+    camera.__driver = 'dc1394'
+    camera.identifier = parameters.uid
+
+    camera.save_image_format = __getOptional(parameters.save_image_format,
+                                             "%1%_%2%_%3%.jpg")
+    camera.uid = parameters.uid
+
+    camera.focal_length = parameters.focal_length
+    camera.principal_point = parameters.principal_point
+    camera.radial_coef = parameters.radial_coef
+    camera.tangential_coef = parameters.tangential_coef
+
+    camera.translation_vector = __getOptional(parameters.translation_vector,
+                                              {0, 0, 0})
+    camera.rotation_matrix = __getOptional(parameters.rotation_matrix,
+                                           {1, 0, 0,
+                                            0, 1, 0,
+                                            0, 0, 1})
+
+    camera.resolution = __getOptional(parameters.resolution, {640, 480})
+    camera.frame_rate = __getOptional(parameters.frame_rate, 30)
+    camera.color_mode = __getOptional(parameters.color_mode, 'mono8')
+    camera.bayer_method = __getOptional(parameters.bayer_method, 'bilinear')
+    camera.color_filter = __getOptional(parameters.color_filter, 'rggb')
+
+    -- The values below are optionals, they can be nil
+    camera.brightness = parameters.brightness
+    camera.exposure = parameters.exposure
+    camera.sharpness = parameters.sharpness
+    camera.hue = parameters.hue
+    camera.saturation = parameters.saturation
+    camera.gamma = parameters.gamma
+    camera.shutter = parameters.shutter
+    camera.gain = parameters.gain
+    camera.iris = parameters.iris
+    camera.focus = parameters.focus
+    camera.temperature = parameters.temperature
+    camera.trigger = parameters.trigger
+    camera.trigger_delay = parameters.trigger_delay
+    camera.zoom = parameters.zoom
+    camera.pan = parameters.pan
+    camera.tilt = parameters.tilt
+    camera.optical_filter = parameters.optical_filter
+    camera.capture_size = parameters.capture_size
+    camera.capture_quality = parameters.capture_quality
+
+    if parameters.white_balance == "off" then
+        camera.white_balance = {"off","off"}
+    elseif parameters.white_balance == "auto" then
+        camera.white_balance = {"auto","auto"}
+    else
+        camera.white_balance = parameters.white_balance
+    end
+
+    if parameters.white_shading == "off" then
+        camera.white_shading = {"off", "off", "off"}
+    elseif parameters.white_shading == "auto" then
+        camera.white_shading = {"auto", "auto", "auto"}
+    else
+        camera.white_shading = parameters.white_shading
+    end
 
     return camera
 end

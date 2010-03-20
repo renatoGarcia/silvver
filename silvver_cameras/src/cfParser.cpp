@@ -110,7 +110,7 @@ CfParser::getTop(boost::array<Type, nItens>& output, lua_State* L) const
     throw type_error() << info_what("Field is not an array");
   }
 
-  for (int i = 1; i <= nItens; ++i)
+  for (std::size_t i = 1; i <= nItens; ++i)
   {
     lua_pushnumber(L, i);
     lua_gettable(L, -2);

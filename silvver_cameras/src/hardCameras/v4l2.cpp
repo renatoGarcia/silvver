@@ -15,14 +15,14 @@
 
 #include "v4l2.hpp"
 
-#include <iostream>
-#include <boost/assign/std/vector.hpp>
 #include <boost/assign/list_of.hpp>
-#include <boost/shared_ptr.hpp>
-#include <boost/tuple/tuple.hpp>
+#include <boost/assign/std/vector.hpp>
 #include <boost/foreach.hpp>
 #include <boost/lexical_cast.hpp>
+#include <boost/shared_ptr.hpp>
+#include <cstring>
 
+#include <fcntl.h>
 #include <stropts.h>
 #include <sys/mman.h>
 
@@ -66,12 +66,9 @@ V4L2::V4L2(const scene::V4l2& config)
   :HardCamera(config, IPL_DEPTH_8U)
   ,uid(config.uid)
   ,cameraFd(open(this->findDevice().c_str(), O_RDWR))
-  ,width(config.resolution.at(0))
-  ,height(config.resolution.at(1))
+  ,grabFrameThread()
   ,colorConverter(V4L2::createColorConverter(config))
 {
-  std::string cameraPath(findDevice());
-
   // Check if the device is compatible with v4l2
   struct v4l2_capability capability;
   if (ioctl(this->cameraFd, VIDIOC_QUERYCAP, &capability))
@@ -90,13 +87,9 @@ V4L2::V4L2(const scene::V4l2& config)
       << info_cameraUid(boost::lexical_cast<std::string>(this->uid));
   }
 
-  setFormat(config);
-
-  // struct v4l2_standard camStandard;
-  // camStandard.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
-
   try
   {
+    setFormat(config);
     setFeatures(config);
   }
   catch (camera_parameter_error& e)
@@ -206,7 +199,7 @@ V4L2::~V4L2() throw()
 std::string
 V4L2::findDevice() const
 {
-  std::string strUid(boost::lexical_cast<std::string>(this->uid));
+  const std::string strUid = boost::lexical_cast<std::string>(this->uid);
 
   boost::array<std::string, 1> possibleDevices;
   possibleDevices.at(0) = "/dev/video" + strUid;
@@ -390,8 +383,7 @@ V4L2::setFormat(const scene::V4l2& config)
   if (ioctl(this->cameraFd, VIDIOC_G_FMT, &imgFormat))
   {
     throw open_camera_error()
-      << info_what("Cannot get the camera images format")
-      << info_cameraUid(boost::lexical_cast<std::string>(this->uid));
+      << info_what("Cannot get the camera images format");
   }
 
   IterColorFormatMap pixelFormat = V4L2::COLOR_FORMAT.find(config.colorMode);
@@ -405,7 +397,6 @@ V4L2::setFormat(const scene::V4l2& config)
     {
       throw open_camera_error()
         << info_what("Could not set resolution and color mode together")
-        << info_cameraUid(boost::lexical_cast<std::string>(this->uid))
         << info_resolution(config.resolution)
         << info_colorMode(config.colorMode);
     }
@@ -414,7 +405,6 @@ V4L2::setFormat(const scene::V4l2& config)
     {
       throw open_camera_error()
         << info_what("Could not set resolution")
-        << info_cameraUid(boost::lexical_cast<std::string>(this->uid))
         << info_resolution(config.resolution);
     }
   }
@@ -422,7 +412,6 @@ V4L2::setFormat(const scene::V4l2& config)
   {
     throw invalid_argument()
       << info_what("Invalid color mode")
-      << info_cameraUid(boost::lexical_cast<std::string>(this->uid))
       << info_resolution(config.resolution)
       << info_colorMode(config.colorMode);
   }

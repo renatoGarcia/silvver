@@ -58,7 +58,7 @@ std::string getLevelsNames()
 {
   std::string levelsNames;
   LogLevel::const_iterator iterLevel = LogLevel::begin();
-  for(; iterLevel < LogLevel::end(); iterLevel++)
+  for(; iterLevel < LogLevel::end(); ++iterLevel)
   {
     levelsNames += '|';
     levelsNames += iterLevel->str();

@@ -37,8 +37,8 @@ DC1394::DC1394(const scene::DC1394& config)
   ,videoMode(DC1394::getDc1394VideoMode(config))
   ,context(NULL)
   ,camera(NULL)
-  ,colorConverter(DC1394::createColorConverter(config))
   ,grabFrameThread()
+  ,colorConverter(DC1394::createColorConverter(config))
 {
   this->context = dc1394_new();
   if (!this->context)
@@ -374,7 +374,7 @@ DC1394::setAutoMode(dc1394feature_info_t featureInfo,
   }
 
   dc1394bool_t hasAutoMode = DC1394_FALSE;
-  for(int i = 0; i < featureModes.num; ++i)
+  for(unsigned i = 0; i < featureModes.num; ++i)
   {
     if (featureModes.modes[i] == DC1394_FEATURE_MODE_AUTO)
     {

@@ -169,7 +169,7 @@
 		friend class boost::detail::enum_base<_name>; \
 		BOOST_ENUM_names(_seq, 0, 1) \
 		BOOST_ENUM_values_identity() \
-	}; 
+	}
 
 #define BOOST_ENUM_VALUES(_name, _type, _seq) \
 	class _name : public boost::detail::enum_base<_name, _type> \

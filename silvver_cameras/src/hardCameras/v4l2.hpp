@@ -20,12 +20,10 @@
 #include <boost/thread/thread.hpp>
 #include <boost/tuple/tuple.hpp>
 #include <map>
-
-#include <string>
-#include <string.h>
-#include <linux/videodev2.h>
-#include <fcntl.h>
 #include <stdint.h>
+#include <string>
+
+#include <linux/videodev2.h>
 
 #include "colorConverter.hpp"
 #include "hardCamera.hpp"
@@ -40,7 +38,7 @@ public:
 
 private:
 
-  /// Map to color space 
+  /// Map with color space as key value, and its 
   typedef std::map<std::string,boost::tuple<__u32,ColorSpace> > ColorFormatMap;
   typedef std::map<std::string,boost::tuple<__u32,ColorSpace> >::const_iterator
   IterColorFormatMap;
@@ -49,25 +47,21 @@ private:
 
   static const ColorFormatMap COLOR_FORMAT;
 
-  void doWork();
+  static ColorConverter createColorConverter(const scene::V4l2& config);
 
   /// Find the device path bounded to this v4l2 camera.
   /// @return A string with the device path.
   std::string findDevice() const;
 
-  ColorConverter createColorConverter(const scene::V4l2& config);
-
   void setFeatures(const scene::V4l2& config);
 
   void setFormat(const scene::V4l2& config);
 
+  void doWork();
+
   const unsigned uid;
 
   const int cameraFd;
-
-  const unsigned width;
-
-  const unsigned height;
 
   boost::scoped_ptr<boost::thread> grabFrameThread;
 
