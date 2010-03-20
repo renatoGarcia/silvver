@@ -37,7 +37,7 @@ namespace scene
     /// Key unique to each artkp targets set.
     unsigned uniqueKey;
 
-    /// ARToolKitPlus patter width [mm].
+    /// ARToolKitPlus pattern width [mm].
     int patternWidth;
 
     /// Grey level threshold between black and white.

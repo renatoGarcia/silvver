@@ -22,6 +22,7 @@
 #include <ARToolKitPlus/TrackerSingleMarkerImpl.h>
 
 #include "../connection.ipp"
+#include "../exceptions.hpp"
 #include "../log.hpp"
 
 ArtkpCamera::ArtkpCamera(const scene::Camera& cameraConfig,
@@ -62,7 +63,8 @@ ArtkpCamera::ArtkpCamera(const scene::Camera& cameraConfig,
                           7000.0f,
                           &this->logger))
   {
-    throw initialize_error(this->logger.message);
+    throw init_target_error()
+      << info_what(this->logger.message);
   }
 
   this->tracker->setPixelFormat(ARToolKitPlus::PIXEL_FORMAT_BGR);

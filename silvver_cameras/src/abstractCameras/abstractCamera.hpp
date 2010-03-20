@@ -1,4 +1,4 @@
-/* Copyright 2009 Renato Florentino Garcia <fgar.renato@gmail.com>
+/* Copyright 2009,2010 Renato Florentino Garcia <fgar.renato@gmail.com>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3, as
@@ -30,25 +30,6 @@
 /// Abstract base class to all abstract cameras.
 class AbstractCamera: public boost::noncopyable, public Observer
 {
-public:
-
-  class abstract_camera_error: public std::exception
-  {
-  public:
-    abstract_camera_error(const std::string& whatArg) :msg(whatArg) {}
-    ~abstract_camera_error() throw() {}
-    const char* what() const throw() { return msg.c_str(); }
-  private:
-    const std::string msg;
-  };
-
-  class initialize_error: public abstract_camera_error
-  {
-  public:
-    initialize_error(const std::string& whatArg)
-      :abstract_camera_error(whatArg){}
-  };
-
 public:
   virtual ~AbstractCamera();
 

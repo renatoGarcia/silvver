@@ -409,6 +409,14 @@ V4L2::setFormat(const scene::V4l2& config)
         << info_resolution(config.resolution)
         << info_colorMode(config.colorMode);
     }
+    if (imgFormat.fmt.pix.width != config.resolution.at(0) ||
+        imgFormat.fmt.pix.height != config.resolution.at(1))
+    {
+      throw open_camera_error()
+        << info_what("Could not set resolution")
+        << info_cameraUid(boost::lexical_cast<std::string>(this->uid))
+        << info_resolution(config.resolution);
+    }
   }
   else //Color mode is not in V4L2::COLOR_FORMAT
   {
