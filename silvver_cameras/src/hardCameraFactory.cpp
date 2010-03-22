@@ -94,8 +94,9 @@ HardCameraFactory::ConstructHardCamera::operator()(const scene::DC1394& config) 
     throw e << info_cameraModel("DC1394");
   }
 #else
-  throw invalid_argument("This program don't was compiled with support "
-                         "to ieee 1394 cameras");
+  throw invalid_argument()
+    << info_what("This program don't was compiled with support "
+                 "to ieee 1394 cameras");
 #endif
 }
 
@@ -112,7 +113,8 @@ HardCameraFactory::ConstructHardCamera::operator()(const scene::V4l2& config) co
     throw e << info_cameraModel("V4l2");
   }
 #else
-  throw invalid_argument("This program don't was compiled with support "
-                         "to v4l2 cameras");
+  throw invalid_argument()
+    << info_what("This program don't was compiled with support"
+                 "to v4l2 cameras");
 #endif
 }
