@@ -26,6 +26,8 @@
 #include "log.hpp"
 #include "receptionist.hpp"
 
+#define VERSION "0.5.0"
+
 namespace po = boost::program_options;
 
 void validate(boost::any& v,
@@ -70,7 +72,7 @@ int main(int argc, char **argv)
   bool logInputs = false;
   MessageLogLevel verbosity;
 
-  po::options_description desc("silvver_server 0.4\n\n"
+  po::options_description desc("silvver_server " VERSION "\n\n"
                                "Compiled with boost version " BOOST_LIB_VERSION "\n\n"
                                "Receive inforamation from silvver_cameras and send to clients\n"
                                "Usage: silvver_server [OPTIONS]...\n\n"
@@ -100,7 +102,7 @@ int main(int argc, char **argv)
   }
   else if(vm.count("version"))
   {
-    std::cout << "silvver_server 0.4" << std::endl;
+    std::cout << "silvver_server " VERSION << std::endl;
   }
   else
   {
@@ -114,7 +116,7 @@ int main(int argc, char **argv)
       targetsLog.setThreshold(TargetsLogLevel::NOTHING);
     }
 
-    std::cout << "silvver_server 0.4:\n\n"
+    std::cout << "silvver_server " VERSION ":\n\n"
               << "Compiled with boost version " << BOOST_LIB_VERSION << '\n'
               << "Press [enter] key to quit\n\n"
               << "----------------------------------------------\n"

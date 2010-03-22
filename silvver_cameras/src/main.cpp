@@ -28,7 +28,7 @@
 
 namespace po = boost::program_options;
 
-#define VERSION "0.4"
+#define VERSION "0.5.0"
 
 globalOptions::Options global_options;
 
