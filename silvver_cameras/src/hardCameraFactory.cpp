@@ -16,6 +16,7 @@
 #include "hardCameraFactory.hpp"
 
 #include "exceptions.hpp"
+#include "log.hpp"
 
 #include "hardCameras/pseudoCamera.hpp"
 
@@ -87,6 +88,9 @@ HardCameraFactory::ConstructHardCamera::operator()(const scene::DC1394& config) 
 #ifdef HAS_DC1394
   try
   {
+    message(LogLevel::TRACE)
+      << "HardCamera factory building DC1394 camera uid "
+      << config.uid << std::endl;
     return (new DC1394(config));
   }
   catch(silvver_cameras_exception& e)
@@ -106,6 +110,9 @@ HardCameraFactory::ConstructHardCamera::operator()(const scene::V4l2& config) co
 #ifdef HAS_V4L2
   try
   {
+    message(LogLevel::TRACE)
+      << "HardCamera factory building V4L2 camera uid "
+      << config.uid << std::endl;
     return (new V4L2(config));
   }
   catch(silvver_cameras_exception& e)
