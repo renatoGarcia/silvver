@@ -16,6 +16,8 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 
+# This script works with OpenCv 1.0 serie
+
 from optparse import OptionParser
 from opencv.cv import *
 from opencv.highgui import *
@@ -39,7 +41,9 @@ class ImagesSource:
     def images_cvSize(self):
         return (cvSize(self._images_size[0], self._images_size[1]))
 
-description = "Receive a series of images with a checkerboard as input, and outputs the intrinsic calibration of camera which grab that images."
+description = "Receive a series of images with a checkerboard as input, "\
+              "and outputs the intrinsic calibration of camera which grab "\
+              "that images."
 usage="%prog [options] board_width board_height square_width input_files..."
 parser = OptionParser(usage=usage, description=description,
                       version="%prog 0.1")

@@ -3,22 +3,49 @@
 # This program receive a pose P1 in relation to origin, this same pose P1 in
 # relation to camera, and calculates the camera pose in relation to origin
 #
-# The intput must be, and the output will be, a row in format:
-# T11 T21 T31 R11 R12 R13 R21 R22 R23 R31 R32 R33
-#
-# Where T21 is the item of row two and column one from translation matrix, and
-# R32 is the item of row three and column two from rotation matrix.
 #
 
 # Tab -> Represents a translation matrix of point 'a' in relation to b
 # Rab -> Represents a rotation matrix of point 'a' in relation to b
 
+from optparse import OptionParser
 import sys
 import numpy as np
 import string
 
-mo_file = np.loadtxt(sys.argv[1])
-mc_file = np.loadtxt(sys.argv[2])
+description = "Receive a pose P1(6D) in world coordinates, this same pose "\
+              "P1 in camera coordinates, and calculates the camera pose in "\
+              "world coordinates.\n\n"\
+              "The intput must be one or more rows in format:\n"\
+              "T11 T21 T31 R11 R12 R13 R21 R22 R23 R31 R32 R33"\
+              " Where T21 is the item of row two and column one from translation matrix, and R32 is the item of row three and column two from rotation matrix"
+
+usage="%prog [options] P1_world P1_camera"
+parser = OptionParser(usage=usage, description=description,
+                      version="%prog 0.1")
+parser.add_option("-o", "--p1-origin", action="store_true",
+                  dest="marker_origin", default=False,
+                  help="Set P1_world as if it's in origin of world "\
+                       "coordinates.")
+
+(options, args) = parser.parse_args()
+
+if options.marker_origin:
+    mo_file = np.array([0,0,0,1,0,0,0,1,0,0,0,1])
+    mc_index = 0
+else:
+    try:
+        mo_file = np.loadtxt(args[0])
+        mc_index = 1
+    except IndexError:
+        print("Error: P1_world mandatory input absent")
+        sys.exit(1)
+
+try:
+    mc_file = np.loadtxt(args[mc_index])
+except IndexError:
+    print("Error: P1_camera mandatory input absent")
+    sys.exit(1)
 
 if mo_file.ndim == 2:
     mo_file = mo_file.mean(axis=0)

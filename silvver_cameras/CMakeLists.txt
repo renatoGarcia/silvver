@@ -12,7 +12,18 @@ INSTALL(DIRECTORY lua/
         PATTERN "*~" EXCLUDE
         PATTERN ".*" EXCLUDE)
 
-INSTALL(DIRECTORY calibration/
-        DESTINATION bin
-        PATTERN "*~" EXCLUDE
-        PATTERN ".*" EXCLUDE)
+FIND_PACKAGE(PyOpenCV)
+
+IF(OpenCV_PYTHON_VERSION EQUAL 1)
+  INSTALL(PROGRAMS calibration/silvverIntCalib_v1
+          DESTINATION bin
+          RENAME silvverIntCalib)
+  INSTALL(PROGRAMS calibration/silvverExtCalib
+          DESTINATION bin)
+ELSEIF(OpenCV_PYTHON_VERSION EQUAL 2)
+  INSTALL(PROGRAMS calibration/silvverIntCalib_v2
+          DESTINATION bin
+          RENAME silvverIntCalib)
+  INSTALL(PROGRAMS calibration/silvverExtCalib
+          DESTINATION bin)
+ENDIF(OpenCV_PYTHON_VERSION EQUAL 1)
