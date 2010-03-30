@@ -5,7 +5,13 @@ SET(WITH_DC1394V2 ON
 SET(WITH_V4L2 ON
     CACHE BOOL "Enable or disable the seek for Video for Linux 2 library")
 
+SET(WITH_ARTKP ON
+    CACHE BOOL "Enable or disable the seek for ARToolKitPlus library")
+SET(WITH_BORBOLETA ON
+    CACHE BOOL "Enable or disable the seek for Borboleta library")
+
 SET(SUPPORTED_CAMERAS "Pseudocameras")
+SET(SUPPORTED_TARGETS "")
 
 SET(silvver_cameras_SRCS cfParser.cpp
                          abstractCameras/abstractCamera.cpp
@@ -13,7 +19,6 @@ SET(silvver_cameras_SRCS cfParser.cpp
                          sceneMounter.cpp
                          hardCameraFactory.cpp
                          main.cpp
-                         abstractCameras/artkpCamera.cpp
                          abstractCameraFactory.cpp
                          hardCameras/hardCamera.cpp
                          hardCameras/pseudoCamera.cpp
@@ -52,22 +57,41 @@ IF(WITH_V4L2)
   ENDIF(V4L2_FOUND)
 ENDIF(WITH_V4L2)
 
+IF(WITH_ARTKP)
+  FIND_PACKAGE(ARTKP)
+  IF(ARTKP_FOUND)
+    SET(SUPPORTED_TARGETS ${SUPPORTED_TARGETS}
+        "ARToolKitPlus")
+    ADD_DEFINITIONS(-DHAS_ARTKP)
+    SET(silvver_cameras_SRCS ${silvver_cameras_SRCS}
+                             abstractCameras/artkpCamera.cpp)
+  ENDIF(ARTKP_FOUND)
+ENDIF(WITH_ARTKP)
+
+IF(WITH_BORBOLETA)
+  FIND_PACKAGE(Borboleta)
+  IF(BORBOLETA_FOUND)
+    SET(SUPPORTED_TARGETS ${SUPPORTED_TARGETS}
+        "Borboleta")
+    ADD_DEFINITIONS(-DHAS_BORBOLETA)
+    SET(silvver_cameras_SRCS ${silvver_cameras_SRCS}
+                             abstractCameras/borboletaCamera.cpp)
+  ENDIF(BORBOLETA_FOUND)
+ENDIF(WITH_BORBOLETA)
+
 FIND_PACKAGE(Boost REQUIRED filesystem program_options thread serialization)
 FIND_PACKAGE(Lua51 REQUIRED lua m)
 FIND_PACKAGE(OpenCV REQUIRED)
-FIND_PACKAGE(ARTKP REQUIRED)
 
 INCLUDE_DIRECTORIES(${Boost_INCLUDE_DIR}
                     ${LUA_INCLUDE_DIR}
-                    ${OpenCV_INCLUDE_DIR}
-                    ${ARTKP_INCLUDE_DIRS})
+                    ${OpenCV_INCLUDE_DIR})
 
 ADD_EXECUTABLE(silvver_cameras ${silvver_cameras_SRCS})
 
 TARGET_LINK_LIBRARIES(silvver_cameras ${Boost_LIBRARIES}
                                       ${LUA_LIBRARIES}
-                                      ${OpenCV_LIBRARIES}
-                                      ${ARTKP_LIBRARIES})
+                                      ${OpenCV_LIBRARIES})
 
 IF(DC1394V2_FOUND)
   INCLUDE_DIRECTORIES(${DC1394V2_INCLUDE_DIRS})
@@ -84,6 +108,16 @@ IF(V4L2_FOUND)
   TARGET_LINK_LIBRARIES(silvver_cameras ${V4L2_LIBRARIES})
 ENDIF(V4L2_FOUND)
 
+IF(ARTKP_FOUND)
+  INCLUDE_DIRECTORIES(${ARTKP_INCLUDE_DIRS})
+  TARGET_LINK_LIBRARIES(silvver_cameras ${ARTKP_LIBRARIES})
+ENDIF(ARTKP_FOUND)
+
+IF(BORBOLETA_FOUND)
+  INCLUDE_DIRECTORIES(${BORBOLETA_INCLUDE_DIRS})
+  TARGET_LINK_LIBRARIES(silvver_cameras ${BORBOLETA_LIBRARIES})
+ENDIF(BORBOLETA_FOUND)
+
 INSTALL(TARGETS silvver_cameras
         RUNTIME DESTINATION bin)
 
@@ -92,4 +126,11 @@ MESSAGE("Supported cameras:")
 FOREACH(CAM ${SUPPORTED_CAMERAS})
   MESSAGE("  * " ${CAM})
 ENDFOREACH(CAM)
+MESSAGE("")
+
+MESSAGE("")
+MESSAGE("Supported targets:")
+FOREACH(TARGET ${SUPPORTED_TARGETS})
+  MESSAGE("  * " ${TARGET})
+ENDFOREACH(TARGET)
 MESSAGE("")

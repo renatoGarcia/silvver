@@ -20,7 +20,12 @@
 #include "exceptions.hpp"
 #include "processorOptions.hpp"
 
-#include "abstractCameras/artkpCamera.hpp"
+#ifdef HAS_ARTKP
+#  include "abstractCameras/artkpCamera.hpp"
+#endif
+#ifdef HAS_BORBOLETA
+#  include "abstractCameras/borboletaCamera.hpp"
+#endif
 
 AbstractCamera*
 AbstractCameraFactory::create(const scene::Camera& cameraConfig,
@@ -32,12 +37,34 @@ AbstractCameraFactory::create(const scene::Camera& cameraConfig,
   if (const scene::ArtkpTargets* const artkpTarget =
       boost::get<scene::ArtkpTargets>(&targets))
   {
+#ifdef HAS_ARTKP
     procOpt::AnyProcOpt markerOpt = procOpt::Marker();
     connection->connect(markerOpt);
 
     abstractCamera = new ArtkpCamera(cameraConfig,
                                      *artkpTarget,
                                      connection);
+#else
+    throw invalid_argument()
+      << info_what("This program don't was compiled with support "
+                   "to ARToolKitPlus targets");
+#endif
+  }
+  if (const scene::BorboletaTargets* const borboletaTarget =
+      boost::get<scene::BorboletaTargets>(&targets))
+  {
+#ifdef HAS_BORBOLETA
+    procOpt::AnyProcOpt markerOpt = procOpt::Marker();
+    connection->connect(markerOpt);
+
+    abstractCamera = new BorboletaCamera(cameraConfig,
+                                         *borboletaTarget,
+                                         connection);
+#else
+    throw invalid_argument()
+      << info_what("This program don't was compiled with support "
+                   "to Borboleta targets");
+#endif
   }
   else
   {

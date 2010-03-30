@@ -1,9 +1,9 @@
-# - Locate the ARToolKitPlus library
+# - Locate the Borboleta library
 #
 # This module defines
-#  ARTKP_INCLUDE_DIRS, where to find the library headers
-#  ARTKP_LIBRARIES, the libraries names
-#  ARTKP_FOUND, If true the library was found
+#  BORBOLETA_INCLUDE_DIRS, where to find the library headers
+#  BORBOLETA_LIBRARIES, the libraries names
+#  BORBOLETA_FOUND, If true the library was found
 
 #=============================================================================
 # Copyright 2010 Renato Florentino Garcia
@@ -18,17 +18,16 @@
 # (To distributed this file outside of CMake, substitute the full
 #  License text for the above reference.)
 
-FIND_PATH(ARTKP_INCLUDE_DIR ARToolKitPlus.h
-          PATH_SUFFIXES ARToolKitPlus)
+FIND_PATH(BORBOLETA_INCLUDE_DIR borboleta.h)
 
-FIND_LIBRARY(ARTKP_LIBRARY ARToolKitPlus)
+FIND_LIBRARY(BORBOLETA_LIBRARY borboleta)
 
 INCLUDE(FindPackageHandleStandardArgs)
-FIND_PACKAGE_HANDLE_STANDARD_ARGS(ARTKP DEFAULT_MSG
-                                  ARTKP_LIBRARY
-                                  ARTKP_INCLUDE_DIR)
+FIND_PACKAGE_HANDLE_STANDARD_ARGS(BORBOLETA DEFAULT_MSG
+                                  BORBOLETA_LIBRARY
+                                  BORBOLETA_INCLUDE_DIR)
 
-SET(ARTKP_INCLUDE_DIRS ${ARTKP_INCLUDE_DIR})
-SET(ARTKP_LIBRARIES ${ARTKP_LIBRARY})
+SET(BORBOLETA_INCLUDE_DIRS ${BORBOLETA_INCLUDE_DIR})
+SET(BORBOLETA_LIBRARIES ${BORBOLETA_LIBRARY})
 
-MARK_AS_ADVANCED(ARTKP_LIBRARY ARTKP_INCLUDE_DIR)
+MARK_AS_ADVANCED(BORBOLETA_LIBRARY BORBOLETA_INCLUDE_DIR)
