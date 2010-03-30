@@ -1,5 +1,0 @@
-cores\\rosa.txt
-#cores\\azul.txt
-#cores\\amarelo.txt
-#cores\\laranja.txt
-cores\\verde.txt
