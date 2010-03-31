@@ -54,18 +54,18 @@ namespace scene
     std::vector< boost::tuple<unsigned, std::string> > patterns;
   };
 
-  struct BorboletaTargets
+  struct ButterflyTargets
   {
     // Size of one checkerboard square [mm]
     unsigned squareSize;
 
-    // Max number of borboletas
-    unsigned nBorboletas;
+    // Max number of butterflys
+    unsigned nButterflies;
   };
 
   /// The AnyTarget is a type which can handle any of target structs.
   typedef boost::variant<ArtkpTargets,
-                         BorboletaTargets> AnyTarget;
+                         ButterflyTargets> AnyTarget;
 }
 
 #endif /* _TARGET_DESCRIPTIONS_HPP_ */

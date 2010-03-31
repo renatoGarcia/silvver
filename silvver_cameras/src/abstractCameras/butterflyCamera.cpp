@@ -13,24 +13,24 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "borboletaCamera.hpp"
+#include "butterflyCamera.hpp"
 
 #include <cstddef>
 #include <opencv/cv.h>
 
-BorboletaCamera::BorboletaCamera(const scene::Camera& cameraConfig,
-                                 const scene::BorboletaTargets& confBorboletas,
+ButterflyCamera::ButterflyCamera(const scene::Camera& cameraConfig,
+                                 const scene::ButterflyTargets& confButterflies,
                                  boost::shared_ptr<Connection> connection)
   :AbstractCamera(cameraConfig, connection)
-  ,nBorboletas(confBorboletas.nBorboletas)
+  ,nButterflies(confButterflies.nButterflies)
   ,runThread()
 {
-  init_borboletas(NULL, NULL, confBorboletas.squareSize,
-                  cvSize(this->currentFrame.size().width,
-                         this->currentFrame.size().height));
+  init_butterfly(NULL, NULL, confButterflies.squareSize,
+                 cvSize(this->currentFrame.size().width,
+                        this->currentFrame.size().height));
 }
 
-BorboletaCamera::~BorboletaCamera()
+ButterflyCamera::~ButterflyCamera()
 {
   if (this->runThread)
   {
@@ -40,13 +40,13 @@ BorboletaCamera::~BorboletaCamera()
 }
 
 void
-BorboletaCamera::run()
+ButterflyCamera::run()
 {
-  this->runThread.reset(new boost::thread(&BorboletaCamera::doWork, this));
+  this->runThread.reset(new boost::thread(&ButterflyCamera::doWork, this));
 }
 
 void
-BorboletaCamera::stop()
+ButterflyCamera::stop()
 {
   if (this->runThread)
   {
@@ -56,10 +56,10 @@ BorboletaCamera::stop()
 }
 
 void
-BorboletaCamera::doWork()
+ButterflyCamera::doWork()
 {
-  Borboleta* borboletas = new Borboleta[this->nBorboletas];
-  unsigned foundBorboletas = 0;
+  Butterfly* butterflies = new Butterfly[this->nButterflies];
+  unsigned foundButterflies = 0;
 
   while(true)
   {
@@ -67,9 +67,9 @@ BorboletaCamera::doWork()
 
     this->updateFrame();
 
-    foundBorboletas = find_borboletas(this->currentFrame,
-                                      borboletas, this->nBorboletas);
+    foundButterflies = find_butterflies(this->currentFrame,
+                                        butterflies, this->nButterflies);
   }
 
-  delete[] borboletas;
+  delete[] butterflies;
 }

@@ -23,8 +23,8 @@
 #ifdef HAS_ARTKP
 #  include "abstractCameras/artkpCamera.hpp"
 #endif
-#ifdef HAS_BORBOLETA
-#  include "abstractCameras/borboletaCamera.hpp"
+#ifdef HAS_BUTTERFLY
+#  include "abstractCameras/butterflyCamera.hpp"
 #endif
 
 AbstractCamera*
@@ -50,20 +50,20 @@ AbstractCameraFactory::create(const scene::Camera& cameraConfig,
                    "to ARToolKitPlus targets");
 #endif
   }
-  if (const scene::BorboletaTargets* const borboletaTarget =
-      boost::get<scene::BorboletaTargets>(&targets))
+  if (const scene::ButterflyTargets* const butterflyTarget =
+      boost::get<scene::ButterflyTargets>(&targets))
   {
-#ifdef HAS_BORBOLETA
+#ifdef HAS_BUTTERFLY
     procOpt::AnyProcOpt markerOpt = procOpt::Marker();
     connection->connect(markerOpt);
 
-    abstractCamera = new BorboletaCamera(cameraConfig,
-                                         *borboletaTarget,
+    abstractCamera = new ButterflyCamera(cameraConfig,
+                                         *butterflyTarget,
                                          connection);
 #else
     throw invalid_argument()
       << info_what("This program don't was compiled with support "
-                   "to Borboleta targets");
+                   "to Butterfly targets");
 #endif
   }
   else

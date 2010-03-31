@@ -1,9 +1,9 @@
-# - Locate the Borboleta library
+# - Locate the Butterfly library
 #
 # This module defines
-#  BORBOLETA_INCLUDE_DIRS, where to find the library headers
-#  BORBOLETA_LIBRARIES, the libraries names
-#  BORBOLETA_FOUND, If true the library was found
+#  BUTTERFLY_INCLUDE_DIRS, where to find the library headers
+#  BUTTERFLY_LIBRARIES, the libraries names
+#  BUTTERFLY_FOUND, If true the library was found
 
 #=============================================================================
 # Copyright 2010 Renato Florentino Garcia
@@ -18,16 +18,16 @@
 # (To distributed this file outside of CMake, substitute the full
 #  License text for the above reference.)
 
-FIND_PATH(BORBOLETA_INCLUDE_DIR borboleta.h)
+FIND_PATH(BUTTERFLY_INCLUDE_DIR butterfly.h)
 
-FIND_LIBRARY(BORBOLETA_LIBRARY borboleta)
+FIND_LIBRARY(BUTTERFLY_LIBRARY butterfly)
 
 INCLUDE(FindPackageHandleStandardArgs)
-FIND_PACKAGE_HANDLE_STANDARD_ARGS(BORBOLETA DEFAULT_MSG
-                                  BORBOLETA_LIBRARY
-                                  BORBOLETA_INCLUDE_DIR)
+FIND_PACKAGE_HANDLE_STANDARD_ARGS(BUTTERFLY DEFAULT_MSG
+                                  BUTTERFLY_LIBRARY
+                                  BUTTERFLY_INCLUDE_DIR)
 
-SET(BORBOLETA_INCLUDE_DIRS ${BORBOLETA_INCLUDE_DIR})
-SET(BORBOLETA_LIBRARIES ${BORBOLETA_LIBRARY})
+SET(BUTTERFLY_INCLUDE_DIRS ${BUTTERFLY_INCLUDE_DIR})
+SET(BUTTERFLY_LIBRARIES ${BUTTERFLY_LIBRARY})
 
-MARK_AS_ADVANCED(BORBOLETA_LIBRARY BORBOLETA_INCLUDE_DIR)
+MARK_AS_ADVANCED(BUTTERFLY_LIBRARY BUTTERFLY_INCLUDE_DIR)

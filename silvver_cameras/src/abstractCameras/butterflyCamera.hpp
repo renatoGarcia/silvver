@@ -13,27 +13,27 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef _BORBOLETA_CAMERA_HPP_
-#define _BORBOLETA_CAMERA_HPP_
+#ifndef _BUTTERFLY_CAMERA_HPP_
+#define _BUTTERFLY_CAMERA_HPP_
 
 #include <boost/scoped_ptr.hpp>
 #include <boost/shared_ptr.hpp>
 #include <boost/thread.hpp>
 
-#include <borboleta.h>
+#include <butterfly.h>
 
 #include "../connection.hpp"
 #include "abstractCamera.hpp"
 #include "targetDescriptions.hpp"
 
-class BorboletaCamera: public AbstractCamera
+class ButterflyCamera: public AbstractCamera
 {
 public:
-  BorboletaCamera(const scene::Camera& cameraConfig,
-                  const scene::BorboletaTargets& confBorboletas,
+  ButterflyCamera(const scene::Camera& cameraConfig,
+                  const scene::ButterflyTargets& confButterflies,
                   boost::shared_ptr<Connection> connection);
 
-  ~BorboletaCamera();
+  ~ButterflyCamera();
 
   virtual void run();
 
@@ -43,9 +43,9 @@ private:
 
   void doWork();
 
-  const unsigned nBorboletas;
+  const unsigned nButterflies;
 
   boost::scoped_ptr<boost::thread> runThread;
 };
 
-#endif /* _BORBOLETA_CAMERA_HPP_ */
+#endif /* _BUTTERFLY_CAMERA_HPP_ */

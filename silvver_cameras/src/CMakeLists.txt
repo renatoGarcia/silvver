@@ -7,8 +7,8 @@ SET(WITH_V4L2 ON
 
 SET(WITH_ARTKP ON
     CACHE BOOL "Enable or disable the seek for ARToolKitPlus library")
-SET(WITH_BORBOLETA ON
-    CACHE BOOL "Enable or disable the seek for Borboleta library")
+SET(WITH_BUTTERFLY ON
+    CACHE BOOL "Enable or disable the seek for Butterfly library")
 
 SET(SUPPORTED_CAMERAS "Pseudocameras")
 SET(SUPPORTED_TARGETS "")
@@ -68,16 +68,16 @@ IF(WITH_ARTKP)
   ENDIF(ARTKP_FOUND)
 ENDIF(WITH_ARTKP)
 
-IF(WITH_BORBOLETA)
-  FIND_PACKAGE(Borboleta)
-  IF(BORBOLETA_FOUND)
+IF(WITH_BUTTERFLY)
+  FIND_PACKAGE(Butterfly)
+  IF(BUTTERFLY_FOUND)
     SET(SUPPORTED_TARGETS ${SUPPORTED_TARGETS}
-        "Borboleta")
-    ADD_DEFINITIONS(-DHAS_BORBOLETA)
+        "Butterfly")
+    ADD_DEFINITIONS(-DHAS_BUTTERFLY)
     SET(silvver_cameras_SRCS ${silvver_cameras_SRCS}
-                             abstractCameras/borboletaCamera.cpp)
-  ENDIF(BORBOLETA_FOUND)
-ENDIF(WITH_BORBOLETA)
+                             abstractCameras/butterflyCamera.cpp)
+  ENDIF(BUTTERFLY_FOUND)
+ENDIF(WITH_BUTTERFLY)
 
 FIND_PACKAGE(Boost REQUIRED filesystem program_options thread serialization)
 FIND_PACKAGE(Lua51 REQUIRED lua m)
@@ -113,10 +113,10 @@ IF(ARTKP_FOUND)
   TARGET_LINK_LIBRARIES(silvver_cameras ${ARTKP_LIBRARIES})
 ENDIF(ARTKP_FOUND)
 
-IF(BORBOLETA_FOUND)
-  INCLUDE_DIRECTORIES(${BORBOLETA_INCLUDE_DIRS})
-  TARGET_LINK_LIBRARIES(silvver_cameras ${BORBOLETA_LIBRARIES})
-ENDIF(BORBOLETA_FOUND)
+IF(BUTTERFLY_FOUND)
+  INCLUDE_DIRECTORIES(${BUTTERFLY_INCLUDE_DIRS})
+  TARGET_LINK_LIBRARIES(silvver_cameras ${BUTTERFLY_LIBRARIES})
+ENDIF(BUTTERFLY_FOUND)
 
 INSTALL(TARGETS silvver_cameras
         RUNTIME DESTINATION bin)
