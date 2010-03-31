@@ -37,6 +37,7 @@ PseudoCamera::PseudoCamera(const scene::PseudoCamera& config)
       << info_what(this->path.directory_string() + " is not a directory");
   }
 
+	
   this->dirIterator = bfs::directory_iterator(this->path);
 
   this->grabFrameThread.reset(new boost::thread(&PseudoCamera::doWork, this));
@@ -55,6 +56,7 @@ void
 PseudoCamera::doWork()
 {
   int frameIdx = 0;
+	int	ordem =0;
   bool imageLoaded = false;
 
   boost::shared_ptr<IplImageWrapper> frameBuffer[2];
@@ -86,11 +88,21 @@ PseudoCamera::doWork()
         this->dirIterator++;
         continue;
       }
-
       try
       {
-        frameBuffer[frameIdx]->loadImage(dirIterator->path().file_string(),
+				std::ostringstream u;//= this->dirIterator->path().parent_path().file_string();
+
+				 u << this->dirIterator->path().parent_path()<< "/img-"<< std::setfill('0') <<std::setw(10) << ordem << ".ppm";
+
+        frameBuffer[frameIdx]->loadImage(u.str(),//dirIterator->path().file_string(),
                                          CV_LOAD_IMAGE_COLOR);
+
+
+			 message(LogLevel::WARN)
+          << ts_output::lock
+          << u.str() << std::endl// this->dirIterator->path().parent_path()<<  << "/img-"<< std::setfill('0') <<std::setw(10) << ordem << ".jpg" << std::endl
+          << ts_output::unlock;
+
       }
       catch (load_file_error& e)
       {
@@ -110,6 +122,7 @@ PseudoCamera::doWork()
 
     updateCurrentFrame(frameBuffer[frameIdx]);
 
+		ordem++;
     frameIdx = (frameIdx+1) % 2;
 
     boost::this_thread::sleep(this->delay);

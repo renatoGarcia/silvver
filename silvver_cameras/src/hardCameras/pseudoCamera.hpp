@@ -42,6 +42,8 @@ private:
 
   const float frameRate;
 
+	const boost::filesystem::path nome;
+
   boost::filesystem::directory_iterator dirIterator;
   const boost::filesystem::directory_iterator  endIterator;
 
