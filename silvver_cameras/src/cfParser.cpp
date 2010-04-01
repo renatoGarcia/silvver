@@ -128,6 +128,47 @@ CfParser::getTop(boost::array<Type, nItens>& output, lua_State* L) const
   }
 }
 
+template <class Type>
+void
+CfParser::getTop(std::vector<Type>& output, lua_State* L) const
+{
+  if (lua_isnil(L, -1))
+  {
+    throw missing_field() << info_what("Missing field");
+  }
+  if (!lua_istable(L, -1))
+  {
+    throw type_error() << info_what("Field is not an array");
+  }
+
+  Type tmpValue;
+  bool allReaded = false;
+  unsigned i = 1;
+  do
+  {
+    lua_pushnumber(L, i);
+    lua_gettable(L, -2);
+
+    try
+    {
+      getTop(tmpValue, L);
+      output.push_back(tmpValue);
+      lua_pop(L, 1); // Pop the current item
+      ++i;
+    }
+    catch (missing_field& e)
+    {
+      lua_pop(L, 1); // Pop the current nil item
+      allReaded = true; // If found nil con
+    }
+    catch (file_parsing_error& e)
+    {
+      lua_pop(L, 1); // Pop the current failed item
+      throw e << info_arrayIndex(i);
+    }
+  } while (!allReaded);
+}
+
 template<class Type>
 void
 CfParser::readValue(Type& output,
@@ -342,7 +383,7 @@ CfParser::readArtkpTargets(lua_State* L)
   // Each artkp config struct must have a unique key. What is the value is
   // indifferent, but it must be unique.
   static unsigned uniqueKey = 0;
-  uniqueKey++;
+  ++uniqueKey;
 
   scene::ArtkpTargets artkpTargets;
 

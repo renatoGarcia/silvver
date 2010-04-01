@@ -19,27 +19,14 @@
 #include "../iplImageWrapper.hpp"
 #include "../log.hpp"
 
-namespace bfs = boost::filesystem;
 namespace bpt = boost::posix_time;
 
 PseudoCamera::PseudoCamera(const scene::PseudoCamera& config)
   :HardCamera(config, IPL_DEPTH_8U)
-  ,path(config.imagesPath)
-  ,frameRate(config.frameRate)
-  ,dirIterator()
-  ,endIterator()
-  ,delay((static_cast<long>((1.0 / this->frameRate) * 1.0e3)))
+  ,imagesPath(config.imagesPath)
+  ,delay((static_cast<long>((1.0 / config.frameRate) * 1.0e3)))
   ,grabFrameThread()
 {
-  if(!bfs::is_directory(this->path))
-  {
-    throw open_camera_error()
-      << info_what(this->path.directory_string() + " is not a directory");
-  }
-
-	
-  this->dirIterator = bfs::directory_iterator(this->path);
-
   this->grabFrameThread.reset(new boost::thread(&PseudoCamera::doWork, this));
 }
 
@@ -56,8 +43,6 @@ void
 PseudoCamera::doWork()
 {
   int frameIdx = 0;
-	int	ordem =0;
-  bool imageLoaded = false;
 
   boost::shared_ptr<IplImageWrapper> frameBuffer[2];
   for (int i = 0; i < 2; ++i)
@@ -65,66 +50,32 @@ PseudoCamera::doWork()
     frameBuffer[i].reset(new IplImageWrapper());
   }
 
-  while (true)
+  std::vector<std::string>::const_iterator itImagesPath;
+  for (itImagesPath = this->imagesPath.begin();
+       itImagesPath < this->imagesPath.end();
+       ++itImagesPath)
   {
     boost::this_thread::interruption_point();
 
-    imageLoaded = false;
-    do
+    try
     {
-      if(this->dirIterator == this->endIterator)
-      {
-        message(LogLevel::INFO)
-          << ts_output::lock
-          << "PseudoCamera already readed all images in directory "
-          << this->path.file_string() << std::endl
-          << ts_output::unlock;
-
-        return;
-      }
-
-      if(bfs::is_directory(dirIterator->status()))
-      {
-        this->dirIterator++;
-        continue;
-      }
-      try
-      {
-				std::ostringstream u;//= this->dirIterator->path().parent_path().file_string();
-
-				 u << this->dirIterator->path().parent_path()<< "/img-"<< std::setfill('0') <<std::setw(10) << ordem << ".ppm";
-
-        frameBuffer[frameIdx]->loadImage(u.str(),//dirIterator->path().file_string(),
-                                         CV_LOAD_IMAGE_COLOR);
-
-
-			 message(LogLevel::WARN)
-          << ts_output::lock
-          << u.str() << std::endl// this->dirIterator->path().parent_path()<<  << "/img-"<< std::setfill('0') <<std::setw(10) << ordem << ".jpg" << std::endl
-          << ts_output::unlock;
-
-      }
-      catch (load_file_error& e)
-      {
-        message(LogLevel::WARN)
-          << ts_output::lock
-          << "PseudoCamera could not load file "
-          << this->dirIterator->path().file_string() << std::endl
-          << ts_output::unlock;
-
-        this->dirIterator++;
-        continue;
-      }
-
-      imageLoaded = true;
-      this->dirIterator++;
-    }while(!imageLoaded);
-
-    updateCurrentFrame(frameBuffer[frameIdx]);
-
-		ordem++;
-    frameIdx = (frameIdx+1) % 2;
-
-    boost::this_thread::sleep(this->delay);
+      frameBuffer[frameIdx]->loadImage(*itImagesPath, CV_LOAD_IMAGE_COLOR);
+      updateCurrentFrame(frameBuffer[frameIdx]);
+      frameIdx = (frameIdx+1) % 2;
+      boost::this_thread::sleep(this->delay);
+    }
+    catch (load_file_error& e)
+    {
+      message(LogLevel::WARN)
+        << ts_output::lock
+        << "PseudoCamera could not load file " << *itImagesPath << std::endl
+        << ts_output::unlock;
+      continue;
+    }
   }
+
+  message(LogLevel::INFO)
+    << ts_output::lock
+    << "PseudoCamera already readed all images" << std::endl
+    << ts_output::unlock;
 }

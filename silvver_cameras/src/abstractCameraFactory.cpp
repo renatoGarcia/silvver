@@ -50,7 +50,7 @@ AbstractCameraFactory::create(const scene::Camera& cameraConfig,
                    "to ARToolKitPlus targets");
 #endif
   }
-  if (const scene::ButterflyTargets* const butterflyTarget =
+  else if (const scene::ButterflyTargets* const butterflyTarget =
       boost::get<scene::ButterflyTargets>(&targets))
   {
 #ifdef HAS_BUTTERFLY

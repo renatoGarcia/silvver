@@ -19,6 +19,7 @@
 #include <boost/array.hpp>
 #include <boost/optional.hpp>
 #include <string>
+#include <vector>
 
 extern "C"
 {
@@ -53,6 +54,9 @@ private:
 
   template <class Type, std::size_t nItens>
   void getTop(boost::array<Type, nItens>& output, lua_State* L) const;
+
+  template <class Type>
+  void getTop(std::vector<Type>& output, lua_State* L) const;
 
   template<class Type>
   void readValue(Type& output,

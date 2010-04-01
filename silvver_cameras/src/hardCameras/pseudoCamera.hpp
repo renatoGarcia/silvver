@@ -19,9 +19,10 @@
 #include "hardCamera.hpp"
 
 #include <boost/date_time/posix_time/posix_time_types.hpp>
-#include <boost/filesystem.hpp>
 #include <boost/scoped_ptr.hpp>
 #include <boost/thread/thread.hpp>
+#include <string>
+#include <vector>
 
 class PseudoCamera
   :public HardCamera
@@ -34,18 +35,9 @@ public:
 
 private:
 
-  static const unsigned BITS_PER_PIXEL = 8;
-
   void doWork();
 
-  const boost::filesystem::path path;
-
-  const float frameRate;
-
-	const boost::filesystem::path nome;
-
-  boost::filesystem::directory_iterator dirIterator;
-  const boost::filesystem::directory_iterator  endIterator;
+  const std::vector<std::string> imagesPath;
 
   /// Delay time to simulate the correct fps
   const boost::posix_time::millisec delay;

@@ -79,7 +79,7 @@ IF(WITH_BUTTERFLY)
   ENDIF(BUTTERFLY_FOUND)
 ENDIF(WITH_BUTTERFLY)
 
-FIND_PACKAGE(Boost REQUIRED filesystem program_options thread serialization)
+FIND_PACKAGE(Boost REQUIRED system filesystem program_options thread serialization)
 FIND_PACKAGE(Lua51 REQUIRED lua m)
 FIND_PACKAGE(OpenCV REQUIRED)
 

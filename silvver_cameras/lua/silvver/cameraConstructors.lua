@@ -23,7 +23,7 @@ end
 function PseudoCamera(parameters)
     camera = {}
     camera.__driver = 'pseudocamera'
-    camera.identifier = string.gsub(parameters.images_path, "/", "_")
+    camera.identifier = parameters.uid
 
     camera.save_image_format = __getOptional(parameters.save_image_format,
                                              "%1%_%2%_%3%.jpg")

@@ -26,6 +26,7 @@
 #include <boost/optional.hpp>
 #include <boost/variant.hpp>
 #include <string>
+#include <vector>
 
 namespace scene
 {
@@ -34,7 +35,7 @@ namespace scene
   struct Hardware
   {
     /// An unique string which differentiate this hardCamera from
-    /// others hardCamera.
+    /// others hardCameras.
     std::string identifier;
 
     /// String configuring the name of saved images. This string can have
@@ -61,8 +62,8 @@ namespace scene
 
   struct PseudoCamera: public Hardware
   {
-    /// Path to directory where are the input images.
-    std::string imagesPath;
+    /// Vector with path of all images.
+    std::vector<std::string> imagesPath;
 
     /// The rate which the input images will be read.
     float frameRate;
@@ -128,61 +129,30 @@ namespace scene
     /// The descriptions of below controls was grabbed of
     /// http://v4l2spec.bytesex.org/spec/x542.htm
 
-    /// Picture brightness, or more precisely, the black level.
     boost::optional<int> brightness;
-
-    /// Picture contrast or luma gain.
-    boost::optional<int> contrast;
-
-    /// Picture color saturation or chroma gain.
-    boost::optional<int> saturation;
-
-    /// Hue or color balance.
-    boost::optional<int> hue;
-
-    /// Automatic white balance.
+    boost::optional<int> contrast;   /// Contrast or luma gain.
+    boost::optional<int> saturation; /// Color saturation or chroma gain.
+    boost::optional<int> hue;        /// Hue or color balance.
     boost::optional<bool> autoWhiteBalance;
-
-    /// Red chroma balance.
     boost::optional<int> redBalance;
-
-    /// Blue chroma balance.
     boost::optional<int> blueBalance;
-
-    /// Gamma adjust.
     boost::optional<int> gamma;
-
-    /// Exposure.
     boost::optional<int> exposure;
-
-    /// Automatic gain/exposure control.
-    boost::optional<bool> autogain;
-
-    /// Gain control.
+    boost::optional<bool> autogain;  /// Automatic gain/exposure control.
     boost::optional<int> gain;
-
-    /// Mirror the picture horizontally.
-    boost::optional<bool> horizontalFlip;
-
-    /// Mirror the picture vertically.
-    boost::optional<bool> verticalFlip;
-
+    boost::optional<bool> horizontalFlip; /// Mirror the picture horizontally.
+    boost::optional<bool> verticalFlip; /// Mirror the picture vertically.
     /// Enables a power line frequency filter to avoid flicker.
     /// Possible values are: 0 (disabled), 50 [Hz] and 60 [Hz].
     boost::optional<int> powerLineFrequency;
-
-    /// Enables automatic hue control by the device.
     boost::optional<bool> hueAuto;
-
     /// This control specifies the white balance settings as a color
     /// temperature in Kelvin. A driver should have a minimum of 2800
     /// (incandescent) to 6500 (daylight).
     boost::optional<int> whiteBalanceTemperature;
-
     /// Adjusts the sharpness filters in a camera. The minimum value disables
     /// the filters, higher values give a sharper picture.
     boost::optional<int> sharpness;
-
     /// Adjusts the backlight compensation in a camera. The minimum value
     /// disables backlight compensation.
     boost::optional<int> backlightCompensation;
