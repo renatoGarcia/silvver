@@ -13,19 +13,20 @@ SET(WITH_BUTTERFLY ON
 SET(SUPPORTED_CAMERAS "Pseudocameras")
 SET(SUPPORTED_TARGETS "")
 
-SET(silvver_cameras_SRCS cfParser.cpp
+SET(silvver_cameras_SRCS abstractCameraFactory.cpp
                          abstractCameras/abstractCamera.cpp
+                         abstractCameras/mountedTarget.cpp
                          connection.cpp
-                         sceneMounter.cpp
+                         exceptions.cpp
                          hardCameraFactory.cpp
-                         main.cpp
-                         abstractCameraFactory.cpp
+                         hardCameras/colorConverter.cpp
                          hardCameras/hardCamera.cpp
                          hardCameras/pseudoCamera.cpp
-                         hardCameras/colorConverter.cpp
-                         observer.cpp
                          log.cpp
-                         exceptions.cpp)
+                         main.cpp
+                         observer.cpp
+                         sceneMounter.cpp
+                         cfParser.cpp)
 
 IF(WITH_DC1394V2)
   FIND_PACKAGE(DC1394V2)

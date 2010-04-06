@@ -367,6 +367,10 @@ CfParser::readTarget(lua_State* L)
   {
     target = this->readArtkpTargets(L);
   }
+  else if (type == "butterfly")
+  {
+    target = this->readButterflyTargets(L);
+  }
   else
   {
     throw file_parsing_error()
@@ -411,6 +415,18 @@ CfParser::readArtkpTargets(lua_State* L)
   }
 
   return artkpTargets;
+}
+
+scene::ButterflyTargets
+CfParser::readButterflyTargets(lua_State* L)
+{
+  scene::ButterflyTargets butterflyTargets;
+  readValue(butterflyTargets.squareSize, L, "square_size");
+  readValue(butterflyTargets.maxButterflies, L, "max_butterflies");
+  readValue(butterflyTargets.bodyTranslation, L, "body_translation");
+  readValue(butterflyTargets.bodyRotation, L, "body_rotation");
+
+  return butterflyTargets;
 }
 
 scene::Scene

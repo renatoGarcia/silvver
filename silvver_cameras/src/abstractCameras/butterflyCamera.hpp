@@ -24,9 +24,10 @@
 
 #include "../connection.hpp"
 #include "abstractCamera.hpp"
+#include "mountedTarget.hpp"
 #include "targetDescriptions.hpp"
 
-class ButterflyCamera: public AbstractCamera
+class ButterflyCamera: public AbstractCamera, private MountedTarget
 {
 public:
   ButterflyCamera(const scene::Camera& cameraConfig,
@@ -43,7 +44,13 @@ private:
 
   void doWork();
 
-  const unsigned nButterflies;
+  static ButterflyInstance*
+  createLibButterfly(const scene::Camera& cameraConfig,
+                     const scene::ButterflyTargets& confButterflies);
+
+  const unsigned maxButterflies;
+
+  ButterflyInstance* const libButterfly;
 
   boost::scoped_ptr<boost::thread> runThread;
 };

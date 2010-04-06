@@ -73,3 +73,25 @@ function ARTKP(parameters)
 
     return artkp
 end
+
+function Butterfly(parameters)
+    if parameters.body_pose then
+        parameters.body_translation = parameters.body_pose[1]
+        parameters.body_rotation = parameters.body_pose[2]
+        parameters.body_pose = nil
+    end
+
+    butterfly = {}
+    butterfly.__type = 'butterfly'
+    butterfly.square_size = parameters.square_size
+    butterfly.max_butterflies = parameters.max_butterflies
+
+    butterfly.body_translation = __getOptional(parameters.body_translation,
+                                               {0, 0, 0})
+    butterfly.body_rotation = __getOptional(parameters.body_rotation,
+                                            {1, 0, 0,
+                                             0, 1, 0,
+                                             0, 0, 1})
+
+    return butterfly
+end

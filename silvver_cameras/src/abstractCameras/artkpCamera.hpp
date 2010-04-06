@@ -26,12 +26,12 @@
 
 #include <ARToolKitPlus/TrackerSingleMarker.h>
 
-#include "abstractCamera.hpp"
-#include "targetDescriptions.hpp"
 #include "../connection.hpp"
-#include "silvverTypes.hpp"
+#include "abstractCamera.hpp"
+#include "mountedTarget.hpp"
+#include "targetDescriptions.hpp"
 
-class ArtkpCamera: public AbstractCamera
+class ArtkpCamera: public AbstractCamera, private MountedTarget
 {
 public:
 
@@ -63,20 +63,7 @@ private:
     std::string message;
   };
 
-  /// Convert the target pose in camera coordinates to body pose in same
-  /// camera coordinates.
-  /// @param pose The pose that will be converted.
-  void localizeBody(silvver::Pose& pose) const;
-
   static const int MAX_TARGETS = 40;
-
-  /// Translation of body center in target coordinate system (Trt).
-  /// The order is [x,y,z]
-  const boost::array<double,3> bodyTranslation;
-
-  /// Rotation matrix of body in target coordinate system (Rrt).
-  /// The order of items is: r11, r12, r13, r21, r22, r23, r31, r32, r33
-  const boost::array<double,9> bodyRotation;
 
   /// Width of pattern, counting with border. [mm]
   const int patternWidth;

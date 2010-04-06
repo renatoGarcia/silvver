@@ -79,6 +79,7 @@ private:
   void readTarget(lua_State* L);
 
   scene::ArtkpTargets readArtkpTargets(lua_State* L);
+  scene::ButterflyTargets readButterflyTargets(lua_State* L);
 };
 
 

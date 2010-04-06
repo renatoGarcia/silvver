@@ -16,18 +16,25 @@
 #include "butterflyCamera.hpp"
 
 #include <cstddef>
+#include <vector>
+
 #include <opencv/cv.h>
 
 ButterflyCamera::ButterflyCamera(const scene::Camera& cameraConfig,
                                  const scene::ButterflyTargets& confButterflies,
                                  boost::shared_ptr<Connection> connection)
   :AbstractCamera(cameraConfig, connection)
-  ,nButterflies(confButterflies.nButterflies)
+  ,MountedTarget(confButterflies.bodyTranslation, confButterflies.bodyRotation)
+  ,maxButterflies(confButterflies.maxButterflies)
+  ,libButterfly(ButterflyCamera::createLibButterfly(cameraConfig,
+                                                    confButterflies))
   ,runThread()
 {
-  init_butterfly(NULL, NULL, confButterflies.squareSize,
-                 cvSize(this->currentFrame.size().width,
-                        this->currentFrame.size().height));
+  if (this->libButterfly == NULL)
+  {
+    throw init_target_error()
+      << info_what("Failed when creating struct ButterflyInstance.");
+  }
 }
 
 ButterflyCamera::~ButterflyCamera()
@@ -37,6 +44,33 @@ ButterflyCamera::~ButterflyCamera()
     this->runThread->interrupt();
     this->runThread->join();
   }
+
+  if (this->libButterfly)
+    butterfly_delete(this->libButterfly);
+}
+
+ButterflyInstance*
+ButterflyCamera::createLibButterfly(const scene::Camera& cameraConfig,
+                                    const scene::ButterflyTargets& confButterflies)
+{
+  const scene::Hardware hardwareConfig =
+    boost::apply_visitor(scene::GetHardware(), cameraConfig.hardware);
+
+  Butterfly_CamParams camParam;
+  camParam.image_size = cvSize(hardwareConfig.resolution.at(0),
+                               hardwareConfig.resolution.at(1));
+  camParam.focal_length[0] = hardwareConfig.focalLength.at(0);
+  camParam.focal_length[1] = hardwareConfig.focalLength.at(1);
+  camParam.principal_point[0] = hardwareConfig.principalPoint.at(0);
+  camParam.principal_point[1] = hardwareConfig.principalPoint.at(1);
+  camParam.radial_coef[0] = hardwareConfig.radialCoef.at(0);
+  camParam.radial_coef[1] = hardwareConfig.radialCoef.at(1);
+  camParam.radial_coef[2] = hardwareConfig.radialCoef.at(2);
+  camParam.tangential_coef[0] = hardwareConfig.tangentialCoef.at(0);
+  camParam.tangential_coef[1] = hardwareConfig.tangentialCoef.at(1);
+
+  return butterfly_construct(confButterflies.squareSize, camParam,
+                             confButterflies.maxButterflies, 0);
 }
 
 void
@@ -58,18 +92,39 @@ ButterflyCamera::stop()
 void
 ButterflyCamera::doWork()
 {
-  Butterfly* butterflies = new Butterfly[this->nButterflies];
+  std::vector<silvver::Identity<silvver::Pose> > poses;
+  silvver::Identity<silvver::Pose> tmpPose;
+
+  std::vector<Butterfly> butterflies(this->maxButterflies);
   unsigned foundButterflies = 0;
 
   while(true)
   {
     boost::this_thread::interruption_point();
 
+    poses.clear();
     this->updateFrame();
 
-    foundButterflies = find_butterflies(this->currentFrame,
-                                        butterflies, this->nButterflies);
-  }
+    foundButterflies = find_butterflies(this->libButterfly,
+                                        this->currentFrame,
+                                        &butterflies.front());
 
-  delete[] butterflies;
+    for (int k = 0; k < foundButterflies; ++k)
+    {
+      tmpPose.uid = butterflies[k].uid;
+      tmpPose.x = butterflies[k].x;
+      tmpPose.y = butterflies[k].y;
+      tmpPose.z = butterflies[k].z;
+      for(int i = 0; i < 3; ++i)
+        for(int j = 0; j < 3; ++j)
+          tmpPose.rotationMatrix[(3*i)+j] = butterflies[k].rot_matrix[i][j];
+
+      localizeBody(tmpPose);
+      toWorld(tmpPose);
+
+      poses.push_back(tmpPose);
+    }
+
+    this->serverConnection->send(poses);
+  }
 }

@@ -31,8 +31,17 @@
 
 namespace scene
 {
+  struct Mounted
+  {
+    /// Translation of body center in target coordinate system.
+    boost::array<double,3> bodyTranslation;
+
+    /// Rotation matrix of body in target coordinate system.
+    boost::array<double,9> bodyRotation;
+  };
+
   /// Struct with definitions of ARToolKitPlus targets.
-  struct ArtkpTargets
+  struct ArtkpTargets: public Mounted
   {
     /// Key unique to each artkp targets set.
     unsigned uniqueKey;
@@ -43,24 +52,18 @@ namespace scene
     /// Grey level threshold between black and white.
     int threshold;
 
-    /// Translation of body center in target coordinate system.
-    boost::array<double,3> bodyTranslation;
-
-    /// Rotation matrix of body in target coordinate system.
-    boost::array<double,9> bodyRotation;
-
     /// Each tuple is: the unique identifier that silvver will attribute to
     /// this pattern, and the path to the file describing the pattern.
     std::vector< boost::tuple<unsigned, std::string> > patterns;
   };
 
-  struct ButterflyTargets
+  struct ButterflyTargets: public Mounted
   {
     // Size of one checkerboard square [mm]
     unsigned squareSize;
 
     // Max number of butterflys
-    unsigned nButterflies;
+    unsigned maxButterflies;
   };
 
   /// The AnyTarget is a type which can handle any of target structs.
