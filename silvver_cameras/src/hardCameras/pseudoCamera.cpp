@@ -16,7 +16,7 @@
 #include "pseudoCamera.hpp"
 
 #include "../exceptions.hpp"
-#include "../iplImageWrapper.hpp"
+#include "../frame.hpp"
 #include "../log.hpp"
 
 namespace bpt = boost::posix_time;
@@ -44,10 +44,10 @@ PseudoCamera::doWork()
 {
   int frameIdx = 0;
 
-  boost::shared_ptr<IplImageWrapper> frameBuffer[2];
+  boost::shared_ptr<Frame> frameBuffer[2];
   for (int i = 0; i < 2; ++i)
   {
-    frameBuffer[i].reset(new IplImageWrapper());
+    frameBuffer[i].reset(new Frame());
   }
 
   std::vector<std::string>::const_iterator itImagesPath;

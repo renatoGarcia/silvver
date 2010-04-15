@@ -26,7 +26,7 @@
 #include <stropts.h>
 #include <sys/mman.h>
 
-#include "../iplImageWrapper.hpp"
+#include "../frame.hpp"
 #include "../log.hpp"
 #include "../exceptions.hpp"
 
@@ -425,10 +425,10 @@ V4L2::doWork()
   buf.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
   buf.memory = V4L2_MEMORY_MMAP;
 
-  boost::shared_ptr<IplImageWrapper> frameBuffer[2];
+  boost::shared_ptr<Frame> frameBuffer[2];
   int depth = IPL_DEPTH_8U;
-  frameBuffer[0].reset(new IplImageWrapper(this->frameSize, depth, 3));
-  frameBuffer[1].reset(new IplImageWrapper(this->frameSize, depth, 3));
+  frameBuffer[0].reset(new Frame(this->frameSize, depth, 3));
+  frameBuffer[1].reset(new Frame(this->frameSize, depth, 3));
   int frameIdx = 0;
 
   while (true)

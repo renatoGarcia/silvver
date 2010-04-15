@@ -13,8 +13,8 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef _IPLIMAGEWRAPPER_HPP_
-#define _IPLIMAGEWRAPPER_HPP_
+#ifndef _FRAME_HPP_
+#define _FRAME_HPP_
 
 #include <boost/tuple/tuple.hpp>
 #include <cstddef>
@@ -25,7 +25,7 @@
 
 #include "exceptions.hpp"
 
-class IplImageWrapper
+class Frame
 {
 public:
 
@@ -34,23 +34,23 @@ public:
 
   /// Default constructor.
   /// Build a empty image, allocating no data.
-  IplImageWrapper();
+  Frame();
 
-  IplImageWrapper(const IplParameters& parameters);
+  Frame(const IplParameters& parameters);
 
-  IplImageWrapper(const CvSize& size, int depth, int nChannels);
+  Frame(const CvSize& size, int depth, int nChannels);
 
-  /// Construct a new IplImageWrapper cloning the iplImageSrc.
+  /// Construct a new Frame cloning the iplImageSrc.
   /// @param iplImageSrc Pointer to image which will be cloned.
-  IplImageWrapper(const IplImage* const iplImageSrc);
+  Frame(const IplImage* const iplImageSrc);
 
-  /// IplImageWrapper copy constructor.
+  /// Frame copy constructor.
   /// @param iplImageWrapper Source image.
-  IplImageWrapper(const IplImageWrapper& iplImageWrapper);
+  Frame(const Frame& iplImageWrapper);
 
-  ~IplImageWrapper();
+  ~Frame();
 
-  const IplImageWrapper& operator=(const IplImageWrapper& iplImageWrapper);
+  const Frame& operator=(const Frame& iplImageWrapper);
 
   operator const IplImage*() const;
 
@@ -64,14 +64,14 @@ public:
   void loadImage(const std::string& filename,
                  int iscolor=CV_LOAD_IMAGE_UNCHANGED);
 
-  /// Transform the color space of IplImageWrapper.
+  /// Transform the color space of Frame.
   /// @param code The same code used in cvCvt function.
   void convertColor(int code);
 
-  /// Transform the color space of IplImageWrapper.
-  /// @param destine The IplImageWrapper where apply the result.
+  /// Transform the color space of Frame.
+  /// @param destine The Frame where apply the result.
   /// @param code The same code used in cvCvt function.
-  void convertColor(IplImageWrapper& destine, int code) const;
+  void convertColor(Frame& destine, int code) const;
 
   /// Get the size of image.
   /// @return A CvSize representing the image size.
@@ -95,33 +95,33 @@ private:
 
 
 inline
-IplImageWrapper::IplImageWrapper()
+Frame::Frame()
   :iplImage(NULL)
 {}
 
 inline
-IplImageWrapper::IplImageWrapper(const IplParameters& parameters)
+Frame::Frame(const IplParameters& parameters)
   :iplImage(cvCreateImage(parameters.get<0>(), parameters.get<1>(),
                           parameters.get<2>()))
 {}
 
 inline
-IplImageWrapper::IplImageWrapper(const CvSize& size, int depth, int nChannels)
+Frame::Frame(const CvSize& size, int depth, int nChannels)
   :iplImage(cvCreateImage(size, depth, nChannels))
 {}
 
 inline
-IplImageWrapper::IplImageWrapper(const IplImage* const iplImageSrc)
+Frame::Frame(const IplImage* const iplImageSrc)
   :iplImage(cvCloneImage(iplImageSrc))
 {}
 
 inline
-IplImageWrapper::IplImageWrapper(const IplImageWrapper& iplImageWrapper)
+Frame::Frame(const Frame& iplImageWrapper)
   :iplImage(cvCloneImage(iplImageWrapper.iplImage))
 {}
 
 inline
-IplImageWrapper::~IplImageWrapper()
+Frame::~Frame()
 {
   if (this->iplImage)
   {
@@ -129,8 +129,8 @@ IplImageWrapper::~IplImageWrapper()
   }
 }
 
-inline const IplImageWrapper&
-IplImageWrapper::operator=(const IplImageWrapper& iplImageWrapper)
+inline const Frame&
+Frame::operator=(const Frame& iplImageWrapper)
 {
   // If is a self-assignment
   if (this == &iplImageWrapper)
@@ -148,19 +148,19 @@ IplImageWrapper::operator=(const IplImageWrapper& iplImageWrapper)
 }
 
 inline
-IplImageWrapper::operator const IplImage*() const
+Frame::operator const IplImage*() const
 {
   return this->iplImage;
 }
 
 inline
-IplImageWrapper::operator IplImage*()
+Frame::operator IplImage*()
 {
   return this->iplImage;
 }
 
 inline void
-IplImageWrapper::loadImage(const std::string& filename, int iscolor)
+Frame::loadImage(const std::string& filename, int iscolor)
 {
   if (this->iplImage)
   {
@@ -178,47 +178,47 @@ IplImageWrapper::loadImage(const std::string& filename, int iscolor)
 }
 
 inline void
-IplImageWrapper::convertColor(int code)
+Frame::convertColor(int code)
 {
-  IplImageWrapper tmpImage(*this);
+  Frame tmpImage(*this);
   cvCvtColor(tmpImage.iplImage, this->iplImage, code);
 }
 
 inline void
-IplImageWrapper::convertColor(IplImageWrapper& destine, int code) const
+Frame::convertColor(Frame& destine, int code) const
 {
   cvCvtColor(this->iplImage, destine.iplImage, code);
 }
 
 inline CvSize
-IplImageWrapper::size() const
+Frame::size() const
 {
   return this->iplImage ?
     cvSize(this->iplImage->width, this->iplImage->height) : cvSize(0,0);
 }
 
 inline int
-IplImageWrapper::depth() const
+Frame::depth() const
 {
   return this->iplImage ? this->iplImage->depth : 0;
 }
 
 inline int
-IplImageWrapper::channels() const
+Frame::channels() const
 {
   return this->iplImage ? this->iplImage->nChannels : 0;
 }
 
 inline const char*
-IplImageWrapper::data() const
+Frame::data() const
 {
   return this->iplImage ? this->iplImage->imageData : 0;
 }
 
 inline char*
-IplImageWrapper::data()
+Frame::data()
 {
   return this->iplImage ? this->iplImage->imageData : 0;
 }
 
-#endif /* _IPLIMAGEWRAPPER_HPP_ */
+#endif /* _FRAME_HPP_ */

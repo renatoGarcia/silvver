@@ -45,10 +45,10 @@ HardCamera::HardCamera(const scene::Hardware& config, int iplDepth)
   ,saveImageFormat(config.saveImageFormat)
   ,imagesCounter(0)
 {
-  undistortedFrameBuffer[0].reset(new IplImageWrapper(this->frameSize,
-                                                      this->iplDepth, 3));
-  undistortedFrameBuffer[1].reset(new IplImageWrapper(this->frameSize,
-                                                      this->iplDepth, 3));
+  undistortedFrameBuffer[0].reset(new Frame(this->frameSize,
+                                            this->iplDepth, 3));
+  undistortedFrameBuffer[1].reset(new Frame(this->frameSize,
+                                            this->iplDepth, 3));
 
   CvMat* intrinsic = cvCreateMat(3, 3, CV_32FC1);
   // Opencv 1.0.0 can handle only 4x1 distortion matrix
@@ -103,14 +103,14 @@ HardCamera::~HardCamera()
   }
 }
 
-IplImageWrapper::IplParameters
+Frame::IplParameters
 HardCamera::getImageParameters() const
 {
-  return IplImageWrapper::IplParameters(this->frameSize, this->iplDepth, 3);
+  return Frame::IplParameters(this->frameSize, this->iplDepth, 3);
 }
 
 void
-HardCamera::updateCurrentFrame(boost::shared_ptr<IplImageWrapper> frame)
+HardCamera::updateCurrentFrame(boost::shared_ptr<Frame> frame)
 {
   static int undistortedIdx = 0;
 
@@ -151,14 +151,14 @@ HardCamera::updateCurrentFrame(boost::shared_ptr<IplImageWrapper> frame)
 }
 
 void
-HardCamera::getDistortedFrame(IplImageWrapper& image)
+HardCamera::getDistortedFrame(Frame& image)
 {
   boost::shared_lock<boost::shared_mutex> lock(this->framesAccessMutex);
   image = *this->distortedFrame;
 }
 
 void
-HardCamera::getUndistortedFrame(IplImageWrapper& image)
+HardCamera::getUndistortedFrame(Frame& image)
 {
   boost::shared_lock<boost::shared_mutex> lock(this->framesAccessMutex);
   image = *this->undistortedFrame;

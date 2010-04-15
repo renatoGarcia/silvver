@@ -26,7 +26,7 @@
 #include <utility>
 
 #include "../exceptions.hpp"
-#include "../iplImageWrapper.hpp"
+#include "../frame.hpp"
 #include "../log.hpp"
 
 using namespace boost::assign;
@@ -699,11 +699,11 @@ void
 DC1394::doWork()
 {
   dc1394video_frame_t* videoFrame = NULL;
-  boost::shared_ptr<IplImageWrapper> frameBuffer[2];
+  boost::shared_ptr<Frame> frameBuffer[2];
   int frameIdx = 0;
 
-  frameBuffer[0].reset(new IplImageWrapper(this->frameSize,this->iplDepth,3));
-  frameBuffer[1].reset(new IplImageWrapper(this->frameSize,this->iplDepth,3));
+  frameBuffer[0].reset(new Frame(this->frameSize,this->iplDepth,3));
+  frameBuffer[1].reset(new Frame(this->frameSize,this->iplDepth,3));
 
   while (true)
   {

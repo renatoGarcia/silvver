@@ -25,7 +25,7 @@
 
 #include <opencv/cv.h>
 
-#include "../iplImageWrapper.hpp"
+#include "../frame.hpp"
 #include "../observer.hpp"
 #include "hardCameraDescriptions.hpp"
 
@@ -44,18 +44,18 @@ public:
 
   virtual ~HardCamera();
 
-  IplImageWrapper::IplParameters getImageParameters() const;
+  Frame::IplParameters getImageParameters() const;
 
-  void getDistortedFrame(IplImageWrapper& image);
+  void getDistortedFrame(Frame& image);
 
-  void getUndistortedFrame(IplImageWrapper& image);
+  void getUndistortedFrame(Frame& image);
 
 protected:
 
   HardCamera(const scene::Hardware& config, int iplDepth);
 
   /// This method must be called by derived classes when it read a new frame
-  void updateCurrentFrame(boost::shared_ptr<IplImageWrapper> frame);
+  void updateCurrentFrame(boost::shared_ptr<Frame> frame);
 
   /// Frame size measures in pixels.
   const unsigned framePixels;
@@ -70,10 +70,10 @@ private:
 
   unsigned getBitsPerPixel(int iplDepth) const;
 
-  boost::shared_ptr<IplImageWrapper> distortedFrame;
-  boost::shared_ptr<IplImageWrapper> undistortedFrame;
+  boost::shared_ptr<Frame> distortedFrame;
+  boost::shared_ptr<Frame> undistortedFrame;
 
-  boost::shared_ptr<IplImageWrapper> undistortedFrameBuffer[2];
+  boost::shared_ptr<Frame> undistortedFrameBuffer[2];
 
   /// A string to differentiate this camera, e.g.: when saving images or
   /// in title of window where showing the captured images.
@@ -84,8 +84,8 @@ private:
   boost::shared_mutex framesAccessMutex;
 
   /// Maps to distort captured images
-  IplImageWrapper mapx;
-  IplImageWrapper mapy;
+  Frame mapx;
+  Frame mapy;
 
   const bool showImages;
   const std::string windowName;

@@ -23,7 +23,7 @@
 
 #include "../connection.hpp"
 #include "../hardCameras/hardCamera.hpp"
-#include "../iplImageWrapper.hpp"
+#include "../frame.hpp"
 #include "../observer.hpp"
 #include "../scene.hpp"
 
@@ -58,7 +58,7 @@ protected:
   /// Tranform a pose in camera coordinates do world coordinates.
   void toWorld(silvver::Pose& pose) const;
 
-  IplImageWrapper currentFrame;
+  Frame currentFrame;
 
   /// Connection with the silvver-server used to send the target localizations.
   const boost::shared_ptr<Connection> serverConnection;
