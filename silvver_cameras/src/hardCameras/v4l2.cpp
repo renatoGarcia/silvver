@@ -444,6 +444,8 @@ V4L2::doWork()
         << ts_output::unlock;
     }
 
+    frameBuffer[frameIdx]->timestamp = buf.timestamp.tv_sec * 1000000 +
+                                       buf.timestamp.tv_usec;
     this->colorConverter((uint8_t*)buffers[buf.index].start,
                          *frameBuffer[frameIdx]);
 

@@ -720,6 +720,7 @@ DC1394::doWork()
         << ts_output::unlock;
     }
 
+    frameBuffer[frameIdx]->timestamp = videoFrame->timestamp;
     this->colorConverter((uint8_t*)videoFrame->image, *frameBuffer[frameIdx]);
 
     updateCurrentFrame(frameBuffer[frameIdx]);

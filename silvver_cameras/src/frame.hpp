@@ -18,6 +18,7 @@
 
 #include <boost/tuple/tuple.hpp>
 #include <cstddef>
+#include <stdint.h>
 #include <string>
 
 #include <opencv/cv.h>
@@ -87,8 +88,10 @@ public:
   /// @return A char* to beginning of image data.
   char* data();
 
-private:
+  /// The instant of frame grab [microseconds].
+  uint64_t timestamp;
 
+private:
   IplImage* iplImage;
 };
 

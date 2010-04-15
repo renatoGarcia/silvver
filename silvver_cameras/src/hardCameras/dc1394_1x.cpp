@@ -720,6 +720,7 @@ DC1394::doWork()
       continue;
     }
 
+    frameBuffer[frameIdx]->timestamp = TODO;
     this->colorConverter((uint8_t*)this->dc1394Camera.capture_buffer,
                          *frameBuffer[frameIdx]);
 
