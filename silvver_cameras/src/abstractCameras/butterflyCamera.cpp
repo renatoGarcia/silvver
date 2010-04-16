@@ -111,6 +111,7 @@ ButterflyCamera::doWork()
 
     for (int k = 0; k < foundButterflies; ++k)
     {
+      tmpPose.timestamp = this->currentFrame.timestamp;
       tmpPose.uid = butterflies[k].uid;
       tmpPose.x = butterflies[k].x;
       tmpPose.y = butterflies[k].y;

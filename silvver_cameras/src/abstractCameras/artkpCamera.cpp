@@ -177,6 +177,7 @@ ArtkpCamera::doWork()
                                            transMatrix);
       // }
 
+      pose.timestamp = this->currentFrame.timestamp;
       pose.uid = this->idMap.at(markerInfo[marker].id);
       pose.x = transMatrix[0][3];
       pose.y = transMatrix[1][3];

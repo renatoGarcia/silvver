@@ -23,6 +23,7 @@
 
 #include <boost/array.hpp>
 #include <cmath>
+#include <stdint.h>
 
 namespace silvver
 {
@@ -136,15 +137,19 @@ namespace silvver
   struct Identity : public BaseClass
   {
     unsigned uid;
+    uint64_t timestamp;
 
     Identity()
       :BaseClass()
       ,uid(0)
+      ,timestamp(0)
     {}
 
-    Identity(const BaseClass& base, const unsigned uid)
+    Identity(const BaseClass& base, const unsigned uid,
+             const uint64_t timestamp)
       :BaseClass(base)
       ,uid(uid)
+      ,timestamp(timestamp)
     {}
 
     Identity<BaseClass>&
@@ -157,6 +162,7 @@ namespace silvver
 
       BaseClass::operator=(identity);
       this->uid = identity.uid;
+      this->timestamp = identity.timestamp;
       return *this;
     }
   };
@@ -167,7 +173,8 @@ namespace silvver
   operator << (std::basic_ostream<charT,traits>& strm,
                const Identity<BaseClass>& identity)
   {
-    strm << identity.uid << '\t' << static_cast<BaseClass>(identity);
+    strm << identity.timestamp << '\t'
+         << identity.uid << '\t' << static_cast<BaseClass>(identity);
     return strm;
   }
 
