@@ -19,11 +19,10 @@
 #include <vector>
 
 /// Interface to access a Processor class withou know the output type.
-template <typename Tinput>
+template <class Tinput>
 class ProcessorInterface
 {
 public:
-
   /** Deliver data to be processed.
    * This method must be implemented by a concrete processor class.
    *
@@ -34,6 +33,10 @@ public:
                               const unsigned id)=0;
 
   virtual ~ProcessorInterface()
+  {}
+
+protected:
+  ProcessorInterface()
   {}
 };
 

@@ -39,8 +39,14 @@ public:
   void localize(/*std::vector<silvver::Ente> &vecRobos*/);
 
 private:
+  typedef std::map<unsigned, std::vector<silvver::Identity<silvver::Pose> > >
+  TMap;
 
   friend class Singleton<MarkerProcessor>;
+
+private:
+  /// Hold the last input of each input client.
+  TMap lastInputs;
 
   MarkerProcessor();
 

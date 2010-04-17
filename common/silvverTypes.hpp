@@ -24,6 +24,7 @@
 #include <boost/array.hpp>
 #include <cmath>
 #include <stdint.h>
+#include <vector>
 
 namespace silvver
 {
@@ -138,6 +139,7 @@ namespace silvver
   {
     unsigned uid;
     uint64_t timestamp;
+    // std::vector<> 
 
     Identity()
       :BaseClass()
