@@ -19,6 +19,7 @@
 #include "input.hpp"
 
 #include <boost/bind.hpp>
+#include <boost/foreach.hpp>
 
 template <typename Type>
 Input<Type>::Input(boost::shared_ptr<IoConnection> connection,
@@ -28,7 +29,9 @@ Input<Type>::Input(boost::shared_ptr<IoConnection> connection,
   ,connectionPort(connection->getLocalPort())
   ,processor(processor)
 {
-  this->connection->asyncReceive(this->inputs,
+  this->outputRawMap = OutputMap<CLIENT_RAW>::instantiate();
+
+  this->connection->asyncReceive(this->currentInputs,
                                  boost::bind(&Input<Type>::handleReceive,
                                              this));
 }
@@ -41,9 +44,22 @@ template <typename Type>
 void
 Input<Type>::handleReceive()
 {
-  this->processor->deliverPackage(this->inputs, this->connectionPort);
+  std::vector< boost::shared_ptr<IoConnection> > vecConnections;
+  boost::shared_ptr<IoConnection> connectionPtr;
+  BOOST_FOREACH(Type input, this->currentInputs)
+  {
+    // Get all raw clients hearing for a given target.
+    this->outputRawMap->findOutputs(input.uid, vecConnections);
 
-  this->connection->asyncReceive(this->inputs,
+    BOOST_FOREACH(connectionPtr, vecConnections)
+    {
+      connectionPtr->send(input);
+    }
+  }
+
+  this->processor->deliverPackage(this->currentInputs, this->connectionPort);
+
+  this->connection->asyncReceive(this->currentInputs,
                                  boost::bind(&Input<Type>::handleReceive,
                                              this));
 }

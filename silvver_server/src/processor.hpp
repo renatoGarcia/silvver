@@ -37,7 +37,7 @@ protected:
   void sendToOutputs(const std::vector<Toutput> &localizations) const;
 
 private:
-  boost::shared_ptr<OutputMap<OUTPUT_NORMAL> > outputMap;
+  boost::shared_ptr<OutputMap<CLIENT_NORMAL> > outputMap;
 };
 
 #endif /* _PROCESSOR_HPP_ */

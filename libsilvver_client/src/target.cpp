@@ -15,13 +15,11 @@
 
 #include "target.hpp"
 
-#include <iostream>
-
 #include <boost/bind.hpp>
-#include <boost/lexical_cast.hpp>
 #include <boost/scoped_ptr.hpp>
 #include <boost/thread/condition.hpp>
 #include <boost/thread/mutex.hpp>
+#include <cstdlib>
 
 #include "connection.ipp"
 
@@ -89,16 +87,13 @@ namespace silvver
   template<class U>
   CheshireCat<U>::~CheshireCat()
   {
-    if (this->connected)
+    try
     {
-      try
-      {
-        this->disconnect();
-      }
-      catch(...)
-      {
-        std::cerr << "Error on closing Target" << std::endl;
-      }
+      this->disconnect();
+    }
+    catch(...)
+    {
+      abort();
     }
   }
 
@@ -106,20 +101,26 @@ namespace silvver
   void
   CheshireCat<U>::connect()
   {
-    this->connection->connect(this->targetId);
-    this->connected = true;
+    if (!this->connected)
+    {
+      this->connection->connect(CLIENT_NORMAL, this->targetId);
+      this->connected = true;
 
-    this->connection->asyncRead(this->last,
-                                boost::bind(&CheshireCat<U>::update,
-                                            this));
+      this->connection->asyncRead(this->last,
+                                  boost::bind(&CheshireCat<U>::update,
+                                              this));
+    }
   }
 
   template<class U>
   void
   CheshireCat<U>::disconnect()
   {
-    this->connection->disconnect(this->targetId);
-    this->connected = false;
+    if (this->connected)
+    {
+      this->connection->disconnect(CLIENT_NORMAL, this->targetId);
+      this->connected = false;
+    }
   }
 
   template<class U>

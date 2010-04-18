@@ -75,8 +75,9 @@ private:
   /// Connected input clients collection
   std::map<unsigned, boost::shared_ptr<InputInterface> > mapInputs;
 
-  /// Connected output clients collection
-  boost::shared_ptr<OutputMap<OUTPUT_NORMAL> > outputs;
+  boost::shared_ptr<OutputMap<CLIENT_NORMAL> > normalOutputs;
+
+  boost::shared_ptr<OutputMap<CLIENT_RAW> > rawOutputs;
 
   /// Thread where the boost io_service will run
   boost::scoped_ptr<boost::thread> thReceptionist;

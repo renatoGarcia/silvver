@@ -16,36 +16,33 @@
 #ifndef _INPUT_HPP_
 #define _INPUT_HPP_
 
-#include "inputInterface.hpp"
-
+#include <boost/shared_ptr.hpp>
 #include <vector>
 
-#include <boost/shared_ptr.hpp>
-
+#include "inputInterface.hpp"
 #include "ioConnection.hpp"
+#include "outputMap.hpp"
 #include "processorInterface.hpp"
 
-/// Receive the data sent by cameras and passes it to correct processor class.
-template <typename Type>
-class Input : public InputInterface
+/// Receive the data sent by cameras and send it to correct processor class.
+template <class Type>
+class Input: public InputInterface
 {
 public:
-
-  /** Input class constructor
-   *
+  /** Input class constructor.
    * @param connection A shared_ptr to an IoConnection already connected
    *                   with a camera.
-   * @param processor A shared_ptr to the correct processor.
-   */
+   * @param processor A shared_ptr to the correct processor.  */
   Input(boost::shared_ptr<IoConnection> connection,
-        boost::shared_ptr< ProcessorInterface<Type> > processor);
+        boost::shared_ptr<ProcessorInterface<Type> > processor);
 
   ~Input();
 
 private:
+  void handleReceive();
 
   /// Hold the last inputs received.
-  std::vector<Type> inputs;
+  std::vector<Type> currentInputs;
 
   /// The connection with the camera.
   boost::shared_ptr<IoConnection> connection;
@@ -53,9 +50,10 @@ private:
   /// The local port where hearing for incoming data from cameras.
   unsigned connectionPort;
 
-  boost::shared_ptr< ProcessorInterface<Type> > processor;
+  boost::shared_ptr<ProcessorInterface<Type> > processor;
 
-  void handleReceive();
+  /// Clients hearing for localizations before be processed.
+  boost::shared_ptr<OutputMap<CLIENT_RAW> > outputRawMap;
 };
 
 #endif /* _INPUT_HPP_ */

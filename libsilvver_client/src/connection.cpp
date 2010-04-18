@@ -66,7 +66,7 @@ Connection::~Connection()
 }
 
 void
-Connection::connect(unsigned targetId)
+Connection::connect(ClientType clientType, unsigned targetId)
 {
   if (!Connection::ioServiceRunning)
   {
@@ -83,7 +83,7 @@ Connection::connect(unsigned targetId)
 
   this->receptionistSocket.connect(this->receptionistEP);
 
-  Request request = AddOutput(targetId,
+  Request request = AddOutput(clientType, targetId,
                               this->inputSocket.local_endpoint().port());
   this->writeToReceptionist(request);
 
@@ -98,11 +98,11 @@ Connection::connect(unsigned targetId)
 }
 
 void
-Connection::disconnect(unsigned targetId)
+Connection::disconnect(ClientType clientType, unsigned targetId)
 {
   this->receptionistSocket.connect(this->receptionistEP);
 
-  Request request = DelOutput(targetId,
+  Request request = DelOutput(clientType, targetId,
                               this->inputSocket.local_endpoint().port());
   this->writeToReceptionist(request);
 

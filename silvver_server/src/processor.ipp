@@ -26,9 +26,8 @@
 
 template <class Tinput, class Toutput>
 Processor<Tinput,Toutput>::Processor()
-{
-  this->outputMap = OutputMap<OUTPUT_NORMAL>::instantiate();
-}
+  :outputMap(OutputMap<CLIENT_NORMAL>::instantiate())
+{}
 
 template <class Tinput, class Toutput>
 void

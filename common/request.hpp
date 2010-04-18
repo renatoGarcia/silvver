@@ -24,6 +24,7 @@
 #include <boost/serialization/variant.hpp>
 
 #include "processorOptions.hpp"
+#include "clientType.hpp"
 
 /// This type symbolize a uninitialized Request.
 struct NullRequest
@@ -35,22 +36,26 @@ struct NullRequest
 
 struct AddOutput
 {
+  ClientType clientType;
   unsigned targetId;
   unsigned short localPort;
 
   AddOutput()
-    :targetId(0)
+    :clientType(CLIENT_NORMAL)
+    ,targetId(0)
     ,localPort(0)
   {}
 
-  AddOutput(unsigned targetId, unsigned short localPort)
-    :targetId(targetId)
+  AddOutput(ClientType clientType, unsigned targetId, unsigned short localPort)
+    :clientType(clientType)
+    ,targetId(targetId)
     ,localPort(localPort)
   {}
 
   template<typename Archive>
   void serialize(Archive& ar, const unsigned)
   {
+    ar & clientType;
     ar & targetId;
     ar & localPort;
   }
@@ -58,22 +63,26 @@ struct AddOutput
 
 struct DelOutput
 {
+  ClientType clientType;
   unsigned targetId;
   unsigned short localPort;
 
   DelOutput()
-    :targetId(0)
+    :clientType(CLIENT_NORMAL)
+    ,targetId(0)
     ,localPort(0)
   {}
 
-  DelOutput(unsigned targetId, unsigned short localPort)
-    :targetId(targetId)
+  DelOutput(ClientType clientType, unsigned targetId, unsigned short localPort)
+    :clientType(clientType)
+    ,targetId(targetId)
     ,localPort(localPort)
   {}
 
   template<typename Archive>
   void serialize(Archive& ar, const unsigned)
   {
+    ar & clientType;
     ar & targetId;
     ar & localPort;
   }
@@ -83,7 +92,6 @@ struct AddCamera
 {
   procOpt::AnyProcOpt processorOpt;
   unsigned short localPort;
-
 
   AddCamera()
     :processorOpt()

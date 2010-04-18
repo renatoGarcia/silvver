@@ -25,7 +25,6 @@ namespace boost
 {
   namespace serialization
   {
-
     template<class Archive>
     void
     serialize(Archive& ar, silvver::Position& position, const unsigned version)
@@ -49,8 +48,8 @@ namespace boost
     {
       ar & boost::serialization::base_object<T>(id);
       ar & id.uid;
+      ar & id.timestamp;
     }
-
   } // namespace serialization
 } // namespace boost
 

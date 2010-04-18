@@ -52,12 +52,10 @@ namespace silvver
   class Target
   {
   public:
-
     /** Target class constructor.
-     * @param targetId Target identifier.
+     * @param targetId Target silvver uid.
      * @param serverIp IP address of silvver-server.
-     * @param receptionistPort Port number of silvver-server receptionist.
-     */
+     * @param receptionistPort Port number of silvver-server receptionist. */
     Target(unsigned targetId,
            const std::string& serverIp="127.0.0.1",
            unsigned receptionistPort=12000);
@@ -97,7 +95,6 @@ namespace silvver
                         waitTime = boost::date_time::pos_infin);
 
   private:
-
     std::auto_ptr<CheshireCat<T> > smile;
   };
 }

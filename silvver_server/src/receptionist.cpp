@@ -32,13 +32,10 @@ Receptionist::Receptionist(unsigned localPort)
   ,currentReception()
   ,request()
   ,mapInputs()
-  ,outputs()
-  ,thReceptionist()
+  ,normalOutputs(OutputMap<CLIENT_NORMAL>::instantiate())
+  ,rawOutputs(OutputMap<CLIENT_RAW>::instantiate())
+  ,thReceptionist(new boost::thread(&Receptionist::run, this))
 {
-  this->outputs = OutputMap<OUTPUT_NORMAL>::instantiate();
-
-  thReceptionist.reset(new boost::thread(&Receptionist::run, this));
-
   StreamConnection::pointer connection =
     StreamConnection::create(Receptionist::ioService);
   this->acceptor.async_accept(connection->getSocket(),
@@ -102,7 +99,19 @@ Receptionist::operator()(AddOutput& request) const
                                   request.localPort));
 
   this->currentReception->write(ioConnection->getLocalPort());
-  this->outputs->addOutput(request.targetId, ioConnection);
+
+  if (request.clientType == CLIENT_NORMAL)
+  {
+    this->normalOutputs->addOutput(request.targetId, ioConnection);
+  }
+  else if (request.clientType == CLIENT_RAW)
+  {
+    this->rawOutputs->addOutput(request.targetId, ioConnection);
+  }
+  else
+  {
+    //throw
+  }
 }
 
 void
@@ -113,7 +122,18 @@ Receptionist::operator()(DelOutput& request) const
     << "Delete output request" << std::endl
     << ts_output::unlock;
 
-  this->outputs->delOutput(request.targetId, request.localPort);
+  if (request.clientType == CLIENT_NORMAL)
+  {
+    this->normalOutputs->delOutput(request.targetId, request.localPort);
+  }
+  else if (request.clientType == CLIENT_RAW)
+  {
+    this->rawOutputs->delOutput(request.targetId, request.localPort);
+  }
+  else
+  {
+    //throw
+  }
 }
 
 void

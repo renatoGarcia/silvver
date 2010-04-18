@@ -21,38 +21,33 @@
 #include <map>
 #include <vector>
 
+#include "clientType.hpp"
 #include "ioConnection.hpp"
-#include <singleton.hpp>
+#include "singleton.hpp"
 
-enum OutputType
-{
-  OUTPUT_NORMAL,
-  OUTPUT_RAW
-};
-
-/** A class to hold the connected clients.
+/** A class to hold the connected outputs.
  * This class wrap the STL multimap for thread safety.
  */
-template<OutputType outputType>
-class OutputMap: public Singleton<OutputMap<outputType> >
+template<ClientType clientType>
+class OutputMap: public Singleton<OutputMap<clientType> >
 {
 public:
 
-  /** Add a client.
+  /** Add a output.
    * @param targetId The silvver uid of target observed by client.
    * @param outputConnection An IoConnection already connected with the client.
    */
   void addOutput(unsigned targetId,
                  boost::shared_ptr<IoConnection> outputConnection);
 
-  /** Delete a client
+  /** Delete a output.
    * @param idTarget The id of target which the client is listening.
    * @param remotePort The remote port where the client is connected, given by
    *                   IoConnection::getRemotePort()
    */
   void delOutput(unsigned idTarget, unsigned remotePort);
 
-  /** Return connections to all clients which are listening for a given target.
+  /** Return connections to all outputs which are listening for a given target.
    * @param idTarget The id of desired target.
    * @param clientsConnections A vector of shared_prt with IoConnection to
                                all clients found.  */
@@ -60,7 +55,7 @@ public:
                    std::vector<boost::shared_ptr<IoConnection> >& clientsConnections);
 
 private:
-  friend class Singleton<OutputMap<outputType> >;
+  friend class Singleton<OutputMap<clientType> >;
 
   typedef std::multimap<unsigned, boost::shared_ptr<IoConnection> > TMultiMap;
 

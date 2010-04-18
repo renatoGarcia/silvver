@@ -16,22 +16,22 @@
 #ifndef CONNECTION_HPP
 #define CONNECTION_HPP
 
+#include <boost/asio/buffer.hpp>
+#include <boost/asio/ip/tcp.hpp>
+#include <boost/asio/ip/udp.hpp>
+#include <boost/asio/placeholders.hpp>
+#include <boost/bind.hpp>
+#include <boost/ref.hpp>
+#include <boost/scoped_ptr.hpp>
+#include <boost/thread/once.hpp>
+#include <boost/thread/thread.hpp>
+#include <boost/tuple/tuple.hpp>
 #include <string>
 #include <vector>
 
-#include <boost/asio/ip/tcp.hpp>
-#include <boost/asio/ip/udp.hpp>
-#include <boost/asio/buffer.hpp>
-#include <boost/asio/placeholders.hpp>
-#include <boost/thread/thread.hpp>
-#include <boost/thread/once.hpp>
-#include <boost/ref.hpp>
-#include <boost/scoped_ptr.hpp>
-#include <boost/tuple/tuple.hpp>
-#include <boost/bind.hpp>
+#include "clientType.hpp"
 
-/** Wrapper all network communication with silvver-server.
- */
+/// Wrapper all network communication with silvver-server.
 class Connection
 {
 public:
@@ -40,15 +40,14 @@ public:
 
   ~Connection();
 
-  void connect(unsigned targetId);
+  void connect(ClientType clientType, unsigned targetId);
 
-  void disconnect(unsigned targetId);
+  void disconnect(ClientType clientType, unsigned targetId);
 
   /** Asynchronously read a value of type T.
    * @param t Reference to the variable where the read value will be returned.
    * @param handler Function with signature "void handler()" which to be called
-   *                when the operation completes.
-   */
+   *                when the operation completes. */
   template <typename T, typename Handler>
   inline void
   asyncRead(T& t, Handler handler)

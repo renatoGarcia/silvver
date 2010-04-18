@@ -17,11 +17,11 @@
 
 #include "ioConnection.ipp"
 
-template<OutputType T>
+template<ClientType T>
 OutputMap<T>::OutputMap()
 {}
 
-template<OutputType T>
+template<ClientType T>
 void
 OutputMap<T>::addOutput(unsigned targetId,
                          boost::shared_ptr<IoConnection> outputConnection)
@@ -32,7 +32,7 @@ OutputMap<T>::addOutput(unsigned targetId,
                       (targetId, outputConnection));
 }
 
-template<OutputType T>
+template<ClientType T>
 void
 OutputMap<T>::delOutput(unsigned idTarget, unsigned remotePort)
 {
@@ -54,7 +54,7 @@ OutputMap<T>::delOutput(unsigned idTarget, unsigned remotePort)
   }
 }
 
-template<OutputType T>
+template<ClientType T>
 void
 OutputMap<T>::findOutputs(unsigned idTarget,
                           std::vector<boost::shared_ptr<IoConnection> >& clientsConnections)
@@ -74,5 +74,5 @@ OutputMap<T>::findOutputs(unsigned idTarget,
   }
 }
 
-template class OutputMap<OUTPUT_NORMAL>;
-template class OutputMap<OUTPUT_RAW>;
+template class OutputMap<CLIENT_NORMAL>;
+template class OutputMap<CLIENT_RAW>;
