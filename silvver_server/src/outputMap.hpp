@@ -13,8 +13,8 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef _CLIENTS_MAP_HPP_
-#define _CLIENTS_MAP_HPP_
+#ifndef _OUTPUT_MAP_HPP_
+#define _OUTPUT_MAP_HPP_
 
 #include <boost/shared_ptr.hpp>
 #include <boost/thread/shared_mutex.hpp>
@@ -24,23 +24,28 @@
 #include "ioConnection.hpp"
 #include <singleton.hpp>
 
+enum OutputType
+{
+  OUTPUT_NORMAL,
+  OUTPUT_RAW
+};
+
 /** A class to hold the connected clients.
  * This class wrap the STL multimap for thread safety.
  */
-class ClientsMap: public Singleton<ClientsMap>
+template<OutputType outputType>
+class OutputMap: public Singleton<OutputMap<outputType> >
 {
 public:
 
   /** Add a client.
-   *
-   * @param request An AddOutput object with the description of the client.
+   * @param targetId The silvver uid of target observed by client.
    * @param outputConnection An IoConnection already connected with the client.
    */
   void addOutput(unsigned targetId,
                  boost::shared_ptr<IoConnection> outputConnection);
 
   /** Delete a client
-   *
    * @param idTarget The id of target which the client is listening.
    * @param remotePort The remote port where the client is connected, given by
    *                   IoConnection::getRemotePort()
@@ -48,26 +53,25 @@ public:
   void delOutput(unsigned idTarget, unsigned remotePort);
 
   /** Return connections to all clients which are listening for a given target.
-   *
    * @param idTarget The id of desired target.
-   * @param clientsConnections A vector of shared_prt with IoConnection to all clients found.
-   */
-  void findClients(unsigned idTarget,
-                   std::vector< boost::shared_ptr<IoConnection> >& clientsConnections);
+   * @param clientsConnections A vector of shared_prt with IoConnection to
+                               all clients found.  */
+  void findOutputs(unsigned idTarget,
+                   std::vector<boost::shared_ptr<IoConnection> >& clientsConnections);
 
 private:
+  friend class Singleton<OutputMap<outputType> >;
 
-  friend class Singleton<ClientsMap>;
+  typedef std::multimap<unsigned, boost::shared_ptr<IoConnection> > TMultiMap;
 
-  typedef std::multimap< unsigned, boost::shared_ptr<IoConnection> > TMultiMap;
-
+private:
   boost::shared_mutex accessMap;
 
   /// A dummy private constructor.
-  ClientsMap();
+  OutputMap();
 
   /// The key of multimap is the id of target
   TMultiMap client;
 };
 
-#endif /* _CLIENTS_MAP_HPP_ */
+#endif /* _OUTPUT_MAP_HPP_ */

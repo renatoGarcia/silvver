@@ -15,7 +15,6 @@
 
 #include "inputFactory.hpp"
 
-#include <boost/lexical_cast.hpp>
 #include <boost/variant.hpp>
 
 #include "input.ipp"
@@ -23,9 +22,6 @@
 #include "silvverTypes.hpp"
 
 #include "markerProcessor.hpp"
-
-InputFactory::InputFactory()
-{}
 
 boost::shared_ptr<InputInterface>
 InputFactory::createInput(const procOpt::AnyProcOpt& processorOpt,

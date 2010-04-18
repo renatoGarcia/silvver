@@ -15,10 +15,7 @@
 
 #include "receptionist.hpp"
 
-#include <iostream>
-
 #include <boost/bind.hpp>
-#include <boost/ref.hpp>
 
 #include "log.hpp"
 #include "inputFactory.hpp"
@@ -28,13 +25,26 @@
 namespace ba = boost::asio;
 namespace bip = boost::asio::ip;
 
-boost::asio::io_service Receptionist::ioService;
-
 Receptionist::Receptionist(unsigned localPort)
-  :acceptor(Receptionist::ioService,
+  :ioService()
+  ,acceptor(this->ioService,
             bip::tcp::endpoint(bip::tcp::v4(), localPort))
+  ,currentReception()
+  ,request()
+  ,mapInputs()
+  ,outputs()
+  ,thReceptionist()
 {
-  this->outputs = ClientsMap::instantiate();
+  this->outputs = OutputMap<OUTPUT_NORMAL>::instantiate();
+
+  thReceptionist.reset(new boost::thread(&Receptionist::run, this));
+
+  StreamConnection::pointer connection =
+    StreamConnection::create(Receptionist::ioService);
+  this->acceptor.async_accept(connection->getSocket(),
+                              boost::bind(&Receptionist::handleAccept,
+                                          this,
+                                          connection));
 }
 
 Receptionist::~Receptionist()
@@ -46,23 +56,7 @@ Receptionist::~Receptionist()
 void
 Receptionist::run()
 {
-  if(!this->thReceptionist) // Do anything only if not running yet
-  {
-    StreamConnection::pointer connection =
-      StreamConnection::create(Receptionist::ioService);
-    this->acceptor.async_accept(connection->getSocket(),
-                                boost::bind(&Receptionist::handleAccept,
-                                            this,
-                                            connection));
-
-    thReceptionist.reset(new boost::thread(boost::ref(*this)));
-  }
-}
-
-void
-Receptionist::operator()()
-{
-  Receptionist::ioService.run();
+  this->ioService.run();
 }
 
 void

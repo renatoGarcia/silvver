@@ -19,20 +19,19 @@
 #include <boost/shared_ptr.hpp>
 
 #include "inputInterface.hpp"
-#include "input.hpp"
 #include "ioConnection.hpp"
-#include <processorOptions.hpp>
+#include "processorOptions.hpp"
 
 class InputFactory
 {
 public:
-
   static boost::shared_ptr<InputInterface>
   createInput(const procOpt::AnyProcOpt& processorOpt,
               const boost::shared_ptr<IoConnection>& connection);
 
 private:
-
+  /** Private constructor not implemented.
+   * This class cannot be instantiated. */
   InputFactory();
 };
 

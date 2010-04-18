@@ -20,7 +20,7 @@
 #include <map>
 #include <vector>
 
-#include "clientsMap.hpp"
+#include "outputMap.hpp"
 #include "processorInterface.hpp"
 
 /// Abstract base class to the concrete processor classes.
@@ -37,7 +37,7 @@ protected:
   void sendToOutputs(const std::vector<Toutput> &localizations) const;
 
 private:
-  boost::shared_ptr<ClientsMap> clientsMap;
+  boost::shared_ptr<OutputMap<OUTPUT_NORMAL> > outputMap;
 };
 
 #endif /* _PROCESSOR_HPP_ */

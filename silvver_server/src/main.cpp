@@ -17,7 +17,6 @@
 #include <boost/algorithm/string/erase.hpp>
 #include <boost/any.hpp>
 #include <boost/program_options.hpp>
-#include <boost/scoped_ptr.hpp>
 #include <boost/version.hpp>
 #include <cstdlib>
 #include <iostream>
@@ -122,9 +121,7 @@ int main(int argc, char **argv)
               << "----------------------------------------------\n"
               << std::endl;
 
-    boost::scoped_ptr<Receptionist>
-      receptionist(new Receptionist(receptionistPort));
-    receptionist-> run();
+    Receptionist receptionist(receptionistPort);
 
     getchar();
     std::cout << "Quitting..." << std::endl << std::endl;

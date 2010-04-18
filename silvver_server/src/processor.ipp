@@ -27,7 +27,7 @@
 template <class Tinput, class Toutput>
 Processor<Tinput,Toutput>::Processor()
 {
-  this->clientsMap = ClientsMap::instantiate();
+  this->outputMap = OutputMap<OUTPUT_NORMAL>::instantiate();
 }
 
 template <class Tinput, class Toutput>
@@ -45,7 +45,7 @@ Processor<Tinput,Toutput>::sendToOutputs(const std::vector<Toutput> &localizatio
       << ts_output::unlock;
 
     // Get all clients hearing for a given target.
-    this->clientsMap->findClients(output.uid, vecConnections);
+    this->outputMap->findOutputs(output.uid, vecConnections);
 
     BOOST_FOREACH(connectionPtr, vecConnections)
     {

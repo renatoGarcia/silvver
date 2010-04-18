@@ -13,16 +13,18 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "clientsMap.hpp"
+#include "outputMap.hpp"
 
 #include "ioConnection.ipp"
 
-ClientsMap::ClientsMap()
+template<OutputType T>
+OutputMap<T>::OutputMap()
 {}
 
+template<OutputType T>
 void
-ClientsMap::addOutput(unsigned targetId,
-                      boost::shared_ptr<IoConnection> outputConnection)
+OutputMap<T>::addOutput(unsigned targetId,
+                         boost::shared_ptr<IoConnection> outputConnection)
 {
   boost::unique_lock<boost::shared_mutex> lock(this->accessMap);
 
@@ -30,8 +32,9 @@ ClientsMap::addOutput(unsigned targetId,
                       (targetId, outputConnection));
 }
 
+template<OutputType T>
 void
-ClientsMap::delOutput(unsigned idTarget, unsigned remotePort)
+OutputMap<T>::delOutput(unsigned idTarget, unsigned remotePort)
 {
   boost::unique_lock<boost::shared_mutex> lock(this->accessMap);
 
@@ -51,9 +54,10 @@ ClientsMap::delOutput(unsigned idTarget, unsigned remotePort)
   }
 }
 
+template<OutputType T>
 void
-ClientsMap::findClients(unsigned idTarget,
-                        std::vector< boost::shared_ptr<IoConnection> >& clientsConnections)
+OutputMap<T>::findOutputs(unsigned idTarget,
+                          std::vector<boost::shared_ptr<IoConnection> >& clientsConnections)
 {
   clientsConnections.clear();
 
@@ -69,3 +73,6 @@ ClientsMap::findClients(unsigned idTarget,
     clientsConnections.push_back(it->second);
   }
 }
+
+template class OutputMap<OUTPUT_NORMAL>;
+template class OutputMap<OUTPUT_RAW>;
