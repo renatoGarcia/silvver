@@ -16,7 +16,6 @@
 #include "target.hpp"
 
 #include <boost/bind.hpp>
-#include <boost/scoped_ptr.hpp>
 #include <boost/thread/condition.hpp>
 #include <boost/thread/mutex.hpp>
 #include <cstdlib>
@@ -27,27 +26,16 @@ namespace bpt = boost::posix_time;
 
 namespace silvver
 {
-  template<class U>
+  template<class T>
   class
-  CheshireCat
+  Target<T>::CheshireCat
   {
   public:
-
-    ~CheshireCat();
-
-  private:
-
-    friend class Target<U>;
-
     CheshireCat(unsigned targetId,
                 const std::string& serverIp,
                 unsigned receptionistPort);
 
-    /// Connect whith silvver-server.
-    void connect();
-
-    /// Stop the thread and close the connection with the receptionist.
-    void disconnect();
+    ~CheshireCat();
 
     /// Callback method called when a new localization arrives.
     void update();
@@ -60,72 +48,37 @@ namespace silvver
     boost::condition_variable newPoseCondition;
 
     /// Value of last received Pose.
-    Identity<U> current;
+    Identity<T> current;
 
     // Signalize a never returned/read current.
     bool currentIsNew;
 
     /// Will holds an Ente until convert it safely to
     /// current locking mutexCurrentPose.
-    Identity<U> last;
+    Identity<T> last;
 
-    boost::scoped_ptr<Connection> connection;
+    Connection connection;
 
     bool connected;
   };
 
-  template<class U>
-  CheshireCat<U>::CheshireCat(unsigned targetId,
-                              const std::string& serverIp,
-                              unsigned receptionistPort)
+  template<class T>
+  Target<T>::CheshireCat::CheshireCat(unsigned targetId,
+                                      const std::string& serverIp,
+                                      unsigned receptionistPort)
     :targetId(targetId)
     ,currentIsNew(false)
-    ,connection(new Connection(serverIp, receptionistPort))
+    ,connection(serverIp, receptionistPort)
     ,connected(false)
   {}
 
-  template<class U>
-  CheshireCat<U>::~CheshireCat()
-  {
-    try
-    {
-      this->disconnect();
-    }
-    catch(...)
-    {
-      abort();
-    }
-  }
+  template<class T>
+  Target<T>::CheshireCat::~CheshireCat()
+  {}
 
-  template<class U>
+  template<class T>
   void
-  CheshireCat<U>::connect()
-  {
-    if (!this->connected)
-    {
-      this->connection->connect(CLIENT_NORMAL, this->targetId);
-      this->connected = true;
-
-      this->connection->asyncRead(this->last,
-                                  boost::bind(&CheshireCat<U>::update,
-                                              this));
-    }
-  }
-
-  template<class U>
-  void
-  CheshireCat<U>::disconnect()
-  {
-    if (this->connected)
-    {
-      this->connection->disconnect(CLIENT_NORMAL, this->targetId);
-      this->connected = false;
-    }
-  }
-
-  template<class U>
-  void
-  CheshireCat<U>::update()
+  Target<T>::CheshireCat::update()
   {
     if ((unsigned)this->last.uid == this->targetId)
     {
@@ -139,23 +92,35 @@ namespace silvver
       this->newPoseCondition.notify_one();
     }
 
-    this->connection->asyncRead(this->last,
-                                boost::bind(&CheshireCat<U>::update,
-                                            this));
+    this->connection.asyncRead(this->last,
+                               boost::bind(&CheshireCat::update,
+                                           this));
   }
 
   template<class T>
   void
   Target<T>::connect()
   {
-    smile->connect();
+    if (!smile->connected)
+    {
+      smile->connection.connect(CLIENT_NORMAL, smile->targetId);
+      smile->connected = true;
+
+      smile->connection.asyncRead(smile->last,
+                                  boost::bind(&CheshireCat::update,
+                                              smile.get()));
+    }
   }
 
   template<class T>
   void
   Target<T>::disconnect()
   {
-    smile->disconnect();
+    if (smile->connected)
+    {
+      smile->connection.disconnect(CLIENT_NORMAL, smile->targetId);
+      smile->connected = false;
+    }
   }
 
   template<class T>
@@ -221,12 +186,19 @@ namespace silvver
   Target<T>::Target(unsigned targetId,
                     const std::string& serverIp,
                     unsigned receptionistPort)
-    :smile(new CheshireCat<T>(targetId, serverIp, receptionistPort))
+    :smile(new CheshireCat(targetId, serverIp, receptionistPort))
   {}
 
   template<class T>
   Target<T>::~Target() throw()
-  {}
+  {
+    try
+    {
+      this->disconnect();
+    }
+    catch(...)
+    {}
+  }
 
   // Templates to be compiled in library
   template class Target<Position>;

@@ -70,6 +70,7 @@ int main(int argc,char **argv)
 
   th.interrupt();
   th.join();
+  target->disconnect();
 
   return 0;
 }

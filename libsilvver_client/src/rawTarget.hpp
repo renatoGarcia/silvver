@@ -13,8 +13,8 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef _RAW_TARGET_HPP_
-#define _RAW_TARGET_HPP_
+#ifndef _SILVVER_RAW_TARGET_HPP_
+#define _SILVVER_RAW_TARGET_HPP_
 
 #include <boost/function.hpp>
 #include <memory>
@@ -24,8 +24,6 @@
 
 namespace silvver
 {
-  template<class U> class CheshireCat;
-
   template<class T>
   class RawTarget
   {
@@ -58,8 +56,9 @@ namespace silvver
     unsigned getId();
 
   private:
-    std::auto_ptr<CheshireCat<T> > smile;
+    class CheshireCat;
+    std::auto_ptr<CheshireCat> smile;
   };
 }
 
-#endif /* _RAW_TARGET_HPP_ */
+#endif /* _SILVVER_RAW_TARGET_HPP_ */

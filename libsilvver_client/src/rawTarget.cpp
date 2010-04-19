@@ -16,18 +16,17 @@
 #include "rawTarget.hpp"
 
 #include <boost/bind.hpp>
-#include <boost/scoped_ptr.hpp>
 
 #include "connection.ipp"
 
 namespace silvver
 {
-  template<class U>
+  template<class T>
   class
-  CheshireCat
+  RawTarget<T>::CheshireCat
   {
   public:
-    CheshireCat(boost::function<void (Identity<U>)> callbackFunction,
+    CheshireCat(boost::function<void (Identity<T>)> callbackFunction,
                 unsigned targetId,
                 const std::string& serverIp,
                 unsigned receptionistPort);
@@ -37,41 +36,45 @@ namespace silvver
     /// Callback method called when a new localization arrives.
     void handleReceive();
 
-    boost::function<void (Identity<U>)> callbackFunction;
+    boost::function<void (Identity<T>)> callbackFunction;
 
     const unsigned targetId;
 
     /// Value of last received target.
-    Identity<U> currentTarget;
+    Identity<T> currentTarget;
 
-    boost::scoped_ptr<Connection> connection;
+    Connection connection;
 
     bool connected;
   };
 
-  template<class U>
-  CheshireCat<U>::CheshireCat(boost::function<void (Identity<U>)> callbackFunction,
-                              unsigned targetId,
-                              const std::string& serverIp,
-                              unsigned receptionistPort)
+  template<class T> RawTarget<T>::
+  CheshireCat::CheshireCat(boost::function<void(Identity<T>)> callbackFunction,
+                           unsigned targetId,
+                           const std::string& serverIp,
+                           unsigned receptionistPort)
     :callbackFunction(callbackFunction)
     ,targetId(targetId)
-    ,connection(new Connection(serverIp, receptionistPort))
+    ,connection(serverIp, receptionistPort)
     ,connected(false)
   {}
 
-  template<class U>
+  template<class T>
+  RawTarget<T>::CheshireCat::~CheshireCat()
+  {}
+
+  template<class T>
   void
-  CheshireCat<U>::handleReceive()
+  RawTarget<T>::CheshireCat::handleReceive()
   {
     if (this->currentTarget.uid == this->targetId)
     {
       this->callbackFunction(currentTarget);
     }
 
-    this->connection->asyncRead(this->currentTarget,
-                                boost::bind(&CheshireCat<U>::handleReceive,
-                                            this));
+    this->connection.asyncRead(this->currentTarget,
+                               boost::bind(&CheshireCat::handleReceive,
+                                           this));
   }
 
   template<class T>
@@ -80,12 +83,12 @@ namespace silvver
   {
     if (!smile->connected)
     {
-      smile->connection->connect(CLIENT_RAW, smile->targetId);
+      smile->connection.connect(CLIENT_RAW, smile->targetId);
       smile->connected = true;
 
-      smile->connection->asyncRead(smile->currentTarget,
-                                   boost::bind(&CheshireCat<T>::handleReceive,
-                                               smile.get()));
+      smile->connection.asyncRead(smile->currentTarget,
+                                  boost::bind(&CheshireCat::handleReceive,
+                                              smile.get()));
     }
   }
 
@@ -95,7 +98,7 @@ namespace silvver
   {
     if (smile->connected)
     {
-      smile->connection->disconnect(CLIENT_RAW, smile->targetId);
+      smile->connection.disconnect(CLIENT_RAW, smile->targetId);
       smile->connected = false;
     }
   }
@@ -112,8 +115,8 @@ namespace silvver
                           unsigned targetId,
                           const std::string& serverIp,
                           unsigned receptionistPort)
-    :smile(new CheshireCat<T>(callbackFunction, targetId,
-                              serverIp, receptionistPort))
+    :smile(new CheshireCat(callbackFunction, targetId,
+                           serverIp, receptionistPort))
   {}
 
   template<class T>
@@ -124,9 +127,7 @@ namespace silvver
       this->disconnect();
     }
     catch(...)
-    {
-      abort();
-    }
+    {}
   }
 
   // Templates to be compiled in library

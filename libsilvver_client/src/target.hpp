@@ -13,8 +13,8 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef _TARGET_HPP_
-#define _TARGET_HPP_
+#ifndef _SILVVER_TARGET_HPP_
+#define _SILVVER_TARGET_HPP_
 
 #include <memory>
 #include <stdexcept>
@@ -25,16 +25,6 @@
 
 #include "silvverTypes.hpp"
 
-//  SILVVER_VERSION % 100 is the patch level
-//  SILVVER_VERSION / 100 % 1000 is the minor version
-//  SILVVER_VERSION / 100000 is the major version
-#define SILVVER_VERSION 500
-
-//  SILVVER_LIB_VERSION must be defined to be the same as SILVVER_VERSION
-//  but as a *string* in the form "x_y[_z]" where x is the major version
-//  number, y is the minor version number, and z is the patch level if not 0.
-#define SILVVER_LIB_VERSION "0_5"
-
 namespace silvver
 {
 
@@ -44,8 +34,6 @@ namespace silvver
     time_expired_error(const std::string& whatArg)
       :runtime_error(whatArg){}
   };
-
-  template<class U> class CheshireCat;
 
   /// Represents a target looked by Silvver.
   template<class T>
@@ -95,7 +83,8 @@ namespace silvver
                         waitTime = boost::date_time::pos_infin);
 
   private:
-    std::auto_ptr<CheshireCat<T> > smile;
+    class CheshireCat;
+    std::auto_ptr<CheshireCat> smile;
   };
 }
-#endif /* _TARGET_HPP_ */
+#endif /* _SILVVER_TARGET_HPP_ */

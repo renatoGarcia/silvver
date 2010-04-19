@@ -1,12 +1,10 @@
 LIB_FLAG = -lsilvver_client -lboost_thread-mt
-CPP_FLAGS = -I../src -I../../common -L../build
 
-OBJECTS = silvver_client 2dPlane
+OBJECTS = simple_client raw_client silvver_client
 all: $(OBJECTS)
 
 clean:
 	rm -f $(OBJECTS)
 
 %: %.cpp
-	$(CXX) $(LIB_FLAG) $(CPP_FLAGS) $^ -o $@
-
+	$(CXX) $(LIB_FLAG) $^ -o $@

@@ -8,6 +8,7 @@ INSTALL(TARGETS silvver_client
         LIBRARY DESTINATION lib)
 INSTALL(FILES target.hpp
               rawTarget.hpp
+              ../../common/version.hpp
               ../../common/silvverTypes.hpp
               ../../common/serializations.hpp
         DESTINATION include/silvver)

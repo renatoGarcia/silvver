@@ -88,12 +88,6 @@ Receptionist::operator()(NullRequest& request) const
 void
 Receptionist::operator()(AddOutput& request) const
 {
-  message(MessageLogLevel::INFO)
-    << ts_output::lock
-    << "Add output request. Id:" << request.targetId
-    << std::endl
-    << ts_output::unlock;
-
   boost::shared_ptr<IoConnection>
     ioConnection(new IoConnection(this->currentReception->getRemoteIp(),
                                   request.localPort));
@@ -102,10 +96,20 @@ Receptionist::operator()(AddOutput& request) const
 
   if (request.clientType == CLIENT_NORMAL)
   {
+    message(MessageLogLevel::INFO)
+      << ts_output::lock
+      << "Add output request (normal client). Id:" << request.targetId
+      << std::endl
+      << ts_output::unlock;
     this->normalOutputs->addOutput(request.targetId, ioConnection);
   }
   else if (request.clientType == CLIENT_RAW)
   {
+    message(MessageLogLevel::INFO)
+      << ts_output::lock
+      << "Add output request (raw client). Id:" << request.targetId
+      << std::endl
+      << ts_output::unlock;
     this->rawOutputs->addOutput(request.targetId, ioConnection);
   }
   else
@@ -117,17 +121,20 @@ Receptionist::operator()(AddOutput& request) const
 void
 Receptionist::operator()(DelOutput& request) const
 {
-  message(MessageLogLevel::INFO)
-    << ts_output::lock
-    << "Delete output request" << std::endl
-    << ts_output::unlock;
-
   if (request.clientType == CLIENT_NORMAL)
   {
+    message(MessageLogLevel::INFO)
+      << ts_output::lock
+      << "Delete output request (normal client)." << std::endl
+      << ts_output::unlock;
     this->normalOutputs->delOutput(request.targetId, request.localPort);
   }
   else if (request.clientType == CLIENT_RAW)
   {
+    message(MessageLogLevel::INFO)
+      << ts_output::lock
+      << "Delete output request (raw client)." << std::endl
+      << ts_output::unlock;
     this->rawOutputs->delOutput(request.targetId, request.localPort);
   }
   else
