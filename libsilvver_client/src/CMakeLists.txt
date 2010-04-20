@@ -1,13 +1,13 @@
 FIND_PACKAGE(Boost REQUIRED serialization system thread)
 
 INCLUDE_DIRECTORIES(${Boost_INCLUDE_DIRS})
-ADD_LIBRARY(silvver_client SHARED connection.cpp target.cpp rawTarget.cpp)
+ADD_LIBRARY(silvver_client SHARED connection.cpp target.cpp abstractCamera.cpp)
 TARGET_LINK_LIBRARIES(silvver_client ${Boost_LIBRARIES})
 
 INSTALL(TARGETS silvver_client
         LIBRARY DESTINATION lib)
 INSTALL(FILES target.hpp
-              rawTarget.hpp
+              abstractCamera.hpp
               ../../common/version.hpp
               ../../common/silvverTypes.hpp
               ../../common/serializations.hpp

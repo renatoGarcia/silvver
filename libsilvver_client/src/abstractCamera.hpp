@@ -13,8 +13,8 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef _SILVVER_RAW_TARGET_HPP_
-#define _SILVVER_RAW_TARGET_HPP_
+#ifndef _SILVVER_ABSTRACT_CAMERA_HPP_
+#define _SILVVER_ABSTRACT_CAMERA_HPP_
 
 #include <boost/function.hpp>
 #include <memory>
@@ -25,21 +25,21 @@
 namespace silvver
 {
   template<class T>
-  class RawTarget
+  class AbstractCamera
   {
   public:
-    /** RawTarget class constructor.
+    /** AbstractCamera class constructor.
      * @param callbackFunction Function which will be called at each target
      *                         localization.
-     * @param targetId Target silvver uid.
+     * @param abstractCameraUid AbstractCamera silvver uid.
      * @param serverIp IP address of silvver-server.
      * @param receptionistPort Port number of silvver-server receptionist. */
-    RawTarget(boost::function<void (Identity<T>)> callbackFunction,
-              unsigned targetId,
-              const std::string& serverIp="127.0.0.1",
-              unsigned receptionistPort=12000);
+    AbstractCamera(boost::function<void (CameraReading<T>)> callbackFunction,
+                   std::string abstractCameraUid,
+                   const std::string& serverIp="127.0.0.1",
+                   unsigned receptionistPort=12000);
 
-    ~RawTarget() throw();
+    ~AbstractCamera() throw();
 
     /// Connect to the silvver-server.
     /// Can throw boost::system::system_error when silvver-server
@@ -50,10 +50,10 @@ namespace silvver
     /// is unreachable.
     void disconnect();
 
-    /** Get the id of target.
-     * @return The id of this target.
+    /** Get the id of camera.
+     * @return The id of this camera.
      */
-    unsigned getId();
+    std::string getId();
 
   private:
     class CheshireCat;
@@ -61,4 +61,4 @@ namespace silvver
   };
 }
 
-#endif /* _SILVVER_RAW_TARGET_HPP_ */
+#endif /* _SILVVER_ABSTRACT_CAMERA_HPP_ */

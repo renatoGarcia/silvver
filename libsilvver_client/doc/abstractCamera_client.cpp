@@ -4,25 +4,25 @@
 #include <string>
 
 #include <silvver/silvverTypes.hpp>
-#include <silvver/rawTarget.hpp>
+#include <silvver/abstractCamera.hpp>
 
 using namespace silvver;
 using namespace std;
 
-void printPose(Identity<Pose> pose)
+void printPose(CameraReading<Pose> reading)
 {
-  cout << pose << endl;
+  cout << reading.localizations.at(0) << endl;
 }
 
 int main(int argc, char *argv[])
 {
-  unsigned id = 1;
+  std::string id = "1";
   std::string ip("127.0.0.1");
   unsigned receptionistPort = 12000;
 
   if (argc > 1)
   {
-    id = atoi(argv[1]);
+    id = argv[1];
   }
   if (argc > 2)
   {
@@ -33,14 +33,14 @@ int main(int argc, char *argv[])
     receptionistPort = atoi(argv[3]);
   }
 
-  RawTarget<Pose> rawTarget(printPose, id, ip, receptionistPort);
+  AbstractCamera<Pose> camera(printPose, id, ip, receptionistPort);
 
-  rawTarget.connect();
+  camera.connect();
 
   cout << "Press [enter] to quit." << endl;
   getchar();
 
-  target.disconnect();
+  camera.disconnect();
 
   return 0;
 }

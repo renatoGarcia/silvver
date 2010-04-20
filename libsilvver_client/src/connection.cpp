@@ -66,7 +66,7 @@ Connection::~Connection()
 }
 
 void
-Connection::connect(ClientType clientType, unsigned targetId)
+Connection::connect(unsigned clientUid)
 {
   if (!Connection::ioServiceRunning)
   {
@@ -83,8 +83,9 @@ Connection::connect(ClientType clientType, unsigned targetId)
 
   this->receptionistSocket.connect(this->receptionistEP);
 
-  Request request = AddOutput(clientType, targetId,
-                              this->inputSocket.local_endpoint().port());
+  Request request = AddTargetClient(clientUid,
+                                    this->inputSocket.local_endpoint().port());
+
   this->writeToReceptionist(request);
 
   unsigned short remotePort;
@@ -98,12 +99,63 @@ Connection::connect(ClientType clientType, unsigned targetId)
 }
 
 void
-Connection::disconnect(ClientType clientType, unsigned targetId)
+Connection::connect(std::string cameraUid)
+{
+  if (!Connection::ioServiceRunning)
+  {
+    boost::mutex::scoped_lock lock(Connection::runMutex);
+    if (!Connection::ioServiceRunning)
+    {
+      Connection::th.reset(new boost::thread(Connection::runIoService));
+      Connection::ioServiceRunning = true;
+    }
+  }
+
+  this->inputSocket.open(bip::udp::v4());
+  this->inputSocket.bind(bip::udp::endpoint());
+
+  this->receptionistSocket.connect(this->receptionistEP);
+
+  Request request = AddCameraClient(cameraUid,
+                                    this->inputSocket.local_endpoint().port());
+
+  this->writeToReceptionist(request);
+
+  unsigned short remotePort;
+  this->readFromReceptionist(remotePort);
+
+  this->inputSocket.connect(bip::udp::endpoint(this->receptionistEP.address(),
+                                               remotePort));
+
+  this->receptionistSocket.shutdown(bip::tcp::socket::shutdown_both);
+  this->receptionistSocket.close();
+}
+
+void
+Connection::disconnect(unsigned clientUid)
 {
   this->receptionistSocket.connect(this->receptionistEP);
 
-  Request request = DelOutput(clientType, targetId,
-                              this->inputSocket.local_endpoint().port());
+  Request request = DelTargetClient(clientUid,
+                                    this->inputSocket.local_endpoint().port());
+
+  this->writeToReceptionist(request);
+
+  this->inputSocket.shutdown(bip::udp::socket::shutdown_both);
+  this->inputSocket.close();
+
+  this->receptionistSocket.shutdown(bip::tcp::socket::shutdown_both);
+  this->receptionistSocket.close();
+}
+
+void
+Connection::disconnect(std::string cameraUid)
+{
+  this->receptionistSocket.connect(this->receptionistEP);
+
+  Request request = DelCameraClient(cameraUid,
+                                    this->inputSocket.local_endpoint().port());
+
   this->writeToReceptionist(request);
 
   this->inputSocket.shutdown(bip::udp::socket::shutdown_both);

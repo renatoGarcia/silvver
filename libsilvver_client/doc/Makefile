@@ -1,6 +1,6 @@
 LIB_FLAG = -lsilvver_client -lboost_thread-mt
 
-OBJECTS = simple_client raw_client silvver_client
+OBJECTS = simple_client abstractCamera_client silvver_client
 all: $(OBJECTS)
 
 clean:

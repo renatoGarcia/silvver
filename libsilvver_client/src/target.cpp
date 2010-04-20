@@ -103,7 +103,7 @@ namespace silvver
   {
     if (!smile->connected)
     {
-      smile->connection.connect(CLIENT_NORMAL, smile->targetId);
+      smile->connection.connect(smile->targetId);
       smile->connected = true;
 
       smile->connection.asyncRead(smile->last,
@@ -118,7 +118,7 @@ namespace silvver
   {
     if (smile->connected)
     {
-      smile->connection.disconnect(CLIENT_NORMAL, smile->targetId);
+      smile->connection.disconnect(smile->targetId);
       smile->connected = false;
     }
   }
