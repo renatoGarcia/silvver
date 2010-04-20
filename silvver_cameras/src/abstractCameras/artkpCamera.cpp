@@ -16,7 +16,6 @@
 #include "artkpCamera.hpp"
 
 #include <boost/foreach.hpp>
-#include <boost/lexical_cast.hpp>
 #include <fstream>
 
 #include <ARToolKitPlus/TrackerSingleMarkerImpl.h>
@@ -29,7 +28,7 @@
 ArtkpCamera::ArtkpCamera(const scene::Camera& cameraConfig,
                          const scene::ArtkpTargets& targets,
                          boost::shared_ptr<Connection> connection)
-  :AbstractCamera(cameraConfig, connection)
+  :AbstractCamera(cameraConfig, connection, targets.prefixUid)
   ,MountedTarget(targets.bodyTranslation, targets.bodyRotation)
   ,patternWidth(targets.patternWidth)
   ,threshold(targets.threshold)
@@ -41,8 +40,7 @@ ArtkpCamera::ArtkpCamera(const scene::Camera& cameraConfig,
   const scene::Hardware hardwareConfig =
     boost::apply_visitor(scene::GetHardware(), cameraConfig.hardware);
 
-  const std::string camConfigFileName("/tmp/artkp" +
-                          boost::lexical_cast<std::string>(targets.uniqueKey));
+  const std::string camConfigFileName("/tmp/artkp" + targets.prefixUid);
 
   std::ofstream tmpConfig(camConfigFileName.c_str());
   tmpConfig.precision(10);
@@ -177,7 +175,6 @@ ArtkpCamera::doWork()
                                            transMatrix);
       // }
 
-      pose.timestamp = this->currentFrame.timestamp;
       pose.uid = this->idMap.at(markerInfo[marker].id);
       pose.x = transMatrix[0][3];
       pose.y = transMatrix[1][3];
@@ -192,6 +189,6 @@ ArtkpCamera::doWork()
       poses.push_back(pose);
     }
 
-    this->serverConnection->send(poses);
+    sendLocalizations(poses);
   }
 }

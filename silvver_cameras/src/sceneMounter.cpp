@@ -19,7 +19,7 @@
 #include <boost/shared_ptr.hpp>
 
 #include "connection.hpp"
-#include "cfParser.hpp"
+#include "cfReader.hpp"
 #include "abstractCameraFactory.hpp"
 #include "log.hpp"
 #include "exceptions.hpp"
@@ -40,14 +40,14 @@ SceneMounter::mount()
 {
   try
   {
-    CfParser cfParser;
-    const scene::Scene scene = cfParser.parseFile(this->sceneDescriptorFile);
+    CfReader cfReader(this->sceneDescriptorFile);
+    const scene::Scene sc = cfReader.readConfigFile();
 
     scene::Camera camera;
     scene::AnyTarget target;
-    BOOST_FOREACH(camera, scene.cameras)
+    BOOST_FOREACH(camera, sc.cameras)
     {
-      BOOST_FOREACH(target, scene.targets)
+      BOOST_FOREACH(target, sc.targets)
       {
         this->constructAbstractCamera(camera, target);
       }

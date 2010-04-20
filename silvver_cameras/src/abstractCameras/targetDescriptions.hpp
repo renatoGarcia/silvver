@@ -31,6 +31,13 @@
 
 namespace scene
 {
+  struct Target
+  {
+    /// Key unique to each targets set.
+    std::string prefixUid;
+  };
+
+  /// Information about targets that is above (mounted) in a body (eg: a robot)
   struct Mounted
   {
     /// Translation of body center in target coordinate system.
@@ -41,11 +48,8 @@ namespace scene
   };
 
   /// Struct with definitions of ARToolKitPlus targets.
-  struct ArtkpTargets: public Mounted
+  struct ArtkpTargets: public Target, public Mounted
   {
-    /// Key unique to each artkp targets set.
-    unsigned uniqueKey;
-
     /// ARToolKitPlus pattern width [mm].
     int patternWidth;
 
@@ -57,7 +61,7 @@ namespace scene
     std::vector< boost::tuple<unsigned, std::string> > patterns;
   };
 
-  struct ButterflyTargets: public Mounted
+  struct ButterflyTargets: public Target, public Mounted
   {
     // Size of one checkerboard square [mm]
     unsigned squareSize;

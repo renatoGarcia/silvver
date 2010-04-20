@@ -20,9 +20,11 @@
 #include "../hardCameraFactory.hpp"
 
 AbstractCamera::AbstractCamera(const scene::Camera& cameraConfig,
-                               boost::shared_ptr<Connection> connection)
+                               boost::shared_ptr<Connection> connection,
+                               const std::string& prefixUid)
   :subjectHardCamera(HardCameraFactory::create(cameraConfig.hardware))
   ,currentFrame(this->subjectHardCamera->getImageParameters())
+  ,abstractCameraUid(prefixUid + subjectHardCamera->silvverUid)
   ,serverConnection(connection)
   ,unreadImage(false)
   ,unreadImageAccess()

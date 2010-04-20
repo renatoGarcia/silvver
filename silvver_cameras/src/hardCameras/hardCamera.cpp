@@ -27,17 +27,17 @@ namespace bfs = boost::filesystem;
 extern globalOptions::Options global_options;
 
 HardCamera::HardCamera(const scene::Hardware& config, int iplDepth)
-  :framePixels(config.resolution.at(0) * config.resolution.at(1))
+  :silvverUid(config.suffixUid)
+  ,framePixels(config.resolution.at(0) * config.resolution.at(1))
   ,frameSize(cvSize(config.resolution.at(0), config.resolution.at(1)))
   ,iplDepth(iplDepth)
   ,distortedFrame()
   ,undistortedFrame()
-  ,cameraIdentifier(config.identifier)
   ,framesAccessMutex()
   ,mapx(this->frameSize, IPL_DEPTH_32F, 1)
   ,mapy(this->frameSize, IPL_DEPTH_32F, 1)
   ,showImages(global_options.showImages)
-  ,windowName("Camera_" + cameraIdentifier)
+  ,windowName("Camera_" + config.suffixUid)
   ,saveDistortedImages(global_options.saveDistortedImages &&
                        !config.saveImageFormat.empty())
   ,saveUndistortedImages(global_options.saveUndistortedImages &&
@@ -86,7 +86,7 @@ HardCamera::HardCamera(const scene::Hardware& config, int iplDepth)
                                    boost::io::too_many_args_bit);
   if (this->saveUndistortedImages || this->saveDistortedImages)
   {
-    this->saveImageFormat % this->cameraIdentifier % this->imagesCounter
+    this->saveImageFormat % this->silvverUid % this->imagesCounter
                           % "u";
     // Create directory where images will be saved if it don't exists yet.
     bfs::path path(this->saveImageFormat.str());
@@ -128,14 +128,14 @@ HardCamera::updateCurrentFrame(boost::shared_ptr<Frame> frame)
 
   if (this->saveDistortedImages)
   {
-    this->saveImageFormat % this->cameraIdentifier % this->imagesCounter
+    this->saveImageFormat % this->silvverUid % this->imagesCounter
                           % "d";
     cvSaveImage(this->saveImageFormat.str().c_str(), *this->distortedFrame);
   }
 
   if (this->saveUndistortedImages)
   {
-    this->saveImageFormat % this->cameraIdentifier % this->imagesCounter
+    this->saveImageFormat % this->silvverUid % this->imagesCounter
                           % "u";
     cvSaveImage(this->saveImageFormat.str().c_str(), *this->undistortedFrame);
   }

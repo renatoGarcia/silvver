@@ -29,7 +29,7 @@
 #include "../observer.hpp"
 #include "hardCameraDescriptions.hpp"
 
-/** Base class to all classes which manage camera hardware.
+/** Base class to all classes which manage camera hardware. !!!!OUTDATED!!!!!
  * All hardware camera class must fill the following requeriments:
  *   -# Only one class may be instantiated for each real (physical) camera
  *   -# Multiple objects may hold one same hardCamera instance
@@ -49,6 +49,10 @@ public:
   void getDistortedFrame(Frame& image);
 
   void getUndistortedFrame(Frame& image);
+
+  /// A string to differentiate this camera, e.g.: when saving images or
+  /// in title of window where showing the captured images.
+  const std::string silvverUid;
 
 protected:
 
@@ -74,10 +78,6 @@ private:
   boost::shared_ptr<Frame> undistortedFrame;
 
   boost::shared_ptr<Frame> undistortedFrameBuffer[2];
-
-  /// A string to differentiate this camera, e.g.: when saving images or
-  /// in title of window where showing the captured images.
-  const std::string cameraIdentifier;
 
   /// Mutex to control the read/write operations in distortedFrame and
   /// undistortedFrame.

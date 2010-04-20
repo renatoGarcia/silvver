@@ -23,7 +23,7 @@
 ButterflyCamera::ButterflyCamera(const scene::Camera& cameraConfig,
                                  const scene::ButterflyTargets& confButterflies,
                                  boost::shared_ptr<Connection> connection)
-  :AbstractCamera(cameraConfig, connection)
+  :AbstractCamera(cameraConfig, connection, confButterflies.prefixUid)
   ,MountedTarget(confButterflies.bodyTranslation, confButterflies.bodyRotation)
   ,maxButterflies(confButterflies.maxButterflies)
   ,libButterfly(ButterflyCamera::createLibButterfly(cameraConfig,
@@ -111,7 +111,6 @@ ButterflyCamera::doWork()
 
     for (int k = 0; k < foundButterflies; ++k)
     {
-      tmpPose.timestamp = this->currentFrame.timestamp;
       tmpPose.uid = butterflies[k].uid;
       tmpPose.x = butterflies[k].x;
       tmpPose.y = butterflies[k].y;
@@ -126,6 +125,6 @@ ButterflyCamera::doWork()
       poses.push_back(tmpPose);
     }
 
-    this->serverConnection->send(poses);
+    sendLocalizations(poses);
   }
 }

@@ -20,12 +20,14 @@
 #include <boost/shared_ptr.hpp>
 #include <boost/thread/condition.hpp>
 #include <boost/thread/mutex.hpp>
+#include <stdint.h>
 
 #include "../connection.hpp"
 #include "../hardCameras/hardCamera.hpp"
 #include "../frame.hpp"
 #include "../observer.hpp"
 #include "../scene.hpp"
+#include "silvverTypes.hpp"
 
 /// Abstract base class to all abstract cameras.
 class AbstractCamera: public boost::noncopyable, public Observer
@@ -50,20 +52,27 @@ private:
 protected:
 
   AbstractCamera(const scene::Camera& cameraConfig,
-                 boost::shared_ptr<Connection> connection);
+                 boost::shared_ptr<Connection> connection,
+                 const std::string& prefixUid);
 
   /// Update the frame in currentFrame.
   void updateFrame();
+
+  template<class TargetType>
+  void sendLocalizations(const std::vector<silvver::Identity<TargetType> >& localizations);
 
   /// Tranform a pose in camera coordinates do world coordinates.
   void toWorld(silvver::Pose& pose) const;
 
   Frame currentFrame;
 
+  const std::string abstractCameraUid;
+
+private:
+
   /// Connection with the silvver-server used to send the target localizations.
   const boost::shared_ptr<Connection> serverConnection;
 
-private:
   /// This boolean represents if the last image grabbed by hardCamera was
   /// already precessed or not. Its access is thread safe.
   bool unreadImage;
@@ -80,5 +89,17 @@ private:
   /// Translation vector of camera in world coordinates.
   const boost::array<double, 3> trans;
 };
+
+template<class TargetType>
+void
+AbstractCamera::sendLocalizations(const std::vector<silvver::Identity<TargetType> >& localizations)
+{
+  silvver::CameraReading<TargetType>
+    cameraReading(this->abstractCameraUid,
+                  this->currentFrame.timestamp,
+                  localizations);
+
+  this->serverConnection->send(cameraReading);
+}
 
 #endif /* _ABSTRACT_CAMERA_HPP_ */

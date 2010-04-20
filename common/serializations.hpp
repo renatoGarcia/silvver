@@ -56,7 +56,7 @@ namespace boost
     serialize(Archive& ar, silvver::CameraReading<T>& id,
               const unsigned version)
     {
-      ar & id.cameraUid;
+      ar & id.abstractCameraUid;
       ar & id.timestamp;
       ar & id.localizations;
     }

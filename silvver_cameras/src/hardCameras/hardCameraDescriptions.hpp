@@ -34,9 +34,9 @@ namespace scene
   /// This struct have all common configurations for all hardware cameras.
   struct Hardware
   {
-    /// An unique string which differentiate this hardCamera from
+    /// An unique identifier which differentiate this hardCamera from
     /// others hardCameras.
-    std::string identifier;
+    std::string suffixUid;
 
     /// String configuring the name of saved images. This string can have
     /// the placeholders %1%, %2% and %3%; where %1% is the camera identifier,
