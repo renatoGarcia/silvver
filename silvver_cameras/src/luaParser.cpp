@@ -17,12 +17,14 @@
 #include "luaParser.ipp"
 
 #include <boost/lexical_cast.hpp>
+#include <cstdlib>
 
 #include "exceptions.hpp"
 
 LuaParser::LuaParser(const std::string& luaFile)
-  :L(lua_open())
+  :L(NULL)
 {
+  this->L = lua_open();
   luaL_openlibs(this->L);
 
   if (luaL_dofile(this->L, luaFile.c_str()))
@@ -81,6 +83,7 @@ LuaParser::iterateArray(boost::function<void (void)> callback)
     // removes 'value', keeps 'key' for next iteration
     lua_pop(this->L, 1);
   }
+  // lua_pop(this->L, 1); // removes last key
 }
 
 bool

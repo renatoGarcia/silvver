@@ -30,6 +30,8 @@ CfReader::~CfReader()
 scene::Scene
 CfReader::readConfigFile()
 {
+  luaParser.loadGlobalTable("scene");
+
   luaParser.loadTable("cameras");
   luaParser.iterateArray(boost::bind(&CfReader::readCamera, this));
   luaParser.unloadTable();
@@ -37,6 +39,8 @@ CfReader::readConfigFile()
   luaParser.loadTable("targets");
   luaParser.iterateArray(boost::bind(&CfReader::readTarget, this));
   luaParser.unloadTable();
+
+  luaParser.unloadTable(); // Unload scene table
 
   return this->sc;
 }
