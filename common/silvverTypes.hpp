@@ -146,8 +146,7 @@ namespace silvver
       ,uid(0)
     {}
 
-    Identity(const BaseClass& base, const unsigned uid,
-             const uint64_t timestamp)
+    Identity(const BaseClass& base, const unsigned uid)
       :BaseClass(base)
       ,uid(uid)
     {}
@@ -191,7 +190,7 @@ namespace silvver
       ,localizations()
     {}
 
-    CameraReading(std::string cameraUid, uint64_t timestamp,
+    CameraReading(std::string abstractCameraUid, uint64_t timestamp,
                   std::vector<Identity<TargetType> > localizations)
       :abstractCameraUid(abstractCameraUid)
       ,timestamp(timestamp)

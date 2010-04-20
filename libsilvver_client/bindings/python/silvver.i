@@ -3,6 +3,7 @@
 %{
 #include "silvverTypes.hpp"
 #include "target.hpp"
+#include "abstractCamera.hpp"
 #include <boost/system/system_error.hpp>
 static PyObject* pTimeExpired;
 static PyObject* pConnectionError;
@@ -18,6 +19,11 @@ PyModule_AddObject(m, "ConnectionError", pConnectionError);
 }
 
 %include "std_string.i"
+%include "std_vector.i"
+namespace std {
+  %template(VectorPosition) vector<silvver::Identity<silvver::Position> >;
+  %template(VectorPose) vector<silvver::Identity<silvver::Pose> >;
+};
 
 %rename(boostarray) boost::array<double, 9>;
 
@@ -120,6 +126,21 @@ namespace silvver
       return temp;
     }
   }
+
+  template<class TargetType>
+  struct CameraReading
+  {
+    std::string abstractCameraUid;
+    uint64_t timestamp;
+
+    std::vector<Identity<TargetType> > localizations;
+
+    CameraReading();
+    CameraReading(std::string cameraUid, uint64_t timestamp,
+                  std::vector<Identity<TargetType> > localizations);
+  };
+  %template(CameraReadingPosition) CameraReading<Position>;
+  %template(CameraReadingPose) CameraReading<Pose>;
 
   template<class T>
   class Target
@@ -260,8 +281,35 @@ namespace silvver
     }
 
   };
-
   %template(TargetPosition) Target<Position>;
   %template(TargetPose) Target<Pose>;
+
+
+  template<class T>
+  class AbstractCamera
+  {
+  public:
+    AbstractCamera(boost::function<void (CameraReading<T>)> callbackFunction,
+                   std::string abstractCameraUid,
+                   const std::string& serverIp="127.0.0.1",
+                   unsigned receptionistPort=12000);
+
+    ~AbstractCamera() throw();
+
+    void connect();
+
+    void disconnect();
+
+    /** Get the id of camera.
+     * @return The id of this camera.
+     */
+    std::string getId();
+
+  private:
+    class CheshireCat;
+    std::auto_ptr<CheshireCat> smile;
+  };
+
+
 
 } //silvver namespace
