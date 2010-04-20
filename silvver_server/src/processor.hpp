@@ -20,7 +20,7 @@
 #include <map>
 #include <vector>
 
-#include "outputMap.hpp"
+#include "outputMultiMap.hpp"
 #include "processorInterface.hpp"
 
 /// Abstract base class to the concrete processor classes.
@@ -34,10 +34,11 @@ protected:
    *
    * @param localizations A vector with all target localized.
    */
-  void sendToOutputs(const std::vector<Toutput> &localizations) const;
+  void sendToOutputs(const std::vector<silvver::Identity<Toutput> >&
+                     localizations) const;
 
 private:
-  boost::shared_ptr<OutputMap<CLIENT_NORMAL> > outputMap;
+  boost::shared_ptr<OutputMultiMap<CLIENT_TARGET, unsigned> > outputMap;
 };
 
 #endif /* _PROCESSOR_HPP_ */

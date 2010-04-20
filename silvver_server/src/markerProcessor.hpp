@@ -13,44 +13,39 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef MARKER_PROCESSOR_HPP
-#define MARKER_PROCESSOR_HPP
+#ifndef _MARKER_PROCESSOR_HPP_
+#define _MARKER_PROCESSOR_HPP_
 
-#include <map>
-#include <vector>
 #include <boost/thread/mutex.hpp>
-#include <boost/shared_ptr.hpp>
-#include "silvverTypes.hpp"
-#include "processor.hpp"
-#include <singleton.hpp>
+#include <map>
+#include <string>
 
-class MarkerProcessor :  public Processor<silvver::Identity<silvver::Pose>,
-                                          silvver::Identity<silvver::Pose> >,
-                         public Singleton<MarkerProcessor>
+#include "processor.hpp"
+#include "silvverTypes.hpp"
+#include "singleton.hpp"
+
+class MarkerProcessor: public Processor<silvver::Pose, silvver::Pose>,
+                       public Singleton<MarkerProcessor>
 
 {
 public:
-
-  void deliverPackage(const std::vector< silvver::Identity<silvver::Pose> > &pacote,
-                      const unsigned id);
-
-  // Calcula a configuração dos robôs, usando os dados atualmente
-  // disponíveis no map armazenador.
-  void localize(/*std::vector<silvver::Ente> &vecRobos*/);
+  void deliverPackage(silvver::CameraReading<silvver::Pose>& reading);
 
 private:
-  typedef std::map<unsigned, std::vector<silvver::Identity<silvver::Pose> > >
-  TMap;
+  /// Map with cameraUid as key, and its last reading as value.
+  typedef std::map<std::string, silvver::CameraReading<silvver::Pose> > TMap;
 
   friend class Singleton<MarkerProcessor>;
 
 private:
-  /// Hold the last input of each input client.
-  TMap lastInputs;
+  /// Hold the last reading of each camera.
+  TMap lastReadings;
 
   MarkerProcessor();
+
+  void process(std::vector<silvver::Identity<silvver::Pose> >& currentPoses) const;
 
   boost::mutex mutexArmazenador;
 };
 
-#endif
+#endif /* _MARKER_PROCESSOR_HPP_ */

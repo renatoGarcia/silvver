@@ -13,64 +13,52 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include <iostream>
 #include "markerProcessor.hpp"
+
+#include <boost/foreach.hpp>
+
 #include "processor.ipp"
 
 MarkerProcessor::MarkerProcessor()
-  :Processor<silvver::Identity<silvver::Pose>,
-             silvver::Identity<silvver::Pose> >::Processor()
+  :Processor<silvver::Pose, silvver::Pose>::Processor()
 {}
 
 void
-MarkerProcessor::deliverPackage(const std::vector< silvver::Identity<silvver::Pose> > &pacote,
-                                const unsigned id)
+MarkerProcessor::deliverPackage(silvver::CameraReading<silvver::Pose>& reading)
 {
   boost::mutex::scoped_lock lock(mutexArmazenador);
-  this->lastInputs[id] = pacote;
+  this->lastReadings[reading.cameraUid] = reading;
 
-  this->localize();
+  this->process(reading.localizations);
 }
 
 void
-MarkerProcessor::localize()
+MarkerProcessor::process(std::vector<silvver::Identity<silvver::Pose> >& currentPoses) const
 {
-  std::vector<silvver::Identity<silvver::Pose> > vecRobos;
+  std::vector<silvver::Identity<silvver::Pose> > allPoses;
 
-  std::vector<silvver::Identity<silvver::Pose> > vecEnteTemp;
-  std::vector<silvver::Identity<silvver::Pose> >::iterator iteEnteTemp;
-
-  //---------------Copia os entes de todas as marcaCameras para vecEnte
-  TMap::iterator iteMapa = this->lastInputs.begin();
-
-  for(; iteMapa != this->lastInputs.end(); iteMapa++)
+  BOOST_FOREACH(const TMap::value_type& reading, this->lastReadings)
   {
-    vecRobos.insert(vecRobos.end(),iteMapa->second.begin(),iteMapa->second.end());
-    iteMapa->second.clear();
+    allPoses.insert(allPoses.end(),  reading.second.localizations.begin(),
+                    reading.second.localizations.end());
   }
 
-//   if(vecRobos.size() > 0)
-//   {
-//     std::cout << "ID: " << vecRobos.at(0).id << std::endl;
-//     std::cout << "X: " << vecRobos.at(0).x << std::endl;
-//   }
-
-  //---------------Verifica se há um mesmo robô reportado por duas câmeras diferentes
-  std::vector<silvver::Identity<silvver::Pose> >::iterator itePrimeiro,iteSegundo;
-
-  for(itePrimeiro = vecRobos.begin(); itePrimeiro < vecRobos.end(); itePrimeiro++)
+  // Merge if there are poses with same uid reported by diferent cameras
+  std::vector<silvver::Identity<silvver::Pose> >::iterator itCurrent, itAll;
+  for (itCurrent = currentPoses.begin();
+       itCurrent < currentPoses.end();
+       ++itCurrent)
   {
-    for(iteSegundo=itePrimeiro+1; iteSegundo < vecRobos.end(); iteSegundo++)
+    for(itAll = allPoses.begin(); itAll < allPoses.end(); ++itAll)
     {
-      if(iteSegundo->uid == itePrimeiro->uid)
+      if(itCurrent->uid == itAll->uid)
       {
-        itePrimeiro->x = (itePrimeiro->x + iteSegundo->x) / 2;
-        itePrimeiro->y = (itePrimeiro->y + iteSegundo->y) / 2;
-
-        vecRobos.erase(iteSegundo);
+        /// TODO: Make merge
+        // itCurrent->x = (itFirst->x + itSecond->x) / 2;
+        // itFirst->y = (itFirst->y + itSecond->y) / 2;
       }
     }
   }
 
-  this->sendToOutputs(vecRobos);
+  this->sendToOutputs(currentPoses);
 }

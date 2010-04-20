@@ -21,8 +21,9 @@
 #include <boost/shared_ptr.hpp>
 #include <boost/thread/thread.hpp>
 #include <map>
+#include <string>
 
-#include "outputMap.hpp"
+#include "outputMultiMap.hpp"
 #include "inputInterface.hpp"
 #include "streamConnection.hpp"
 #include "request.hpp"
@@ -49,13 +50,14 @@ public:
 
   // Visitors of the boost::variant Request type.
   void operator()(NullRequest& request) const;
-  void operator()(AddOutput& request) const;
-  void operator()(DelOutput& request) const;
+  void operator()(AddTargetClient& request) const;
+  void operator()(DelTargetClient& request) const;
+  void operator()(AddCameraClient& request) const;
+  void operator()(DelCameraClient& request) const;
   void operator()(AddCamera& request);
   void operator()(DelCamera& request);
 
 private:
-
   void run();
 
   void handleAccept(StreamConnection::pointer connection);
@@ -75,9 +77,9 @@ private:
   /// Connected input clients collection
   std::map<unsigned, boost::shared_ptr<InputInterface> > mapInputs;
 
-  boost::shared_ptr<OutputMap<CLIENT_NORMAL> > normalOutputs;
+  boost::shared_ptr<OutputMultiMap<CLIENT_TARGET, unsigned> > targetOutputs;
 
-  boost::shared_ptr<OutputMap<CLIENT_RAW> > rawOutputs;
+  boost::shared_ptr<OutputMultiMap<CLIENT_CAMERA, std::string> > cameraOutputs;
 
   /// Thread where the boost io_service will run
   boost::scoped_ptr<boost::thread> thReceptionist;

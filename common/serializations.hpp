@@ -18,8 +18,9 @@
 
 #include "silvverTypes.hpp"
 
-#include <boost/serialization/base_object.hpp>
 #include <boost/serialization/array.hpp>
+#include <boost/serialization/base_object.hpp>
+#include <boost/serialization/vector.hpp>
 
 namespace boost
 {
@@ -48,7 +49,16 @@ namespace boost
     {
       ar & boost::serialization::base_object<T>(id);
       ar & id.uid;
+    }
+
+    template<class Archive, class T>
+    void
+    serialize(Archive& ar, silvver::CameraReading<T>& id,
+              const unsigned version)
+    {
+      ar & id.cameraUid;
       ar & id.timestamp;
+      ar & id.localizations;
     }
   } // namespace serialization
 } // namespace boost

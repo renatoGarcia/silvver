@@ -13,8 +13,8 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef REQUEST_HPP
-#define REQUEST_HPP
+#ifndef _REQUEST_HPP_
+#define _REQUEST_HPP_
 
 /** \file request.hpp
  * \brief Types for request actions from receptionist on silvver-server.
@@ -24,7 +24,6 @@
 #include <boost/serialization/variant.hpp>
 
 #include "processorOptions.hpp"
-#include "clientType.hpp"
 
 /// This type symbolize a uninitialized Request.
 struct NullRequest
@@ -34,56 +33,94 @@ struct NullRequest
   {}
 };
 
-struct AddOutput
+struct AddTargetClient
 {
-  ClientType clientType;
   unsigned targetId;
   unsigned short localPort;
 
-  AddOutput()
-    :clientType(CLIENT_NORMAL)
-    ,targetId(0)
+  AddTargetClient()
+    :targetId(0)
     ,localPort(0)
   {}
 
-  AddOutput(ClientType clientType, unsigned targetId, unsigned short localPort)
-    :clientType(clientType)
-    ,targetId(targetId)
+  AddTargetClient(unsigned targetId, unsigned short localPort)
+    :targetId(targetId)
     ,localPort(localPort)
   {}
 
   template<typename Archive>
   void serialize(Archive& ar, const unsigned)
   {
-    ar & clientType;
     ar & targetId;
     ar & localPort;
   }
 };
 
-struct DelOutput
+struct DelTargetClient
 {
-  ClientType clientType;
   unsigned targetId;
   unsigned short localPort;
 
-  DelOutput()
-    :clientType(CLIENT_NORMAL)
-    ,targetId(0)
+  DelTargetClient()
+    :targetId(0)
     ,localPort(0)
   {}
 
-  DelOutput(ClientType clientType, unsigned targetId, unsigned short localPort)
-    :clientType(clientType)
-    ,targetId(targetId)
+  DelTargetClient(unsigned targetId, unsigned short localPort)
+    :targetId(targetId)
     ,localPort(localPort)
   {}
 
   template<typename Archive>
   void serialize(Archive& ar, const unsigned)
   {
-    ar & clientType;
     ar & targetId;
+    ar & localPort;
+  }
+};
+
+struct AddCameraClient
+{
+  std::string cameraUid;
+  unsigned short localPort;
+
+  AddCameraClient()
+    :cameraUid()
+    ,localPort(0)
+  {}
+
+  AddCameraClient(std::string cameraUid, unsigned short localPort)
+    :cameraUid(cameraUid)
+    ,localPort(localPort)
+  {}
+
+  template<typename Archive>
+  void serialize(Archive& ar, const unsigned)
+  {
+    ar & cameraUid;
+    ar & localPort;
+  }
+};
+
+struct DelCameraClient
+{
+  std::string cameraUid;
+  unsigned short localPort;
+
+  DelCameraClient()
+    :cameraUid()
+    ,localPort(0)
+  {}
+
+  DelCameraClient(std::string cameraUid, unsigned short localPort)
+    :cameraUid(cameraUid)
+    ,localPort(localPort)
+  {}
+
+  template<typename Archive>
+  void serialize(Archive& ar, const unsigned)
+  {
+    ar & cameraUid;
     ar & localPort;
   }
 };
@@ -131,9 +168,11 @@ struct DelCamera
 };
 
 typedef boost::variant<NullRequest,
-                       AddOutput,
-                       DelOutput,
+                       AddTargetClient,
+                       DelTargetClient,
+                       AddCameraClient,
+                       DelCameraClient,
                        AddCamera,
-                       DelCamera> Request;
+                       DelCamera       > Request;
 
-#endif // REQUEST_HPP
+#endif // _REQUEST_HPP_

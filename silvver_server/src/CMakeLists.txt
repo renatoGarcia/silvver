@@ -1,4 +1,4 @@
-SET(silvver_server_SRCS outputMap.cpp
+SET(silvver_server_SRCS outputMultiMap.cpp
                         log.cpp
                         inputFactory.cpp
                         ioConnection.cpp

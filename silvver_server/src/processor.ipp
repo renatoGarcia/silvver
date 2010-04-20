@@ -26,17 +26,18 @@
 
 template <class Tinput, class Toutput>
 Processor<Tinput,Toutput>::Processor()
-  :outputMap(OutputMap<CLIENT_NORMAL>::instantiate())
+  :outputMap(OutputMultiMap<CLIENT_TARGET, unsigned>::instantiate())
 {}
 
 template <class Tinput, class Toutput>
 void
-Processor<Tinput,Toutput>::sendToOutputs(const std::vector<Toutput> &localizations) const
+Processor<Tinput,Toutput>::sendToOutputs
+         (const std::vector<silvver::Identity<Toutput> >& localizations) const
 {
   std::vector< boost::shared_ptr<IoConnection> > vecConnections;
   boost::shared_ptr<IoConnection> connectionPtr;
 
-  BOOST_FOREACH(Toutput output, localizations)
+  BOOST_FOREACH(silvver::Identity<Toutput> output, localizations)
   {
     targetsLog(TargetsLogLevel::INFO)
       << ts_output::lock

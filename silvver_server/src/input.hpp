@@ -17,12 +17,13 @@
 #define _INPUT_HPP_
 
 #include <boost/shared_ptr.hpp>
-#include <vector>
+#include <string>
 
 #include "inputInterface.hpp"
 #include "ioConnection.hpp"
-#include "outputMap.hpp"
+#include "outputMultiMap.hpp"
 #include "processorInterface.hpp"
+#include "silvverTypes.hpp"
 
 /// Receive the data sent by cameras and send it to correct processor class.
 template <class Type>
@@ -41,8 +42,8 @@ public:
 private:
   void handleReceive();
 
-  /// Hold the last inputs received.
-  std::vector<Type> currentInputs;
+  /// Hold the last input received.
+  silvver::CameraReading<Type> currentInput;
 
   /// The connection with the camera.
   boost::shared_ptr<IoConnection> connection;
@@ -53,7 +54,7 @@ private:
   boost::shared_ptr<ProcessorInterface<Type> > processor;
 
   /// Clients hearing for localizations before be processed.
-  boost::shared_ptr<OutputMap<CLIENT_RAW> > outputRawMap;
+  boost::shared_ptr<OutputMultiMap<CLIENT_CAMERA, std::string> > clientCameraMap;
 };
 
 #endif /* _INPUT_HPP_ */

@@ -22,6 +22,7 @@
 #define _SILVVER_TYPES_HPP_
 
 #include <boost/array.hpp>
+#include <boost/tuple/tuple.hpp>
 #include <cmath>
 #include <stdint.h>
 #include <vector>
@@ -137,21 +138,18 @@ namespace silvver
   template<class BaseClass>
   struct Identity : public BaseClass
   {
+    /// UID of this target;
     unsigned uid;
-    uint64_t timestamp;
-    // std::vector<> 
 
     Identity()
       :BaseClass()
       ,uid(0)
-      ,timestamp(0)
     {}
 
     Identity(const BaseClass& base, const unsigned uid,
              const uint64_t timestamp)
       :BaseClass(base)
       ,uid(uid)
-      ,timestamp(timestamp)
     {}
 
     Identity<BaseClass>&
@@ -164,7 +162,6 @@ namespace silvver
 
       BaseClass::operator=(identity);
       this->uid = identity.uid;
-      this->timestamp = identity.timestamp;
       return *this;
     }
   };
@@ -175,11 +172,32 @@ namespace silvver
   operator << (std::basic_ostream<charT,traits>& strm,
                const Identity<BaseClass>& identity)
   {
-    strm << identity.timestamp << '\t'
-         << identity.uid << '\t' << static_cast<BaseClass>(identity);
+    strm << identity.uid << '\t' << static_cast<BaseClass>(identity);
     return strm;
   }
 
+  //------------------------------ Camera reading
+  template<class TargetType>
+  struct CameraReading
+  {
+    std::string cameraUid;
+    uint64_t timestamp;
+
+    std::vector<Identity<TargetType> > localizations;
+
+    CameraReading()
+      :cameraUid()
+      ,timestamp(0)
+      ,localizations()
+    {}
+
+    CameraReading(std::string cameraUid, uint64_t timestamp,
+                  std::vector<Identity<TargetType> > localizations)
+      :cameraUid(cameraUid)
+      ,timestamp(timestamp)
+      ,localizations(localizations)
+    {}
+  };
 } // namespace silvver
 
 #endif /* _SILVVER_TYPES_HPP_ */

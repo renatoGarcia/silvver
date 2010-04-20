@@ -32,8 +32,8 @@ Receptionist::Receptionist(unsigned localPort)
   ,currentReception()
   ,request()
   ,mapInputs()
-  ,normalOutputs(OutputMap<CLIENT_NORMAL>::instantiate())
-  ,rawOutputs(OutputMap<CLIENT_RAW>::instantiate())
+  ,targetOutputs(OutputMultiMap<CLIENT_TARGET, unsigned>::instantiate())
+  ,cameraOutputs(OutputMultiMap<CLIENT_CAMERA, std::string>::instantiate())
   ,thReceptionist(new boost::thread(&Receptionist::run, this))
 {
   StreamConnection::pointer connection =
@@ -86,7 +86,7 @@ Receptionist::operator()(NullRequest& request) const
 {}
 
 void
-Receptionist::operator()(AddOutput& request) const
+Receptionist::operator()(AddTargetClient& request) const
 {
   boost::shared_ptr<IoConnection>
     ioConnection(new IoConnection(this->currentReception->getRemoteIp(),
@@ -94,53 +94,47 @@ Receptionist::operator()(AddOutput& request) const
 
   this->currentReception->write(ioConnection->getLocalPort());
 
-  if (request.clientType == CLIENT_NORMAL)
-  {
-    message(MessageLogLevel::INFO)
-      << ts_output::lock
-      << "Add output request (normal client). Id:" << request.targetId
-      << std::endl
-      << ts_output::unlock;
-    this->normalOutputs->addOutput(request.targetId, ioConnection);
-  }
-  else if (request.clientType == CLIENT_RAW)
-  {
-    message(MessageLogLevel::INFO)
-      << ts_output::lock
-      << "Add output request (raw client). Id:" << request.targetId
-      << std::endl
-      << ts_output::unlock;
-    this->rawOutputs->addOutput(request.targetId, ioConnection);
-  }
-  else
-  {
-    //throw
-  }
+  message(MessageLogLevel::INFO)
+    << ts_output::lock
+    << "Add target client request. Uid: " << request.targetId << std::endl
+    << ts_output::unlock;
+  this->targetOutputs->addOutput(request.targetId, ioConnection);
 }
 
 void
-Receptionist::operator()(DelOutput& request) const
+Receptionist::operator()(DelTargetClient& request) const
 {
-  if (request.clientType == CLIENT_NORMAL)
-  {
-    message(MessageLogLevel::INFO)
-      << ts_output::lock
-      << "Delete output request (normal client)." << std::endl
-      << ts_output::unlock;
-    this->normalOutputs->delOutput(request.targetId, request.localPort);
-  }
-  else if (request.clientType == CLIENT_RAW)
-  {
-    message(MessageLogLevel::INFO)
-      << ts_output::lock
-      << "Delete output request (raw client)." << std::endl
-      << ts_output::unlock;
-    this->rawOutputs->delOutput(request.targetId, request.localPort);
-  }
-  else
-  {
-    //throw
-  }
+  message(MessageLogLevel::INFO)
+    << ts_output::lock
+    << "Delete target client request. Uid: " << request.targetId << std::endl
+    << ts_output::unlock;
+  this->targetOutputs->delOutput(request.targetId, request.localPort);
+}
+
+void
+Receptionist::operator()(AddCameraClient& request) const
+{
+  boost::shared_ptr<IoConnection>
+    ioConnection(new IoConnection(this->currentReception->getRemoteIp(),
+                                  request.localPort));
+
+  this->currentReception->write(ioConnection->getLocalPort());
+
+  message(MessageLogLevel::INFO)
+    << ts_output::lock
+    << "Add camera client request. Uid: " << request.cameraUid << std::endl
+    << ts_output::unlock;
+  this->cameraOutputs->addOutput(request.cameraUid, ioConnection);
+}
+
+void
+Receptionist::operator()(DelCameraClient& request) const
+{
+  message(MessageLogLevel::INFO)
+    << ts_output::lock
+    << "Delete camera client request. Uid: " << request.cameraUid << std::endl
+    << ts_output::unlock;
+  this->cameraOutputs->delOutput(request.cameraUid, request.localPort);
 }
 
 void

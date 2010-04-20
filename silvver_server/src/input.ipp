@@ -25,13 +25,14 @@ template <typename Type>
 Input<Type>::Input(boost::shared_ptr<IoConnection> connection,
                    boost::shared_ptr< ProcessorInterface<Type> > processor)
   :InputInterface()
+  ,currentInput()
   ,connection(connection)
   ,connectionPort(connection->getLocalPort())
   ,processor(processor)
+  ,clientCameraMap(OutputMultiMap<CLIENT_CAMERA, std::string>::instantiate())
 {
-  this->outputRawMap = OutputMap<CLIENT_RAW>::instantiate();
 
-  this->connection->asyncReceive(this->currentInputs,
+  this->connection->asyncReceive(this->currentInput,
                                  boost::bind(&Input<Type>::handleReceive,
                                              this));
 }
@@ -44,22 +45,20 @@ template <typename Type>
 void
 Input<Type>::handleReceive()
 {
-  std::vector< boost::shared_ptr<IoConnection> > vecConnections;
+  std::vector<boost::shared_ptr<IoConnection> > vecConnections;
   boost::shared_ptr<IoConnection> connectionPtr;
-  BOOST_FOREACH(Type input, this->currentInputs)
-  {
-    // Get all raw clients hearing for a given target.
-    this->outputRawMap->findOutputs(input.uid, vecConnections);
 
-    BOOST_FOREACH(connectionPtr, vecConnections)
-    {
-      connectionPtr->send(input);
-    }
+  // Get all camera clients hearing for a given camera.
+  this->clientCameraMap->findOutputs(this->currentInput.cameraUid,
+                                     vecConnections);
+  BOOST_FOREACH(connectionPtr, vecConnections)
+  {
+    connectionPtr->send(this->currentInput);
   }
 
-  this->processor->deliverPackage(this->currentInputs, this->connectionPort);
+  this->processor->deliverPackage(this->currentInput);
 
-  this->connection->asyncReceive(this->currentInputs,
+  this->connection->asyncReceive(this->currentInput,
                                  boost::bind(&Input<Type>::handleReceive,
                                              this));
 }

@@ -13,60 +13,61 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef _OUTPUT_MAP_HPP_
-#define _OUTPUT_MAP_HPP_
+#ifndef _OUTPUT_MULTIMAP_HPP_
+#define _OUTPUT_MULTIMAP_HPP_
 
 #include <boost/shared_ptr.hpp>
 #include <boost/thread/shared_mutex.hpp>
 #include <map>
 #include <vector>
 
-#include "clientType.hpp"
 #include "ioConnection.hpp"
 #include "singleton.hpp"
+
+enum ClientType
+{
+  CLIENT_TARGET,
+  CLIENT_CAMERA
+};
 
 /** A class to hold the connected outputs.
  * This class wrap the STL multimap for thread safety.
  */
-template<ClientType clientType>
-class OutputMap: public Singleton<OutputMap<clientType> >
+template<ClientType clientType, class KeyType>
+class OutputMultiMap: public Singleton<OutputMultiMap<clientType, KeyType> >
 {
 public:
 
   /** Add a output.
-   * @param targetId The silvver uid of target observed by client.
-   * @param outputConnection An IoConnection already connected with the client.
-   */
-  void addOutput(unsigned targetId,
+   * @param silvverUid The silvver uid of target or camera being observed.
+   * @param outputConnection An IoConnection already made with the output. */
+  void addOutput(KeyType silvverUid,
                  boost::shared_ptr<IoConnection> outputConnection);
 
   /** Delete a output.
-   * @param idTarget The id of target which the client is listening.
+   * @param silvverUid The silvver uid of target or camera being observed.
    * @param remotePort The remote port where the client is connected, given by
-   *                   IoConnection::getRemotePort()
-   */
-  void delOutput(unsigned idTarget, unsigned remotePort);
+   *                   IoConnection::getRemotePort()  */
+  void delOutput(KeyType silvverUid, unsigned remotePort);
 
   /** Return connections to all outputs which are listening for a given target.
-   * @param idTarget The id of desired target.
-   * @param clientsConnections A vector of shared_prt with IoConnection to
-                               all clients found.  */
-  void findOutputs(unsigned idTarget,
-                   std::vector<boost::shared_ptr<IoConnection> >& clientsConnections);
+   * @param silvverUid The silvver uid of target or camera being observed.
+   * @param outputsConnections A vector of shared_prt with IoConnection to
+   *                           all clients found.  */
+  void findOutputs(KeyType silvverUid,
+                   std::vector<boost::shared_ptr<IoConnection> >& outputsConnections);
 
 private:
-  friend class Singleton<OutputMap<clientType> >;
+  friend class Singleton<OutputMultiMap<clientType, KeyType> >;
 
-  typedef std::multimap<unsigned, boost::shared_ptr<IoConnection> > TMultiMap;
+  typedef std::multimap<KeyType, boost::shared_ptr<IoConnection> > TMultiMap;
 
 private:
   boost::shared_mutex accessMap;
 
-  /// A dummy private constructor.
-  OutputMap();
+  OutputMultiMap();
 
-  /// The key of multimap is the id of target
-  TMultiMap client;
+  TMultiMap outputs;
 };
 
-#endif /* _OUTPUT_MAP_HPP_ */
+#endif /* _OUTPUT_MULTIMAP_HPP_ */

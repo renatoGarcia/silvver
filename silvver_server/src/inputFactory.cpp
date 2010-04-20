@@ -32,7 +32,7 @@ InputFactory::createInput(const procOpt::AnyProcOpt& processorOpt,
   if (const procOpt::Marker* const marker =
       boost::get<procOpt::Marker>(&processorOpt))
   {
-    returnPtr.reset(new Input<silvver::Identity<silvver::Pose> >
+    returnPtr.reset(new Input<silvver::Pose>
                     (connection, MarkerProcessor::instantiate()));
   }
   else

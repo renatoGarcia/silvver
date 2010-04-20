@@ -16,7 +16,7 @@
 #ifndef _PROCESSOR_INTERFACE_HPP_
 #define _PROCESSOR_INTERFACE_HPP_
 
-#include <vector>
+#include "silvverTypes.hpp"
 
 /// Interface to access a Processor class withou know the output type.
 template <class Tinput>
@@ -25,12 +25,9 @@ class ProcessorInterface
 public:
   /** Deliver data to be processed.
    * This method must be implemented by a concrete processor class.
-   *
-   * @param package A vector with the data.
-   * @param id An unique id which identify each input client.
-   */
-  virtual void deliverPackage(const std::vector<Tinput>& package,
-                              const unsigned id)=0;
+   * @param reading A reading of a camera.
+   * @param inputUid A key unique to calling input. */
+  virtual void deliverPackage(silvver::CameraReading<Tinput>& reading)=0;
 
   virtual ~ProcessorInterface()
   {}
