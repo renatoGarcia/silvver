@@ -27,7 +27,7 @@ void
 MarkerProcessor::deliverPackage(silvver::CameraReading<silvver::Pose>& reading)
 {
   boost::mutex::scoped_lock lock(mutexArmazenador);
-  this->lastReadings[reading.cameraUid] = reading;
+  this->lastReadings[reading.abstractCameraUid] = reading;
 
   this->process(reading.localizations);
 }

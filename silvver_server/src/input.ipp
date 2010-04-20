@@ -49,7 +49,7 @@ Input<Type>::handleReceive()
   boost::shared_ptr<IoConnection> connectionPtr;
 
   // Get all camera clients hearing for a given camera.
-  this->clientCameraMap->findOutputs(this->currentInput.cameraUid,
+  this->clientCameraMap->findOutputs(this->currentInput.abstractCameraUid,
                                      vecConnections);
   BOOST_FOREACH(connectionPtr, vecConnections)
   {

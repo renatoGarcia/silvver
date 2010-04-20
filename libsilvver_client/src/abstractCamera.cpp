@@ -67,7 +67,7 @@ namespace silvver
   void
   AbstractCamera<T>::CheshireCat::handleReceive()
   {
-    if (this->currentReading.cameraUid == this->abstractCameraUid)
+    if (this->currentReading.abstractCameraUid == this->abstractCameraUid)
     {
       this->callbackFunction(currentReading);
     }
