@@ -32,6 +32,18 @@ function __transpose(matrix_3_3)
     return transposed_matrix
 end
 
+do
+    local automaticUid = 0
+    function __getOptionalUid(value)
+        if value then
+            return value
+        else
+            automaticUid = automaticUid + 1
+            return '_silvverInternal_target' ..  automaticUid
+        end
+    end
+end
+
 function target2body(translation, rotation)
     body_rotation = __transpose(rotation)
 
@@ -58,6 +70,7 @@ function ARTKP(parameters)
 
     artkp = {}
     artkp.__type = 'artkp'
+    artkp.prefix_uid = __getOptionalUid(parameters.prefixUid)
     artkp.pattern_width = parameters.pattern_width
     artkp.threshold = __getOptional(parameters.threshold, 100)
     artkp.body_translation = __getOptional(parameters.body_translation,
@@ -83,6 +96,7 @@ function Butterfly(parameters)
 
     butterfly = {}
     butterfly.__type = 'butterfly'
+    butterfly.prefix_uid = __getOptionalUid(parameters.prefixUid)
     butterfly.square_size = parameters.square_size
     butterfly.max_butterflies = parameters.max_butterflies
 
