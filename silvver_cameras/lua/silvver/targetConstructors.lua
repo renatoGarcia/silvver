@@ -70,7 +70,7 @@ function ARTKP(parameters)
 
     artkp = {}
     artkp.__type = 'artkp'
-    artkp.prefix_uid = __getOptionalUid(parameters.prefixUid)
+    artkp.uid_prefix = __getOptionalUid(parameters.uid_prefix)
     artkp.pattern_width = parameters.pattern_width
     artkp.threshold = __getOptional(parameters.threshold, 100)
     artkp.body_translation = __getOptional(parameters.body_translation,
@@ -96,7 +96,7 @@ function Butterfly(parameters)
 
     butterfly = {}
     butterfly.__type = 'butterfly'
-    butterfly.prefix_uid = __getOptionalUid(parameters.prefixUid)
+    butterfly.uid_prefix = __getOptionalUid(parameters.uid_prefix)
     butterfly.square_size = parameters.square_size
     butterfly.max_butterflies = parameters.max_butterflies
 

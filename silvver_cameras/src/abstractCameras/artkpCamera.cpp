@@ -28,7 +28,7 @@
 ArtkpCamera::ArtkpCamera(const scene::Camera& cameraConfig,
                          const scene::ArtkpTargets& targets,
                          boost::shared_ptr<Connection> connection)
-  :AbstractCamera(cameraConfig, connection, targets.prefixUid)
+  :AbstractCamera(cameraConfig, connection, targets.uidPrefix)
   ,MountedTarget(targets.bodyTranslation, targets.bodyRotation)
   ,patternWidth(targets.patternWidth)
   ,threshold(targets.threshold)
@@ -40,7 +40,7 @@ ArtkpCamera::ArtkpCamera(const scene::Camera& cameraConfig,
   const scene::Hardware hardwareConfig =
     boost::apply_visitor(scene::GetHardware(), cameraConfig.hardware);
 
-  const std::string camConfigFileName("/tmp/artkp" + targets.prefixUid);
+  const std::string camConfigFileName("/tmp/artkp" + targets.uidPrefix);
 
   std::ofstream tmpConfig(camConfigFileName.c_str());
   tmpConfig.precision(10);

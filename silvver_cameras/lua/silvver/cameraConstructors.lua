@@ -35,7 +35,7 @@ end
 function PseudoCamera(parameters)
     camera = {}
     camera.__driver = 'pseudocamera'
-    camera.suffix_uid = __getOptionalUid(parameters.suffix_uid)
+    camera.uid_suffix = __getOptionalUid(parameters.uid_suffix)
 
     camera.save_image_format = __getOptional(parameters.save_image_format,
                                              "%1%_%2%_%3%.jpg")
@@ -62,7 +62,7 @@ end
 function Dc1394(parameters)
     camera = {}
     camera.__driver = 'dc1394'
-    camera.suffix_uid = __getOptionalUid(parameters.suffix_uid)
+    camera.uid_suffix = __getOptionalUid(parameters.uid_suffix)
 
     camera.save_image_format = __getOptional(parameters.save_image_format,
                                              "%1%_%2%_%3%.jpg")
@@ -132,7 +132,7 @@ function V4l2(parameters)
 
     camera.save_image_format = __getOptional(parameters.save_image_format,
                                              "%1%_%2%_%3%.jpg")
-    camera.suffix_uid = __getOptionalUid(parameters.suffix_uid)
+    camera.uid_suffix = __getOptionalUid(parameters.uid_suffix)
 
     camera.focal_length = parameters.focal_length
     camera.principal_point = parameters.principal_point
@@ -176,7 +176,7 @@ end
 function Dragonfly(parameters)
     camera = {}
     camera.__driver = 'dc1394'
-    camera.suffix_uid = __getOptionalUid(parameters.suffix_uid)
+    camera.uid_suffix = __getOptionalUid(parameters.uid_suffix)
 
     camera.save_image_format = __getOptional(parameters.save_image_format,
                                              "%1%_%2%_%3%.jpg")

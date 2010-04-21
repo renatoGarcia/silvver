@@ -34,7 +34,7 @@ namespace scene
   struct Target
   {
     /// Key unique to each targets set.
-    std::string prefixUid;
+    std::string uidPrefix;
   };
 
   /// Information about targets that is above (mounted) in a body (eg: a robot)

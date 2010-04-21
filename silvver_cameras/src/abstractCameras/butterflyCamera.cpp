@@ -23,7 +23,7 @@
 ButterflyCamera::ButterflyCamera(const scene::Camera& cameraConfig,
                                  const scene::ButterflyTargets& confButterflies,
                                  boost::shared_ptr<Connection> connection)
-  :AbstractCamera(cameraConfig, connection, confButterflies.prefixUid)
+  :AbstractCamera(cameraConfig, connection, confButterflies.uidPrefix)
   ,MountedTarget(confButterflies.bodyTranslation, confButterflies.bodyRotation)
   ,maxButterflies(confButterflies.maxButterflies)
   ,libButterfly(ButterflyCamera::createLibButterfly(cameraConfig,

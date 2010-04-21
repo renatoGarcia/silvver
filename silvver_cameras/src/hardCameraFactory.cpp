@@ -55,7 +55,7 @@ HardCameraFactory::create(const scene::AnyHardwareCamera& cameraConfig)
     boost::apply_visitor(scene::GetHardware(), cameraConfig);
 
   std::map< std::string, boost::shared_ptr<HardCamera> >::iterator
-    iteHardCamera = HardCameraFactory::createdHardCameras.find(hardwareConfig.suffixUid);
+    iteHardCamera = HardCameraFactory::createdHardCameras.find(hardwareConfig.uidSuffix);
 
   // If hardCamera is already created
   if (iteHardCamera != HardCameraFactory::createdHardCameras.end())
@@ -70,7 +70,7 @@ HardCameraFactory::create(const scene::AnyHardwareCamera& cameraConfig)
 
     HardCameraFactory::createdHardCameras.
       insert(std::pair<std::string, boost::shared_ptr<HardCamera> >
-             (hardwareConfig.suffixUid, hardCamera));
+             (hardwareConfig.uidSuffix, hardCamera));
   }
 
   return hardCamera;

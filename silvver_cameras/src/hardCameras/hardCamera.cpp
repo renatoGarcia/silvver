@@ -27,7 +27,7 @@ namespace bfs = boost::filesystem;
 extern globalOptions::Options global_options;
 
 HardCamera::HardCamera(const scene::Hardware& config, int iplDepth)
-  :silvverUid(config.suffixUid)
+  :silvverUid(config.uidSuffix)
   ,framePixels(config.resolution.at(0) * config.resolution.at(1))
   ,frameSize(cvSize(config.resolution.at(0), config.resolution.at(1)))
   ,iplDepth(iplDepth)
@@ -37,7 +37,7 @@ HardCamera::HardCamera(const scene::Hardware& config, int iplDepth)
   ,mapx(this->frameSize, IPL_DEPTH_32F, 1)
   ,mapy(this->frameSize, IPL_DEPTH_32F, 1)
   ,showImages(global_options.showImages)
-  ,windowName("Camera_" + config.suffixUid)
+  ,windowName("Camera_" + config.uidSuffix)
   ,saveDistortedImages(global_options.saveDistortedImages &&
                        !config.saveImageFormat.empty())
   ,saveUndistortedImages(global_options.saveUndistortedImages &&

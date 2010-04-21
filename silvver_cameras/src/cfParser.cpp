@@ -264,7 +264,7 @@ CfParser::readCamera(lua_State* L)
 void
 CfParser::readHardware(lua_State* L, scene::Hardware& hardware)
 {
-  readValue(hardware.suffixUid, L, "suffix_uid");
+  readValue(hardware.uidSuffix, L, "uid_suffix");
   readValue(hardware.saveImageFormat, L, "save_image_format");
   readValue(hardware.resolution, L, "resolution");
 
@@ -386,7 +386,7 @@ CfParser::readArtkpTargets(lua_State* L)
 {
   scene::ArtkpTargets artkpTargets;
 
-  readValue(artkpTargets.prefixUid, L, "prefix_uid");
+  readValue(artkpTargets.uidPrefix, L, "uid_prefix");
   readValue(artkpTargets.patternWidth, L, "pattern_width");
   readValue(artkpTargets.threshold, L, "threshold");
   readValue(artkpTargets.bodyTranslation, L, "body_translation");
@@ -416,7 +416,7 @@ scene::ButterflyTargets
 CfParser::readButterflyTargets(lua_State* L)
 {
   scene::ButterflyTargets butterflyTargets;
-  readValue(butterflyTargets.prefixUid, L, "prefix_uid");
+  readValue(butterflyTargets.uidPrefix, L, "uid_prefix");
   readValue(butterflyTargets.squareSize, L, "square_size");
   readValue(butterflyTargets.maxButterflies, L, "max_butterflies");
   readValue(butterflyTargets.bodyTranslation, L, "body_translation");
