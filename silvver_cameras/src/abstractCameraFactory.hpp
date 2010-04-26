@@ -19,20 +19,16 @@
 #include <boost/shared_ptr.hpp>
 
 #include "abstractCameras/abstractCamera.hpp"
-#include "connection.hpp"
 #include "scene.hpp"
 
 class AbstractCameraFactory
 {
 public:
-
   static AbstractCamera*
   create(const scene::Camera& cameraConfig,
-         const scene::AnyTarget& targets,
-         boost::shared_ptr<Connection> connection);
+         const scene::AnyTarget& targets);
 
 private:
-
   AbstractCameraFactory();
 };
 

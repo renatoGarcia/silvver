@@ -18,7 +18,6 @@
 #include <boost/variant/get.hpp>
 
 #include "exceptions.hpp"
-#include "processorOptions.hpp"
 
 #ifdef HAS_ARTKP
 #  include "abstractCameras/artkpCamera.hpp"
@@ -29,8 +28,7 @@
 
 AbstractCamera*
 AbstractCameraFactory::create(const scene::Camera& cameraConfig,
-                              const scene::AnyTarget& targets,
-                              boost::shared_ptr<Connection> connection)
+                              const scene::AnyTarget& targets)
 {
   AbstractCamera* abstractCamera;
 
@@ -38,12 +36,8 @@ AbstractCameraFactory::create(const scene::Camera& cameraConfig,
       boost::get<scene::ArtkpTargets>(&targets))
   {
 #ifdef HAS_ARTKP
-    procOpt::AnyProcOpt markerOpt = procOpt::Marker();
-    connection->connect(markerOpt);
-
     abstractCamera = new ArtkpCamera(cameraConfig,
-                                     *artkpTarget,
-                                     connection);
+                                     *artkpTarget);
 #else
     throw invalid_argument()
       << info_what("This program don't was compiled with support "
@@ -54,12 +48,8 @@ AbstractCameraFactory::create(const scene::Camera& cameraConfig,
       boost::get<scene::ButterflyTargets>(&targets))
   {
 #ifdef HAS_BUTTERFLY
-    procOpt::AnyProcOpt markerOpt = procOpt::Marker();
-    connection->connect(markerOpt);
-
     abstractCamera = new ButterflyCamera(cameraConfig,
-                                         *butterflyTarget,
-                                         connection);
+                                         *butterflyTarget);
 #else
     throw invalid_argument()
       << info_what("This program don't was compiled with support "

@@ -35,8 +35,10 @@ Connection::runIoService()
   Connection::ioService.run();
 }
 
-Connection::Connection(const std::string& serverIp, unsigned receptionistPort)
-  :receptionistSocket(Connection::ioService)
+Connection::Connection(const std::string& serverIp, unsigned receptionistPort,
+                       const std::string& abstractCameraUid)
+  :abstractCameraUid(abstractCameraUid)
+  ,receptionistSocket(Connection::ioService)
   ,receptionistEP(bip::address::from_string(serverIp), receptionistPort)
   ,outputSocket(Connection::ioService, bip::udp::endpoint())
 {
@@ -62,12 +64,13 @@ Connection::~Connection()
 }
 
 void
-Connection::connect(procOpt::AnyProcOpt& processorOpt)
+Connection::connect(const procOpt::AnyProcOpt& processorOpt)
 {
   this->receptionistSocket.connect(this->receptionistEP);
 
   Request request = AddCamera(processorOpt,
-                              this->outputSocket.local_endpoint().port());
+                              this->outputSocket.local_endpoint().port(),
+                              this->abstractCameraUid);
   this->writeToReceptionist(request);
 
   unsigned short remotePort;
@@ -85,7 +88,7 @@ Connection::disconnect()
 {
   this->receptionistSocket.connect(this->receptionistEP);
 
-  Request request = DelCamera(this->outputSocket.local_endpoint().port());
+  Request request = DelCamera(this->abstractCameraUid);
   this->writeToReceptionist(request);
 
   this->outputSocket.shutdown(bip::udp::socket::shutdown_both);

@@ -75,7 +75,7 @@ private:
   Request request;
 
   /// Connected input clients collection
-  std::map<unsigned, boost::shared_ptr<InputInterface> > mapInputs;
+  std::map<std::string, boost::shared_ptr<InputInterface> > mapInputs;
 
   boost::shared_ptr<OutputMultiMap<CLIENT_TARGET, unsigned> > targetOutputs;
 

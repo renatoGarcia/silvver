@@ -22,7 +22,6 @@
 
 #include <butterfly.h>
 
-#include "../connection.hpp"
 #include "abstractCamera.hpp"
 #include "mountedTarget.hpp"
 #include "targetDescriptions.hpp"
@@ -31,8 +30,7 @@ class ButterflyCamera: public AbstractCamera, private MountedTarget
 {
 public:
   ButterflyCamera(const scene::Camera& cameraConfig,
-                  const scene::ButterflyTargets& confButterflies,
-                  boost::shared_ptr<Connection> connection);
+                  const scene::ButterflyTargets& confButterflies);
 
   ~ButterflyCamera();
 

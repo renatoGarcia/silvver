@@ -129,15 +129,19 @@ struct AddCamera
 {
   procOpt::AnyProcOpt processorOpt;
   unsigned short localPort;
+  std::string cameraUid;
 
   AddCamera()
     :processorOpt()
     ,localPort(0)
+    ,cameraUid()
   {}
 
-  AddCamera(const procOpt::AnyProcOpt& processorOpt, unsigned short localPort)
+  AddCamera(const procOpt::AnyProcOpt& processorOpt, unsigned short localPort,
+            const std::string& cameraUid)
     :processorOpt(processorOpt)
     ,localPort(localPort)
+    ,cameraUid(cameraUid)
   {}
 
   template<typename Archive>
@@ -145,25 +149,26 @@ struct AddCamera
   {
     ar & processorOpt;
     ar & localPort;
+    ar & cameraUid;
   }
 };
 
 struct DelCamera
 {
-  unsigned short localPort;
+  std::string cameraUid;
 
   DelCamera()
-    :localPort(0)
+    :cameraUid()
   {}
 
-  DelCamera(unsigned short localPort)
-    :localPort(localPort)
+  DelCamera(const std::string& cameraUid)
+    :cameraUid(cameraUid)
   {}
 
   template<typename Archive>
   void serialize(Archive& ar, const unsigned)
   {
-    ar & localPort;
+    ar & cameraUid;
   }
 };
 

@@ -22,11 +22,12 @@
 #include <boost/thread/mutex.hpp>
 #include <stdint.h>
 
-#include "../connection.hpp"
+#include "../connection.ipp"
 #include "../hardCameras/hardCamera.hpp"
 #include "../frame.hpp"
 #include "../observer.hpp"
 #include "../scene.hpp"
+#include "processorOptions.hpp"
 #include "silvverTypes.hpp"
 
 /// Abstract base class to all abstract cameras.
@@ -52,8 +53,8 @@ private:
 protected:
 
   AbstractCamera(const scene::Camera& cameraConfig,
-                 boost::shared_ptr<Connection> connection,
-                 const std::string& prefixUid);
+                 const std::string& prefixUid,
+                 const procOpt::AnyProcOpt& procOptions);
 
   /// Update the frame in currentFrame.
   void updateFrame();
@@ -71,7 +72,7 @@ protected:
 private:
 
   /// Connection with the silvver-server used to send the target localizations.
-  const boost::shared_ptr<Connection> serverConnection;
+  Connection serverConnection;
 
   /// This boolean represents if the last image grabbed by hardCamera was
   /// already precessed or not. Its access is thread safe.
@@ -99,7 +100,7 @@ AbstractCamera::sendLocalizations(const std::vector<silvver::Identity<TargetType
                   this->currentFrame.timestamp,
                   localizations);
 
-  this->serverConnection->send(cameraReading);
+  this->serverConnection.send(cameraReading);
 }
 
 #endif /* _ABSTRACT_CAMERA_HPP_ */

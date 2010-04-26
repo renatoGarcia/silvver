@@ -37,11 +37,12 @@ class Connection
 {
 public:
 
-  Connection(const std::string& serverIp, unsigned receptionistPort);
+  Connection(const std::string& serverIp, unsigned receptionistPort,
+             const std::string& abstractCameraUid);
 
   ~Connection();
 
-  void connect(procOpt::AnyProcOpt& processorOpt);
+  void connect(const procOpt::AnyProcOpt& processorOpt);
 
   void disconnect();
 
@@ -52,6 +53,8 @@ private:
 
   friend class boost::thread;
 
+  static void runIoService();
+
   static const unsigned HEADER_LENGTH = 8;
 
   static boost::asio::io_service ioService;
@@ -60,7 +63,7 @@ private:
 
   static boost::once_flag onceFlag;
 
-  static void runIoService();
+  const std::string abstractCameraUid;
 
   boost::asio::ip::tcp::socket receptionistSocket;
 

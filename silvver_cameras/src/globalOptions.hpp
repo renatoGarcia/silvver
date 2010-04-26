@@ -13,10 +13,15 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include <string>
+
 namespace globalOptions
 {
   struct Options
   {
+    std::string serverIP;
+    int receptionistPort;
+
     bool showImages;
     bool saveDistortedImages;
     bool saveUndistortedImages;

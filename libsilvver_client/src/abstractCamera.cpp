@@ -77,13 +77,6 @@ namespace silvver
                                            this));
   }
 
-  // template<class T>
-  // void
-  // AbstractCamera<T>::setCallback(boost::function<void(CameraReading<T>)> function)
-  // {
-  //   smile->callbackFunction = function;
-  // }
-
   template<class T>
   void
   AbstractCamera<T>::connect()

@@ -27,30 +27,19 @@ class SceneMounter
 public:
 
   /** sceneMounter class constructor.
-   *
-   * @param serverIP IP address where silvver-server is running.
-   * @param receptionistPort Port where the receptionist of silvver-server
-   *                         is hearing.
-   * @param sceneDescriptorFile Path to the lua file scene descriptor.
-   */
-  SceneMounter(const std::string& serverIp, const int receptionistPort,
-               const std::string& sceneDescriptorFile);
+   * @param sceneDescriptorFile Path to the lua file scene descriptor. */
+  SceneMounter(const std::string& sceneDescriptorFile);
 
   ~SceneMounter();
 
   /** Initialize all abstract cameras.
-   *
    * The abstract cameras that will be initized are described in the scene
-   * descriptor lua file.
-   */
+   * descriptor lua file. */
   void mount();
 
 private:
 
   const std::string sceneDescriptorFile;
-
-  const std::string serverIp;
-  const unsigned receptionistPort;
 
   /// Initialize the abstract camera given by cameraConfig and targets.
   void constructAbstractCamera(const scene::Camera& cameraConfig,

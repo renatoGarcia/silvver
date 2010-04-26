@@ -26,7 +26,6 @@
 
 #include <ARToolKitPlus/TrackerSingleMarker.h>
 
-#include "../connection.hpp"
 #include "abstractCamera.hpp"
 #include "mountedTarget.hpp"
 #include "targetDescriptions.hpp"
@@ -36,8 +35,7 @@ class ArtkpCamera: public AbstractCamera, private MountedTarget
 public:
 
   ArtkpCamera(const scene::Camera& cameraConfig,
-              const scene::ArtkpTargets& targets,
-              boost::shared_ptr<Connection> connection);
+              const scene::ArtkpTargets& targets);
 
   ~ArtkpCamera();
 

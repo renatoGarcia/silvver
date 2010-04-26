@@ -21,9 +21,8 @@
 #include <opencv/cv.h>
 
 ButterflyCamera::ButterflyCamera(const scene::Camera& cameraConfig,
-                                 const scene::ButterflyTargets& confButterflies,
-                                 boost::shared_ptr<Connection> connection)
-  :AbstractCamera(cameraConfig, connection, confButterflies.uidPrefix)
+                                 const scene::ButterflyTargets& confButterflies)
+  :AbstractCamera(cameraConfig, confButterflies.uidPrefix, procOpt::Marker())
   ,MountedTarget(confButterflies.bodyTranslation, confButterflies.bodyRotation)
   ,maxButterflies(confButterflies.maxButterflies)
   ,libButterfly(ButterflyCamera::createLibButterfly(cameraConfig,

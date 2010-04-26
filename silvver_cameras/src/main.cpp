@@ -70,8 +70,6 @@ std::string getLevelsNames()
 
 int main(int argc, char **argv)
 {
-  std::string serverIP;
-  int receptionistPort;
   std::string luaFile;
   LogLevel verbosity;
 
@@ -84,10 +82,10 @@ int main(int argc, char **argv)
     ("help,h", "Print this help message and exit")
     ("version,V", "Print version and exit")
     ("server-ip,s",
-     po::value<std::string>(&serverIP)->default_value("127.0.0.1"),
+     po::value<std::string>(&global_options.serverIP)->default_value("127.0.0.1"),
      "IP address of silvver-server")
     ("receptionist-port,p",
-     po::value<int>(&receptionistPort)->default_value(12000),
+     po::value<int>(&global_options.receptionistPort)->default_value(12000),
      "Port on the server where the receptionist is hearing")
     ("scene-config,c",
      po::value<std::string>(&luaFile)->default_value("scene.lua"),
@@ -139,7 +137,7 @@ int main(int argc, char **argv)
     global_options.saveUndistortedImages = vm.count("save-undistorted");
     message.setThreshold(verbosity.value());
 
-    SceneMounter sceneMounter(serverIP, receptionistPort, luaFile);
+    SceneMounter sceneMounter(luaFile);
     sceneMounter.mount();
 
     getchar();

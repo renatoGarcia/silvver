@@ -18,18 +18,13 @@
 #include <boost/foreach.hpp>
 #include <boost/shared_ptr.hpp>
 
-#include "connection.hpp"
 #include "cfParser.hpp"
 #include "abstractCameraFactory.hpp"
 #include "log.hpp"
 #include "exceptions.hpp"
 
-SceneMounter::SceneMounter(const std::string& serverIp,
-                           const int receptionistPort,
-                           const std::string& sceneDescriptorFile)
+SceneMounter::SceneMounter(const std::string& sceneDescriptorFile)
   :sceneDescriptorFile(sceneDescriptorFile)
-  ,serverIp(serverIp)
-  ,receptionistPort(receptionistPort)
 {}
 
  SceneMounter::~SceneMounter()
@@ -71,12 +66,8 @@ void
 SceneMounter::constructAbstractCamera(const scene::Camera& camera,
                                       const scene::AnyTarget& target)
 {
-  boost::shared_ptr<Connection>
-    connection(new Connection(this->serverIp, this->receptionistPort));
-
   this->abstractCameras.push_back(AbstractCameraFactory::create(camera,
-                                                                target,
-                                                                connection));
+                                                                target));
 
   this->abstractCameras.back().run();
 }

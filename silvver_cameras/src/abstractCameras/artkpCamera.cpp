@@ -20,15 +20,13 @@
 
 #include <ARToolKitPlus/TrackerSingleMarkerImpl.h>
 
-#include "../connection.ipp"
 #include "../exceptions.hpp"
 #include "../log.hpp"
 #include "silvverTypes.hpp"
 
 ArtkpCamera::ArtkpCamera(const scene::Camera& cameraConfig,
-                         const scene::ArtkpTargets& targets,
-                         boost::shared_ptr<Connection> connection)
-  :AbstractCamera(cameraConfig, connection, targets.uidPrefix)
+                         const scene::ArtkpTargets& targets)
+  :AbstractCamera(cameraConfig, targets.uidPrefix, procOpt::Marker())
   ,MountedTarget(targets.bodyTranslation, targets.bodyRotation)
   ,patternWidth(targets.patternWidth)
   ,threshold(targets.threshold)

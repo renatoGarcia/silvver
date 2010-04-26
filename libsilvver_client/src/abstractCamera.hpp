@@ -40,11 +40,6 @@ namespace silvver
 
     ~AbstractCamera() throw();
 
-    /** Set the callbackFunciont
-     * @param function Function which will be called at each target
-     *                 localization. */
-    // void setCallback(boost::function<void(CameraReading<T>)> function);
-
     /** Connect to the silvver-server.
      * Can throw connection_error when silvver-server is unreachable. */
     void connect();

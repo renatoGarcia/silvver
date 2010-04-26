@@ -142,7 +142,7 @@ Receptionist::operator()(AddCamera& request)
 {
   message(MessageLogLevel::INFO)
     << ts_output::lock
-    << "Add camera request" << std::endl
+    << "Add camera request. Uid: " << request.cameraUid << std::endl
     << ts_output::unlock;
 
   boost::shared_ptr<IoConnection>
@@ -156,8 +156,7 @@ Receptionist::operator()(AddCamera& request)
   boost::shared_ptr<InputInterface> input =
     InputFactory::createInput(request.processorOpt, ioConnection);
 
-  this->mapInputs.insert(std::pair< unsigned,boost::shared_ptr<InputInterface> >
-                         ((unsigned)ioConnection->getRemotePort(), input));
+  this->mapInputs.insert(std::make_pair(request.cameraUid, input));
 }
 
 void
@@ -165,10 +164,10 @@ Receptionist::operator()(DelCamera& request)
 {
   message(MessageLogLevel::INFO)
     << ts_output::lock
-    << "Delete camera request" << std::endl
+    << "Delete camera request. Uid: " << request.cameraUid <<  std::endl
     << ts_output::unlock;
 
-  if (this->mapInputs.erase(request.localPort) != 1)
+  if (this->mapInputs.erase(request.cameraUid) != 1)
   {
     message(MessageLogLevel::INFO)
       << ts_output::lock

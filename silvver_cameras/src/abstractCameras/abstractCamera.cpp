@@ -17,15 +17,19 @@
 
 #include <cstddef>
 
+#include "../globalOptions.hpp"
 #include "../hardCameraFactory.hpp"
 
+extern globalOptions::Options global_options;
+
 AbstractCamera::AbstractCamera(const scene::Camera& cameraConfig,
-                               boost::shared_ptr<Connection> connection,
-                               const std::string& prefixUid)
+                               const std::string& prefixUid,
+                               const procOpt::AnyProcOpt& procOptions)
   :subjectHardCamera(HardCameraFactory::create(cameraConfig.hardware))
   ,currentFrame(this->subjectHardCamera->getImageParameters())
   ,abstractCameraUid(prefixUid + subjectHardCamera->silvverUid)
-  ,serverConnection(connection)
+  ,serverConnection(global_options.serverIP, global_options.receptionistPort,
+                    this->abstractCameraUid)
   ,unreadImage(false)
   ,unreadImageAccess()
   ,unreadImageCondition()
@@ -33,6 +37,8 @@ AbstractCamera::AbstractCamera(const scene::Camera& cameraConfig,
   ,trans(cameraConfig.translationVector)
 {
   this->subjectHardCamera->attach(this);
+
+  this->serverConnection.connect(procOptions);
 }
 
 AbstractCamera::~AbstractCamera()
