@@ -20,6 +20,7 @@
 #include <memory>
 #include <string>
 
+#include "exceptions.hpp"
 #include "silvverTypes.hpp"
 
 namespace silvver
@@ -29,25 +30,26 @@ namespace silvver
   {
   public:
     /** AbstractCamera class constructor.
-     * @param callbackFunction Function which will be called at each target
-     *                         localization.
      * @param abstractCameraUid AbstractCamera silvver uid.
      * @param serverIp IP address of silvver-server.
      * @param receptionistPort Port number of silvver-server receptionist. */
-    AbstractCamera(boost::function<void (CameraReading<T>)> callbackFunction,
-                   std::string abstractCameraUid,
+    AbstractCamera(boost::function<void (CameraReading<T>)> callback,
+                   const std::string& abstractCameraUid,
                    const std::string& serverIp="127.0.0.1",
                    unsigned receptionistPort=12000);
 
     ~AbstractCamera() throw();
 
-    /// Connect to the silvver-server.
-    /// Can throw boost::system::system_error when silvver-server
-    /// is unreachable.
+    /** Set the callbackFunciont
+     * @param function Function which will be called at each target
+     *                 localization. */
+    // void setCallback(boost::function<void(CameraReading<T>)> function);
+
+    /** Connect to the silvver-server.
+     * Can throw connection_error when silvver-server is unreachable. */
     void connect();
 
-    /// Can throw boost::system::system_error when silvver-server
-    /// is unreachable.
+    /// Can throw connection_error when silvver-server is unreachable.
     void disconnect();
 
     /** Get the id of camera.

@@ -26,8 +26,8 @@ namespace silvver
   AbstractCamera<T>::CheshireCat
   {
   public:
-    CheshireCat(boost::function<void (CameraReading<T>)> callbackFunction,
-                std::string abstractCameraUid,
+    CheshireCat(boost::function<void(CameraReading<T>)> callback,
+                const std::string& abstractCameraUid,
                 const std::string& serverIp,
                 unsigned receptionistPort);
 
@@ -49,11 +49,11 @@ namespace silvver
   };
 
   template<class T> AbstractCamera<T>::
-  CheshireCat::CheshireCat(boost::function<void (CameraReading<T>)> callbackFunction,
-                           std::string abstractCameraUid,
+  CheshireCat::CheshireCat(boost::function<void(CameraReading<T>)> callback,
+                           const std::string& abstractCameraUid,
                            const std::string& serverIp,
                            unsigned receptionistPort)
-    :callbackFunction(callbackFunction)
+    :callbackFunction(callback)
     ,abstractCameraUid(abstractCameraUid)
     ,connection(serverIp, receptionistPort)
     ,connected(false)
@@ -69,7 +69,7 @@ namespace silvver
   {
     if (this->currentReading.abstractCameraUid == this->abstractCameraUid)
     {
-      this->callbackFunction(currentReading);
+      this->callbackFunction(this->currentReading);
     }
 
     this->connection.asyncRead(this->currentReading,
@@ -77,18 +77,32 @@ namespace silvver
                                            this));
   }
 
+  // template<class T>
+  // void
+  // AbstractCamera<T>::setCallback(boost::function<void(CameraReading<T>)> function)
+  // {
+  //   smile->callbackFunction = function;
+  // }
+
   template<class T>
   void
   AbstractCamera<T>::connect()
   {
     if (!smile->connected)
     {
-      smile->connection.connect(smile->abstractCameraUid);
-      smile->connected = true;
+      try
+      {
+        smile->connection.connect(smile->abstractCameraUid);
+        smile->connected = true;
 
-      smile->connection.asyncRead(smile->currentReading,
-                                  boost::bind(&CheshireCat::handleReceive,
-                                              smile.get()));
+        smile->connection.asyncRead(smile->currentReading,
+                                    boost::bind(&CheshireCat::handleReceive,
+                                                smile.get()));
+      }
+      catch (const boost::system::system_error& e)
+      {
+        throw silvver::connection_error(e.what());
+      }
     }
   }
 
@@ -98,8 +112,15 @@ namespace silvver
   {
     if (smile->connected)
     {
-      smile->connection.disconnect(smile->abstractCameraUid);
-      smile->connected = false;
+      try
+      {
+        smile->connection.disconnect(smile->abstractCameraUid);
+        smile->connected = false;
+      }
+      catch (const boost::system::system_error& e)
+      {
+        throw silvver::connection_error(e.what());
+      }
     }
   }
 
@@ -111,12 +132,11 @@ namespace silvver
   }
 
   template<class T>
-  AbstractCamera<T>::
-  AbstractCamera(boost::function<void (CameraReading<T>)> callbackFunction,
-                 std::string abstractCameraUid,
-                 const std::string& serverIp,
-                 unsigned receptionistPort)
-    :smile(new CheshireCat(callbackFunction, abstractCameraUid,
+  AbstractCamera<T>::AbstractCamera(boost::function<void(CameraReading<T>)> callback,
+                                    const std::string& abstractCameraUid,
+                                    const std::string& serverIp,
+                                    unsigned receptionistPort)
+    :smile(new CheshireCat(callback, abstractCameraUid,
                            serverIp, receptionistPort))
   {}
 

@@ -23,18 +23,11 @@
 #include <boost/date_time/time_duration.hpp>
 #include <boost/date_time/posix_time/posix_time.hpp>
 
+#include "exceptions.hpp"
 #include "silvverTypes.hpp"
 
 namespace silvver
 {
-
-  class time_expired_error : public std::runtime_error
-  {
-  public:
-    time_expired_error(const std::string& whatArg)
-      :runtime_error(whatArg){}
-  };
-
   /// Represents a target looked by Silvver.
   template<class T>
   class Target
@@ -50,13 +43,11 @@ namespace silvver
 
     ~Target() throw();
 
-    /// Connect to the silvver-server.
-    /// Can throw boost::system::system_error when silvver-server
-    /// is unreachable.
+    /** Connect to the silvver-server.
+     * Can throw connection_error when silvver-server is unreachable. */
     void connect();
 
-    /// Can throw boost::system::system_error when silvver-server
-    /// is unreachable.
+    /// Can throw connection_error when silvver-server is unreachable.
     void disconnect();
 
     /** Get the id of target.

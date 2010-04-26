@@ -103,12 +103,19 @@ namespace silvver
   {
     if (!smile->connected)
     {
-      smile->connection.connect(smile->targetId);
-      smile->connected = true;
+      try
+      {
+        smile->connection.connect(smile->targetId);
+        smile->connected = true;
 
-      smile->connection.asyncRead(smile->last,
-                                  boost::bind(&CheshireCat::update,
-                                              smile.get()));
+        smile->connection.asyncRead(smile->last,
+                                    boost::bind(&CheshireCat::update,
+                                                smile.get()));
+      }
+      catch (const boost::system::system_error& e)
+      {
+        throw silvver::connection_error(e.what());
+      }
     }
   }
 
@@ -118,8 +125,15 @@ namespace silvver
   {
     if (smile->connected)
     {
-      smile->connection.disconnect(smile->targetId);
-      smile->connected = false;
+      try
+      {
+        smile->connection.disconnect(smile->targetId);
+        smile->connected = false;
+      }
+      catch (const boost::system::system_error& e)
+      {
+        throw silvver::connection_error(e.what());
+      }
     }
   }
 

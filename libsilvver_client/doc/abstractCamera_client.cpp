@@ -9,7 +9,7 @@
 using namespace silvver;
 using namespace std;
 
-void printPose(CameraReading<Pose> reading)
+void printPose(CameraReading<Position> reading)
 {
   cout << reading.localizations.at(0) << endl;
 }
@@ -33,7 +33,7 @@ int main(int argc, char *argv[])
     receptionistPort = atoi(argv[3]);
   }
 
-  AbstractCamera<Pose> camera(printPose, id, ip, receptionistPort);
+  AbstractCamera<Position> camera(printPose, id, ip, receptionistPort);
 
   camera.connect();
 
