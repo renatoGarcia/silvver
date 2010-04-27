@@ -26,7 +26,7 @@ AbstractCamera::AbstractCamera(const scene::Camera& cameraConfig,
                                const std::string& prefixUid,
                                const procOpt::AnyProcOpt& procOptions)
   :subjectHardCamera(HardCameraFactory::create(cameraConfig.hardware))
-  ,currentFrame(this->subjectHardCamera->getImageParameters())
+  ,currentFrame()
   ,abstractCameraUid(prefixUid + subjectHardCamera->silvverUid)
   ,serverConnection(global_options.serverIP, global_options.receptionistPort,
                     this->abstractCameraUid)

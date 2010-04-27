@@ -25,10 +25,9 @@
 #include "globalOptions.hpp"
 #include "sceneMounter.hpp"
 #include "log.hpp"
+#include "version.hpp"
 
 namespace po = boost::program_options;
-
-#define VERSION "0.5.0"
 
 globalOptions::Options global_options;
 
@@ -73,7 +72,7 @@ int main(int argc, char **argv)
   std::string luaFile;
   LogLevel verbosity;
 
-  po::options_description desc("silvver_cameras " VERSION " \n\n"
+  po::options_description desc("silvver_cameras " SILVVER_LIB_VERSION " \n\n"
                                "Compiled with boost version " BOOST_LIB_VERSION "\n\n"
                                "Capture images with the cameras and process it\n"
                                "Usage: silvver_cameras [OPTIONS]...\n\n"
@@ -121,11 +120,11 @@ int main(int argc, char **argv)
   }
   else if(vm.count("version"))
   {
-    std::cout << "silvver_cameras " VERSION << std::endl;
+    std::cout << "silvver_cameras " SILVVER_LIB_VERSION << std::endl;
   }
   else
   {
-    std::cout << "silvver_cameras " VERSION ":\n\n"
+    std::cout << "silvver_cameras " SILVVER_LIB_VERSION ":\n\n"
               << "Compiled with boost version " << BOOST_LIB_VERSION << '\n'
               << "Capture images with the cameras and process it\n"
               << "Press [enter] key to quit\n\n"

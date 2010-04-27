@@ -32,7 +32,8 @@ ArtkpCamera::ArtkpCamera(const scene::Camera& cameraConfig,
   ,threshold(targets.threshold)
   ,logger()
   ,tracker(new ARToolKitPlus::TrackerSingleMarkerImpl<16,16,64,50,50>
-           (this->currentFrame.size().width, this->currentFrame.size().height))
+           (ArtkpCamera::getResolution(cameraConfig)[0],
+            ArtkpCamera::getResolution(cameraConfig)[1]))
   ,runThread()
 {
   const scene::Hardware hardwareConfig =
@@ -43,8 +44,8 @@ ArtkpCamera::ArtkpCamera(const scene::Camera& cameraConfig,
   std::ofstream tmpConfig(camConfigFileName.c_str());
   tmpConfig.precision(10);
   tmpConfig << "ARToolKitPlus_CamCal_Rev02" << "\n"
-            << this->currentFrame.size().width << " "
-            << this->currentFrame.size().height << " "
+            << this->currentFrame.image.size().width << " "
+            << this->currentFrame.image.size().height << " "
             << hardwareConfig.principalPoint.at(0) << " "
             << hardwareConfig.principalPoint.at(1) << " "
             << hardwareConfig.focalLength.at(0) << " "
@@ -99,6 +100,12 @@ ArtkpCamera::~ArtkpCamera()
   }
 }
 
+boost::array<unsigned, 2>
+ArtkpCamera::getResolution(const scene::Camera& cameraConfig)
+{
+  return boost::apply_visitor(scene::GetHardware(), cameraConfig.hardware).resolution;
+}
+
 void
 ArtkpCamera::run()
 {
@@ -136,7 +143,7 @@ ArtkpCamera::doWork()
 
     nMarkers = 0;
 
-    if (this->tracker->arDetectMarker((ARToolKitPlus::ARUint8*)this->currentFrame.data(),
+    if (this->tracker->arDetectMarker((ARToolKitPlus::ARUint8*)this->currentFrame.image.data(),
                                       this->threshold,
                                       &markerInfo,
                                       &nMarkers)

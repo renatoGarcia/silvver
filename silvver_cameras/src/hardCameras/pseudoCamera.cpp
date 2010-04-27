@@ -15,6 +15,8 @@
 
 #include "pseudoCamera.hpp"
 
+#include <boost/array.hpp>
+
 #include "../exceptions.hpp"
 #include "../frame.hpp"
 #include "../log.hpp"
@@ -42,13 +44,8 @@ PseudoCamera::~PseudoCamera()
 void
 PseudoCamera::doWork()
 {
-  int frameIdx = 0;
-
-  boost::shared_ptr<Frame> frameBuffer[2];
-  for (int i = 0; i < 2; ++i)
-  {
-    frameBuffer[i].reset(new Frame());
-  }
+  boost::array<Frame, 2> frameBuffer;
+  int index = 0;
 
   std::vector<std::string>::const_iterator itImagesPath;
   for (itImagesPath = this->imagesPath.begin();
@@ -57,14 +54,7 @@ PseudoCamera::doWork()
   {
     boost::this_thread::interruption_point();
 
-    try
-    {
-      frameBuffer[frameIdx]->loadImage(*itImagesPath, CV_LOAD_IMAGE_COLOR);
-      updateCurrentFrame(frameBuffer[frameIdx]);
-      frameIdx = (frameIdx+1) % 2;
-      boost::this_thread::sleep(this->delay);
-    }
-    catch (load_file_error& e)
+    if (!frameBuffer[index].image.loadImage(*itImagesPath,CV_LOAD_IMAGE_COLOR))
     {
       message(LogLevel::WARN)
         << ts_output::lock
@@ -72,6 +62,9 @@ PseudoCamera::doWork()
         << ts_output::unlock;
       continue;
     }
+    updateCurrentFrame(frameBuffer[index]);
+    index = (index+1) % 2;
+    boost::this_thread::sleep(this->delay);
   }
 
   message(LogLevel::INFO)

@@ -15,11 +15,11 @@
 
 #include "v4l2.hpp"
 
+#include <boost/array.hpp>
 #include <boost/assign/list_of.hpp>
 #include <boost/assign/std/vector.hpp>
 #include <boost/foreach.hpp>
 #include <boost/lexical_cast.hpp>
-#include <boost/shared_ptr.hpp>
 #include <cstring>
 
 #include <fcntl.h>
@@ -425,11 +425,10 @@ V4L2::doWork()
   buf.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
   buf.memory = V4L2_MEMORY_MMAP;
 
-  boost::shared_ptr<Frame> frameBuffer[2];
-  int depth = IPL_DEPTH_8U;
-  frameBuffer[0].reset(new Frame(this->frameSize, depth, 3));
-  frameBuffer[1].reset(new Frame(this->frameSize, depth, 3));
-  int frameIdx = 0;
+  boost::array<Frame, 2> frameBuffer;
+  frameBuffer[0].image = IplImageWrapper(this->frameSize, this->iplDepth, 3);
+  frameBuffer[1].image = IplImageWrapper(this->frameSize, this->iplDepth, 3);
+  int index = 0;
 
   while (true)
   {
@@ -444,12 +443,12 @@ V4L2::doWork()
         << ts_output::unlock;
     }
 
-    frameBuffer[frameIdx]->timestamp = buf.timestamp.tv_sec * 1000000 +
-                                       buf.timestamp.tv_usec;
+    frameBuffer[index].timestamp = buf.timestamp.tv_sec * 1000000 +
+                                   buf.timestamp.tv_usec;
     this->colorConverter((uint8_t*)buffers[buf.index].start,
-                         *frameBuffer[frameIdx]);
+                         frameBuffer[index].image);
 
-    updateCurrentFrame(frameBuffer[frameIdx]);
+    updateCurrentFrame(frameBuffer[index]);
 
     if (ioctl(this->cameraFd, VIDIOC_QBUF, &buf))
     {
@@ -460,6 +459,6 @@ V4L2::doWork()
         << ts_output::unlock;
     }
 
-    frameIdx = (frameIdx+1) % 2;
+    index = (index+1) % 2;
   }
 }

@@ -15,11 +15,11 @@
 
 #include "dc1394_1x.hpp"
 
+#include <boost/array.hpp>
 #include <boost/assign/list_of.hpp>
 #include <boost/assign/std/vector.hpp>
 #include <boost/foreach.hpp>
 #include <boost/lexical_cast.hpp>
-#include <boost/shared_ptr.hpp>
 #include <boost/tuple/tuple.hpp>
 #include <cstddef>
 #include <stdint.h>
@@ -698,11 +698,11 @@ DC1394::setFeatures(const scene::DC1394& config, nodeid_t cameraNode)
 void
 DC1394::doWork()
 {
-  boost::shared_ptr<IplImageWrapper> frameBuffer[2];
+  boost::array<Frame, 2> frameBuffer;
   int frameIdx = 0;
 
-  frameBuffer[0].reset(new IplImageWrapper(this->frameSize,this->iplDepth,3));
-  frameBuffer[1].reset(new IplImageWrapper(this->frameSize,this->iplDepth,3));
+  frameBuffer[0].image = IplImageWrapper(this->frameSize, this->iplDepth, 3);
+  frameBuffer[1].image = IplImageWrapper(this->frameSize, this->iplDepth, 3);
 
   while (true)
   {
@@ -722,7 +722,7 @@ DC1394::doWork()
 
     frameBuffer[frameIdx]->timestamp = TODO;
     this->colorConverter((uint8_t*)this->dc1394Camera.capture_buffer,
-                         *frameBuffer[frameIdx]);
+                         frameBuffer[frameIdx].image);
 
     dc1394_dma_done_with_buffer(&(this->dc1394Camera));
 
