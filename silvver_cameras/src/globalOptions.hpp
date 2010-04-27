@@ -22,6 +22,8 @@ namespace globalOptions
     std::string serverIP;
     int receptionistPort;
 
+    bool sendImages;
+
     bool showImages;
     bool saveDistortedImages;
     bool saveUndistortedImages;

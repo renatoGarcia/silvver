@@ -16,6 +16,7 @@
 #ifndef _HARDCAMERA_HPP_
 #define _HARDCAMERA_HPP_
 
+#include <boost/array.hpp>
 #include <boost/format.hpp>
 #include <boost/noncopyable.hpp>
 #include <boost/shared_ptr.hpp>
@@ -44,7 +45,7 @@ public:
 
   virtual ~HardCamera();
 
-  Frame::IplParameters getImageParameters() const;
+  // Frame::IplParameters getImageParameters() const;
 
   void getDistortedFrame(Frame& image);
 
@@ -59,7 +60,7 @@ protected:
   HardCamera(const scene::Hardware& config, int iplDepth);
 
   /// This method must be called by derived classes when it read a new frame
-  void updateCurrentFrame(boost::shared_ptr<Frame> frame);
+  void updateCurrentFrame(Frame& frame);
 
   /// Frame size measures in pixels.
   const unsigned framePixels;
@@ -74,18 +75,18 @@ private:
 
   unsigned getBitsPerPixel(int iplDepth) const;
 
-  boost::shared_ptr<Frame> distortedFrame;
-  boost::shared_ptr<Frame> undistortedFrame;
+  Frame* distortedFrame;
+  Frame* undistortedFrame;
 
-  boost::shared_ptr<Frame> undistortedFrameBuffer[2];
+  boost::array<Frame, 2> undistortedFrameBuffer;
 
   /// Mutex to control the read/write operations in distortedFrame and
   /// undistortedFrame.
   boost::shared_mutex framesAccessMutex;
 
   /// Maps to distort captured images
-  Frame mapx;
-  Frame mapy;
+  IplImageWrapper mapx;
+  IplImageWrapper mapy;
 
   const bool showImages;
   const std::string windowName;

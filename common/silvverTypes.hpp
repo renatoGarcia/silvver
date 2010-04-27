@@ -22,10 +22,14 @@
 #define _SILVVER_TYPES_HPP_
 
 #include <boost/array.hpp>
+#include <boost/shared_ptr.hpp>
 #include <boost/tuple/tuple.hpp>
 #include <cmath>
+#include <cstddef>
 #include <stdint.h>
 #include <vector>
+
+#include <opencv/cv.h>
 
 namespace silvver
 {
@@ -181,19 +185,23 @@ namespace silvver
   {
     std::string abstractCameraUid;
     uint64_t timestamp;
-
+    IplImage* const image;
     std::vector<Identity<TargetType> > localizations;
 
     CameraReading()
       :abstractCameraUid()
       ,timestamp(0)
+      ,image(NULL)
       ,localizations()
     {}
 
-    CameraReading(std::string abstractCameraUid, uint64_t timestamp,
-                  std::vector<Identity<TargetType> > localizations)
+    CameraReading(const std::string& abstractCameraUid,
+                  uint64_t timestamp,
+                  IplImage* const image,
+                  const std::vector<Identity<TargetType> >& localizations)
       :abstractCameraUid(abstractCameraUid)
       ,timestamp(timestamp)
+      ,image(image)
       ,localizations(localizations)
     {}
   };

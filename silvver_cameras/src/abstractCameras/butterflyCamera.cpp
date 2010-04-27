@@ -20,6 +20,8 @@
 
 #include <opencv/cv.h>
 
+#include "../exceptions.hpp"
+
 ButterflyCamera::ButterflyCamera(const scene::Camera& cameraConfig,
                                  const scene::ButterflyTargets& confButterflies)
   :AbstractCamera(cameraConfig, confButterflies.uidPrefix, procOpt::Marker())
@@ -105,7 +107,7 @@ ButterflyCamera::doWork()
     this->updateFrame();
 
     foundButterflies = find_butterflies(this->libButterfly,
-                                        this->currentFrame,
+                                        this->currentFrame.image,
                                         &butterflies.front());
 
     for (int k = 0; k < foundButterflies; ++k)

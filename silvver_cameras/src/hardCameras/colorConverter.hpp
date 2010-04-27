@@ -18,7 +18,7 @@
 
 #include <stdint.h>
 
-#include "../frame.hpp"
+#include "../iplImageWrapper.hpp"
 #include "boost/enum.hpp"
 
 #define restrict __restrict
@@ -62,7 +62,7 @@ public:
   /// Converts the color space of input image to BGR.
   /// @param input Pointer to input image buffer.
   /// @param output Frame where put the converted image.
-  void operator()(const uint8_t* input, Frame& output) const;
+  void operator()(const uint8_t* input, IplImageWrapper& output) const;
 
 private:
 
@@ -107,7 +107,7 @@ private:
 
 inline void
 ColorConverter::operator()(const uint8_t* input,
-                           Frame& output) const
+                           IplImageWrapper& output) const
 {
   (this->*convertFunc)(input, (uint8_t*) output.data());
   output.convertColor(CV_RGB2BGR);

@@ -25,10 +25,9 @@
 #include "globalOptions.hpp"
 #include "sceneMounter.hpp"
 #include "log.hpp"
+#include "version.hpp"
 
 namespace po = boost::program_options;
-
-#define VERSION "0.5.0"
 
 globalOptions::Options global_options;
 
@@ -73,7 +72,7 @@ int main(int argc, char **argv)
   std::string luaFile;
   LogLevel verbosity;
 
-  po::options_description desc("silvver_cameras " VERSION " \n\n"
+  po::options_description desc("silvver_cameras " SILVVER_LIB_VERSION " \n\n"
                                "Compiled with boost version " BOOST_LIB_VERSION "\n\n"
                                "Capture images with the cameras and process it\n"
                                "Usage: silvver_cameras [OPTIONS]...\n\n"
@@ -90,6 +89,7 @@ int main(int argc, char **argv)
     ("scene-config,c",
      po::value<std::string>(&luaFile)->default_value("scene.lua"),
      "Lua file with the scene configuration")
+    ("send-images,i", "Send the captured images to abstract camera clients")
     ("verbosity,v",
      po::value<LogLevel>(&verbosity)->default_value(LogLevel::WARN),
      std::string("Minimum level of messages. ["  +
@@ -121,17 +121,18 @@ int main(int argc, char **argv)
   }
   else if(vm.count("version"))
   {
-    std::cout << "silvver_cameras " VERSION << std::endl;
+    std::cout << "silvver_cameras " SILVVER_LIB_VERSION << std::endl;
   }
   else
   {
-    std::cout << "silvver_cameras " VERSION ":\n\n"
+    std::cout << "silvver_cameras " SILVVER_LIB_VERSION ":\n\n"
               << "Compiled with boost version " << BOOST_LIB_VERSION << '\n'
               << "Capture images with the cameras and process it\n"
               << "Press [enter] key to quit\n\n"
               << "----------------------------------------------\n"
               << std::endl;
 
+    global_options.sendImages = vm.count("send-images");
     global_options.showImages = vm.count("show");
     global_options.saveDistortedImages = vm.count("save-distorted");
     global_options.saveUndistortedImages = vm.count("save-undistorted");

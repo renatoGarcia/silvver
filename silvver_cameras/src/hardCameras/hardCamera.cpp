@@ -16,6 +16,7 @@
 #include "hardCamera.hpp"
 
 #include <boost/filesystem.hpp>
+#include <cstddef>
 #include <stdint.h>
 
 #include <opencv/highgui.h>
@@ -31,8 +32,9 @@ HardCamera::HardCamera(const scene::Hardware& config, int iplDepth)
   ,framePixels(config.resolution.at(0) * config.resolution.at(1))
   ,frameSize(cvSize(config.resolution.at(0), config.resolution.at(1)))
   ,iplDepth(iplDepth)
-  ,distortedFrame()
-  ,undistortedFrame()
+  ,distortedFrame(NULL)
+  ,undistortedFrame(NULL)
+  ,undistortedFrameBuffer()
   ,framesAccessMutex()
   ,mapx(this->frameSize, IPL_DEPTH_32F, 1)
   ,mapy(this->frameSize, IPL_DEPTH_32F, 1)
@@ -45,10 +47,10 @@ HardCamera::HardCamera(const scene::Hardware& config, int iplDepth)
   ,saveImageFormat(config.saveImageFormat)
   ,imagesCounter(0)
 {
-  undistortedFrameBuffer[0].reset(new Frame(this->frameSize,
-                                            this->iplDepth, 3));
-  undistortedFrameBuffer[1].reset(new Frame(this->frameSize,
-                                            this->iplDepth, 3));
+  undistortedFrameBuffer[0].image = IplImageWrapper(this->frameSize,
+                                                    this->iplDepth, 3);
+  undistortedFrameBuffer[1].image = IplImageWrapper(this->frameSize,
+                                                    this->iplDepth, 3);
 
   CvMat* intrinsic = cvCreateMat(3, 3, CV_32FC1);
   // Opencv 1.0.0 can handle only 4x1 distortion matrix
@@ -103,24 +105,24 @@ HardCamera::~HardCamera()
   }
 }
 
-Frame::IplParameters
-HardCamera::getImageParameters() const
-{
-  return Frame::IplParameters(this->frameSize, this->iplDepth, 3);
-}
+// Frame::IplParameters
+// HardCamera::getImageParameters() const
+// {
+//   return Frame::IplParameters(this->frameSize, this->iplDepth, 3);
+// }
 
 void
-HardCamera::updateCurrentFrame(boost::shared_ptr<Frame> frame)
+HardCamera::updateCurrentFrame(Frame& frame)
 {
   static int undistortedIdx = 0;
 
-  cvRemap(*frame, *this->undistortedFrameBuffer[undistortedIdx],
+  cvRemap(frame.image, this->undistortedFrameBuffer[undistortedIdx].image,
           this->mapx, this->mapy,
           CV_INTER_LINEAR+CV_WARP_FILL_OUTLIERS, cvScalarAll(0));
 
   this->framesAccessMutex.lock();
-  this->distortedFrame = frame;
-  this->undistortedFrame = this->undistortedFrameBuffer[undistortedIdx];
+  this->distortedFrame = &frame;
+  this->undistortedFrame = &this->undistortedFrameBuffer[undistortedIdx];
   this->framesAccessMutex.unlock();
 
   // Notify the classes observing this camera.
@@ -130,19 +132,21 @@ HardCamera::updateCurrentFrame(boost::shared_ptr<Frame> frame)
   {
     this->saveImageFormat % this->silvverUid % this->imagesCounter
                           % "d";
-    cvSaveImage(this->saveImageFormat.str().c_str(), *this->distortedFrame);
+    cvSaveImage(this->saveImageFormat.str().c_str(),
+                this->distortedFrame->image);
   }
 
   if (this->saveUndistortedImages)
   {
     this->saveImageFormat % this->silvverUid % this->imagesCounter
                           % "u";
-    cvSaveImage(this->saveImageFormat.str().c_str(), *this->undistortedFrame);
+    cvSaveImage(this->saveImageFormat.str().c_str(),
+                this->undistortedFrame->image);
   }
 
   if (this->showImages)
   {
-    cvShowImage(this->windowName.c_str(), *this->undistortedFrame);
+    cvShowImage(this->windowName.c_str(), this->undistortedFrame->image);
     cvWaitKey(5);
   }
 

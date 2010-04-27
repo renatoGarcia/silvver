@@ -15,8 +15,6 @@
 
 #include "abstractCamera.hpp"
 
-#include <cstddef>
-
 #include "../globalOptions.hpp"
 #include "../hardCameraFactory.hpp"
 
@@ -26,7 +24,7 @@ AbstractCamera::AbstractCamera(const scene::Camera& cameraConfig,
                                const std::string& prefixUid,
                                const procOpt::AnyProcOpt& procOptions)
   :subjectHardCamera(HardCameraFactory::create(cameraConfig.hardware))
-  ,currentFrame(this->subjectHardCamera->getImageParameters())
+  ,currentFrame()
   ,abstractCameraUid(prefixUid + subjectHardCamera->silvverUid)
   ,serverConnection(global_options.serverIP, global_options.receptionistPort,
                     this->abstractCameraUid)
@@ -126,4 +124,11 @@ AbstractCamera::toWorld(silvver::Pose &pose) const
     this->rot[6] * tempPose.x +
     this->rot[7] * tempPose.y +
     this->rot[8] * tempPose.z;
+}
+
+IplImageWrapper
+AbstractCamera::imageToSend()
+{
+  return
+    global_options.sendImages ? this->currentFrame.image : IplImageWrapper();
 }

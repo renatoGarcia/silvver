@@ -71,6 +71,10 @@ protected:
 
 private:
 
+  /** Return current image if send image option is enabled.
+   * @return IplImageWrapper with current image or a NULL image. */
+  IplImageWrapper imageToSend();
+
   /// Connection with the silvver-server used to send the target localizations.
   Connection serverConnection;
 
@@ -95,9 +99,12 @@ template<class TargetType>
 void
 AbstractCamera::sendLocalizations(const std::vector<silvver::Identity<TargetType> >& localizations)
 {
+  IplImageWrapper sendImg = imageToSend();
+
   silvver::CameraReading<TargetType>
     cameraReading(this->abstractCameraUid,
                   this->currentFrame.timestamp,
+                  sendImg,
                   localizations);
 
   this->serverConnection.send(cameraReading);

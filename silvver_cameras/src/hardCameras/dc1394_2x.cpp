@@ -15,11 +15,11 @@
 
 #include "dc1394_2x.hpp"
 
+#include <boost/array.hpp>
 #include <boost/assign/std/vector.hpp>
 #include <boost/assign/list_of.hpp>
 #include <boost/foreach.hpp>
 #include <boost/lexical_cast.hpp>
-#include <boost/shared_ptr.hpp>
 #include <boost/tuple/tuple.hpp>
 #include <map>
 #include <stdint.h>
@@ -699,11 +699,11 @@ void
 DC1394::doWork()
 {
   dc1394video_frame_t* videoFrame = NULL;
-  boost::shared_ptr<Frame> frameBuffer[2];
-  int frameIdx = 0;
+  boost::array<Frame, 2> frameBuffer;
+  int index = 0;
 
-  frameBuffer[0].reset(new Frame(this->frameSize,this->iplDepth,3));
-  frameBuffer[1].reset(new Frame(this->frameSize,this->iplDepth,3));
+  frameBuffer[0].image = IplImageWrapper(this->frameSize, this->iplDepth, 3);
+  frameBuffer[1].image = IplImageWrapper(this->frameSize, this->iplDepth, 3);
 
   while (true)
   {
@@ -720,10 +720,11 @@ DC1394::doWork()
         << ts_output::unlock;
     }
 
-    frameBuffer[frameIdx]->timestamp = videoFrame->timestamp;
-    this->colorConverter((uint8_t*)videoFrame->image, *frameBuffer[frameIdx]);
+    frameBuffer[index].timestamp = videoFrame->timestamp;
+    this->colorConverter((uint8_t*)videoFrame->image,
+                         frameBuffer[index].image);
 
-    updateCurrentFrame(frameBuffer[frameIdx]);
+    updateCurrentFrame(frameBuffer[index]);
 
     // Release the buffer
     if (dc1394_capture_enqueue(this->camera, videoFrame))
@@ -735,6 +736,6 @@ DC1394::doWork()
         << ts_output::unlock;
     }
 
-    frameIdx = (frameIdx+1) % 2;
+    index = (index+1) % 2;
   }
 }

@@ -44,6 +44,9 @@ public:
   virtual void stop();
 
 private:
+  /// Return the image resolution from scene::Camera struct.
+  static boost::array<unsigned, 2>
+  getResolution(const scene::Camera& cameraConfig);
 
   /// It's the method which will be called when a new thread was created, and
   /// will make all camera work.
