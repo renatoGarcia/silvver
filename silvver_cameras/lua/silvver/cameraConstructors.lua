@@ -133,6 +133,7 @@ function V4l2(parameters)
     camera.save_image_format = __getOptional(parameters.save_image_format,
                                              "%1%_%2%_%3%.jpg")
     camera.uid_suffix = __getOptionalUid(parameters.uid_suffix)
+    camera.uid = parameters.uid
 
     camera.focal_length = parameters.focal_length
     camera.principal_point = parameters.principal_point

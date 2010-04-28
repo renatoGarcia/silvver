@@ -21,6 +21,8 @@
 #include <boost/bind.hpp>
 #include <boost/foreach.hpp>
 
+#include "log.hpp"
+
 template <typename Type>
 Input<Type>::Input(boost::shared_ptr<IoConnection> connection,
                    boost::shared_ptr< ProcessorInterface<Type> > processor)
@@ -45,6 +47,13 @@ template <typename Type>
 void
 Input<Type>::handleReceive()
 {
+  message(MessageLogLevel::DEBUG)
+    << ts_output::lock
+    << "Received " << this->currentInput.localizations.size()
+    << " targets from camera "
+    << this->currentInput.abstractCameraUid << std::endl
+    << ts_output::unlock;
+
   std::vector<boost::shared_ptr<IoConnection> > vecConnections;
   boost::shared_ptr<IoConnection> connectionPtr;
 

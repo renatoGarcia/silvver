@@ -329,7 +329,7 @@ CfParser::readV4l2Config(lua_State* L)
 {
   scene::V4l2 v4l2;
 
-  readValue(v4l2.uid, L, "identifier");
+  readValue(v4l2.uid, L, "uid");
   readValue(v4l2.colorMode, L, "color_mode");
 
   readValue(v4l2.brightness, L, "brightness");

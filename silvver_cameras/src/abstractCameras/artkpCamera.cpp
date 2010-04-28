@@ -32,8 +32,8 @@ ArtkpCamera::ArtkpCamera(const scene::Camera& cameraConfig,
   ,threshold(targets.threshold)
   ,logger()
   ,tracker(new ARToolKitPlus::TrackerSingleMarkerImpl<16,16,64,50,50>
-           (ArtkpCamera::getResolution(cameraConfig)[0],
-            ArtkpCamera::getResolution(cameraConfig)[1]))
+           (ArtkpCamera::getResolution(cameraConfig).at(0),
+            ArtkpCamera::getResolution(cameraConfig).at(1)))
   ,runThread()
 {
   const scene::Hardware hardwareConfig =
@@ -44,8 +44,8 @@ ArtkpCamera::ArtkpCamera(const scene::Camera& cameraConfig,
   std::ofstream tmpConfig(camConfigFileName.c_str());
   tmpConfig.precision(10);
   tmpConfig << "ARToolKitPlus_CamCal_Rev02" << "\n"
-            << this->currentFrame.image.size().width << " "
-            << this->currentFrame.image.size().height << " "
+            << ArtkpCamera::getResolution(cameraConfig).at(0) << " "
+            << ArtkpCamera::getResolution(cameraConfig).at(1) << " "
             << hardwareConfig.principalPoint.at(0) << " "
             << hardwareConfig.principalPoint.at(1) << " "
             << hardwareConfig.focalLength.at(0) << " "
@@ -154,7 +154,7 @@ ArtkpCamera::doWork()
         << "Error in arDetectMarker message." << std::endl
         << ts_output::unlock;
     }
-    for (int marker = 0; marker < nMarkers; marker++)
+    for (int marker = 0; marker < nMarkers; ++marker)
     {
       // If the marker was not identified or its confidence is lower than 50%
       if ((markerInfo[marker].id < 0) || (markerInfo[marker].cf<0.5))
@@ -193,6 +193,12 @@ ArtkpCamera::doWork()
 
       poses.push_back(pose);
     }
+
+    message(LogLevel::DEBUG)
+      << ts_output::lock
+      << "ARTKP camera " << abstractCameraUid
+      << " found " << poses.size() << " markers." << std::endl
+      << ts_output::unlock;
 
     sendLocalizations(poses);
   }
