@@ -38,8 +38,8 @@ function PseudoCamera(parameters)
     camera.uid_suffix = __getOptionalUid(parameters.uid_suffix)
 
     camera.save_image_format = __getOptional(parameters.save_image_format,
-                                             "%1%_%2%_%3%.jpg")
-    camera.images_path = parameters.images_path
+                                             os.date("%Y%m%d%H%M%S")..'/%1%_%|2$08|_%3%.png')
+     camera.images_path = parameters.images_path
 
     camera.focal_length = parameters.focal_length
     camera.principal_point = parameters.principal_point
@@ -65,7 +65,7 @@ function Dc1394(parameters)
     camera.uid_suffix = __getOptionalUid(parameters.uid_suffix)
 
     camera.save_image_format = __getOptional(parameters.save_image_format,
-                                             "%1%_%2%_%3%.jpg")
+                                             os.date("%Y%m%d%H%M%S")..'/%1%_%|2$08|_%3%.png')
     camera.uid = parameters.uid
 
     camera.focal_length = parameters.focal_length
@@ -131,7 +131,7 @@ function V4l2(parameters)
     camera.__driver = 'v4l2'
 
     camera.save_image_format = __getOptional(parameters.save_image_format,
-                                             "%1%_%2%_%3%.jpg")
+                                             os.date("%Y%m%d%H%M%S")..'/%1%_%|2$08|_%3%.png')
     camera.uid_suffix = __getOptionalUid(parameters.uid_suffix)
     camera.uid = parameters.uid
 
@@ -180,7 +180,7 @@ function Dragonfly(parameters)
     camera.uid_suffix = __getOptionalUid(parameters.uid_suffix)
 
     camera.save_image_format = __getOptional(parameters.save_image_format,
-                                             "%1%_%2%_%3%.jpg")
+                                             os.date("%Y%m%d%H%M%S")..'/%1%_%|2$08|_%3%.png')
     camera.uid = parameters.uid
 
     camera.focal_length = parameters.focal_length

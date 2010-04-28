@@ -12,6 +12,11 @@ INSTALL(DIRECTORY lua/
         PATTERN "*~" EXCLUDE
         PATTERN ".*" EXCLUDE)
 
+INSTALL(DIRECTORY doc/
+        DESTINATION share/doc/silvver/scenes/
+        PATTERN "*~" EXCLUDE
+        PATTERN ".*" EXCLUDE)
+
 FIND_PACKAGE(PyOpenCV)
 
 IF(OpenCV_PYTHON_VERSION EQUAL 1)
