@@ -16,19 +16,31 @@
 #include "pseudoCamera.hpp"
 
 #include <boost/array.hpp>
+#include <boost/filesystem.hpp>
 
 #include "../exceptions.hpp"
 #include "../frame.hpp"
 #include "../log.hpp"
 
 namespace bpt = boost::posix_time;
+namespace bfs = boost::filesystem;
 
 PseudoCamera::PseudoCamera(const scene::PseudoCamera& config)
   :HardCamera(config, IPL_DEPTH_8U)
   ,imagesPath(config.imagesPath)
+  ,timestampReader()
   ,delay((static_cast<long>((1.0 / config.frameRate) * 1.0e3)))
   ,grabFrameThread()
 {
+  if (!this->imagesPath.empty()) // If there is a timestamp file load it
+  {
+    bfs::path timestampFile(imagesPath.at(0));
+    timestampFile = timestampFile.parent_path() / "/timestamps";
+    if (bfs::exists(timestampFile))
+    {
+      this->timestampReader = TSMapReader(timestampFile.string());
+    }
+  }
   this->grabFrameThread.reset(new boost::thread(&PseudoCamera::doWork, this));
 }
 
@@ -46,6 +58,7 @@ PseudoCamera::doWork()
 {
   boost::array<Frame, 2> frameBuffer;
   int index = 0;
+  unsigned imagesCounter = 0;
 
   std::vector<std::string>::const_iterator itImagesPath;
   for (itImagesPath = this->imagesPath.begin();
@@ -62,7 +75,31 @@ PseudoCamera::doWork()
         << ts_output::unlock;
       continue;
     }
+
+    if (this->timestampReader)
+    {
+      try
+      {
+        bfs::path imgPath(*itImagesPath);
+        frameBuffer[index].timestamp =
+          this->timestampReader->read(imgPath.filename());
+      }
+      catch (const file_parsing_error& e)
+      {
+        message(LogLevel::WARN)
+          << ts_output::lock
+          << errorsInfo2string(e)
+          << ts_output::unlock;
+        continue;
+      }
+    }
+    else
+    {
+      frameBuffer[index].timestamp = imagesCounter;
+      ++imagesCounter;
+    }
     updateCurrentFrame(frameBuffer[index]);
+
     index = (index+1) % 2;
     boost::this_thread::sleep(this->delay);
   }

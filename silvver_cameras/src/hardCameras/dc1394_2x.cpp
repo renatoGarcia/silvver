@@ -45,7 +45,7 @@ DC1394::DC1394(const scene::DC1394& config)
   {
     throw open_camera_error()
       << info_what("Unable to create a libdc1394 context")
-      << info_cameraUid(this->uid);
+      << info_cameraUid(this->silvverUid);
   }
 
   this->camera = dc1394_camera_new(this->context,
@@ -54,21 +54,21 @@ DC1394::DC1394(const scene::DC1394& config)
   {
     throw open_camera_error()
       << info_what("Don't found specified camera")
-      << info_cameraUid(this->uid);
+      << info_cameraUid(this->silvverUid);
   }
 
   if (dc1394_video_set_iso_speed(this->camera, DC1394_ISO_SPEED_400))
   {
     throw open_camera_error()
       << info_what("Could not set 400Mbps iso speed")
-      << info_cameraUid(this->uid);
+      << info_cameraUid(this->silvverUid);
   }
 
   if (dc1394_video_set_mode(camera, this->videoMode))
   {
     throw open_camera_error()
       << info_what("Could not set video mode")
-      << info_cameraUid(this->uid);
+      << info_cameraUid(this->silvverUid);
   }
 
   if (dc1394_video_set_framerate(camera,
@@ -76,7 +76,7 @@ DC1394::DC1394(const scene::DC1394& config)
   {
     throw open_camera_error()
       << info_what("Could not set framerate")
-      << info_cameraUid(this->uid);
+      << info_cameraUid(this->silvverUid);
   }
 
   if (dc1394_capture_setup(this->camera, DC1394::N_BUFFERS,
@@ -84,7 +84,7 @@ DC1394::DC1394(const scene::DC1394& config)
   {
     throw open_camera_error()
       << info_what("Could not setup camera. Make sure that the resolution and framerate are supported by your camera")
-      << info_cameraUid(this->uid);
+      << info_cameraUid(this->silvverUid);
   }
 
   try
@@ -93,14 +93,14 @@ DC1394::DC1394(const scene::DC1394& config)
   }
   catch(silvver_cameras_exception& e)
   {
-    throw e << info_cameraUid(this->uid);
+    throw e << info_cameraUid(this->silvverUid);
   }
 
   if (dc1394_video_set_transmission(this->camera, DC1394_ON))
   {
     throw open_camera_error()
       << info_what("Could not start camera iso transmission")
-      << info_cameraUid(this->uid);
+      << info_cameraUid(this->silvverUid);
   }
   this->grabFrameThread.reset(new boost::thread(&DC1394::doWork, this));
 }

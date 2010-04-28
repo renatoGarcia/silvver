@@ -25,5 +25,6 @@ namespace globalOptions
     bool showImages;
     bool saveDistortedImages;
     bool saveUndistortedImages;
+    bool saveTimestamp;
   };
 }
