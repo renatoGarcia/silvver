@@ -699,7 +699,7 @@ void
 DC1394::doWork()
 {
   boost::array<Frame, 2> frameBuffer;
-  int frameIdx = 0;
+  int index = 0;
 
   frameBuffer[0].image = IplImageWrapper(this->frameSize, this->iplDepth, 3);
   frameBuffer[1].image = IplImageWrapper(this->frameSize, this->iplDepth, 3);
@@ -720,14 +720,15 @@ DC1394::doWork()
       continue;
     }
 
-    frameBuffer[frameIdx]->timestamp = TODO;
+    frameBuffer[index].timestamp = this->dc1394Camera.filltime.tv_sec*1000000+
+                                   this->dc1394Camera.filltime.tv_usec;
     this->colorConverter((uint8_t*)this->dc1394Camera.capture_buffer,
-                         frameBuffer[frameIdx].image);
+                         frameBuffer[index].image);
 
     dc1394_dma_done_with_buffer(&(this->dc1394Camera));
 
-    updateCurrentFrame(frameBuffer[frameIdx]);
+    updateCurrentFrame(frameBuffer[index]);
 
-    frameIdx = (frameIdx+1) % 2;
+    index = (index+1) % 2;
   }
 }
