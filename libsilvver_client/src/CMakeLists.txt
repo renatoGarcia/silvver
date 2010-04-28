@@ -14,4 +14,4 @@ INSTALL(FILES target.hpp
               ../../common/serializations.hpp
         DESTINATION include/silvver)
 
-SET_TARGET_PROPERTIES(silvver_client PROPERTIES VERSION 0.5.0 SOVERSION 0)
+SET_TARGET_PROPERTIES(silvver_client PROPERTIES VERSION 0.6.0 SOVERSION 0)

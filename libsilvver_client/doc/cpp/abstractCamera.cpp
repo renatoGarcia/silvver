@@ -9,14 +9,23 @@
 using namespace silvver;
 using namespace std;
 
-void printPose(CameraReading<Position> reading)
+void printPose(CameraReading<Pose> reading)
 {
-  cout << reading.localizations.at(0) << endl;
+  std::vector<Identity<Pose> >::iterator itPose;
+
+  cout << "Timestamp: " << reading.timestamp << endl;
+  for (itPose = reading.localizations.begin();
+       itPose < reading.localizations.end();
+       ++itPose)
+  {
+    cout << *itPose << endl;
+  }
+  cout << endl;
 }
 
 int main(int argc, char *argv[])
 {
-  std::string id = "1";
+  std::string id = "target1cam1";
   std::string ip("127.0.0.1");
   unsigned receptionistPort = 12000;
 
@@ -33,7 +42,7 @@ int main(int argc, char *argv[])
     receptionistPort = atoi(argv[3]);
   }
 
-  AbstractCamera<Position> camera(printPose, id, ip, receptionistPort);
+  AbstractCamera<Pose> camera(printPose, id, ip, receptionistPort);
 
   camera.connect();
 
