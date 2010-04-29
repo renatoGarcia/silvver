@@ -230,7 +230,7 @@ V4L2::createColorConverter(const scene::V4l2& config)
   }
   catch (silvver_cameras_exception& e)
   {
-    throw e << info_cameraUid(boost::lexical_cast<std::string>(config.uid))
+    throw e << info_cameraUid(config.uid)
             << info_colorMode(config.colorMode);
   }
 }

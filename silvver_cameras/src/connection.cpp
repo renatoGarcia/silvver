@@ -13,15 +13,17 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include "connection.hpp"
 #include "connection.ipp"
-#include <iostream>
-#include <string>
-#include <sstream>
+
 #include <boost/bind.hpp>
 #include <boost/lexical_cast.hpp>
 #include <boost/serialization/variant.hpp>
+#include <iostream>
+#include <sstream>
 #include <vector>
-#include <request.hpp>
+
+#include "request.hpp"
 
 namespace bip = boost::asio::ip;
 
@@ -36,7 +38,7 @@ Connection::runIoService()
 }
 
 Connection::Connection(const std::string& serverIp, unsigned receptionistPort,
-                       const std::string& abstractCameraUid)
+                       const silvver::AbstractCameraUid& abstractCameraUid)
   :abstractCameraUid(abstractCameraUid)
   ,receptionistSocket(Connection::ioService)
   ,receptionistEP(bip::address::from_string(serverIp), receptionistPort)

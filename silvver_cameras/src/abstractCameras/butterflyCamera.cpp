@@ -24,7 +24,7 @@
 
 ButterflyCamera::ButterflyCamera(const scene::Camera& cameraConfig,
                                  const scene::ButterflyTargets& confButterflies)
-  :AbstractCamera(cameraConfig, confButterflies.uidPrefix, procOpt::Marker())
+  :AbstractCamera(cameraConfig, confButterflies.silvverUid, procOpt::Marker())
   ,MountedTarget(confButterflies.bodyTranslation, confButterflies.bodyRotation)
   ,maxButterflies(confButterflies.maxButterflies)
   ,libButterfly(ButterflyCamera::createLibButterfly(cameraConfig,
@@ -112,7 +112,8 @@ ButterflyCamera::doWork()
 
     for (int k = 0; k < foundButterflies; ++k)
     {
-      tmpPose.uid = butterflies[k].uid;
+      tmpPose.uid = silvver::TargetUid(this->abstractCameraUid.targetSystem,
+                                       butterflies[k].uid);
       tmpPose.x = butterflies[k].x;
       tmpPose.y = butterflies[k].y;
       tmpPose.z = butterflies[k].z;

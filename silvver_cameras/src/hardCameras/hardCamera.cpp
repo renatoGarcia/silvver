@@ -29,7 +29,7 @@ namespace bfs = boost::filesystem;
 extern globalOptions::Options global_options;
 
 HardCamera::HardCamera(const scene::Hardware& config, int iplDepth)
-  :silvverUid(config.uidSuffix)
+  :silvverUid(config.silvverUid)
   ,framePixels(config.resolution.at(0) * config.resolution.at(1))
   ,frameSize(cvSize(config.resolution.at(0), config.resolution.at(1)))
   ,iplDepth(iplDepth)
@@ -40,13 +40,13 @@ HardCamera::HardCamera(const scene::Hardware& config, int iplDepth)
   ,mapx(this->frameSize, IPL_DEPTH_32F, 1)
   ,mapy(this->frameSize, IPL_DEPTH_32F, 1)
   ,showImages(global_options.showImages)
-  ,windowName("Camera_" + config.uidSuffix)
+  ,windowName("Camera_" + config.silvverUid)
   ,saveDistortedImages(global_options.saveDistortedImages &&
                        !config.saveImageFormat.empty())
   ,saveUndistortedImages(global_options.saveUndistortedImages &&
                          !config.saveImageFormat.empty())
   ,saveImageFormat(HardCamera::createFormat(config.saveImageFormat,
-                                            config.uidSuffix))
+                                            config.silvverUid))
   ,imagesCounter(0)
   ,saveTimestamp(global_options.saveTimestamp)
   ,timestampWriter()
@@ -118,7 +118,7 @@ HardCamera::~HardCamera()
 
 boost::format
 HardCamera::createFormat(const std::string& strFormat,
-                         const std::string& cameraUid)
+                         const unsigned silvverUid)
 {
   try
   {
@@ -129,7 +129,7 @@ HardCamera::createFormat(const std::string& strFormat,
     throw camera_parameter_error()
       << info_what("Syntax error on save image format string. Consult the "
                    "boost format library documentation.")
-      << info_cameraUid(cameraUid);
+      << info_cameraUid(silvverUid);
   }
 }
 

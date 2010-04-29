@@ -29,6 +29,69 @@
 
 namespace silvver
 {
+  //------------------------------ Silvver UIDs
+  struct AbstractCameraUid
+  {
+    unsigned targetSystem;
+    unsigned hardCamera;
+
+    AbstractCameraUid()
+      :targetSystem(0)
+      ,hardCamera(0)
+    {}
+
+    AbstractCameraUid(const unsigned targetSystem, const unsigned hardCamera)
+      :targetSystem(targetSystem)
+      ,hardCamera(hardCamera)
+    {}
+
+    AbstractCameraUid(const AbstractCameraUid& uid)
+      :targetSystem(uid.targetSystem)
+      ,hardCamera(uid.hardCamera)
+    {}
+  };
+
+  template <class charT, class traits>
+  inline
+  std::basic_ostream<charT,traits>&
+  operator << (std::basic_ostream<charT,traits>& strm,
+               const AbstractCameraUid& uid)
+  {
+    strm << "(" << uid.targetSystem << ", " << uid.hardCamera << ')';
+    return strm;
+  }
+
+  struct TargetUid
+  {
+    unsigned targetSystem;
+    unsigned internal;
+
+    TargetUid()
+      :targetSystem(0)
+      ,internal(0)
+    {}
+
+    TargetUid(const unsigned targetSystem, const unsigned internal)
+      :targetSystem(targetSystem)
+      ,internal(internal)
+    {}
+
+    TargetUid(const TargetUid& uid)
+      :targetSystem(uid.targetSystem)
+      ,internal(uid.internal)
+    {}
+  };
+
+  template <class charT, class traits>
+  inline
+  std::basic_ostream<charT,traits>&
+  operator << (std::basic_ostream<charT,traits>& strm,
+               const TargetUid& uid)
+  {
+    strm << "(" << uid.targetSystem << ", " << uid.internal << ')';
+    return strm;
+  }
+
   //------------------------------ Position
 
   struct Position
@@ -139,14 +202,14 @@ namespace silvver
   struct Identity : public BaseClass
   {
     /// UID of this target;
-    unsigned uid;
+    TargetUid uid;
 
     Identity()
       :BaseClass()
-      ,uid(0)
+      ,uid()
     {}
 
-    Identity(const BaseClass& base, const unsigned uid)
+    Identity(const BaseClass& base, const TargetUid& uid)
       :BaseClass(base)
       ,uid(uid)
     {}
@@ -179,20 +242,20 @@ namespace silvver
   template<class TargetType>
   struct CameraReading
   {
-    std::string abstractCameraUid;
+    AbstractCameraUid camUid;
     uint64_t timestamp;
 
     std::vector<Identity<TargetType> > localizations;
 
     CameraReading()
-      :abstractCameraUid()
+      :camUid()
       ,timestamp(0)
       ,localizations()
     {}
 
-    CameraReading(std::string abstractCameraUid, uint64_t timestamp,
+    CameraReading(const AbstractCameraUid& camUid, uint64_t timestamp,
                   std::vector<Identity<TargetType> > localizations)
-      :abstractCameraUid(abstractCameraUid)
+      :camUid(camUid)
       ,timestamp(timestamp)
       ,localizations(localizations)
     {}

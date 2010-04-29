@@ -28,6 +28,24 @@ namespace boost
   {
     template<class Archive>
     void
+    serialize(Archive& ar, silvver::AbstractCameraUid& uid,
+              const unsigned version)
+    {
+      ar & uid.targetSystem;
+      ar & uid.hardCamera;
+    }
+
+    template<class Archive>
+    void
+    serialize(Archive& ar, silvver::TargetUid& uid,
+              const unsigned version)
+    {
+      ar & uid.targetSystem;
+      ar & uid.internal;
+    }
+
+    template<class Archive>
+    void
     serialize(Archive& ar, silvver::Position& position, const unsigned version)
     {
       ar & position.x;
@@ -56,7 +74,7 @@ namespace boost
     serialize(Archive& ar, silvver::CameraReading<T>& id,
               const unsigned version)
     {
-      ar & id.abstractCameraUid;
+      ar & id.camUid;
       ar & id.timestamp;
       ar & id.localizations;
     }
