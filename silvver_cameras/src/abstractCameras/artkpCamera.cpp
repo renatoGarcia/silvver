@@ -16,6 +16,7 @@
 #include "artkpCamera.hpp"
 
 #include <boost/foreach.hpp>
+#include <boost/lexical_cast.hpp>
 #include <fstream>
 
 #include <ARToolKitPlus/TrackerSingleMarkerImpl.h>
@@ -39,7 +40,8 @@ ArtkpCamera::ArtkpCamera(const scene::Camera& cameraConfig,
   const scene::Hardware hardwareConfig =
     boost::apply_visitor(scene::GetHardware(), cameraConfig.hardware);
 
-  const std::string camConfigFileName("/tmp/artkp" + targets.silvverUid);
+  const std::string camConfigFileName("/tmp/artkp" +
+                                      boost::lexical_cast<std::string>(targets.silvverUid));
 
   std::ofstream tmpConfig(camConfigFileName.c_str());
   tmpConfig.precision(10);
