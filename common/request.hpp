@@ -36,46 +36,46 @@ struct NullRequest
 
 struct AddTargetClient
 {
-  unsigned targetId;
+  silvver::TargetUid targetUid;
   unsigned short localPort;
 
   AddTargetClient()
-    :targetId(0)
+    :targetUid()
     ,localPort(0)
   {}
 
-  AddTargetClient(unsigned targetId, unsigned short localPort)
-    :targetId(targetId)
+  AddTargetClient(silvver::TargetUid targetUid, unsigned short localPort)
+    :targetUid(targetUid)
     ,localPort(localPort)
   {}
 
   template<typename Archive>
   void serialize(Archive& ar, const unsigned)
   {
-    ar & targetId;
+    ar & targetUid;
     ar & localPort;
   }
 };
 
 struct DelTargetClient
 {
-  unsigned targetId;
+  silvver::TargetUid targetUid;
   unsigned short localPort;
 
   DelTargetClient()
-    :targetId(0)
+    :targetUid()
     ,localPort(0)
   {}
 
-  DelTargetClient(unsigned targetId, unsigned short localPort)
-    :targetId(targetId)
+  DelTargetClient(silvver::TargetUid targetUid, unsigned short localPort)
+    :targetUid(targetUid)
     ,localPort(localPort)
   {}
 
   template<typename Archive>
   void serialize(Archive& ar, const unsigned)
   {
-    ar & targetId;
+    ar & targetUid;
     ar & localPort;
   }
 };

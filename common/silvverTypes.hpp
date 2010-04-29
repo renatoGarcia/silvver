@@ -22,6 +22,7 @@
 #define _SILVVER_TYPES_HPP_
 
 #include <boost/array.hpp>
+#include <boost/operators.hpp>
 #include <boost/tuple/tuple.hpp>
 #include <cmath>
 #include <stdint.h>
@@ -31,6 +32,7 @@ namespace silvver
 {
   //------------------------------ Silvver UIDs
   struct AbstractCameraUid
+    :private boost::totally_ordered<AbstractCameraUid>
   {
     unsigned targetSystem;
     unsigned hardCamera;
@@ -49,6 +51,27 @@ namespace silvver
       :targetSystem(uid.targetSystem)
       ,hardCamera(uid.hardCamera)
     {}
+
+    bool
+    operator<(const AbstractCameraUid& uid) const
+    {
+      if (this->targetSystem < uid.targetSystem) return true;
+      else if (this->targetSystem > uid.targetSystem) return false;
+
+      // If here the two targetSystems are equals
+      else if (this->hardCamera < uid.hardCamera) return true;
+      else if (this->hardCamera > uid.hardCamera) return false;
+
+      // If here the two AbstractCameraUids are equals
+      else return false;
+    }
+
+    bool
+    operator==(const AbstractCameraUid& uid) const
+    {
+      return ((this->targetSystem == uid.targetSystem) &&
+              (this->hardCamera == uid.hardCamera));
+    }
   };
 
   template <class charT, class traits>
@@ -62,6 +85,7 @@ namespace silvver
   }
 
   struct TargetUid
+    :private boost::totally_ordered<TargetUid>
   {
     unsigned targetSystem;
     unsigned internal;
@@ -80,6 +104,27 @@ namespace silvver
       :targetSystem(uid.targetSystem)
       ,internal(uid.internal)
     {}
+
+    bool
+    operator<(const TargetUid& uid) const
+    {
+      if (this->targetSystem < uid.targetSystem) return true;
+      else if (this->targetSystem > uid.targetSystem) return false;
+
+      // If here the two targetSystems are equals
+      else if (this->internal < uid.internal) return true;
+      else if (this->internal > uid.internal) return false;
+
+      // If here the two TargetUids are equals
+      else return false;
+    }
+
+    bool
+    operator==(const TargetUid& uid) const
+    {
+      return ((this->targetSystem == uid.targetSystem) &&
+              (this->internal == uid.internal));
+    }
   };
 
   template <class charT, class traits>
@@ -138,7 +183,8 @@ namespace silvver
   }
 
   //------------------------------ Pose
-  struct Pose : public Position
+  struct Pose
+    :public Position
   {
     /// The order of items is: r11, r12, r13, r21, r22, r23, r31, r32, r33
     boost::array<double, 9> rotationMatrix;
@@ -199,7 +245,8 @@ namespace silvver
 
   //------------------------------ Identity
   template<class BaseClass>
-  struct Identity : public BaseClass
+  struct Identity
+    :public BaseClass
   {
     /// UID of this target;
     TargetUid uid;

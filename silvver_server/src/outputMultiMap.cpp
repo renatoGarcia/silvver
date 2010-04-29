@@ -16,6 +16,7 @@
 #include "outputMultiMap.hpp"
 
 #include "ioConnection.ipp"
+#include "silvverTypes.hpp"
 
 template<ClientType clientType, class KeyType>
 OutputMultiMap<clientType, KeyType>::
@@ -74,5 +75,5 @@ findOutputs(KeyType silvverUid,
   }
 }
 
-template class OutputMultiMap<CLIENT_TARGET, unsigned>;
-template class OutputMultiMap<CLIENT_CAMERA, std::string>;
+template class OutputMultiMap<CLIENT_TARGET, silvver::TargetUid>;
+template class OutputMultiMap<CLIENT_CAMERA, silvver::AbstractCameraUid>;
