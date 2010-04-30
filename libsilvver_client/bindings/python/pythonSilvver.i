@@ -17,14 +17,10 @@ namespace silvver
 {
   %typemap(typecheck) AbstractCameraUid&
   {
-    if (PyTuple_Size($input) != 2)
+    if ((PySequence_Check($input)) && (PySequence_Size($input) == 2))
     {
-      $1 = false;
-    }
-    else
-    {
-      PyObject* first = PyTuple_GetItem($input, 0);
-      PyObject* second = PyTuple_GetItem($input, 1);
+      PyObject* first = PySequence_GetItem($input, 0);
+      PyObject* second = PySequence_GetItem($input, 1);
       if ((PyInt_AsLong(first) > 0) && (PyInt_AsLong(second) > 0))
       {
         $1 = true;
@@ -36,81 +32,66 @@ namespace silvver
       Py_DECREF(first);
       Py_DECREF(second);
     }
-  }
-
-  %typemap(in) AbstractCameraUid&
-  {
-    PyObject* first = PyTuple_GetItem($input, 0);
-    PyObject* second = PyTuple_GetItem($input, 1);
-    $1 = new silvver::AbstractCameraUid(PyInt_AsUnsignedLongMask(first),
-                                        PyInt_AsUnsignedLongMask(second));
-    Py_DECREF(first);
-    Py_DECREF(second);
-  }
-
-  %typemap(freearg) AbstractCameraUid&
-  {
-    delete $1;
-  }
-
-  %typemap(typecheck) TargetUid&
-  {
-    if (PyTuple_Size($input) != 2)
-    {
-      $1 = false;
-    }
     else
     {
-      PyObject* first = PyTuple_GetItem($input, 0);
-      PyObject* second = PyTuple_GetItem($input, 1);
-      if ((PyInt_AsLong(first) > 0) && (PyInt_AsLong(second) > 0))
-      {
-        $1 = true;
-      }
-      else
+      void* temp;
+      if (!SWIG_IsOK(SWIG_ConvertPtr($input, &temp, $1_descriptor, 0)))
       {
         $1 = false;
       }
-      Py_DECREF(first);
-      Py_DECREF(second);
+      else
+      {
+        $1 = true;
+      }
     }
   }
 
-  %typemap(in) TargetUid& (bool isTuple, void* aaa)
+  %typemap(in) AbstractCameraUid& (bool isTuple)
   {
-    if (PyTuple_Check($input))
+    if (PySequence_Check($input))
     {
+      if (PySequence_Size($input) != 2)
+      {
+        SWIG_exception_fail(SWIG_TypeError,
+                            "Sequences to be set as $1_type "
+                            "must have length 2");
+      }
       isTuple = true;
-      PyObject* first = PyTuple_GetItem($input, 0);
-      PyObject* second = PyTuple_GetItem($input, 1);
-      $1 = new silvver::TargetUid(PyInt_AsUnsignedLongMask(first),
-                                  PyInt_AsUnsignedLongMask(second));
+      PyObject* first = PySequence_GetItem($input, 0);
+      PyObject* second = PySequence_GetItem($input, 1);
+      $1 = new $1_basetype(PyInt_AsUnsignedLongMask(first),
+                           PyInt_AsUnsignedLongMask(second));
       Py_DECREF(first);
       Py_DECREF(second);
     }
     else
     {
       isTuple = false;
-      int res2 = SWIG_ConvertPtr($input, &aaa, $1_descriptor, 0);
+      int res2 = SWIG_ConvertPtr($input, (void**) &$1, $1_descriptor, 0);
       if (!SWIG_IsOK(res2))
       {
-        SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "TargetUid___eq__" "', a\
-rgument " "2"" of type '" "silvver::TargetUid const &""'");
+        SWIG_exception_fail(SWIG_ArgError(res2),
+                            "Erron converting argument to $1_type "
+                            "in function $symname");
       }
-      if (!aaa)
+      if (!$1)
       {
-        SWIG_exception_fail(SWIG_ValueError, "invalid null reference " "in method '" "T\
-argetUid___eq__" "', argument " "2"" of type '" "silvver::TargetUid const &""'");
+        SWIG_exception_fail(SWIG_ValueError,
+                            "invalid null reference of type $1_type "
+                            "in function $symname");
       }
-      $1 = reinterpret_cast<silvver::TargetUid*>(aaa);
     }
   }
 
-  %typemap(freearg) TargetUid&
+  %typemap(freearg) AbstractCameraUid&
   {
     if (isTuple$argnum)
       delete $1;
   }
+
+  %typemap(typecheck) TargetUid& = AbstractCameraUid&;
+  %typemap(in) TargetUid& = AbstractCameraUid&;
+  %typemap(freearg) TargetUid& = AbstractCameraUid&;
 
   %typemap(typecheck) boost::function<void (CameraReading<Position>)>
   {

@@ -5,7 +5,8 @@ from silvver import *
 def printCameraReading(reading):
     print('Timestamp: %d' % reading.timestamp)
     for l in reading.localizations:
-        print l
+        print(l)
+    print
 
 c = AbstractCameraPose(printCameraReading, (1,1))
 c.connect()

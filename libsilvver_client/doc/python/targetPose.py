@@ -7,6 +7,7 @@ target.connect()
 
 for i in range(10):
     pose = target.getNew()
-    print pose
+    print(pose)
+    print
 
 target.disconnect()
