@@ -31,7 +31,7 @@ namespace silvver
   Target<T>::CheshireCat
   {
   public:
-    CheshireCat(unsigned targetId,
+    CheshireCat(const silvver::TargetUid& targetUid,
                 const std::string& serverIp,
                 unsigned receptionistPort);
 
@@ -40,7 +40,7 @@ namespace silvver
     /// Callback method called when a new localization arrives.
     void update();
 
-    const unsigned targetId;
+    const silvver::TargetUid targetUid;
 
     /// Synchronize the write and read in current.
     boost::mutex mutexCurrentPose;
@@ -63,10 +63,10 @@ namespace silvver
   };
 
   template<class T>
-  Target<T>::CheshireCat::CheshireCat(unsigned targetId,
+  Target<T>::CheshireCat::CheshireCat(const silvver::TargetUid& targetUid,
                                       const std::string& serverIp,
                                       unsigned receptionistPort)
-    :targetId(targetId)
+    :targetUid(targetUid)
     ,currentIsNew(false)
     ,connection(serverIp, receptionistPort)
     ,connected(false)
@@ -80,7 +80,7 @@ namespace silvver
   void
   Target<T>::CheshireCat::update()
   {
-    if ((unsigned)this->last.uid == this->targetId)
+    if (this->last.uid == this->targetUid)
     {
       {
         boost::mutex::scoped_lock lock(this->mutexCurrentPose);
@@ -105,7 +105,7 @@ namespace silvver
     {
       try
       {
-        smile->connection.connect(smile->targetId);
+        smile->connection.connect(smile->targetUid);
         smile->connected = true;
 
         smile->connection.asyncRead(smile->last,
@@ -127,7 +127,7 @@ namespace silvver
     {
       try
       {
-        smile->connection.disconnect(smile->targetId);
+        smile->connection.disconnect(smile->targetUid);
         smile->connected = false;
       }
       catch (const boost::system::system_error& e)
@@ -138,10 +138,10 @@ namespace silvver
   }
 
   template<class T>
-  unsigned
-  Target<T>::getId()
+  silvver::TargetUid
+  Target<T>::getUid()
   {
-    return smile->targetId;
+    return smile->targetUid;
   }
 
   template<class T>
@@ -197,10 +197,10 @@ namespace silvver
   }
 
   template<class T>
-  Target<T>::Target(unsigned targetId,
+  Target<T>::Target(const silvver::TargetUid& targetUid,
                     const std::string& serverIp,
                     unsigned receptionistPort)
-    :smile(new CheshireCat(targetId, serverIp, receptionistPort))
+    :smile(new CheshireCat(targetUid, serverIp, receptionistPort))
   {}
 
   template<class T>

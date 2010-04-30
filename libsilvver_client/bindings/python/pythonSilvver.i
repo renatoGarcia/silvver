@@ -13,12 +13,143 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-%include ../silvver.i
+namespace silvver
+{
+  %typemap(typecheck) AbstractCameraUid&
+  {
+    if (PyTuple_Size($input) != 2)
+    {
+      $1 = false;
+    }
+    else
+    {
+      PyObject* first = PyTuple_GetItem($input, 0);
+      PyObject* second = PyTuple_GetItem($input, 1);
+      if ((PyInt_AsLong(first) > 0) && (PyInt_AsLong(second) > 0))
+      {
+        $1 = true;
+      }
+      else
+      {
+        $1 = false;
+      }
+      Py_DECREF(first);
+      Py_DECREF(second);
+    }
+  }
+
+  %typemap(in) AbstractCameraUid&
+  {
+    PyObject* first = PyTuple_GetItem($input, 0);
+    PyObject* second = PyTuple_GetItem($input, 1);
+    $1 = new silvver::AbstractCameraUid(PyInt_AsUnsignedLongMask(first),
+                                        PyInt_AsUnsignedLongMask(second));
+    Py_DECREF(first);
+    Py_DECREF(second);
+  }
+
+  %typemap(freearg) AbstractCameraUid&
+  {
+    delete $1;
+  }
+
+  %typemap(typecheck) TargetUid&
+  {
+    if (PyTuple_Size($input) != 2)
+    {
+      $1 = false;
+    }
+    else
+    {
+      PyObject* first = PyTuple_GetItem($input, 0);
+      PyObject* second = PyTuple_GetItem($input, 1);
+      if ((PyInt_AsLong(first) > 0) && (PyInt_AsLong(second) > 0))
+      {
+        $1 = true;
+      }
+      else
+      {
+        $1 = false;
+      }
+      Py_DECREF(first);
+      Py_DECREF(second);
+    }
+  }
+
+  %typemap(in) TargetUid& (bool isTuple, void* aaa)
+  {
+    if (PyTuple_Check($input))
+    {
+      isTuple = true;
+      PyObject* first = PyTuple_GetItem($input, 0);
+      PyObject* second = PyTuple_GetItem($input, 1);
+      $1 = new silvver::TargetUid(PyInt_AsUnsignedLongMask(first),
+                                  PyInt_AsUnsignedLongMask(second));
+      Py_DECREF(first);
+      Py_DECREF(second);
+    }
+    else
+    {
+      isTuple = false;
+      int res2 = SWIG_ConvertPtr($input, &aaa, $1_descriptor, 0);
+      if (!SWIG_IsOK(res2))
+      {
+        SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "TargetUid___eq__" "', a\
+rgument " "2"" of type '" "silvver::TargetUid const &""'");
+      }
+      if (!aaa)
+      {
+        SWIG_exception_fail(SWIG_ValueError, "invalid null reference " "in method '" "T\
+argetUid___eq__" "', argument " "2"" of type '" "silvver::TargetUid const &""'");
+      }
+      $1 = reinterpret_cast<silvver::TargetUid*>(aaa);
+    }
+  }
+
+  %typemap(freearg) TargetUid&
+  {
+    if (isTuple$argnum)
+      delete $1;
+  }
+
+  %typemap(typecheck) boost::function<void (CameraReading<Position>)>
+  {
+    $1 = PyCallable_Check($input);
+  }
+
+  %typemap(typecheck) boost::function<void (CameraReading<Pose>)>
+  {
+    $1 = PyCallable_Check($input);
+  }
+
+  %typemap(in) boost::function<void (CameraReading<Position>)>
+  {
+    if (!PyCallable_Check($input))
+    {
+      PyErr_SetString(PyExc_TypeError, "Need a callable object!");
+      return NULL;
+    }
+    Callback<silvver::Position> cb($input);
+    $1 = cb;
+  }
+
+  %typemap(in) boost::function<void (CameraReading<Pose>)>
+  {
+    if (!PyCallable_Check($input))
+    {
+      PyErr_SetString(PyExc_TypeError, "Need a callable object!");
+      return NULL;
+    }
+    Callback<silvver::Pose> cb($input);
+    $1 = cb;
+  }
+}
 
 %apply unsigned { uint64_t };
 
-%header %{
+%include ../silvver.i
 
+%header %{
 #define PYTHON_THREAD_BEGIN_BLOCK PyGILState_STATE thread_block = PyGILState_Ensure()
 
 #define PYTHON_THREAD_END_BLOCK PyGILState_Release(thread_block)
@@ -154,40 +285,53 @@ namespace boost
 
 namespace silvver
 {
-  %extend Position{
-    char* __str__()
+  %extend AbstractCameraUid{
+    const char* __str__()
     {
-      static char temp[256];
-      sprintf(temp,"%g\t%g\t%g", $self->x,$self->y,$self->z);
-      return temp;
+      static std::stringstream ss(std::stringstream::out);
+      ss.str("");
+      ss << *$self;
+      return ss.str().c_str();
+    }
+  }
+
+  %extend TargetUid{
+    const char* __str__()
+    {
+      static std::stringstream ss(std::stringstream::out);
+      ss.str("");
+      ss << *$self;
+      return ss.str().c_str();
+    }
+  }
+
+  %extend Position{
+    const char* __str__()
+    {
+      static std::stringstream ss(std::stringstream::out);
+      ss.str("");
+      ss << *$self;
+      return ss.str().c_str();
     }
   }
 
   %extend Pose{
-    char* __str__()
+    const char* __str__()
     {
-      static char temp[256];
-      sprintf(temp,"%s\t%s", silvver_Position___str__($self),
-              boost_array_Sl_double_Sc_9_Sg____str__(&$self->rotationMatrix));
-      return temp;
+      static std::stringstream ss(std::stringstream::out);
+      ss.str("");
+      ss << *$self;
+      return ss.str().c_str();
     }
   }
 
-  %extend Identity<Position>{
-    char* __str__()
+  %extend Identity{
+    const char* __str__()
     {
-      static char temp[256];
-      sprintf(temp,"%u\t%s", $self->uid, silvver_Position___str__($self));
-      return temp;
-    }
-  }
-
-  %extend Identity<Pose>{
-    char* __str__()
-    {
-      static char temp[256];
-      sprintf(temp,"%u\t%s", $self->uid, silvver_Pose___str__($self));
-      return temp;
+      static std::stringstream ss(std::stringstream::out);
+      ss.str("");
+      ss << *$self;
+      return ss.str().c_str();
     }
   }
 
@@ -214,36 +358,8 @@ namespace silvver
                                 timedelta.microseconds)
   %}
 
-  %typemap(typecheck) boost::function<void (CameraReading<Position>)> {
-    $1 = PyCallable_Check($input) ? 1 : 0;
-  }
-
-  %typemap(typecheck) boost::function<void (CameraReading<Pose>)> {
-    $1 = PyCallable_Check($input) ? 1 : 0;
-  }
-
-  %typemap(in) boost::function<void (CameraReading<Position>)> {
-    if (!PyCallable_Check($input))
-    {
-      PyErr_SetString(PyExc_TypeError, "Need a callable object!");
-      return NULL;
-    }
-    Callback<silvver::Position> cb($input);
-    $1 = cb;
-  }
-
-  %typemap(in) boost::function<void (CameraReading<Pose>)> {
-    if (!PyCallable_Check($input))
-    {
-      PyErr_SetString(PyExc_TypeError, "Need a callable object!");
-      return NULL;
-    }
-    Callback<silvver::Pose> cb($input);
-    $1 = cb;
-  }
-
-  %template(PositionId) Identity<Position>;
-  %template(PoseId) Identity<Pose>;
+  %template(IdentityPosition) Identity<Position>;
+  %template(IdentityPose) Identity<Pose>;
 
   %template(CameraReadingPosition) CameraReading<Position>;
   %template(CameraReadingPose) CameraReading<Pose>;

@@ -29,6 +29,8 @@
 #include <string>
 #include <vector>
 
+#include "silvverTypes.hpp"
+
 /// Wrapper all network communication with silvver-server.
 class Connection
 {
@@ -38,13 +40,13 @@ public:
 
   ~Connection();
 
-  void connect(unsigned targetUid);
+  void connect(const silvver::TargetUid& targetUid);
 
-  void connect(std::string cameraUid);
+  void connect(const silvver::AbstractCameraUid& cameraUid);
 
-  void disconnect(unsigned targetUid);
+  void disconnect(const silvver::TargetUid& targetUid);
 
-  void disconnect(std::string cameraUid);
+  void disconnect(const silvver::AbstractCameraUid& cameraUid);
 
   /** Asynchronously read a value of type T.
    * @param t Reference to the variable where the read value will be returned.

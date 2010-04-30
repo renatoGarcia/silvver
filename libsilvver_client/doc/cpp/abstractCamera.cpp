@@ -25,24 +25,9 @@ void printPose(CameraReading<Pose> reading)
 
 int main(int argc, char *argv[])
 {
-  std::string id = "target1cam1";
-  std::string ip("127.0.0.1");
-  unsigned receptionistPort = 12000;
+  AbstractCameraUid uid(1,1);
 
-  if (argc > 1)
-  {
-    id = argv[1];
-  }
-  if (argc > 2)
-  {
-    ip = argv[2];
-  }
-  if (argc > 3)
-  {
-    receptionistPort = atoi(argv[3]);
-  }
-
-  AbstractCamera<Pose> camera(printPose, id, ip, receptionistPort);
+  AbstractCamera<Pose> camera(printPose, uid);
 
   camera.connect();
 

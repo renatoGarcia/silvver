@@ -34,7 +34,7 @@ namespace silvver
      * @param serverIp IP address of silvver-server.
      * @param receptionistPort Port number of silvver-server receptionist. */
     AbstractCamera(boost::function<void (CameraReading<T>)> callback,
-                   const std::string& abstractCameraUid,
+                   const AbstractCameraUid& abstractCameraUid,
                    const std::string& serverIp="127.0.0.1",
                    unsigned receptionistPort=12000);
 
@@ -50,7 +50,7 @@ namespace silvver
     /** Get the id of camera.
      * @return The id of this camera.
      */
-    std::string getId();
+    AbstractCameraUid getUid();
 
   private:
     class CheshireCat;
