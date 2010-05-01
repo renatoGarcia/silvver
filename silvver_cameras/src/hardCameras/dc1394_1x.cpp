@@ -15,6 +15,7 @@
 
 #include "dc1394_1x.hpp"
 
+#include <boost/array.hpp>
 #include <boost/assign/list_of.hpp>
 #include <boost/assign/std/vector.hpp>
 #include <boost/foreach.hpp>
@@ -55,7 +56,7 @@ DC1394::DC1394(const scene::DC1394& config)
   {
     throw open_camera_error()
       << info_what("Unable to get the iso channel number")
-      << info_cameraUid(this->uid);
+      << info_cameraUid(this->silvverUid);
   }
 
   int e = dc1394_dma_setup_capture(this->raw1394Handle,
@@ -73,7 +74,7 @@ DC1394::DC1394(const scene::DC1394& config)
   {
     throw open_camera_error()
       << info_what("Unable to setup camera")
-      << info_cameraUid(this->uid);
+      << info_cameraUid(this->silvverUid);
   }
   else
   {
@@ -86,7 +87,7 @@ DC1394::DC1394(const scene::DC1394& config)
   }
   catch(silvver_cameras_exception& e)
   {
-    throw e << info_cameraUid(this->uid);
+    throw e << info_cameraUid(this->silvverUid);
   }
 
   // Have the camera start sending us data
@@ -96,7 +97,7 @@ DC1394::DC1394(const scene::DC1394& config)
   {
     throw open_camera_error()
       << info_what("Unable to start camera iso transmission")
-      << info_cameraUid(this->uid);
+      << info_cameraUid(this->silvverUid);
   }
 
   this->grabFrameThread.reset(new boost::thread(&DC1394::doWork,this));
@@ -142,7 +143,7 @@ DC1394::findThisCamera(nodeid_t& node, int& cardIndex)
     {
       throw open_camera_error()
         << info_what("Unable to aquire a raw1394 handle")
-        << info_cameraUid(this->uid);
+        << info_cameraUid(this->silvverUid);
     }
 
     cameraNodes = dc1394_get_camera_nodes(this->raw1394Handle, &nCameras, 0);
@@ -167,7 +168,7 @@ DC1394::findThisCamera(nodeid_t& node, int& cardIndex)
 
   throw open_camera_error()
     << info_what("Didn't found the camera with required uid")
-    << info_cameraUid(this->uid);
+    << info_cameraUid(this->silvverUid);
 }
 
 std::string
@@ -193,7 +194,7 @@ DC1394::findVideo1394Device(unsigned cardNumber)
   // If here, didn't found camera devide
   throw open_camera_error()
     << info_what("Didn't found the path to camera device")
-    << info_cameraUid(this->uid);
+    << info_cameraUid(this->silvverUid);
 }
 
 int
@@ -698,7 +699,7 @@ void
 DC1394::doWork()
 {
   boost::array<Frame, 2> frameBuffer;
-  int frameIdx = 0;
+  int index = 0;
 
   frameBuffer[0].image = IplImageWrapper(this->frameSize, this->iplDepth, 3);
   frameBuffer[1].image = IplImageWrapper(this->frameSize, this->iplDepth, 3);
@@ -719,14 +720,15 @@ DC1394::doWork()
       continue;
     }
 
-    frameBuffer[frameIdx]->timestamp = TODO;
+    frameBuffer[index].timestamp = this->dc1394Camera.filltime.tv_sec*1000000+
+                                   this->dc1394Camera.filltime.tv_usec;
     this->colorConverter((uint8_t*)this->dc1394Camera.capture_buffer,
-                         frameBuffer[frameIdx].image);
+                         frameBuffer[index].image);
 
     dc1394_dma_done_with_buffer(&(this->dc1394Camera));
 
-    updateCurrentFrame(frameBuffer[frameIdx]);
+    updateCurrentFrame(frameBuffer[index]);
 
-    frameIdx = (frameIdx+1) % 2;
+    index = (index+1) % 2;
   }
 }

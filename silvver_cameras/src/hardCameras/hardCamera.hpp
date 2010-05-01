@@ -29,6 +29,7 @@
 #include "../frame.hpp"
 #include "../observer.hpp"
 #include "hardCameraDescriptions.hpp"
+#include "timestampMap.hpp"
 
 /** Base class to all classes which manage camera hardware. !!!!OUTDATED!!!!!
  * All hardware camera class must fill the following requeriments:
@@ -42,21 +43,17 @@
 class HardCamera: public boost::noncopyable, public Subject
 {
 public:
-
   virtual ~HardCamera();
-
-  // Frame::IplParameters getImageParameters() const;
 
   void getDistortedFrame(Frame& image);
 
   void getUndistortedFrame(Frame& image);
 
-  /// A string to differentiate this camera, e.g.: when saving images or
+  /// A uid to differentiate this camera, e.g.: when saving images or
   /// in title of window where showing the captured images.
-  const std::string silvverUid;
+  const unsigned silvverUid;
 
 protected:
-
   HardCamera(const scene::Hardware& config, int iplDepth);
 
   /// This method must be called by derived classes when it read a new frame
@@ -70,8 +67,11 @@ protected:
   const int iplDepth;
 
 private:
-
   friend class HardCameraFactory;
+
+private:
+  static boost::format createFormat(const std::string& strFormat,
+                                    const unsigned silvverUid);
 
   unsigned getBitsPerPixel(int iplDepth) const;
 
@@ -95,6 +95,9 @@ private:
   const bool saveUndistortedImages;
   boost::format saveImageFormat;
   unsigned imagesCounter;
+
+  const bool saveTimestamp;
+  TSMapWriter timestampWriter;
 };
 
 #endif /* _HARDCAMERA_HPP_ */

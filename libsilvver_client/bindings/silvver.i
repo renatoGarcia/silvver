@@ -20,6 +20,9 @@
 #include "target.hpp"
 #include "abstractCamera.hpp"
 #include <boost/system/system_error.hpp>
+#include <iostream>
+#include <sstream>
+#include <string>
 %}
 
 %include "std_string.i"
@@ -35,6 +38,40 @@ namespace boost
 
 namespace silvver
 {
+  struct AbstractCameraUid
+    :private boost::totally_ordered<AbstractCameraUid>
+  {
+    unsigned targetSystem;
+    unsigned hardCamera;
+
+    AbstractCameraUid();
+
+    AbstractCameraUid(const unsigned targetSystem, const unsigned hardCamera);
+
+    AbstractCameraUid(const AbstractCameraUid& uid);
+
+    bool operator<(const AbstractCameraUid& uid) const;
+
+    bool operator==(const AbstractCameraUid& uid) const;
+  };
+
+  struct TargetUid
+    :private boost::totally_ordered<TargetUid>
+  {
+    unsigned targetSystem;
+    unsigned internal;
+
+    TargetUid();
+
+    TargetUid(const unsigned targetSystem, const unsigned internal);
+
+    TargetUid(const TargetUid& uid);
+
+    bool operator<(const TargetUid& uid) const;
+
+    bool operator==(const TargetUid& uid) const;
+  };
+
   struct Position
   {
     double x;
@@ -60,22 +97,23 @@ namespace silvver
   template<class BaseClass>
   struct Identity: public BaseClass
   {
-    unsigned uid;
+    TargetUid uid;
 
     Identity();
-    Identity(const BaseClass& base, const unsigned uid);
+    Identity(const BaseClass& base, const TargetUid& uid);
   };
 
   template<class TargetType>
   struct CameraReading
   {
-    std::string abstractCameraUid;
+    AbstractCameraUid camUid;
     uint64_t timestamp;
 
     std::vector<Identity<TargetType> > localizations;
 
     CameraReading();
-    CameraReading(std::string cameraUid, uint64_t timestamp,
+    CameraReading(const AbstractCameraUid& camUid,
+                  uint64_t timestamp,
                   std::vector<Identity<TargetType> > localizations);
   };
 
@@ -83,7 +121,7 @@ namespace silvver
   class Target
   {
   public:
-    Target(unsigned targetId,
+    Target(const TargetUid& targetUid,
            const std::string& serverIp="127.0.0.1",
            unsigned receptionistPort=12000);
 
@@ -93,7 +131,7 @@ namespace silvver
 
     void disconnect();
 
-    unsigned getId();
+    TargetUid getUid();
 
     Identity<T> getLast();
 
@@ -109,7 +147,7 @@ namespace silvver
   {
   public:
     AbstractCamera(boost::function<void(CameraReading<T>)> callback,
-                   std::string abstractCameraUid,
+                   const AbstractCameraUid& abstractCameraUid,
                    const std::string& serverIp="127.0.0.1",
                    unsigned receptionistPort=12000);
 
@@ -119,6 +157,6 @@ namespace silvver
 
     void disconnect();
 
-    std::string getId();
+    AbstractCameraUid getUid();
   };
 } //silvver namespace

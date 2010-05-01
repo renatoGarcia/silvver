@@ -48,7 +48,7 @@ typedef boost::error_info<struct tag_what, std::string>
 typedef boost::error_info<struct tag_cameraModel, std::string>
   info_cameraModel;
 
-typedef boost::error_info<struct tag_cameraUid, std::string>
+typedef boost::error_info<struct tag_cameraUid, unsigned>
   info_cameraUid;
 
 typedef boost::error_info<struct tag_colorMode, std::string>

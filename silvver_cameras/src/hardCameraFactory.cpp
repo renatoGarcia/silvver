@@ -37,7 +37,7 @@
 #  include "hardCameras/v4l2.hpp"
 #endif
 
-std::map < std::string, boost::shared_ptr<HardCamera> >
+std::map <unsigned, boost::shared_ptr<HardCamera> >
 HardCameraFactory::createdHardCameras;
 
 boost::mutex
@@ -54,8 +54,8 @@ HardCameraFactory::create(const scene::AnyHardwareCamera& cameraConfig)
   const scene::Hardware hardwareConfig =
     boost::apply_visitor(scene::GetHardware(), cameraConfig);
 
-  std::map< std::string, boost::shared_ptr<HardCamera> >::iterator
-    iteHardCamera = HardCameraFactory::createdHardCameras.find(hardwareConfig.uidSuffix);
+  std::map<unsigned, boost::shared_ptr<HardCamera> >::iterator
+    iteHardCamera = HardCameraFactory::createdHardCameras.find(hardwareConfig.silvverUid);
 
   // If hardCamera is already created
   if (iteHardCamera != HardCameraFactory::createdHardCameras.end())
@@ -69,8 +69,7 @@ HardCameraFactory::create(const scene::AnyHardwareCamera& cameraConfig)
                       cameraConfig));
 
     HardCameraFactory::createdHardCameras.
-      insert(std::pair<std::string, boost::shared_ptr<HardCamera> >
-             (hardwareConfig.uidSuffix, hardCamera));
+      insert(std::make_pair(hardwareConfig.silvverUid, hardCamera));
   }
 
   return hardCamera;

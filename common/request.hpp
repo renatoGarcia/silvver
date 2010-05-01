@@ -24,6 +24,7 @@
 #include <boost/serialization/variant.hpp>
 
 #include "processorOptions.hpp"
+#include "silvverTypes.hpp"
 
 /// This type symbolize a uninitialized Request.
 struct NullRequest
@@ -35,53 +36,53 @@ struct NullRequest
 
 struct AddTargetClient
 {
-  unsigned targetId;
+  silvver::TargetUid targetUid;
   unsigned short localPort;
 
   AddTargetClient()
-    :targetId(0)
+    :targetUid()
     ,localPort(0)
   {}
 
-  AddTargetClient(unsigned targetId, unsigned short localPort)
-    :targetId(targetId)
+  AddTargetClient(silvver::TargetUid targetUid, unsigned short localPort)
+    :targetUid(targetUid)
     ,localPort(localPort)
   {}
 
   template<typename Archive>
   void serialize(Archive& ar, const unsigned)
   {
-    ar & targetId;
+    ar & targetUid;
     ar & localPort;
   }
 };
 
 struct DelTargetClient
 {
-  unsigned targetId;
+  silvver::TargetUid targetUid;
   unsigned short localPort;
 
   DelTargetClient()
-    :targetId(0)
+    :targetUid()
     ,localPort(0)
   {}
 
-  DelTargetClient(unsigned targetId, unsigned short localPort)
-    :targetId(targetId)
+  DelTargetClient(silvver::TargetUid targetUid, unsigned short localPort)
+    :targetUid(targetUid)
     ,localPort(localPort)
   {}
 
   template<typename Archive>
   void serialize(Archive& ar, const unsigned)
   {
-    ar & targetId;
+    ar & targetUid;
     ar & localPort;
   }
 };
 
 struct AddCameraClient
 {
-  std::string cameraUid;
+  silvver::AbstractCameraUid cameraUid;
   unsigned short localPort;
 
   AddCameraClient()
@@ -89,7 +90,8 @@ struct AddCameraClient
     ,localPort(0)
   {}
 
-  AddCameraClient(std::string cameraUid, unsigned short localPort)
+  AddCameraClient(const silvver::AbstractCameraUid& cameraUid,
+                  unsigned short localPort)
     :cameraUid(cameraUid)
     ,localPort(localPort)
   {}
@@ -104,7 +106,7 @@ struct AddCameraClient
 
 struct DelCameraClient
 {
-  std::string cameraUid;
+  silvver::AbstractCameraUid cameraUid;
   unsigned short localPort;
 
   DelCameraClient()
@@ -112,7 +114,8 @@ struct DelCameraClient
     ,localPort(0)
   {}
 
-  DelCameraClient(std::string cameraUid, unsigned short localPort)
+  DelCameraClient(const silvver::AbstractCameraUid& cameraUid,
+                  unsigned short localPort)
     :cameraUid(cameraUid)
     ,localPort(localPort)
   {}
@@ -129,7 +132,7 @@ struct AddCamera
 {
   procOpt::AnyProcOpt processorOpt;
   unsigned short localPort;
-  std::string cameraUid;
+  silvver::AbstractCameraUid cameraUid;
 
   AddCamera()
     :processorOpt()
@@ -138,7 +141,7 @@ struct AddCamera
   {}
 
   AddCamera(const procOpt::AnyProcOpt& processorOpt, unsigned short localPort,
-            const std::string& cameraUid)
+            const silvver::AbstractCameraUid& cameraUid)
     :processorOpt(processorOpt)
     ,localPort(localPort)
     ,cameraUid(cameraUid)
@@ -155,13 +158,13 @@ struct AddCamera
 
 struct DelCamera
 {
-  std::string cameraUid;
+  silvver::AbstractCameraUid cameraUid;
 
   DelCamera()
     :cameraUid()
   {}
 
-  DelCamera(const std::string& cameraUid)
+  DelCamera(const silvver::AbstractCameraUid& cameraUid)
     :cameraUid(cameraUid)
   {}
 

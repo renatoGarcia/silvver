@@ -22,13 +22,14 @@
 #include <opencv/highgui.h>
 
 #include "../globalOptions.hpp"
+#include "../exceptions.hpp"
 
 namespace bfs = boost::filesystem;
 
 extern globalOptions::Options global_options;
 
 HardCamera::HardCamera(const scene::Hardware& config, int iplDepth)
-  :silvverUid(config.uidSuffix)
+  :silvverUid(config.silvverUid)
   ,framePixels(config.resolution.at(0) * config.resolution.at(1))
   ,frameSize(cvSize(config.resolution.at(0), config.resolution.at(1)))
   ,iplDepth(iplDepth)
@@ -39,13 +40,16 @@ HardCamera::HardCamera(const scene::Hardware& config, int iplDepth)
   ,mapx(this->frameSize, IPL_DEPTH_32F, 1)
   ,mapy(this->frameSize, IPL_DEPTH_32F, 1)
   ,showImages(global_options.showImages)
-  ,windowName("Camera_" + config.uidSuffix)
+  ,windowName("Camera_" + config.silvverUid)
   ,saveDistortedImages(global_options.saveDistortedImages &&
                        !config.saveImageFormat.empty())
   ,saveUndistortedImages(global_options.saveUndistortedImages &&
                          !config.saveImageFormat.empty())
-  ,saveImageFormat(config.saveImageFormat)
+  ,saveImageFormat(HardCamera::createFormat(config.saveImageFormat,
+                                            config.silvverUid))
   ,imagesCounter(0)
+  ,saveTimestamp(global_options.saveTimestamp)
+  ,timestampWriter()
 {
   undistortedFrameBuffer[0].image = IplImageWrapper(this->frameSize,
                                                     this->iplDepth, 3);
@@ -103,13 +107,31 @@ HardCamera::~HardCamera()
   {
     cvDestroyWindow(this->windowName.c_str());
   }
+  if (this->saveTimestamp)
+  {
+    this->saveImageFormat % this->silvverUid % this->imagesCounter
+                          % "u";
+    bfs::path path(this->saveImageFormat.str());
+    this->timestampWriter.save(path.parent_path().string() + "/timestamps");
+  }
 }
 
-// Frame::IplParameters
-// HardCamera::getImageParameters() const
-// {
-//   return Frame::IplParameters(this->frameSize, this->iplDepth, 3);
-// }
+boost::format
+HardCamera::createFormat(const std::string& strFormat,
+                         const unsigned silvverUid)
+{
+  try
+  {
+    return boost::format(strFormat);
+  }
+  catch (const boost::io::bad_format_string& e)
+  {
+    throw camera_parameter_error()
+      << info_what("Syntax error on save image format string. Consult the "
+                   "boost format library documentation.")
+      << info_cameraUid(silvverUid);
+  }
+}
 
 void
 HardCamera::updateCurrentFrame(Frame& frame)
@@ -119,6 +141,7 @@ HardCamera::updateCurrentFrame(Frame& frame)
   cvRemap(frame.image, this->undistortedFrameBuffer[undistortedIdx].image,
           this->mapx, this->mapy,
           CV_INTER_LINEAR+CV_WARP_FILL_OUTLIERS, cvScalarAll(0));
+  this->undistortedFrameBuffer[undistortedIdx].timestamp = frame.timestamp;
 
   this->framesAccessMutex.lock();
   this->distortedFrame = &frame;
@@ -134,6 +157,15 @@ HardCamera::updateCurrentFrame(Frame& frame)
                           % "d";
     cvSaveImage(this->saveImageFormat.str().c_str(),
                 this->distortedFrame->image);
+<<<<<<< HEAD
+=======
+    if (this->saveTimestamp)
+    {
+      bfs::path path(this->saveImageFormat.str());
+      this->timestampWriter.add(path.filename(),
+                                this->distortedFrame->timestamp);
+    }
+>>>>>>> master
   }
 
   if (this->saveUndistortedImages)
@@ -142,6 +174,15 @@ HardCamera::updateCurrentFrame(Frame& frame)
                           % "u";
     cvSaveImage(this->saveImageFormat.str().c_str(),
                 this->undistortedFrame->image);
+<<<<<<< HEAD
+=======
+    if (this->saveTimestamp)
+    {
+      bfs::path path(this->saveImageFormat.str());
+      this->timestampWriter.add(path.filename(),
+                                this->undistortedFrame->timestamp);
+    }
+>>>>>>> master
   }
 
   if (this->showImages)

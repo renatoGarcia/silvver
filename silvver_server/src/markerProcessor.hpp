@@ -33,7 +33,8 @@ public:
 
 private:
   /// Map with cameraUid as key, and its last reading as value.
-  typedef std::map<std::string, silvver::CameraReading<silvver::Pose> > TMap;
+  typedef std::map<silvver::AbstractCameraUid,
+                   silvver::CameraReading<silvver::Pose> > TMap;
 
   friend class Singleton<MarkerProcessor>;
 

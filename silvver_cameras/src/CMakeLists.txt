@@ -20,6 +20,7 @@ SET(silvver_cameras_SRCS abstractCameraFactory.cpp
                          exceptions.cpp
                          hardCameraFactory.cpp
                          hardCameras/colorConverter.cpp
+                         hardCameras/timestampMap.cpp
                          hardCameras/hardCamera.cpp
                          hardCameras/pseudoCamera.cpp
                          log.cpp

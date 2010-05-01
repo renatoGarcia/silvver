@@ -26,7 +26,7 @@
 
 template <class Tinput, class Toutput>
 Processor<Tinput,Toutput>::Processor()
-  :outputMap(OutputMultiMap<CLIENT_TARGET, unsigned>::instantiate())
+  :outputMap(OutputMultiMap<CLIENT_TARGET, silvver::TargetUid>::instantiate())
 {}
 
 template <class Tinput, class Toutput>

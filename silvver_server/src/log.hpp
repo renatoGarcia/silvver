@@ -21,7 +21,7 @@
 #include <tsostream.hpp>
 
 BOOST_ENUM(MessageLogLevel,
-           (TRACE)
+           (DEBUG)
            (INFO)
            (WARN)
            (ERROR)

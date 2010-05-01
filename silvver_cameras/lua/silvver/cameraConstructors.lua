@@ -35,11 +35,11 @@ end
 function PseudoCamera(parameters)
     camera = {}
     camera.__driver = 'pseudocamera'
-    camera.uid_suffix = __getOptionalUid(parameters.uid_suffix)
+    camera.silvver_uid = __getOptionalUid(parameters.silvver_uid)
 
     camera.save_image_format = __getOptional(parameters.save_image_format,
-                                             "%1%_%2%_%3%.jpg")
-    camera.images_path = parameters.images_path
+                                             os.date("%Y%m%d%H%M%S")..'/%1%_%|2$08|_%3%.png')
+     camera.images_path = parameters.images_path
 
     camera.focal_length = parameters.focal_length
     camera.principal_point = parameters.principal_point
@@ -62,10 +62,10 @@ end
 function Dc1394(parameters)
     camera = {}
     camera.__driver = 'dc1394'
-    camera.uid_suffix = __getOptionalUid(parameters.uid_suffix)
+    camera.silvver_uid = __getOptionalUid(parameters.silvver_uid)
 
     camera.save_image_format = __getOptional(parameters.save_image_format,
-                                             "%1%_%2%_%3%.jpg")
+                                             os.date("%Y%m%d%H%M%S")..'/%1%_%|2$08|_%3%.png')
     camera.uid = parameters.uid
 
     camera.focal_length = parameters.focal_length
@@ -131,8 +131,9 @@ function V4l2(parameters)
     camera.__driver = 'v4l2'
 
     camera.save_image_format = __getOptional(parameters.save_image_format,
-                                             "%1%_%2%_%3%.jpg")
-    camera.uid_suffix = __getOptionalUid(parameters.uid_suffix)
+                                             os.date("%Y%m%d%H%M%S")..'/%1%_%|2$08|_%3%.png')
+    camera.silvver_uid = __getOptionalUid(parameters.silvver_uid)
+    camera.uid = parameters.uid
 
     camera.focal_length = parameters.focal_length
     camera.principal_point = parameters.principal_point
@@ -176,10 +177,10 @@ end
 function Dragonfly(parameters)
     camera = {}
     camera.__driver = 'dc1394'
-    camera.uid_suffix = __getOptionalUid(parameters.uid_suffix)
+    camera.silvver_uid = __getOptionalUid(parameters.silvver_uid)
 
     camera.save_image_format = __getOptional(parameters.save_image_format,
-                                             "%1%_%2%_%3%.jpg")
+                                             os.date("%Y%m%d%H%M%S")..'/%1%_%|2$08|_%3%.png')
     camera.uid = parameters.uid
 
     camera.focal_length = parameters.focal_length

@@ -19,6 +19,7 @@
 #include "hardCamera.hpp"
 
 #include <boost/date_time/posix_time/posix_time_types.hpp>
+#include <boost/optional/optional.hpp>
 #include <boost/scoped_ptr.hpp>
 #include <boost/thread/thread.hpp>
 #include <string>
@@ -38,6 +39,9 @@ private:
   void doWork();
 
   const std::vector<std::string> imagesPath;
+
+  /// Class that will read the saved timestamp to each loaded image
+  boost::optional<TSMapReader> timestampReader;
 
   /// Delay time to simulate the correct fps
   const boost::posix_time::millisec delay;

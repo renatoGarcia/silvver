@@ -23,6 +23,7 @@
 
 #include <boost/array.hpp>
 #include <boost/shared_ptr.hpp>
+#include <boost/operators.hpp>
 #include <boost/tuple/tuple.hpp>
 #include <cmath>
 #include <cstddef>
@@ -33,6 +34,113 @@
 
 namespace silvver
 {
+  //------------------------------ Silvver UIDs
+  struct AbstractCameraUid
+    :private boost::totally_ordered<AbstractCameraUid>
+  {
+    unsigned targetSystem;
+    unsigned hardCamera;
+
+    AbstractCameraUid()
+      :targetSystem(0)
+      ,hardCamera(0)
+    {}
+
+    AbstractCameraUid(const unsigned targetSystem, const unsigned hardCamera)
+      :targetSystem(targetSystem)
+      ,hardCamera(hardCamera)
+    {}
+
+    AbstractCameraUid(const AbstractCameraUid& uid)
+      :targetSystem(uid.targetSystem)
+      ,hardCamera(uid.hardCamera)
+    {}
+
+    bool
+    operator<(const AbstractCameraUid& uid) const
+    {
+      if (this->targetSystem < uid.targetSystem) return true;
+      else if (this->targetSystem > uid.targetSystem) return false;
+
+      // If here the two targetSystems are equals
+      else if (this->hardCamera < uid.hardCamera) return true;
+      else if (this->hardCamera > uid.hardCamera) return false;
+
+      // If here the two AbstractCameraUids are equals
+      else return false;
+    }
+
+    bool
+    operator==(const AbstractCameraUid& uid) const
+    {
+      return ((this->targetSystem == uid.targetSystem) &&
+              (this->hardCamera == uid.hardCamera));
+    }
+  };
+
+  template <class charT, class traits>
+  inline
+  std::basic_ostream<charT,traits>&
+  operator<<(std::basic_ostream<charT,traits>& strm,
+             const AbstractCameraUid& uid)
+  {
+    strm << "(" << uid.targetSystem << ", " << uid.hardCamera << ')';
+    return strm;
+  }
+
+  struct TargetUid
+    :private boost::totally_ordered<TargetUid>
+  {
+    unsigned targetSystem;
+    unsigned internal;
+
+    TargetUid()
+      :targetSystem(0)
+      ,internal(0)
+    {}
+
+    TargetUid(const unsigned targetSystem, const unsigned internal)
+      :targetSystem(targetSystem)
+      ,internal(internal)
+    {}
+
+    TargetUid(const TargetUid& uid)
+      :targetSystem(uid.targetSystem)
+      ,internal(uid.internal)
+    {}
+
+    bool
+    operator<(const TargetUid& uid) const
+    {
+      if (this->targetSystem < uid.targetSystem) return true;
+      else if (this->targetSystem > uid.targetSystem) return false;
+
+      // If here the two targetSystems are equals
+      else if (this->internal < uid.internal) return true;
+      else if (this->internal > uid.internal) return false;
+
+      // If here the two TargetUids are equals
+      else return false;
+    }
+
+    bool
+    operator==(const TargetUid& uid) const
+    {
+      return ((this->targetSystem == uid.targetSystem) &&
+              (this->internal == uid.internal));
+    }
+  };
+
+  template <class charT, class traits>
+  inline
+  std::basic_ostream<charT,traits>&
+  operator<<(std::basic_ostream<charT,traits>& strm,
+             const TargetUid& uid)
+  {
+    strm << "(" << uid.targetSystem << ", " << uid.internal << ')';
+    return strm;
+  }
+
   //------------------------------ Position
 
   struct Position
@@ -71,15 +179,16 @@ namespace silvver
   template <class charT, class traits>
   inline
   std::basic_ostream<charT,traits>&
-  operator << (std::basic_ostream<charT,traits>& strm,
-               const Position& position)
+  operator<<(std::basic_ostream<charT,traits>& strm,
+             const Position& position)
   {
     strm << position.x << '\t' << position.y << '\t' << position.z;
     return strm;
   }
 
   //------------------------------ Pose
-  struct Pose : public Position
+  struct Pose
+    :public Position
   {
     /// The order of items is: r11, r12, r13, r21, r22, r23, r31, r32, r33
     boost::array<double, 9> rotationMatrix;
@@ -123,11 +232,11 @@ namespace silvver
     }
   };
 
-  template <class charT, class traits>
+  template<class charT, class traits>
   inline
   std::basic_ostream<charT,traits>&
-  operator << (std::basic_ostream<charT,traits>& strm,
-               const Pose& pose)
+  operator<<(std::basic_ostream<charT,traits>& strm,
+             const Pose& pose)
   {
     strm << static_cast<Position>(pose);
     for (int i = 0; i < 9; ++i)
@@ -140,17 +249,18 @@ namespace silvver
 
   //------------------------------ Identity
   template<class BaseClass>
-  struct Identity : public BaseClass
+  struct Identity
+    :public BaseClass
   {
     /// UID of this target;
-    unsigned uid;
+    TargetUid uid;
 
     Identity()
       :BaseClass()
-      ,uid(0)
+      ,uid()
     {}
 
-    Identity(const BaseClass& base, const unsigned uid)
+    Identity(const BaseClass& base, const TargetUid& uid)
       :BaseClass(base)
       ,uid(uid)
     {}
@@ -183,23 +293,23 @@ namespace silvver
   template<class TargetType>
   struct CameraReading
   {
-    std::string abstractCameraUid;
+    AbstractCameraUid camUid;
     uint64_t timestamp;
     IplImage* const image;
     std::vector<Identity<TargetType> > localizations;
 
     CameraReading()
-      :abstractCameraUid()
+      :camUid()
       ,timestamp(0)
       ,image(NULL)
       ,localizations()
     {}
 
-    CameraReading(const std::string& abstractCameraUid,
+    CameraReading(const AbstractCameraUid& camUid,
                   uint64_t timestamp,
                   IplImage* const image,
                   const std::vector<Identity<TargetType> >& localizations)
-      :abstractCameraUid(abstractCameraUid)
+      :camUid(camUid)
       ,timestamp(timestamp)
       ,image(image)
       ,localizations(localizations)

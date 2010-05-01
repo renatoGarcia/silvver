@@ -38,7 +38,7 @@ protected:
                      localizations) const;
 
 private:
-  boost::shared_ptr<OutputMultiMap<CLIENT_TARGET, unsigned> > outputMap;
+  boost::shared_ptr<OutputMultiMap<CLIENT_TARGET, silvver::TargetUid> > outputMap;
 };
 
 #endif /* _PROCESSOR_HPP_ */

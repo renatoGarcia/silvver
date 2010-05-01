@@ -33,8 +33,8 @@ namespace scene
 {
   struct Target
   {
-    /// Key unique to each targets set.
-    std::string uidPrefix;
+    /// Key unique to each targets system.
+    unsigned silvverUid;
   };
 
   /// Information about targets that is above (mounted) in a body (eg: a robot)
@@ -48,7 +48,9 @@ namespace scene
   };
 
   /// Struct with definitions of ARToolKitPlus targets.
-  struct ArtkpTargets: public Target, public Mounted
+  struct ArtkpTargets
+    :public Target
+    ,public Mounted
   {
     /// ARToolKitPlus pattern width [mm].
     int patternWidth;
@@ -58,10 +60,12 @@ namespace scene
 
     /// Each tuple is: the unique identifier that silvver will attribute to
     /// this pattern, and the path to the file describing the pattern.
-    std::vector< boost::tuple<unsigned, std::string> > patterns;
+    std::vector<boost::tuple<unsigned, std::string> > patterns;
   };
 
-  struct ButterflyTargets: public Target, public Mounted
+  struct ButterflyTargets
+    :public Target
+    ,public Mounted
   {
     // Size of one checkerboard square [mm]
     unsigned squareSize;

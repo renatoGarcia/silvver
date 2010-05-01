@@ -27,7 +27,7 @@ namespace silvver
   {
   public:
     CheshireCat(boost::function<void(CameraReading<T>)> callback,
-                const std::string& abstractCameraUid,
+                const silvver::AbstractCameraUid& abstractCameraUid,
                 const std::string& serverIp,
                 unsigned receptionistPort);
 
@@ -38,7 +38,7 @@ namespace silvver
 
     boost::function<void (CameraReading<T>)> callbackFunction;
 
-    const std::string abstractCameraUid;
+    const silvver::AbstractCameraUid abstractCameraUid;
 
     /// Value of last received reading.
     CameraReading<T> currentReading;
@@ -50,7 +50,7 @@ namespace silvver
 
   template<class T> AbstractCamera<T>::
   CheshireCat::CheshireCat(boost::function<void(CameraReading<T>)> callback,
-                           const std::string& abstractCameraUid,
+                           const silvver::AbstractCameraUid& abstractCameraUid,
                            const std::string& serverIp,
                            unsigned receptionistPort)
     :callbackFunction(callback)
@@ -67,7 +67,7 @@ namespace silvver
   void
   AbstractCamera<T>::CheshireCat::handleReceive()
   {
-    if (this->currentReading.abstractCameraUid == this->abstractCameraUid)
+    if (this->currentReading.camUid == this->abstractCameraUid)
     {
       this->callbackFunction(this->currentReading);
     }
@@ -118,15 +118,15 @@ namespace silvver
   }
 
   template<class T>
-  std::string
-  AbstractCamera<T>::getId()
+  silvver::AbstractCameraUid
+  AbstractCamera<T>::getUid()
   {
     return smile->abstractCameraUid;
   }
 
   template<class T>
   AbstractCamera<T>::AbstractCamera(boost::function<void(CameraReading<T>)> callback,
-                                    const std::string& abstractCameraUid,
+                                    const silvver::AbstractCameraUid& abstractCameraUid,
                                     const std::string& serverIp,
                                     unsigned receptionistPort)
     :smile(new CheshireCat(callback, abstractCameraUid,

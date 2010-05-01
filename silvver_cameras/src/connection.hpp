@@ -16,29 +16,27 @@
 #ifndef _CONNECTION_HPP_
 #define _CONNECTION_HPP_
 
-#include <string>
-
-#include <silvverTypes.hpp>
-#include <iostream>
-#include <boost/array.hpp>
-#include <boost/asio.hpp>
 #include <boost/archive/text_iarchive.hpp>
 #include <boost/archive/text_oarchive.hpp>
-#include <boost/thread/thread.hpp>
-#include <boost/thread/once.hpp>
-#include <boost/scoped_ptr.hpp>
-#include <boost/tuple/tuple.hpp>
+#include <boost/array.hpp>
+#include <boost/asio.hpp>
 #include <boost/bind.hpp>
+#include <boost/scoped_ptr.hpp>
+#include <boost/thread/once.hpp>
+#include <boost/thread/thread.hpp>
+#include <boost/tuple/tuple.hpp>
+#include <string>
 
-#include <processorOptions.hpp>
+#include "processorOptions.hpp"
 #include "scene.hpp"
+#include "silvverTypes.hpp"
 
 class Connection
 {
 public:
 
   Connection(const std::string& serverIp, unsigned receptionistPort,
-             const std::string& abstractCameraUid);
+             const silvver::AbstractCameraUid& abstractCameraUid);
 
   ~Connection();
 
@@ -63,7 +61,7 @@ private:
 
   static boost::once_flag onceFlag;
 
-  const std::string abstractCameraUid;
+  const silvver::AbstractCameraUid abstractCameraUid;
 
   boost::asio::ip::tcp::socket receptionistSocket;
 

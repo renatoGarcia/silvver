@@ -24,7 +24,7 @@ std::string errorsInfo2string(const silvver_cameras_exception& e)
     ostr << "What: " << *mi << std::endl;
   if (const std::string* mi = boost::get_error_info<info_cameraModel>(e))
     ostr << "Camera model: " << *mi << std::endl;
-  if (const std::string* mi = boost::get_error_info<info_cameraUid>(e))
+  if (const unsigned* mi = boost::get_error_info<info_cameraUid>(e))
     ostr << "Camera UID: " << *mi << std::endl;
   if (const std::string* mi = boost::get_error_info<info_colorMode>(e))
     ostr << "Color mode: " << *mi << std::endl;

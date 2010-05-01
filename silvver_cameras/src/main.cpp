@@ -99,6 +99,7 @@ int main(int argc, char **argv)
      "Save the images captured by cameras with intrinsic distortion corrected")
     ("save-distorted",
      "Save the images captured by cameras without correct the intrinsic distortion")
+    ("save-timestamp", "Save a file with timestamps of saved images")
     ;
 
   po::variables_map vm;
@@ -136,6 +137,7 @@ int main(int argc, char **argv)
     global_options.showImages = vm.count("show");
     global_options.saveDistortedImages = vm.count("save-distorted");
     global_options.saveUndistortedImages = vm.count("save-undistorted");
+    global_options.saveTimestamp = vm.count("save-timestamp");
     message.setThreshold(verbosity.value());
 
     SceneMounter sceneMounter(luaFile);

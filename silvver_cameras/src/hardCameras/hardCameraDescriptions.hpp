@@ -36,7 +36,7 @@ namespace scene
   {
     /// An unique identifier which differentiate this hardCamera from
     /// others hardCameras.
-    std::string uidSuffix;
+    unsigned silvverUid;
 
     /// String configuring the name of saved images. This string can have
     /// the placeholders %1%, %2% and %3%; where %1% is the camera identifier,
