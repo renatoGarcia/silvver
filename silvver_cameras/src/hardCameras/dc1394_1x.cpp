@@ -274,7 +274,7 @@ DC1394::getDc1394VideoMode(const scene::DC1394& config)
   {
     throw open_camera_error()
       << info_what("Could not set resolution and color mode together")
-      << info_cameraUid(config.uid)
+      << info_cameraUid(config.silvverUid)
       << info_resolution(config.resolution)
       << info_colorMode(config.colorMode);
   }
@@ -339,7 +339,7 @@ DC1394::createColorConverter(const scene::DC1394& config)
     }
     catch (invalid_argument& e)
     {
-      throw e << info_cameraUid(config.uid)
+      throw e << info_cameraUid(config.silvverUid)
               << info_colorMode(config.colorMode)
               << info_bayer(*(config.bayerMethod))
               << info_colorFilter(*(config.colorFilter));
@@ -354,7 +354,7 @@ DC1394::createColorConverter(const scene::DC1394& config)
     }
     catch (invalid_argument& e)
     {
-      throw e << info_cameraUid(config.uid)
+      throw e << info_cameraUid(config.silvverUid)
               << info_colorMode(config.colorMode);
     }
   }
