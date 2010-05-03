@@ -27,6 +27,7 @@
 #include "inputInterface.hpp"
 #include "streamConnection.hpp"
 #include "request.hpp"
+#include "silvverTypes.hpp"
 
 /** Receive and manage the incoming connections demands.
  *
@@ -75,11 +76,11 @@ private:
   Request request;
 
   /// Connected input clients collection
-  std::map<std::string, boost::shared_ptr<InputInterface> > mapInputs;
+  std::map<silvver::AbstractCameraUid, boost::shared_ptr<InputInterface> > mapInputs;
 
-  boost::shared_ptr<OutputMultiMap<CLIENT_TARGET, unsigned> > targetOutputs;
+  boost::shared_ptr<OutputMultiMap<CLIENT_TARGET, silvver::TargetUid> > targetOutputs;
 
-  boost::shared_ptr<OutputMultiMap<CLIENT_CAMERA, std::string> > cameraOutputs;
+  boost::shared_ptr<OutputMultiMap<CLIENT_CAMERA, silvver::AbstractCameraUid> > cameraOutputs;
 
   /// Thread where the boost io_service will run
   boost::scoped_ptr<boost::thread> thReceptionist;

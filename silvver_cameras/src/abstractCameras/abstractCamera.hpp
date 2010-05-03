@@ -53,7 +53,7 @@ private:
 protected:
 
   AbstractCamera(const scene::Camera& cameraConfig,
-                 const std::string& prefixUid,
+                 const unsigned silvverUid,
                  const procOpt::AnyProcOpt& procOptions);
 
   /// Update the frame in currentFrame.
@@ -67,7 +67,7 @@ protected:
 
   Frame currentFrame;
 
-  const std::string abstractCameraUid;
+  const silvver::AbstractCameraUid abstractCameraUid;
 
 private:
 

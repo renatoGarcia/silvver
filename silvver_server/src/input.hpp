@@ -54,7 +54,7 @@ private:
   boost::shared_ptr<ProcessorInterface<Type> > processor;
 
   /// Clients hearing for localizations before be processed.
-  boost::shared_ptr<OutputMultiMap<CLIENT_CAMERA, std::string> > clientCameraMap;
+  boost::shared_ptr<OutputMultiMap<CLIENT_CAMERA, silvver::AbstractCameraUid> > clientCameraMap;
 };
 
 #endif /* _INPUT_HPP_ */

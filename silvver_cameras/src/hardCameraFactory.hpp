@@ -44,8 +44,8 @@ private:
 
   HardCameraFactory();
 
-  /// The std::string key is the HardCamera identifier.
-  static std::map< std::string, boost::shared_ptr<HardCamera> >
+  /// The unsigned key is the HardCamera identifier.
+  static std::map<unsigned, boost::shared_ptr<HardCamera> >
   createdHardCameras;
 
   static boost::mutex mutexCameraCreate;

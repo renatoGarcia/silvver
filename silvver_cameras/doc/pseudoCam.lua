@@ -1,5 +1,7 @@
 require("silvver")
 
+-- Attention! This path is relative to directory where you are when
+-- executing silvver_cameras
 artkp_patt_dir = 'artkpImgs/4x4patt/'
 
 function output2table(command)
@@ -19,9 +21,11 @@ scene = {
     cameras = {
 
         PseudoCamera{
+            -- Attention! This path on 'ls ...' is relative to directory
+            -- where you are when executing silvver_cameras
             images_path = output2table('ls -d artkpImgs/*.png'),
 
-            uid_suffix = "cam1",
+            silvver_uid = 1,
 
             resolution = {640, 480},
             frame_rate = 30,
@@ -38,7 +42,7 @@ scene = {
         ARTKP{
             pattern_width = 50,
             threshold = 150,
-            uid_prefix = "target1",
+            silvver_uid = 1,
 
             {
                 pattern_file = artkp_patt_dir .. '4x4_1.patt',

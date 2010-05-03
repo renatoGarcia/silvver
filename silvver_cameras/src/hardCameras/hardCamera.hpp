@@ -49,9 +49,9 @@ public:
 
   void getUndistortedFrame(Frame& image);
 
-  /// A string to differentiate this camera, e.g.: when saving images or
+  /// A uid to differentiate this camera, e.g.: when saving images or
   /// in title of window where showing the captured images.
-  const std::string silvverUid;
+  const unsigned silvverUid;
 
 protected:
   HardCamera(const scene::Hardware& config, int iplDepth);
@@ -71,7 +71,7 @@ private:
 
 private:
   static boost::format createFormat(const std::string& strFormat,
-                                    const std::string& cameraUid);
+                                    const unsigned silvverUid);
 
   unsigned getBitsPerPixel(int iplDepth) const;
 

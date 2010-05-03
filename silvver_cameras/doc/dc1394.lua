@@ -1,5 +1,7 @@
 require("silvver")
 
+-- Attention! This path is relative to directory where you are when
+-- executing silvver_cameras
 artkp_patt_dir = 'artkpImgs/4x4patt/'
 
 scene = {
@@ -7,7 +9,7 @@ scene = {
     cameras = {
 
         Dc1394{
-            uid_suffix = "cam1",
+            silvver_uid = 1,
 
             uid = dragonfly2uid(5110432),
 
@@ -15,7 +17,7 @@ scene = {
             bayer_method = "bilinear",
             color_filter = "rggb",
             resolution = {640, 480},
-            frame_rate = '30',
+            frame_rate = 30,
 
             focal_length = {531.206054688, 531.451049805},
             principal_point = {359.263824463, 278.308197021},
@@ -36,7 +38,7 @@ scene = {
         ARTKP{
             pattern_width = 50,
             threshold = 150,
-            uid_prefix = "target1",
+            silvver_uid = 1,
 
             {
                 pattern_file = artkp_patt_dir .. '4x4_1.patt',

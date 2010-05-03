@@ -37,7 +37,7 @@ namespace silvver
      * @param targetId Target silvver uid.
      * @param serverIp IP address of silvver-server.
      * @param receptionistPort Port number of silvver-server receptionist. */
-    Target(unsigned targetId,
+    Target(const TargetUid& targetUid,
            const std::string& serverIp="127.0.0.1",
            unsigned receptionistPort=12000);
 
@@ -50,10 +50,9 @@ namespace silvver
     /// Can throw connection_error when silvver-server is unreachable.
     void disconnect();
 
-    /** Get the id of target.
-     * @return The id of this target.
-     */
-    unsigned getId();
+    /** Get the UID of target.
+     * @return The UID of this target.  */
+    TargetUid getUid();
 
     /// Get the last received target localization.
     Identity<T> getLast();
@@ -62,14 +61,12 @@ namespace silvver
      * old_pose_error exception.
      * @param waitTime
      *
-     * @return
-     */
+     * @return  */
     Identity<T> getNew(const boost::posix_time::time_duration&
                        waitTime = boost::date_time::pos_infin);
 
     /** Return the next received target localization.
-     * This function wait until a new Pose arrives and returns;
-     */
+     * This function wait until a new Pose arrives and returns */
     Identity<T> getNext(const boost::posix_time::time_duration&
                         waitTime = boost::date_time::pos_infin);
 

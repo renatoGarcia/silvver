@@ -1,5 +1,7 @@
 require("silvver")
 
+-- Attention! This path is relative to directory where you are when
+-- executing silvver_cameras
 artkp_patt_dir = 'artkpImgs/4x4patt/'
 
 scene = {
@@ -7,10 +9,9 @@ scene = {
     cameras = {
 
         V4l2{
+            silvver_uid = 1,
+
             uid = 0,
-
-            uid_suffix = "cam1",
-
             focal_length = {531.206054688, 531.451049805},
             principal_point = {359.263824463, 278.308197021},
             radial_coef = {0, 0, 0},
@@ -26,7 +27,7 @@ scene = {
         ARTKP{
             pattern_width = 50,
             threshold = 150,
-            uid_prefix = "target1",
+            silvver_uid = 1,
 
             body_pose = target2body({0,0,0},{0,-1, 0,
                                              1, 0, 0,

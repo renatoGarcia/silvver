@@ -17,8 +17,10 @@
 #define _CONNECTION_IPP_
 
 #include "connection.hpp"
+
 #include <boost/serialization/vector.hpp>
-#include <serializations.hpp>
+
+#include "serializations.hpp"
 
 namespace bip = boost::asio::ip;
 

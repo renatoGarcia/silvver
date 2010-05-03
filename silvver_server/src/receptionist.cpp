@@ -32,8 +32,8 @@ Receptionist::Receptionist(unsigned localPort)
   ,currentReception()
   ,request()
   ,mapInputs()
-  ,targetOutputs(OutputMultiMap<CLIENT_TARGET, unsigned>::instantiate())
-  ,cameraOutputs(OutputMultiMap<CLIENT_CAMERA, std::string>::instantiate())
+  ,targetOutputs(OutputMultiMap<CLIENT_TARGET, silvver::TargetUid>::instantiate())
+  ,cameraOutputs(OutputMultiMap<CLIENT_CAMERA, silvver::AbstractCameraUid>::instantiate())
   ,thReceptionist(new boost::thread(&Receptionist::run, this))
 {
   StreamConnection::pointer connection =
@@ -96,9 +96,9 @@ Receptionist::operator()(AddTargetClient& request) const
 
   message(MessageLogLevel::INFO)
     << ts_output::lock
-    << "Add target client request. Uid: " << request.targetId << std::endl
+    << "Add target client request. Uid: " << request.targetUid << std::endl
     << ts_output::unlock;
-  this->targetOutputs->addOutput(request.targetId, ioConnection);
+  this->targetOutputs->addOutput(request.targetUid, ioConnection);
 }
 
 void
@@ -106,9 +106,9 @@ Receptionist::operator()(DelTargetClient& request) const
 {
   message(MessageLogLevel::INFO)
     << ts_output::lock
-    << "Delete target client request. Uid: " << request.targetId << std::endl
+    << "Delete target client request. Uid: " << request.targetUid << std::endl
     << ts_output::unlock;
-  this->targetOutputs->delOutput(request.targetId, request.localPort);
+  this->targetOutputs->delOutput(request.targetUid, request.localPort);
 }
 
 void

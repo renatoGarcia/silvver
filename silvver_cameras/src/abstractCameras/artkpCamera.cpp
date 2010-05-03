@@ -16,6 +16,7 @@
 #include "artkpCamera.hpp"
 
 #include <boost/foreach.hpp>
+#include <boost/lexical_cast.hpp>
 #include <fstream>
 
 #include <ARToolKitPlus/TrackerSingleMarkerImpl.h>
@@ -26,7 +27,7 @@
 
 ArtkpCamera::ArtkpCamera(const scene::Camera& cameraConfig,
                          const scene::ArtkpTargets& targets)
-  :AbstractCamera(cameraConfig, targets.uidPrefix, procOpt::Marker())
+  :AbstractCamera(cameraConfig, targets.silvverUid, procOpt::Marker())
   ,MountedTarget(targets.bodyTranslation, targets.bodyRotation)
   ,patternWidth(targets.patternWidth)
   ,threshold(targets.threshold)
@@ -39,7 +40,8 @@ ArtkpCamera::ArtkpCamera(const scene::Camera& cameraConfig,
   const scene::Hardware hardwareConfig =
     boost::apply_visitor(scene::GetHardware(), cameraConfig.hardware);
 
-  const std::string camConfigFileName("/tmp/artkp" + targets.uidPrefix);
+  const std::string camConfigFileName("/tmp/artkp" +
+                                      boost::lexical_cast<std::string>(targets.silvverUid));
 
   std::ofstream tmpConfig(camConfigFileName.c_str());
   tmpConfig.precision(10);
@@ -180,7 +182,8 @@ ArtkpCamera::doWork()
                                            transMatrix);
       // }
 
-      pose.uid = this->idMap.at(markerInfo[marker].id);
+      pose.uid = silvver::TargetUid(this->abstractCameraUid.targetSystem,
+                                    this->idMap.at(markerInfo[marker].id));
       pose.x = transMatrix[0][3];
       pose.y = transMatrix[1][3];
       pose.z = transMatrix[2][3];

@@ -31,7 +31,7 @@ Input<Type>::Input(boost::shared_ptr<IoConnection> connection,
   ,connection(connection)
   ,connectionPort(connection->getLocalPort())
   ,processor(processor)
-  ,clientCameraMap(OutputMultiMap<CLIENT_CAMERA, std::string>::instantiate())
+  ,clientCameraMap(OutputMultiMap<CLIENT_CAMERA, silvver::AbstractCameraUid>::instantiate())
 {
 
   this->connection->asyncReceive(this->currentInput,
@@ -51,14 +51,14 @@ Input<Type>::handleReceive()
     << ts_output::lock
     << "Received " << this->currentInput.localizations.size()
     << " targets from camera "
-    << this->currentInput.abstractCameraUid << std::endl
+    << this->currentInput.camUid << std::endl
     << ts_output::unlock;
 
   std::vector<boost::shared_ptr<IoConnection> > vecConnections;
   boost::shared_ptr<IoConnection> connectionPtr;
 
   // Get all camera clients hearing for a given camera.
-  this->clientCameraMap->findOutputs(this->currentInput.abstractCameraUid,
+  this->clientCameraMap->findOutputs(this->currentInput.camUid,
                                      vecConnections);
   BOOST_FOREACH(connectionPtr, vecConnections)
   {

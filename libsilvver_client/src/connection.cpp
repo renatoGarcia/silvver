@@ -13,6 +13,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include "connection.hpp"
 #include "connection.ipp"
 
 #include <iostream>
@@ -66,7 +67,7 @@ Connection::~Connection()
 }
 
 void
-Connection::connect(unsigned clientUid)
+Connection::connect(const silvver::TargetUid& targetUid)
 {
   if (!Connection::ioServiceRunning)
   {
@@ -83,7 +84,7 @@ Connection::connect(unsigned clientUid)
 
   this->receptionistSocket.connect(this->receptionistEP);
 
-  Request request = AddTargetClient(clientUid,
+  Request request = AddTargetClient(targetUid,
                                     this->inputSocket.local_endpoint().port());
 
   this->writeToReceptionist(request);
@@ -99,7 +100,7 @@ Connection::connect(unsigned clientUid)
 }
 
 void
-Connection::connect(std::string cameraUid)
+Connection::connect(const silvver::AbstractCameraUid& cameraUid)
 {
   if (!Connection::ioServiceRunning)
   {
@@ -132,11 +133,11 @@ Connection::connect(std::string cameraUid)
 }
 
 void
-Connection::disconnect(unsigned clientUid)
+Connection::disconnect(const silvver::TargetUid& targetUid)
 {
   this->receptionistSocket.connect(this->receptionistEP);
 
-  Request request = DelTargetClient(clientUid,
+  Request request = DelTargetClient(targetUid,
                                     this->inputSocket.local_endpoint().port());
 
   this->writeToReceptionist(request);
@@ -149,7 +150,7 @@ Connection::disconnect(unsigned clientUid)
 }
 
 void
-Connection::disconnect(std::string cameraUid)
+Connection::disconnect(const silvver::AbstractCameraUid& cameraUid)
 {
   this->receptionistSocket.connect(this->receptionistEP);
 
