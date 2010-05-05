@@ -157,15 +157,12 @@ HardCamera::updateCurrentFrame(Frame& frame)
                           % "d";
     cvSaveImage(this->saveImageFormat.str().c_str(),
                 this->distortedFrame->image);
-<<<<<<< HEAD
-=======
     if (this->saveTimestamp)
     {
       bfs::path path(this->saveImageFormat.str());
       this->timestampWriter.add(path.filename(),
                                 this->distortedFrame->timestamp);
     }
->>>>>>> master
   }
 
   if (this->saveUndistortedImages)
@@ -174,15 +171,12 @@ HardCamera::updateCurrentFrame(Frame& frame)
                           % "u";
     cvSaveImage(this->saveImageFormat.str().c_str(),
                 this->undistortedFrame->image);
-<<<<<<< HEAD
-=======
     if (this->saveTimestamp)
     {
       bfs::path path(this->saveImageFormat.str());
       this->timestampWriter.add(path.filename(),
                                 this->undistortedFrame->timestamp);
     }
->>>>>>> master
   }
 
   if (this->showImages)
