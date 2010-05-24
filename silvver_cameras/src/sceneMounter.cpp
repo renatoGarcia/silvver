@@ -18,7 +18,7 @@
 #include <boost/foreach.hpp>
 #include <boost/shared_ptr.hpp>
 
-#include "cfParser.hpp"
+#include "cfReader.hpp"
 #include "abstractCameraFactory.hpp"
 #include "log.hpp"
 #include "exceptions.hpp"
@@ -35,8 +35,8 @@ SceneMounter::mount()
 {
   try
   {
-    CfParser cfParser;
-    const scene::Scene sc = cfParser.parseFile(this->sceneDescriptorFile);
+    CfReader cfReader(this->sceneDescriptorFile);
+    const scene::Scene sc = cfReader.readConfigFile();
 
     scene::Camera camera;
     scene::AnyTarget target;
