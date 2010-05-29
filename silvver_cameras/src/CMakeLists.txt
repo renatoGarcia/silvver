@@ -27,7 +27,8 @@ SET(silvver_cameras_SRCS abstractCameraFactory.cpp
                          main.cpp
                          observer.cpp
                          sceneMounter.cpp
-                         cfParser.cpp)
+                         cfReader.cpp
+                         luaParser.cpp)
 
 IF(WITH_DC1394V2)
   FIND_PACKAGE(DC1394V2)
