@@ -16,6 +16,7 @@
 #ifndef _CF_READER_HPP_
 #define _CF_READER_HPP_
 
+#include <boost/shared_ptr.hpp>
 #include <string>
 
 #include "luaParser.hpp"
@@ -41,7 +42,7 @@ private:
 
   void readTarget();
   scene::ArtkpTargets readArtkp();
-  void readArtkpTargets(scene::ArtkpTargets& artkpTargets);
+  void readArtkpTargets(boost::shared_ptr<scene::ArtkpTargets> artkpTargets);
   scene::ButterflyTargets readButterfly();
 
   LuaParser luaParser;

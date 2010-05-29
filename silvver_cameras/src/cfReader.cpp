@@ -200,22 +200,22 @@ CfReader::readTarget()
 scene::ArtkpTargets
 CfReader::readArtkp()
 {
-  scene::ArtkpTargets artkpTargets;
+  boost::shared_ptr<scene::ArtkpTargets> artkpTargets(new scene::ArtkpTargets());
 
-  luaParser.readValue(artkpTargets.patternWidth, "pattern_width");
-  luaParser.readValue(artkpTargets.threshold, "threshold");
-  luaParser.readValue(artkpTargets.bodyTranslation, "body_translation");
-  luaParser.readValue(artkpTargets.bodyRotation, "body_rotation");
-  luaParser.readValue(artkpTargets.silvverUid, "silvver_uid");
+  luaParser.readValue(artkpTargets->patternWidth, "pattern_width");
+  luaParser.readValue(artkpTargets->threshold, "threshold");
+  luaParser.readValue(artkpTargets->bodyTranslation, "body_translation");
+  luaParser.readValue(artkpTargets->bodyRotation, "body_rotation");
+  luaParser.readValue(artkpTargets->silvverUid, "silvver_uid");
 
   luaParser.iterateArray(boost::bind(&CfReader::readArtkpTargets, this,
                                      artkpTargets));
 
-  return artkpTargets;
+  return *artkpTargets;
 }
 
 void
-CfReader::readArtkpTargets(scene::ArtkpTargets& artkpTargets)
+CfReader::readArtkpTargets(boost::shared_ptr<scene::ArtkpTargets> artkpTargets)
 {
   std::string patternPath;
   unsigned uid;
@@ -223,7 +223,7 @@ CfReader::readArtkpTargets(scene::ArtkpTargets& artkpTargets)
   luaParser.readValue(patternPath, "pattern_file");
   luaParser.readValue(uid, "uid");
 
-  artkpTargets.patterns.push_back(boost::make_tuple(uid, patternPath));
+  artkpTargets->patterns.push_back(boost::make_tuple(uid, patternPath));
 }
 
 scene::ButterflyTargets

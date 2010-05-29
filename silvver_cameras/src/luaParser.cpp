@@ -24,7 +24,13 @@
 LuaParser::LuaParser(const std::string& luaFile)
   :L(NULL)
 {
-  this->L = lua_open();
+  this->L = luaL_newstate();
+  if (this->L == NULL)
+  {
+    throw load_file_error()
+      << info_what("Error on creating Lua environment.");
+  }
+
   luaL_openlibs(this->L);
 
   if (luaL_dofile(this->L, luaFile.c_str()))
@@ -68,9 +74,18 @@ LuaParser::unloadTable()
 void
 LuaParser::iterateArray(boost::function<void (void)> callback)
 {
-  lua_pushnil(this->L);// first key
-  while (lua_next(this->L, -2) != 0)
+  if (!lua_istable(this->L, -1))
   {
+    throw type_error()
+      << info_what("Trying iterate in a non table item.");
+  }
+
+  int nArray = lua_objlen(this->L, -1);
+  for (int i=1; i <= nArray; ++i)
+  {
+    lua_pushnumber(L, i);
+    lua_gettable(L, -2); // Get the i'th item of array
+
     try
     {
       callback();
@@ -80,10 +95,8 @@ LuaParser::iterateArray(boost::function<void (void)> callback)
       throw e << info_cameraIndex(lua_tonumber(this->L, -2));
     }
 
-    // removes 'value', keeps 'key' for next iteration
-    lua_pop(this->L, 1);
+    lua_pop(this->L, 1); // Pop the top item
   }
-  // lua_pop(this->L, 1); // removes last key
 }
 
 bool

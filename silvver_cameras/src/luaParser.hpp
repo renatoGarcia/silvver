@@ -42,6 +42,12 @@ public:
 
   void unloadTable();
 
+  /** Iterate over all numeric indexes of top table.
+   * Iterate over the table currently on top of Lua stack, but only the
+   * numeric indexes and in crescent order. Put each item on top of Lua stack,
+   * call the callback function, then pop that item.
+   *
+   * @param callback A callback function that will handle each item. */
   void iterateArray(boost::function<void (void)> callback);
 
   // Return true if the field name exists
