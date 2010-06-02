@@ -50,20 +50,19 @@ public:
   ~Receptionist();
 
   // Visitors of the boost::variant Request type.
-  void operator()(NullRequest& request) const;
-  void operator()(AddTargetClient& request) const;
-  void operator()(DelTargetClient& request) const;
-  void operator()(AddCameraClient& request) const;
-  void operator()(DelCameraClient& request) const;
+  void operator()(NullRequest& request);
+  void operator()(AddTargetClient& request);
+  void operator()(DelTargetClient& request);
+  void operator()(AddCameraClient& request);
+  void operator()(DelCameraClient& request);
   void operator()(AddCamera& request);
-  void operator()(DelCamera& request);
 
 private:
   void run();
 
   void handleAccept(StreamConnection::pointer connection);
 
-  void handleRead();
+  void closeCamera(const silvver::AbstractCameraUid& cameraUid);
 
   boost::asio::io_service ioService;
 

@@ -24,6 +24,17 @@
 
 #include "serializations.hpp"
 
+template <class T>
+void
+StreamConnection::read(T& t)
+{
+  boost::asio::read(this->socket, boost::asio::buffer(this->inboundHeader));
+  this->inboundData.resize(this->getDataSize());
+
+  boost::asio::read(this->socket, boost::asio::buffer(this->inboundData));
+  this->extractData(t);
+}
+
 template <typename T>
 void
 StreamConnection::write(const T& t)
@@ -43,10 +54,7 @@ StreamConnection::write(const T& t)
                << std::hex << outboundData.size();
   if (!headerStream || headerStream.str().size() != HEADER_LENGTH)
   {
-//     // Something went wrong, inform the caller.
-//     boost::system::error_code error(boost::asio::error::invalid_argument);
-//     socket_.io_service().post(boost::bind(handler, error));
-    return;
+    throw boost::system::system_error(boost::asio::error::invalid_argument);
   }
   outboundHeader = headerStream.str();
 
@@ -55,6 +63,39 @@ StreamConnection::write(const T& t)
   buffers.push_back(boost::asio::buffer(outboundData));
 
   boost::asio::write(this->socket, buffers);
+}
+
+inline std::size_t
+StreamConnection::getDataSize()
+{
+  // Determine the length of the serialized data.
+  std::istringstream is(std::string(this->inboundHeader, HEADER_LENGTH));
+  std::size_t inboundDataSize = 0;
+  if (!(is >> std::hex >> inboundDataSize))
+  {
+    throw boost::system::system_error(boost::asio::error::invalid_argument);
+  }
+
+  return inboundDataSize;
+}
+
+template <class T>
+void
+StreamConnection::extractData(T& t)
+{
+  // Extract the data structure from the data just received.
+  try
+  {
+    std::string archiveData(&this->inboundData[0], this->inboundData.size());
+    std::istringstream archiveStream(archiveData);
+    boost::archive::text_iarchive archive(archiveStream);
+    archive >> t;
+  }
+  catch (std::exception& e)
+  {
+    // Unable to decode data.
+    throw boost::system::system_error(boost::asio::error::invalid_argument);
+  }
 }
 
 // Handle a completed read of a message header. The handler is passed using
@@ -67,21 +108,18 @@ StreamConnection::readHeader(const boost::system::error_code& e,
                              T& t,
                              boost::tuple<Handler> handler)
 {
-  if (e)
+  if ((e == boost::asio::error::eof) && !this->closeHandler.empty())
+  {
+    this->closeHandler();
+  }
+  else if (e)
   {
     throw boost::system::system_error(e);
   }
   else
   {
-    // Determine the length of the serialized data.
-    std::istringstream is(std::string(this->inboundHeader, HEADER_LENGTH));
-    std::size_t inboundDataSize = 0;
-    if (!(is >> std::hex >> inboundDataSize))
-    {
-      throw boost::system::system_error(boost::asio::error::invalid_argument);
-    }
+    this->inboundData.resize(this->getDataSize());
 
-    this->inboundData.resize(inboundDataSize);
     boost::asio::async_read
       (this->socket,
        boost::asio::buffer(this->inboundData),
@@ -107,19 +145,7 @@ StreamConnection::readData(const boost::system::error_code& e,
   }
   else
   {
-    // Extract the data structure from the data just received.
-    try
-    {
-      std::string archiveData(&this->inboundData[0], this->inboundData.size());
-      std::istringstream archiveStream(archiveData);
-      boost::archive::text_iarchive archive(archiveStream);
-      archive >> t;
-    }
-    catch (std::exception& e)
-    {
-      // Unable to decode data.
-      throw boost::system::system_error(boost::asio::error::invalid_argument);
-    }
+    this->extractData(t);
 
     // Inform caller that data has been received ok.
     boost::get<0>(handler)();

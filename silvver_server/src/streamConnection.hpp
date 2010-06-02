@@ -21,14 +21,14 @@
 #include <boost/asio.hpp>
 #include <boost/bind.hpp>
 #include <boost/enable_shared_from_this.hpp>
+#include <boost/function.hpp>
 #include <boost/shared_ptr.hpp>
 #include <boost/tuple/tuple.hpp>
 
 class StreamConnection
-  : public boost::enable_shared_from_this<StreamConnection>
+  :public boost::enable_shared_from_this<StreamConnection>
 {
 public:
-
   typedef boost::shared_ptr<StreamConnection> pointer;
 
   inline static pointer
@@ -49,13 +49,22 @@ public:
     return this->socket.remote_endpoint().address().to_string();
   }
 
-  /**
-   * Asynchronously read a value of type T.
+  inline void
+  setCloseHandler(const boost::function<void (void)>& closeHandler)
+  {
+    this->closeHandler = closeHandler;
+  }
+
+  /** Read a value of type T.
+   * @param t Reference to the variable where the read value will be returned. */
+  template <class T>
+  void read(T& t);
+
+  /** Asynchronously read a value of type T.
    * @param t Reference to the variable where the read value will be returned.
    * @param handler Function with signature "void handler()" which to be called
-   *                when the operation completes.
-   */
-  template <typename T, typename Handler>
+   *                when the operation completes.  */
+  template <class T, class Handler>
   inline void
   asyncRead(T& t, Handler handler)
   {
@@ -69,22 +78,29 @@ public:
                                         boost::make_tuple(handler)));
   }
 
-  template <typename T>
+  template <class T>
   void write(const T& t);
 
 private:
-
   StreamConnection(boost::asio::io_service& ioService)
     :socket(ioService)
   {}
 
-  template <typename T, typename Handler>
+  /// Analise inboundHeader attribute to get the next incoming data size.
+  std::size_t getDataSize();
+
+  /** Extract the last received data package.
+   * @param t Variable where put the extracted data. */
+  template <class T>
+  void extractData(T& t);
+
+  template <class T, class Handler>
   void readHeader(const boost::system::error_code& e,
                   std::size_t bytes_transferred,
                   T& t,
                   boost::tuple<Handler> handler);
 
-  template <typename T, typename Handler>
+  template <class T, class Handler>
   void readData(const boost::system::error_code& e,
                 std::size_t bytes_transferred,
                 T& t,
@@ -97,6 +113,8 @@ private:
   char inboundHeader[HEADER_LENGTH];
 
   std::vector<char> inboundData;
+
+  boost::function<void (void)> closeHandler;
 };
 
 #endif /* _STREAM_CONNECTION_HPP_ */

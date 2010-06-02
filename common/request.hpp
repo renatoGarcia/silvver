@@ -152,31 +152,12 @@ struct AddCamera
   }
 };
 
-struct DelCamera
-{
-  silvver::AbstractCameraUid cameraUid;
-
-  DelCamera()
-    :cameraUid()
-  {}
-
-  DelCamera(const silvver::AbstractCameraUid& cameraUid)
-    :cameraUid(cameraUid)
-  {}
-
-  template<typename Archive>
-  void serialize(Archive& ar, const unsigned)
-  {
-    ar & cameraUid;
-  }
-};
-
 typedef boost::variant<NullRequest,
                        AddTargetClient,
                        DelTargetClient,
                        AddCameraClient,
                        DelCameraClient,
-                       AddCamera,
-                       DelCamera       > Request;
+                       AddCamera       > Request;
+
 
 #endif // _REQUEST_HPP_

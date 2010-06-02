@@ -1,4 +1,4 @@
-/* Copyright 2009 Renato Florentino Garcia <fgar.renato@gmail.com>
+/* Copyright 2009-2010 Renato Florentino Garcia <fgar.renato@gmail.com>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3, as
@@ -17,13 +17,7 @@
 #include "connection.ipp"
 
 #include <boost/bind.hpp>
-#include <boost/lexical_cast.hpp>
-#include <boost/serialization/variant.hpp>
 #include <iostream>
-#include <sstream>
-#include <vector>
-
-#include "request.hpp"
 
 namespace bip = boost::asio::ip;
 
@@ -38,15 +32,18 @@ Connection::runIoService()
 }
 
 Connection::Connection(const std::string& serverIp, unsigned receptionistPort,
-                       const silvver::AbstractCameraUid& abstractCameraUid)
-  :abstractCameraUid(abstractCameraUid)
-  ,receptionistEP(bip::address::from_string(serverIp), receptionistPort)
-  ,socket(Connection::ioService, bip::tcp::endpoint())
+                       const Request& request)
+  :socket(Connection::ioService, bip::tcp::endpoint())
 {
   boost::call_once(Connection::onceFlag,
                    boost::bind(&boost::scoped_ptr<boost::thread>::reset,
                                &Connection::th,
                                new boost::thread(Connection::runIoService)));
+
+  const boost::asio::ip::tcp::endpoint receptionistEP(bip::address::from_string(serverIp), receptionistPort);
+
+  this->socket.connect(receptionistEP);
+  this->write(request);
 }
 
 Connection::~Connection()
@@ -55,47 +52,12 @@ Connection::~Connection()
   {
     try
     {
-      this->disconnect();
+      this->socket.shutdown(bip::tcp::socket::shutdown_both);
+      this->socket.close();
     }
     catch(...)
     {
       std::cerr << "Error on closing the connection with server" << std::endl;
     }
   }
-}
-
-void
-Connection::connect(const procOpt::AnyProcOpt& processorOpt)
-{
-  // bip::tcp::socket receptionistSocket(Connection::ioService);
-  // receptionistSocket.connect(this->receptionistEP);
-  this->socket.connect(this->receptionistEP);
-
-  Request request = AddCamera(processorOpt, this->abstractCameraUid);
-  this->write(request, this->socket);
-
-  // unsigned short remotePort;
-  // this->read(remotePort, receptionistSocket);
-
-  // this->socket.connect(bip::tcp::endpoint(this->receptionistEP.address(),
-  //                                         remotePort));
-
-  // receptionistSocket.shutdown(bip::tcp::socket::shutdown_both);
-  // receptionistSocket.close();
-}
-
-void
-Connection::disconnect()
-{
-  bip::tcp::socket receptionistSocket(Connection::ioService);
-  receptionistSocket.connect(this->receptionistEP);
-
-  Request request = DelCamera(this->abstractCameraUid);
-  this->write(request, receptionistSocket);
-
-  this->socket.shutdown(bip::tcp::socket::shutdown_both);
-  this->socket.close();
-
-  receptionistSocket.shutdown(bip::tcp::socket::shutdown_both);
-  receptionistSocket.close();
 }

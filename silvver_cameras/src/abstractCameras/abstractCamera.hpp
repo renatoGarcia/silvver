@@ -107,7 +107,7 @@ AbstractCamera::sendLocalizations(const std::vector<silvver::Identity<TargetType
                   sendImg,
                   localizations);
 
-  this->serverConnection.send(cameraReading);
+  this->serverConnection.write(cameraReading);
 }
 
 #endif /* _ABSTRACT_CAMERA_HPP_ */

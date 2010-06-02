@@ -1,4 +1,4 @@
-/* Copyright 2009 Renato Florentino Garcia <fgar.renato@gmail.com>
+/* Copyright 2009-2010 Renato Florentino Garcia <fgar.renato@gmail.com>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3, as
@@ -18,7 +18,11 @@
 
 #include "connection.hpp"
 
+#include <boost/archive/text_iarchive.hpp>
+#include <boost/archive/text_oarchive.hpp>
 #include <boost/serialization/vector.hpp>
+#include <sstream>
+#include <vector>
 
 #include "serializations.hpp"
 
@@ -26,7 +30,7 @@ namespace bip = boost::asio::ip;
 
 template <typename T>
 void
-Connection::write(const T& t, boost::asio::ip::tcp::socket& socket)
+Connection::write(const T& t)
 {
   std::string outboundData;
   std::string outboundHeader;
@@ -43,10 +47,7 @@ Connection::write(const T& t, boost::asio::ip::tcp::socket& socket)
                << std::hex << outboundData.size();
   if (!headerStream || (headerStream.str().size()!=Connection::HEADER_LENGTH))
   {
-//     // Something went wrong, inform the caller.
-//     boost::system::error_code error(boost::asio::error::invalid_argument);
-//     socket_.io_service().post(boost::bind(handler, error));
-    return;
+    throw boost::system::system_error(boost::asio::error::invalid_argument);
   }
   outboundHeader = headerStream.str();
 
@@ -54,15 +55,15 @@ Connection::write(const T& t, boost::asio::ip::tcp::socket& socket)
   buffers.push_back(boost::asio::buffer(outboundHeader));
   buffers.push_back(boost::asio::buffer(outboundData));
 
-  boost::asio::write(socket, buffers);
+  boost::asio::write(this->socket, buffers);
 }
 
 template <typename T>
 void
-Connection::read(T& t, boost::asio::ip::tcp::socket& socket)
+Connection::read(T& t)
 {
   char inHeader[Connection::HEADER_LENGTH];
-  boost::asio::read(socket, boost::asio::buffer(inHeader));
+  boost::asio::read(this->socket, boost::asio::buffer(inHeader));
 
   // Determine the length of the serialized data.
   std::istringstream is(std::string(inHeader, Connection::HEADER_LENGTH));
@@ -73,7 +74,7 @@ Connection::read(T& t, boost::asio::ip::tcp::socket& socket)
   }
 
   std::vector<char> inData(inboundDataSize);
-  boost::asio::read(socket, boost::asio::buffer(inData));
+  boost::asio::read(this->socket, boost::asio::buffer(inData));
 
   // Extract the data structure from the data just received.
   try

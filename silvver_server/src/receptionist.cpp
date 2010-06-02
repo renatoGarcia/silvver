@@ -62,13 +62,13 @@ Receptionist::handleAccept(StreamConnection::pointer connection)
   this->currentReception = connection;
 
   // Ask the incoming client for request
-  connection->asyncRead(this->request,
-                        boost::bind(&Receptionist::handleRead,
-                                    this));
+  connection->read(this->request);
+  boost::apply_visitor(*this, this->request);
 
   // Create a new connection and wait a new client
   StreamConnection::pointer newConnection =
     StreamConnection::create(Receptionist::ioService);
+
   this->acceptor.async_accept(newConnection->getSocket(),
                               boost::bind(&Receptionist::handleAccept,
                                           this,
@@ -76,17 +76,16 @@ Receptionist::handleAccept(StreamConnection::pointer connection)
 }
 
 void
-Receptionist::handleRead()
+Receptionist::operator()(NullRequest& request)
 {
-  boost::apply_visitor(*this, this->request);
+  message(MessageLogLevel::ERROR)
+    << ts_output::lock
+    << "Null request received" << std::endl
+    << ts_output::unlock;
 }
 
 void
-Receptionist::operator()(NullRequest& request) const
-{}
-
-void
-Receptionist::operator()(AddTargetClient& request) const
+Receptionist::operator()(AddTargetClient& request)
 {
   boost::shared_ptr<IoConnection>
     ioConnection(new IoConnection(this->currentReception->getRemoteIp(),
@@ -98,21 +97,23 @@ Receptionist::operator()(AddTargetClient& request) const
     << ts_output::lock
     << "Add target client request. Uid: " << request.targetUid << std::endl
     << ts_output::unlock;
+
   this->targetOutputs->addOutput(request.targetUid, ioConnection);
 }
 
 void
-Receptionist::operator()(DelTargetClient& request) const
+Receptionist::operator()(DelTargetClient& request)
 {
   message(MessageLogLevel::INFO)
     << ts_output::lock
     << "Delete target client request. Uid: " << request.targetUid << std::endl
     << ts_output::unlock;
+
   this->targetOutputs->delOutput(request.targetUid, request.localPort);
 }
 
 void
-Receptionist::operator()(AddCameraClient& request) const
+Receptionist::operator()(AddCameraClient& request)
 {
   boost::shared_ptr<IoConnection>
     ioConnection(new IoConnection(this->currentReception->getRemoteIp(),
@@ -124,16 +125,18 @@ Receptionist::operator()(AddCameraClient& request) const
     << ts_output::lock
     << "Add camera client request. Uid: " << request.cameraUid << std::endl
     << ts_output::unlock;
+
   this->cameraOutputs->addOutput(request.cameraUid, ioConnection);
 }
 
 void
-Receptionist::operator()(DelCameraClient& request) const
+Receptionist::operator()(DelCameraClient& request)
 {
   message(MessageLogLevel::INFO)
     << ts_output::lock
     << "Delete camera client request. Uid: " << request.cameraUid << std::endl
     << ts_output::unlock;
+
   this->cameraOutputs->delOutput(request.cameraUid, request.localPort);
 }
 
@@ -145,13 +148,9 @@ Receptionist::operator()(AddCamera& request)
     << "Add camera request. Uid: " << request.cameraUid << std::endl
     << ts_output::unlock;
 
-  // boost::shared_ptr<IoConnection>
-  //   ioConnection(new IoConnection(this->currentReception->getRemoteIp(),
-  //                                 request.localPort));
-
-  // Send to camera the local UDP port number for which it must send the
-  // localizations.
-  // this->currentReception->write(ioConnection->getLocalPort());
+  this->currentReception->setCloseHandler(boost::bind(&Receptionist::closeCamera,
+                                                      this,
+                                                      request.cameraUid));
 
   boost::shared_ptr<InputInterface> input =
     InputFactory::createInput(request.processorOpt, this->currentReception);
@@ -160,18 +159,18 @@ Receptionist::operator()(AddCamera& request)
 }
 
 void
-Receptionist::operator()(DelCamera& request)
+Receptionist::closeCamera(const silvver::AbstractCameraUid& cameraUid)
 {
   message(MessageLogLevel::INFO)
     << ts_output::lock
-    << "Delete camera request. Uid: " << request.cameraUid <<  std::endl
+    << "Camera Uid: " << cameraUid << " closed connection." << std::endl
     << ts_output::unlock;
 
-  if (this->mapInputs.erase(request.cameraUid) != 1)
+  if (this->mapInputs.erase(cameraUid) != 1)
   {
-    message(MessageLogLevel::INFO)
+    message(MessageLogLevel::ERROR)
       << ts_output::lock
-      << "Unknown camera delete request" << std::endl
+      << "Trying close unknown camera." << std::endl
       << ts_output::unlock;
   }
 }
