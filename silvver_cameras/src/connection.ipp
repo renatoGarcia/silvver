@@ -26,22 +26,7 @@ namespace bip = boost::asio::ip;
 
 template <typename T>
 void
-Connection::send(const T& t)
-{
-  std::string outboundData;
-
-  std::ostringstream archiveStream;
-  boost::archive::text_oarchive archive(archiveStream);
-  archive << t;
-  outboundData = archiveStream.str();
-
-  this->outputSocket.send(boost::asio::buffer(outboundData));
-}
-
-
-template <typename T>
-void
-Connection::writeToReceptionist(const T& t)
+Connection::write(const T& t, boost::asio::ip::tcp::socket& socket)
 {
   std::string outboundData;
   std::string outboundHeader;
@@ -54,9 +39,9 @@ Connection::writeToReceptionist(const T& t)
 
   // Format the header.
   std::ostringstream headerStream;
-  headerStream << std::setw(HEADER_LENGTH)
+  headerStream << std::setw(Connection::HEADER_LENGTH)
                << std::hex << outboundData.size();
-  if (!headerStream || headerStream.str().size() != HEADER_LENGTH)
+  if (!headerStream || (headerStream.str().size()!=Connection::HEADER_LENGTH))
   {
 //     // Something went wrong, inform the caller.
 //     boost::system::error_code error(boost::asio::error::invalid_argument);
@@ -69,18 +54,18 @@ Connection::writeToReceptionist(const T& t)
   buffers.push_back(boost::asio::buffer(outboundHeader));
   buffers.push_back(boost::asio::buffer(outboundData));
 
-  boost::asio::write(this->receptionistSocket, buffers);
+  boost::asio::write(socket, buffers);
 }
 
 template <typename T>
 void
-Connection::readFromReceptionist(T& t)
+Connection::read(T& t, boost::asio::ip::tcp::socket& socket)
 {
-  char inHeader[HEADER_LENGTH];
-  boost::asio::read(this->receptionistSocket, boost::asio::buffer(inHeader));
+  char inHeader[Connection::HEADER_LENGTH];
+  boost::asio::read(socket, boost::asio::buffer(inHeader));
 
   // Determine the length of the serialized data.
-  std::istringstream is(std::string(inHeader, HEADER_LENGTH));
+  std::istringstream is(std::string(inHeader, Connection::HEADER_LENGTH));
   std::size_t inboundDataSize = 0;
   if (!(is >> std::hex >> inboundDataSize))
   {
@@ -88,7 +73,7 @@ Connection::readFromReceptionist(T& t)
   }
 
   std::vector<char> inData(inboundDataSize);
-  boost::asio::read(this->receptionistSocket, boost::asio::buffer(inData));
+  boost::asio::read(socket, boost::asio::buffer(inData));
 
   // Extract the data structure from the data just received.
   try

@@ -295,7 +295,7 @@ namespace silvver
   {
     AbstractCameraUid camUid;
     uint64_t timestamp;
-    IplImage* const image;
+    IplImage* image;
     std::vector<Identity<TargetType> > localizations;
 
     CameraReading()
@@ -307,7 +307,7 @@ namespace silvver
 
     CameraReading(const AbstractCameraUid& camUid,
                   uint64_t timestamp,
-                  IplImage* const image,
+                  IplImage* image,
                   const std::vector<Identity<TargetType> >& localizations)
       :camUid(camUid)
       ,timestamp(timestamp)

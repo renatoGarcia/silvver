@@ -145,16 +145,16 @@ Receptionist::operator()(AddCamera& request)
     << "Add camera request. Uid: " << request.cameraUid << std::endl
     << ts_output::unlock;
 
-  boost::shared_ptr<IoConnection>
-    ioConnection(new IoConnection(this->currentReception->getRemoteIp(),
-                                  request.localPort));
+  // boost::shared_ptr<IoConnection>
+  //   ioConnection(new IoConnection(this->currentReception->getRemoteIp(),
+  //                                 request.localPort));
 
   // Send to camera the local UDP port number for which it must send the
   // localizations.
-  this->currentReception->write(ioConnection->getLocalPort());
+  // this->currentReception->write(ioConnection->getLocalPort());
 
   boost::shared_ptr<InputInterface> input =
-    InputFactory::createInput(request.processorOpt, ioConnection);
+    InputFactory::createInput(request.processorOpt, this->currentReception);
 
   this->mapInputs.insert(std::make_pair(request.cameraUid, input));
 }

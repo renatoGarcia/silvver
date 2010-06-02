@@ -22,6 +22,8 @@
 #include <boost/archive/text_oarchive.hpp>
 #include <boost/system/system_error.hpp>
 
+#include "serializations.hpp"
+
 template <typename T>
 void
 StreamConnection::write(const T& t)

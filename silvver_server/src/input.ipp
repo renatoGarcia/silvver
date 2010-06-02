@@ -22,21 +22,22 @@
 #include <boost/foreach.hpp>
 
 #include "log.hpp"
+#include "ioConnection.ipp"
 
 template <typename Type>
-Input<Type>::Input(boost::shared_ptr<IoConnection> connection,
+Input<Type>::Input(boost::shared_ptr<StreamConnection> connection,
                    boost::shared_ptr< ProcessorInterface<Type> > processor)
   :InputInterface()
   ,currentInput()
   ,connection(connection)
-  ,connectionPort(connection->getLocalPort())
+  // ,connectionPort(connection->getLocalPort())
   ,processor(processor)
   ,clientCameraMap(OutputMultiMap<CLIENT_CAMERA, silvver::AbstractCameraUid>::instantiate())
 {
 
-  this->connection->asyncReceive(this->currentInput,
-                                 boost::bind(&Input<Type>::handleReceive,
-                                             this));
+  this->connection->asyncRead(this->currentInput,
+                              boost::bind(&Input<Type>::handleReceive,
+                                          this));
 }
 
 template <typename Type>
@@ -67,9 +68,9 @@ Input<Type>::handleReceive()
 
   this->processor->deliverPackage(this->currentInput);
 
-  this->connection->asyncReceive(this->currentInput,
-                                 boost::bind(&Input<Type>::handleReceive,
-                                             this));
+  this->connection->asyncRead(this->currentInput,
+                              boost::bind(&Input<Type>::handleReceive,
+                                          this));
 }
 
 #endif /* _INPUT_IPP_ */

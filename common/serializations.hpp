@@ -74,27 +74,27 @@ namespace boost
     /** Serialization for IplImage.
      * Variables that are assigned to NULL are the ones ignored by OpenCV
      * (but used in Intel Ipl Image Library)
-     * Code grabed from:
+     * Based in code from:
      * http://cycabtk.gforge.inria.fr/wiki/doku.php?id=howto:devel-hugr*/
     template<class Archive>
     void
     save(Archive& ar, const IplImage& image, const unsigned int version)
     {
-      ar & image.nSize;
-      ar & image.ID;
-      ar & image.nChannels;
-      ar & image.depth;
-      ar & image.dataOrder;
-      ar & image.origin;
-      ar & image.width;
-      ar & image.height;
+      ar << image.nSize;
+      ar << image.ID;
+      ar << image.nChannels;
+      ar << image.depth;
+      ar << image.dataOrder;
+      ar << image.origin;
+      ar << image.width;
+      ar << image.height;
 
-      ar & image.imageSize;
+      ar << image.imageSize;
 
       for(int i=0; i<image.imageSize ; i++)
-        ar & image.imageData[i];
+        ar << image.imageData[i];
 
-      ar & image.widthStep;
+      ar << image.widthStep;
     }
 
     template<class Archive>
@@ -103,31 +103,31 @@ namespace boost
     {
       int old_size = image.imageSize;
 
-      ar & image.nSize;
-      ar & image.ID;
-      ar & image.nChannels;
-      ar & image.depth;
-      ar & image.dataOrder;
-      ar & image.origin;
-      ar & image.width;
-      ar & image.height;
+      ar >> image.nSize;
+      ar >> image.ID;
+      ar >> image.nChannels;
+      ar >> image.depth;
+      ar >> image.dataOrder;
+      ar >> image.origin;
+      ar >> image.width;
+      ar >> image.height;
 
       image.roi = NULL;
       image.maskROI = NULL;
 
-      ar & image.imageSize;
-      if(image.imageSize != old_size)
-      {
-        delete image.imageData;
-        image.imageData = new char[image.imageSize];
-      }
+      ar >> image.imageSize;
+      // if(image.imageSize != old_size)
+      // {
+      //   delete image.imageData;
+      //   image.imageData = new char[image.imageSize];
+      // }
 
-      for(int i=0; i<image.imageSize ; i++)
-      {
-        ar & image.imageData[i];
-      }
+      // for(int i=0; i<image.imageSize ; i++)
+      // {
+      //   ar >> image.imageData[i];
+      // }
 
-      ar & image.widthStep;
+      ar >> image.widthStep;
 
       bzero(image.BorderMode, 4);
       bzero(image.BorderConst, 4);

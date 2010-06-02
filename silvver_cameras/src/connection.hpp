@@ -34,7 +34,6 @@
 class Connection
 {
 public:
-
   Connection(const std::string& serverIp, unsigned receptionistPort,
              const silvver::AbstractCameraUid& abstractCameraUid);
 
@@ -48,9 +47,6 @@ public:
   void send(const T& t);
 
 private:
-
-  friend class boost::thread;
-
   static void runIoService();
 
   static const unsigned HEADER_LENGTH = 8;
@@ -63,17 +59,22 @@ private:
 
   const silvver::AbstractCameraUid abstractCameraUid;
 
-  boost::asio::ip::tcp::socket receptionistSocket;
-
   const boost::asio::ip::tcp::endpoint receptionistEP;
 
-  boost::asio::ip::udp::socket outputSocket;
+  boost::asio::ip::tcp::socket socket;
 
   template <typename T>
-  void writeToReceptionist(const T& t);
+  void write(const T& t, boost::asio::ip::tcp::socket& socket);
 
   template <typename T>
-  void readFromReceptionist(T& t);
+  void read(T& t, boost::asio::ip::tcp::socket& socket);
 };
+
+template <typename T>
+inline void
+Connection::send(const T& t)
+{
+  this->write(t, this->socket);
+}
 
 #endif // _CONNECTION_HPP_

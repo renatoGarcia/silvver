@@ -131,19 +131,16 @@ struct DelCameraClient
 struct AddCamera
 {
   procOpt::AnyProcOpt processorOpt;
-  unsigned short localPort;
   silvver::AbstractCameraUid cameraUid;
 
   AddCamera()
     :processorOpt()
-    ,localPort(0)
     ,cameraUid()
   {}
 
-  AddCamera(const procOpt::AnyProcOpt& processorOpt, unsigned short localPort,
+  AddCamera(const procOpt::AnyProcOpt& processorOpt,
             const silvver::AbstractCameraUid& cameraUid)
     :processorOpt(processorOpt)
-    ,localPort(localPort)
     ,cameraUid(cameraUid)
   {}
 
@@ -151,7 +148,6 @@ struct AddCamera
   void serialize(Archive& ar, const unsigned)
   {
     ar & processorOpt;
-    ar & localPort;
     ar & cameraUid;
   }
 };

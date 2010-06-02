@@ -40,9 +40,8 @@ Connection::runIoService()
 Connection::Connection(const std::string& serverIp, unsigned receptionistPort,
                        const silvver::AbstractCameraUid& abstractCameraUid)
   :abstractCameraUid(abstractCameraUid)
-  ,receptionistSocket(Connection::ioService)
   ,receptionistEP(bip::address::from_string(serverIp), receptionistPort)
-  ,outputSocket(Connection::ioService, bip::udp::endpoint())
+  ,socket(Connection::ioService, bip::tcp::endpoint())
 {
   boost::call_once(Connection::onceFlag,
                    boost::bind(&boost::scoped_ptr<boost::thread>::reset,
@@ -52,7 +51,7 @@ Connection::Connection(const std::string& serverIp, unsigned receptionistPort,
 
 Connection::~Connection()
 {
-  if(this->outputSocket.is_open())
+  if(this->socket.is_open())
   {
     try
     {
@@ -68,34 +67,35 @@ Connection::~Connection()
 void
 Connection::connect(const procOpt::AnyProcOpt& processorOpt)
 {
-  this->receptionistSocket.connect(this->receptionistEP);
+  // bip::tcp::socket receptionistSocket(Connection::ioService);
+  // receptionistSocket.connect(this->receptionistEP);
+  this->socket.connect(this->receptionistEP);
 
-  Request request = AddCamera(processorOpt,
-                              this->outputSocket.local_endpoint().port(),
-                              this->abstractCameraUid);
-  this->writeToReceptionist(request);
+  Request request = AddCamera(processorOpt, this->abstractCameraUid);
+  this->write(request, this->socket);
 
-  unsigned short remotePort;
-  this->readFromReceptionist(remotePort);
+  // unsigned short remotePort;
+  // this->read(remotePort, receptionistSocket);
 
-  this->outputSocket.connect(bip::udp::endpoint(this->receptionistEP.address(),
-                                                remotePort));
+  // this->socket.connect(bip::tcp::endpoint(this->receptionistEP.address(),
+  //                                         remotePort));
 
-  this->receptionistSocket.shutdown(bip::tcp::socket::shutdown_both);
-  this->receptionistSocket.close();
+  // receptionistSocket.shutdown(bip::tcp::socket::shutdown_both);
+  // receptionistSocket.close();
 }
 
 void
 Connection::disconnect()
 {
-  this->receptionistSocket.connect(this->receptionistEP);
+  bip::tcp::socket receptionistSocket(Connection::ioService);
+  receptionistSocket.connect(this->receptionistEP);
 
   Request request = DelCamera(this->abstractCameraUid);
-  this->writeToReceptionist(request);
+  this->write(request, receptionistSocket);
 
-  this->outputSocket.shutdown(bip::udp::socket::shutdown_both);
-  this->outputSocket.close();
+  this->socket.shutdown(bip::tcp::socket::shutdown_both);
+  this->socket.close();
 
-  this->receptionistSocket.shutdown(bip::tcp::socket::shutdown_both);
-  this->receptionistSocket.close();
+  receptionistSocket.shutdown(bip::tcp::socket::shutdown_both);
+  receptionistSocket.close();
 }

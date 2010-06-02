@@ -34,7 +34,7 @@ public:
    * @param connection A shared_ptr to an IoConnection already connected
    *                   with a camera.
    * @param processor A shared_ptr to the correct processor.  */
-  Input(boost::shared_ptr<IoConnection> connection,
+  Input(boost::shared_ptr<StreamConnection> connection,
         boost::shared_ptr<ProcessorInterface<Type> > processor);
 
   ~Input();
@@ -46,10 +46,10 @@ private:
   silvver::CameraReading<Type> currentInput;
 
   /// The connection with the camera.
-  boost::shared_ptr<IoConnection> connection;
+  boost::shared_ptr<StreamConnection> connection;
 
-  /// The local port where hearing for incoming data from cameras.
-  unsigned connectionPort;
+  // /// The local port where hearing for incoming data from cameras.
+  // unsigned connectionPort;
 
   boost::shared_ptr<ProcessorInterface<Type> > processor;
 
