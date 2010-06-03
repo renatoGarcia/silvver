@@ -24,6 +24,7 @@
 #include <sstream>
 #include <vector>
 
+#include "exceptions.hpp"
 #include "serializations.hpp"
 
 namespace bip = boost::asio::ip;
@@ -55,7 +56,15 @@ Connection::write(const T& t)
   buffers.push_back(boost::asio::buffer(outboundHeader));
   buffers.push_back(boost::asio::buffer(outboundData));
 
-  boost::asio::write(this->socket, buffers);
+  try
+  {
+    boost::asio::write(this->socket, buffers);
+  }
+  catch (const boost::system::system_error& e)
+  {
+    throw server_connection_error()
+      << info_what("Error writing to silvver-server");
+  }
 }
 
 template <typename T>

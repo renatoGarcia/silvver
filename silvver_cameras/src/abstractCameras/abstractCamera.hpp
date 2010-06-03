@@ -20,11 +20,14 @@
 #include <boost/shared_ptr.hpp>
 #include <boost/thread/condition.hpp>
 #include <boost/thread/mutex.hpp>
+#include <cstdlib>
 #include <stdint.h>
 
 #include "../connection.ipp"
-#include "../hardCameras/hardCamera.hpp"
+#include "../exceptions.hpp"
 #include "../frame.hpp"
+#include "../hardCameras/hardCamera.hpp"
+#include "../log.hpp"
 #include "../observer.hpp"
 #include "../scene.hpp"
 #include "processorOptions.hpp"
@@ -107,7 +110,16 @@ AbstractCamera::sendLocalizations(const std::vector<silvver::Identity<TargetType
                   sendImg,
                   localizations);
 
-  this->serverConnection.write(cameraReading);
+  try
+  {
+    this->serverConnection.write(cameraReading);
+  }
+  catch (const server_connection_error& e)
+  {
+    message(LogLevel::ERROR)
+      << "[Fatal error]\n" << errorsInfo2string(e) << std::endl;
+    exit(EXIT_FAILURE);
+  }
 }
 
 #endif /* _ABSTRACT_CAMERA_HPP_ */

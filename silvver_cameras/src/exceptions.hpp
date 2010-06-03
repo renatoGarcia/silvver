@@ -40,6 +40,8 @@ struct file_parsing_error: public virtual silvver_cameras_exception {};
 struct missing_field: public virtual file_parsing_error {};
 struct type_error: public virtual file_parsing_error {};
 
+struct server_connection_error: public virtual silvver_cameras_exception {};
+
 std::string errorsInfo2string(const silvver_cameras_exception& e);
 
 typedef boost::error_info<struct tag_what, std::string>

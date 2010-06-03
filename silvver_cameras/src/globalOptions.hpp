@@ -19,8 +19,8 @@ namespace globalOptions
 {
   struct Options
   {
-    std::string serverIP;
-    int receptionistPort;
+    std::string serverName;
+    std::string receptionistPort;
 
     bool sendImages;
 

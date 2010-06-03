@@ -80,11 +80,11 @@ int main(int argc, char **argv)
   desc.add_options()
     ("help,h", "Print this help message and exit")
     ("version,V", "Print version and exit")
-    ("server-ip,s",
-     po::value<std::string>(&global_options.serverIP)->default_value("127.0.0.1"),
-     "IP address of silvver-server")
+    ("server-name,s",
+     po::value<std::string>(&global_options.serverName)->default_value("localhost"),
+     "Hostname or IP address of silvver-server")
     ("receptionist-port,p",
-     po::value<int>(&global_options.receptionistPort)->default_value(12000),
+     po::value<std::string>(&global_options.receptionistPort)->default_value("12000"),
      "Port on the server where the receptionist is hearing")
     ("scene-config,c",
      po::value<std::string>(&luaFile)->default_value("scene.lua"),

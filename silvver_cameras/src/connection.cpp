@@ -19,6 +19,8 @@
 #include <boost/bind.hpp>
 #include <iostream>
 
+#include "exceptions.hpp"
+
 namespace bip = boost::asio::ip;
 
 boost::asio::io_service Connection::ioService;
@@ -31,7 +33,8 @@ Connection::runIoService()
   Connection::ioService.run();
 }
 
-Connection::Connection(const std::string& serverIp, unsigned receptionistPort,
+Connection::Connection(const std::string& serverName,
+                       const std::string& receptionistPort,
                        const Request& request)
   :socket(Connection::ioService, bip::tcp::endpoint())
 {
@@ -40,9 +43,24 @@ Connection::Connection(const std::string& serverIp, unsigned receptionistPort,
                                &Connection::th,
                                new boost::thread(Connection::runIoService)));
 
-  const boost::asio::ip::tcp::endpoint receptionistEP(bip::address::from_string(serverIp), receptionistPort);
+  bip::tcp::resolver resolver(Connection::ioService);
+  bip::tcp::resolver::query query(serverName, receptionistPort);
 
-  this->socket.connect(receptionistEP);
+  bip::tcp::resolver::iterator endpoint_iterator = resolver.resolve(query);
+  bip::tcp::resolver::iterator end;
+  boost::system::error_code error = boost::asio::error::host_not_found;
+  while (error && endpoint_iterator != end)
+  {
+    socket.close();
+    socket.connect(*endpoint_iterator, error);
+    ++endpoint_iterator;
+  }
+  if (error)
+  {
+    throw server_connection_error()
+      << info_what("Server " + serverName + " not found.");
+  }
+
   this->write(request);
 }
 

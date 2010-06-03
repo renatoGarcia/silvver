@@ -27,7 +27,8 @@
 class Connection
 {
 public:
-  Connection(const std::string& serverIp, unsigned receptionistPort,
+  Connection(const std::string& serverName,
+             const std::string& receptionistPort,
              const Request& request);
 
   ~Connection();

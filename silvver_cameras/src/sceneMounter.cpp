@@ -17,6 +17,7 @@
 
 #include <boost/foreach.hpp>
 #include <boost/shared_ptr.hpp>
+#include <cstdlib>
 
 #include "cfReader.hpp"
 #include "abstractCameraFactory.hpp"

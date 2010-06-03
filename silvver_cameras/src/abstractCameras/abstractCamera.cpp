@@ -26,7 +26,7 @@ AbstractCamera::AbstractCamera(const scene::Camera& cameraConfig,
   :subjectHardCamera(HardCameraFactory::create(cameraConfig.hardware))
   ,currentFrame()
   ,abstractCameraUid(silvverUid, subjectHardCamera->silvverUid)
-  ,serverConnection(global_options.serverIP, global_options.receptionistPort,
+  ,serverConnection(global_options.serverName, global_options.receptionistPort,
                     AddCamera(processorOptions, this->abstractCameraUid))
   ,unreadImage(false)
   ,unreadImageAccess()

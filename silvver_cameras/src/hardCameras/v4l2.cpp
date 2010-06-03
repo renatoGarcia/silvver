@@ -25,6 +25,7 @@
 #include <fcntl.h>
 #include <stropts.h>
 #include <sys/mman.h>
+#include <sys/stat.h>
 
 #include "../frame.hpp"
 #include "../log.hpp"
