@@ -30,7 +30,6 @@ Input<Type>::Input(boost::shared_ptr<StreamConnection> connection,
   :InputInterface()
   ,currentInput()
   ,connection(connection)
-  // ,connectionPort(connection->getLocalPort())
   ,processor(processor)
   ,clientCameraMap(OutputMultiMap<CLIENT_CAMERA, silvver::AbstractCameraUid>::instantiate())
 {

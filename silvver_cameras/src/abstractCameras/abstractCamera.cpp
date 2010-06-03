@@ -124,9 +124,15 @@ AbstractCamera::toWorld(silvver::Pose &pose) const
     this->rot[8] * tempPose.z;
 }
 
-IplImageWrapper
+silvver::Image
 AbstractCamera::imageToSend()
 {
-  return
-    global_options.sendImages ? this->currentFrame.image : IplImageWrapper();
+  if (global_options.sendImages)
+  {
+    return silvver::Image(this->currentFrame.image);
+  }
+  else
+  {
+    return silvver::Image();
+  }
 }

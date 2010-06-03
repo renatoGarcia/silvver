@@ -30,7 +30,7 @@
 #include <stdint.h>
 #include <vector>
 
-#include <opencv/cv.h>
+#include "silvverImage.hpp"
 
 namespace silvver
 {
@@ -295,19 +295,19 @@ namespace silvver
   {
     AbstractCameraUid camUid;
     uint64_t timestamp;
-    IplImage* image;
+    Image image;
     std::vector<Identity<TargetType> > localizations;
 
     CameraReading()
       :camUid()
       ,timestamp(0)
-      ,image(NULL)
+      ,image()
       ,localizations()
     {}
 
     CameraReading(const AbstractCameraUid& camUid,
                   uint64_t timestamp,
-                  IplImage* image,
+                  const Image& image,
                   const std::vector<Identity<TargetType> >& localizations)
       :camUid(camUid)
       ,timestamp(timestamp)

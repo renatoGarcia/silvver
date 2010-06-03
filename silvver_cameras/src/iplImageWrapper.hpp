@@ -27,15 +27,9 @@
 class IplImageWrapper
 {
 public:
-
-  // /// Tuple with image size, depth and number of channels.
-  // typedef boost::tuple<CvSize,int,int> IplParameters;
-
   /// Default constructor.
   /// Build a empty image, allocating no data.
   IplImageWrapper();
-
-  // IplImageWrapper(const IplParameters& parameters);
 
   IplImageWrapper(const CvSize& size, int depth, int nChannels);
 
@@ -94,12 +88,6 @@ inline
 IplImageWrapper::IplImageWrapper()
   :iplImage(NULL)
 {}
-
-// inline
-// IplImageWrapper::IplImageWrapper(const IplParameters& parameters)
-//   :iplImage(cvCreateImage(parameters.get<0>(), parameters.get<1>(),
-//                           parameters.get<2>()))
-// {}
 
 inline
 IplImageWrapper::IplImageWrapper(const CvSize& size, int depth, int nChannels)

@@ -48,9 +48,6 @@ private:
   /// The connection with the camera.
   boost::shared_ptr<StreamConnection> connection;
 
-  // /// The local port where hearing for incoming data from cameras.
-  // unsigned connectionPort;
-
   boost::shared_ptr<ProcessorInterface<Type> > processor;
 
   /// Clients hearing for localizations before be processed.

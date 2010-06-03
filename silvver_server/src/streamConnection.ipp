@@ -84,18 +84,18 @@ void
 StreamConnection::extractData(T& t)
 {
   // Extract the data structure from the data just received.
-  try
-  {
+  // try
+  // {
     std::string archiveData(&this->inboundData[0], this->inboundData.size());
     std::istringstream archiveStream(archiveData);
     boost::archive::text_iarchive archive(archiveStream);
     archive >> t;
-  }
-  catch (std::exception& e)
-  {
-    // Unable to decode data.
-    throw boost::system::system_error(boost::asio::error::invalid_argument);
-  }
+  // }
+  // catch (std::exception& e)
+  // {
+  //   // Unable to decode data.
+  //   throw boost::system::system_error(boost::asio::error::invalid_argument);
+  // }
 }
 
 // Handle a completed read of a message header. The handler is passed using

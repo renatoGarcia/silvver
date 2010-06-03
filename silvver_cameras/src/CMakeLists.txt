@@ -86,6 +86,8 @@ FIND_PACKAGE(Boost REQUIRED system filesystem program_options thread serializati
 FIND_PACKAGE(Lua51 REQUIRED lua m)
 FIND_PACKAGE(OpenCV REQUIRED)
 
+ADD_DEFINITIONS(-DHAS_OPENCV)
+
 INCLUDE_DIRECTORIES(${Boost_INCLUDE_DIR}
                     ${LUA_INCLUDE_DIR}
                     ${OpenCV_INCLUDE_DIR})
