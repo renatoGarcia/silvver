@@ -29,12 +29,8 @@ int main(int argc, char *argv[])
 
   AbstractCamera<Pose> camera(printPose, uid);
 
-  camera.connect();
-
   cout << "Press [enter] to quit." << endl;
   getchar();
-
-  camera.disconnect();
 
   return 0;
 }

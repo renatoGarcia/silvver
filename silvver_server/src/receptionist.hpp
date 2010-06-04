@@ -1,4 +1,4 @@
-/* Copyright 2009 Renato Florentino Garcia <fgar.renato@gmail.com>
+/* Copyright 2009-2010 Renato Florentino Garcia <fgar.renato@gmail.com>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3, as
@@ -25,7 +25,7 @@
 
 #include "outputMultiMap.hpp"
 #include "inputInterface.hpp"
-#include "streamConnection.hpp"
+#include "connection.hpp"
 #include "request.hpp"
 #include "silvverTypes.hpp"
 
@@ -58,7 +58,13 @@ public:
 private:
   void run();
 
-  void handleAccept(StreamConnection::pointer connection);
+  void handleAccept(Connection::pointer connection);
+
+  void closeTargetClient(const silvver::TargetUid& targetUid,
+                         boost::shared_ptr<Connection> connection);
+
+  void closeCameraClient(const silvver::AbstractCameraUid& cameraUid,
+                         boost::shared_ptr<Connection> connection);
 
   void closeCamera(const silvver::AbstractCameraUid& cameraUid);
 
@@ -67,7 +73,7 @@ private:
   boost::asio::ip::tcp::acceptor acceptor;
 
   /// Handle the TCP connection with the client being currently managed.
-  StreamConnection::pointer currentReception;
+  Connection::pointer currentReception;
 
   /// Handle the request of the client being currently managed.
   Request request;
@@ -75,9 +81,9 @@ private:
   /// Connected input clients collection
   std::map<silvver::AbstractCameraUid, boost::shared_ptr<InputInterface> > mapInputs;
 
-  boost::shared_ptr<OutputMultiMap<CLIENT_TARGET, silvver::TargetUid> > targetOutputs;
+  boost::shared_ptr<OutputMultiMap<silvver::TargetUid> > targetOutputs;
 
-  boost::shared_ptr<OutputMultiMap<CLIENT_CAMERA, silvver::AbstractCameraUid> > cameraOutputs;
+  boost::shared_ptr<OutputMultiMap<silvver::AbstractCameraUid> > cameraOutputs;
 
   /// Thread where the boost io_service will run
   boost::scoped_ptr<boost::thread> thReceptionist;

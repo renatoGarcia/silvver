@@ -20,7 +20,7 @@
 #include <string>
 
 #include "inputInterface.hpp"
-#include "ioConnection.hpp"
+#include "connection.hpp"
 #include "outputMultiMap.hpp"
 #include "processorInterface.hpp"
 #include "silvverTypes.hpp"
@@ -31,10 +31,10 @@ class Input: public InputInterface
 {
 public:
   /** Input class constructor.
-   * @param connection A shared_ptr to an IoConnection already connected
+   * @param connection A shared_ptr to a Connection object already connected
    *                   with a camera.
    * @param processor A shared_ptr to the correct processor.  */
-  Input(boost::shared_ptr<StreamConnection> connection,
+  Input(boost::shared_ptr<Connection> connection,
         boost::shared_ptr<ProcessorInterface<Type> > processor);
 
   ~Input();
@@ -46,12 +46,12 @@ private:
   silvver::CameraReading<Type> currentInput;
 
   /// The connection with the camera.
-  boost::shared_ptr<StreamConnection> connection;
+  boost::shared_ptr<Connection> connection;
 
   boost::shared_ptr<ProcessorInterface<Type> > processor;
 
   /// Clients hearing for localizations before be processed.
-  boost::shared_ptr<OutputMultiMap<CLIENT_CAMERA, silvver::AbstractCameraUid> > clientCameraMap;
+  boost::shared_ptr<OutputMultiMap<silvver::AbstractCameraUid> > clientCameraMap;
 };
 
 #endif /* _INPUT_HPP_ */

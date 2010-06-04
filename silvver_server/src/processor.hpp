@@ -25,20 +25,20 @@
 
 /// Abstract base class to the concrete processor classes.
 template <class Tinput, class Toutput>
-class Processor : public ProcessorInterface<Tinput>
+class Processor
+  :public ProcessorInterface<Tinput>
 {
 protected:
   Processor();
 
   /** Send the final localizations to clients hearing for it.
    *
-   * @param localizations A vector with all target localized.
-   */
+   * @param localizations A vector with all target localized.  */
   void sendToOutputs(const std::vector<silvver::Identity<Toutput> >&
                      localizations) const;
 
 private:
-  boost::shared_ptr<OutputMultiMap<CLIENT_TARGET, silvver::TargetUid> > outputMap;
+  boost::shared_ptr<OutputMultiMap<silvver::TargetUid> > outputMap;
 };
 
 #endif /* _PROCESSOR_HPP_ */

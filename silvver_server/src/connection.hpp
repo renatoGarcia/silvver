@@ -13,8 +13,8 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef _STREAM_CONNECTION_HPP_
-#define _STREAM_CONNECTION_HPP_
+#ifndef _CONNECTION_HPP_
+#define _CONNECTION_HPP_
 
 #include <string>
 
@@ -25,16 +25,16 @@
 #include <boost/shared_ptr.hpp>
 #include <boost/tuple/tuple.hpp>
 
-class StreamConnection
-  :public boost::enable_shared_from_this<StreamConnection>
+class Connection
+  :public boost::enable_shared_from_this<Connection>
 {
 public:
-  typedef boost::shared_ptr<StreamConnection> pointer;
+  typedef boost::shared_ptr<Connection> pointer;
 
   inline static pointer
   create(boost::asio::io_service& ioService)
   {
-    return pointer(new StreamConnection(ioService));
+    return pointer(new Connection(ioService));
   }
 
   inline boost::asio::ip::tcp::socket&
@@ -43,11 +43,11 @@ public:
     return this->socket;
   }
 
-  inline std::string
-  getRemoteIp()
-  {
-    return this->socket.remote_endpoint().address().to_string();
-  }
+  // inline std::string
+  // getRemoteIp()
+  // {
+  //   return this->socket.remote_endpoint().address().to_string();
+  // }
 
   inline void
   setCloseHandler(const boost::function<void (void)>& closeHandler)
@@ -70,7 +70,7 @@ public:
   {
     boost::asio::async_read(this->socket,
                             boost::asio::buffer(inboundHeader),
-                            boost::bind(&StreamConnection::readHeader<T, Handler>,
+                            boost::bind(&Connection::readHeader<T, Handler>,
                                         shared_from_this(),
                                         boost::asio::placeholders::error,
                                         boost::asio::placeholders::bytes_transferred,
@@ -82,7 +82,7 @@ public:
   void write(const T& t);
 
 private:
-  StreamConnection(boost::asio::io_service& ioService)
+  Connection(boost::asio::io_service& ioService)
     :socket(ioService)
   {}
 
@@ -117,4 +117,4 @@ private:
   boost::function<void (void)> closeHandler;
 };
 
-#endif /* _STREAM_CONNECTION_HPP_ */
+#endif /* _CONNECTION_HPP_ */

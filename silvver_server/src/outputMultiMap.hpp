@@ -21,51 +21,42 @@
 #include <map>
 #include <vector>
 
-#include "ioConnection.hpp"
+#include "connection.hpp"
 #include "singleton.hpp"
 
-enum ClientType
-{
-  CLIENT_TARGET,
-  CLIENT_CAMERA
-};
-
 /** A class to hold the connected outputs.
- * This class wrap the STL multimap for thread safety.
- */
-template<ClientType clientType, class KeyType>
-class OutputMultiMap: public Singleton<OutputMultiMap<clientType, KeyType> >
+ * This class wrap the STL multimap for thread safety. */
+template<class KeyType>
+class OutputMultiMap
+  :public Singleton<OutputMultiMap<KeyType> >
 {
 public:
-
   /** Add a output.
    * @param silvverUid The silvver uid of target or camera being observed.
-   * @param outputConnection An IoConnection already made with the output. */
-  void addOutput(KeyType silvverUid,
-                 boost::shared_ptr<IoConnection> outputConnection);
+   * @param connection A Connection already made with the output.  */
+  void addOutput(KeyType silvverUid, boost::shared_ptr<Connection> connection);
 
   /** Delete a output.
    * @param silvverUid The silvver uid of target or camera being observed.
-   * @param remotePort The remote port where the client is connected, given by
-   *                   IoConnection::getRemotePort()  */
-  void delOutput(KeyType silvverUid, unsigned remotePort);
+   * @param connection A pointer to connection of the output to be deleted. */
+  void delOutput(KeyType silvverUid, boost::shared_ptr<Connection> connection);
 
   /** Return connections to all outputs which are listening for a given target.
    * @param silvverUid The silvver uid of target or camera being observed.
-   * @param outputsConnections A vector of shared_prt with IoConnection to
+   * @param outputsConnections A vector of shared_prt with Connections to
    *                           all clients found.  */
   void findOutputs(KeyType silvverUid,
-                   std::vector<boost::shared_ptr<IoConnection> >& outputsConnections);
+                   std::vector<boost::shared_ptr<Connection> >& outputsConnections);
 
 private:
-  friend class Singleton<OutputMultiMap<clientType, KeyType> >;
+  friend class Singleton<OutputMultiMap<KeyType> >;
 
-  typedef std::multimap<KeyType, boost::shared_ptr<IoConnection> > TMultiMap;
+  typedef std::multimap<KeyType, boost::shared_ptr<Connection> > TMultiMap;
 
 private:
-  boost::shared_mutex accessMap;
-
   OutputMultiMap();
+
+  boost::shared_mutex accessMap;
 
   TMultiMap outputs;
 };

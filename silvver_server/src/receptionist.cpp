@@ -1,4 +1,4 @@
-/* Copyright 2009 Renato Florentino Garcia <fgar.renato@gmail.com>
+/* Copyright 2009-2010 Renato Florentino Garcia <fgar.renato@gmail.com>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3, as
@@ -19,8 +19,8 @@
 
 #include "log.hpp"
 #include "inputFactory.hpp"
-#include "ioConnection.ipp"
-#include "streamConnection.ipp"
+#include "connection.ipp"
+#include "connection.ipp"
 
 namespace ba = boost::asio;
 namespace bip = boost::asio::ip;
@@ -32,12 +32,11 @@ Receptionist::Receptionist(unsigned localPort)
   ,currentReception()
   ,request()
   ,mapInputs()
-  ,targetOutputs(OutputMultiMap<CLIENT_TARGET, silvver::TargetUid>::instantiate())
-  ,cameraOutputs(OutputMultiMap<CLIENT_CAMERA, silvver::AbstractCameraUid>::instantiate())
+  ,targetOutputs(OutputMultiMap<silvver::TargetUid>::instantiate())
+  ,cameraOutputs(OutputMultiMap<silvver::AbstractCameraUid>::instantiate())
   ,thReceptionist(new boost::thread(&Receptionist::run, this))
 {
-  StreamConnection::pointer connection =
-    StreamConnection::create(Receptionist::ioService);
+  Connection::pointer connection = Connection::create(Receptionist::ioService);
   this->acceptor.async_accept(connection->getSocket(),
                               boost::bind(&Receptionist::handleAccept,
                                           this,
@@ -57,7 +56,7 @@ Receptionist::run()
 }
 
 void
-Receptionist::handleAccept(StreamConnection::pointer connection)
+Receptionist::handleAccept(Connection::pointer connection)
 {
   this->currentReception = connection;
 
@@ -66,8 +65,8 @@ Receptionist::handleAccept(StreamConnection::pointer connection)
   boost::apply_visitor(*this, this->request);
 
   // Create a new connection and wait a new client
-  StreamConnection::pointer newConnection =
-    StreamConnection::create(Receptionist::ioService);
+  Connection::pointer newConnection =
+    Connection::create(Receptionist::ioService);
 
   this->acceptor.async_accept(newConnection->getSocket(),
                               boost::bind(&Receptionist::handleAccept,
@@ -87,57 +86,57 @@ Receptionist::operator()(NullRequest& request)
 void
 Receptionist::operator()(AddTargetClient& request)
 {
-  boost::shared_ptr<IoConnection>
-    ioConnection(new IoConnection(this->currentReception->getRemoteIp(),
-                                  request.localPort));
-
-  this->currentReception->write(ioConnection->getLocalPort());
-
   message(MessageLogLevel::INFO)
     << ts_output::lock
     << "Add target client request. Uid: " << request.targetUid << std::endl
     << ts_output::unlock;
 
-  this->targetOutputs->addOutput(request.targetUid, ioConnection);
+  this->currentReception->setCloseHandler(boost::bind(&Receptionist::closeTargetClient,
+                                                      this,
+                                                      request.targetUid,
+                                                      this->currentReception));
+
+  this->targetOutputs->addOutput(request.targetUid, this->currentReception);
 }
 
 void
-Receptionist::operator()(DelTargetClient& request)
+Receptionist::closeTargetClient(const silvver::TargetUid& targetUid,
+                                boost::shared_ptr<Connection> connection)
 {
   message(MessageLogLevel::INFO)
     << ts_output::lock
-    << "Delete target client request. Uid: " << request.targetUid << std::endl
+    << "Closed connection with target client uid: " << targetUid << std::endl
     << ts_output::unlock;
 
-  this->targetOutputs->delOutput(request.targetUid, request.localPort);
+  this->targetOutputs->delOutput(targetUid, connection);
 }
 
 void
 Receptionist::operator()(AddCameraClient& request)
 {
-  boost::shared_ptr<IoConnection>
-    ioConnection(new IoConnection(this->currentReception->getRemoteIp(),
-                                  request.localPort));
-
-  this->currentReception->write(ioConnection->getLocalPort());
-
   message(MessageLogLevel::INFO)
     << ts_output::lock
     << "Add camera client request. Uid: " << request.cameraUid << std::endl
     << ts_output::unlock;
 
-  this->cameraOutputs->addOutput(request.cameraUid, ioConnection);
+  this->currentReception->setCloseHandler(boost::bind(&Receptionist::closeCameraClient,
+                                                      this,
+                                                      request.cameraUid,
+                                                      this->currentReception));
+
+  this->cameraOutputs->addOutput(request.cameraUid, this->currentReception);
 }
 
 void
-Receptionist::operator()(DelCameraClient& request)
+Receptionist::closeCameraClient(const silvver::AbstractCameraUid& cameraUid,
+                                boost::shared_ptr<Connection> connection)
 {
   message(MessageLogLevel::INFO)
     << ts_output::lock
-    << "Delete camera client request. Uid: " << request.cameraUid << std::endl
+    << "Closed connection with camera client uid: " << cameraUid << std::endl
     << ts_output::unlock;
 
-  this->cameraOutputs->delOutput(request.cameraUid, request.localPort);
+  this->cameraOutputs->delOutput(cameraUid, connection);
 }
 
 void

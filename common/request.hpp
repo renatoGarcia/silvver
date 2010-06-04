@@ -53,29 +53,6 @@ struct AddTargetClient
   }
 };
 
-// struct DelTargetClient
-// {
-//   silvver::TargetUid targetUid;
-//   unsigned short localPort;
-
-//   DelTargetClient()
-//     :targetUid()
-//     ,localPort(0)
-//   {}
-
-//   DelTargetClient(silvver::TargetUid targetUid, unsigned short localPort)
-//     :targetUid(targetUid)
-//     ,localPort(localPort)
-//   {}
-
-//   template<typename Archive>
-//   void serialize(Archive& ar, const unsigned)
-//   {
-//     ar & targetUid;
-//     ar & localPort;
-//   }
-// };
-
 struct AddCameraClient
 {
   silvver::AbstractCameraUid cameraUid;
@@ -94,30 +71,6 @@ struct AddCameraClient
     ar & cameraUid;
   }
 };
-
-// struct DelCameraClient
-// {
-//   silvver::AbstractCameraUid cameraUid;
-//   unsigned short localPort;
-
-//   DelCameraClient()
-//     :cameraUid()
-//     ,localPort(0)
-//   {}
-
-//   DelCameraClient(const silvver::AbstractCameraUid& cameraUid,
-//                   unsigned short localPort)
-//     :cameraUid(cameraUid)
-//     ,localPort(localPort)
-//   {}
-
-//   template<typename Archive>
-//   void serialize(Archive& ar, const unsigned)
-//   {
-//     ar & cameraUid;
-//     ar & localPort;
-//   }
-// };
 
 struct AddCamera
 {
@@ -145,9 +98,7 @@ struct AddCamera
 
 typedef boost::variant<NullRequest,
                        AddTargetClient,
-                       // DelTargetClient,
                        AddCameraClient,
-                       // DelCameraClient,
                        AddCamera       > Request;
 
 

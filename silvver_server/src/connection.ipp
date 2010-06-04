@@ -1,4 +1,4 @@
-/* Copyright 2009 Renato Florentino Garcia <fgar.renato@gmail.com>
+/* Copyright 2009-2010 Renato Florentino Garcia <fgar.renato@gmail.com>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3, as
@@ -13,10 +13,10 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef _STREAM_CONNECTION_IPP_
-#define _STREAM_CONNECTION_IPP_
+#ifndef _CONNECTION_IPP_
+#define _CONNECTION_IPP_
 
-#include "streamConnection.hpp"
+#include "connection.hpp"
 
 #include <boost/archive/text_iarchive.hpp>
 #include <boost/archive/text_oarchive.hpp>
@@ -26,7 +26,7 @@
 
 template <class T>
 void
-StreamConnection::read(T& t)
+Connection::read(T& t)
 {
   boost::asio::read(this->socket, boost::asio::buffer(this->inboundHeader));
   this->inboundData.resize(this->getDataSize());
@@ -37,7 +37,7 @@ StreamConnection::read(T& t)
 
 template <typename T>
 void
-StreamConnection::write(const T& t)
+Connection::write(const T& t)
 {
   std::string outboundData;
   std::string outboundHeader;
@@ -62,26 +62,26 @@ StreamConnection::write(const T& t)
   buffers.push_back(boost::asio::buffer(outboundHeader));
   buffers.push_back(boost::asio::buffer(outboundData));
 
-  boost::asio::write(this->socket, buffers);
-}
-
-inline std::size_t
-StreamConnection::getDataSize()
-{
-  // Determine the length of the serialized data.
-  std::istringstream is(std::string(this->inboundHeader, HEADER_LENGTH));
-  std::size_t inboundDataSize = 0;
-  if (!(is >> std::hex >> inboundDataSize))
+  try
   {
-    throw boost::system::system_error(boost::asio::error::invalid_argument);
+    boost::asio::write(this->socket, buffers);
   }
-
-  return inboundDataSize;
+  catch (const boost::system::system_error& e)
+  {
+    if (!this->closeHandler.empty())
+    {
+      this->closeHandler();
+    }
+    else
+    {
+      throw;
+    }
+  }
 }
 
 template <class T>
 void
-StreamConnection::extractData(T& t)
+Connection::extractData(T& t)
 {
   // Extract the data structure from the data just received.
   // try
@@ -103,10 +103,10 @@ StreamConnection::extractData(T& t)
 // created using boost::bind as a parameter.
 template <typename T, typename Handler>
 void
-StreamConnection::readHeader(const boost::system::error_code& e,
-                             std::size_t bytes_transferred,
-                             T& t,
-                             boost::tuple<Handler> handler)
+Connection::readHeader(const boost::system::error_code& e,
+                       std::size_t bytes_transferred,
+                       T& t,
+                       boost::tuple<Handler> handler)
 {
   if ((e == boost::asio::error::eof) && !this->closeHandler.empty())
   {
@@ -123,7 +123,7 @@ StreamConnection::readHeader(const boost::system::error_code& e,
     boost::asio::async_read
       (this->socket,
        boost::asio::buffer(this->inboundData),
-       boost::bind(&StreamConnection::readData<T, Handler>,
+       boost::bind(&Connection::readData<T, Handler>,
                    shared_from_this(),
                    boost::asio::placeholders::error,
                    boost::asio::placeholders::bytes_transferred,
@@ -134,10 +134,10 @@ StreamConnection::readHeader(const boost::system::error_code& e,
 
 template <typename T, typename Handler>
 void
-StreamConnection::readData(const boost::system::error_code& e,
-                           std::size_t bytes_transferred,
-                           T& t,
-                           boost::tuple<Handler> handler)
+Connection::readData(const boost::system::error_code& e,
+                     std::size_t bytes_transferred,
+                     T& t,
+                     boost::tuple<Handler> handler)
 {
   if (e)
   {
@@ -152,5 +152,5 @@ StreamConnection::readData(const boost::system::error_code& e,
   }
 }
 
-#endif /* _STREAM_CONNECTION_IPP_ */
+#endif /* _CONNECTION_IPP_ */
 

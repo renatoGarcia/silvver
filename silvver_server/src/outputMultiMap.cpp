@@ -15,32 +15,32 @@
 
 #include "outputMultiMap.hpp"
 
-#include "ioConnection.ipp"
+#include "connection.ipp"
 #include "silvverTypes.hpp"
 
-template<ClientType clientType, class KeyType>
-OutputMultiMap<clientType, KeyType>::
-OutputMultiMap()
+template<class KeyType>
+OutputMultiMap<KeyType>::OutputMultiMap()
 {}
 
-template<ClientType clientType, class KeyType>
-void OutputMultiMap<clientType, KeyType>::
-addOutput(KeyType silvverUid,
-          boost::shared_ptr<IoConnection> outputConnection)
+template<class KeyType>
+void
+OutputMultiMap<KeyType>::addOutput(KeyType silvverUid,
+                                   boost::shared_ptr<Connection> connection)
 {
   boost::unique_lock<boost::shared_mutex> lock(this->accessMap);
 
-  this->outputs.insert(std::make_pair(silvverUid, outputConnection));
+  this->outputs.insert(std::make_pair(silvverUid, connection));
 }
 
-template<ClientType clientType, class KeyType>
-void OutputMultiMap<clientType, KeyType>::
-delOutput(KeyType silvverUid, unsigned remotePort)
+template<class KeyType>
+void
+OutputMultiMap<KeyType>::delOutput(KeyType silvverUid,
+                                   boost::shared_ptr<Connection> connection)
 {
   boost::unique_lock<boost::shared_mutex> lock(this->accessMap);
 
   // Get all clients whit the idTarget
-  std::pair<typename TMultiMap::iterator, typename  TMultiMap::iterator>
+  std::pair<typename TMultiMap::iterator, typename TMultiMap::iterator>
     range(this->outputs.equal_range(silvverUid));
 
   // Look for client connected at remote port remotePort and delete it
@@ -48,17 +48,17 @@ delOutput(KeyType silvverUid, unsigned remotePort)
       it != range.second;
       ++it)
   {
-    if(it->second->getRemotePort() == remotePort)
+    if(it->second == connection)
     {
       this->outputs.erase(it);
     }
   }
 }
 
-template<ClientType clientType, class KeyType>
-void OutputMultiMap<clientType, KeyType>::
-findOutputs(KeyType silvverUid,
-            std::vector<boost::shared_ptr<IoConnection> >& outputsConnections)
+template<class KeyType>
+void
+OutputMultiMap<KeyType>::findOutputs(KeyType silvverUid,
+                                     std::vector<boost::shared_ptr<Connection> >& outputsConnections)
 {
   outputsConnections.clear();
 
@@ -75,5 +75,5 @@ findOutputs(KeyType silvverUid,
   }
 }
 
-template class OutputMultiMap<CLIENT_TARGET, silvver::TargetUid>;
-template class OutputMultiMap<CLIENT_CAMERA, silvver::AbstractCameraUid>;
+template class OutputMultiMap<silvver::TargetUid>;
+template class OutputMultiMap<silvver::AbstractCameraUid>;

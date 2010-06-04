@@ -20,13 +20,13 @@
 
 #include <boost/foreach.hpp>
 
-#include "ioConnection.ipp"
+#include "connection.ipp"
 #include "log.hpp"
 #include "silvverTypes.hpp"
 
-template <class Tinput, class Toutput>
+template<class Tinput, class Toutput>
 Processor<Tinput,Toutput>::Processor()
-  :outputMap(OutputMultiMap<CLIENT_TARGET, silvver::TargetUid>::instantiate())
+  :outputMap(OutputMultiMap<silvver::TargetUid>::instantiate())
 {}
 
 template <class Tinput, class Toutput>
@@ -34,8 +34,8 @@ void
 Processor<Tinput,Toutput>::sendToOutputs
          (const std::vector<silvver::Identity<Toutput> >& localizations) const
 {
-  std::vector< boost::shared_ptr<IoConnection> > vecConnections;
-  boost::shared_ptr<IoConnection> connectionPtr;
+  std::vector< boost::shared_ptr<Connection> > vecConnections;
+  boost::shared_ptr<Connection> connectionPtr;
 
   BOOST_FOREACH(silvver::Identity<Toutput> output, localizations)
   {
@@ -49,10 +49,9 @@ Processor<Tinput,Toutput>::sendToOutputs
 
     BOOST_FOREACH(connectionPtr, vecConnections)
     {
-      connectionPtr->send(output);
+      connectionPtr->write(output);
     }
   }
-
 }
 
 #endif /*  _PROCESSOR_IPP_ */

@@ -18,14 +18,14 @@
 #include <boost/variant.hpp>
 
 #include "input.ipp"
-#include "streamConnection.ipp"
+#include "connection.ipp"
 #include "silvverTypes.hpp"
 
 #include "markerProcessor.hpp"
 
 boost::shared_ptr<InputInterface>
 InputFactory::createInput(const procOpt::AnyProcOpt& processorOpt,
-                          const boost::shared_ptr<StreamConnection>& connection)
+                          const boost::shared_ptr<Connection>& connection)
 {
   boost::shared_ptr<InputInterface> returnPtr;
 

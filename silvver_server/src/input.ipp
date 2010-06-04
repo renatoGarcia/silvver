@@ -22,18 +22,17 @@
 #include <boost/foreach.hpp>
 
 #include "log.hpp"
-#include "ioConnection.ipp"
+#include "connection.ipp"
 
 template <typename Type>
-Input<Type>::Input(boost::shared_ptr<StreamConnection> connection,
+Input<Type>::Input(boost::shared_ptr<Connection> connection,
                    boost::shared_ptr< ProcessorInterface<Type> > processor)
   :InputInterface()
   ,currentInput()
   ,connection(connection)
   ,processor(processor)
-  ,clientCameraMap(OutputMultiMap<CLIENT_CAMERA, silvver::AbstractCameraUid>::instantiate())
+  ,clientCameraMap(OutputMultiMap<silvver::AbstractCameraUid>::instantiate())
 {
-
   this->connection->asyncRead(this->currentInput,
                               boost::bind(&Input<Type>::handleReceive,
                                           this));
@@ -54,15 +53,15 @@ Input<Type>::handleReceive()
     << this->currentInput.camUid << std::endl
     << ts_output::unlock;
 
-  std::vector<boost::shared_ptr<IoConnection> > vecConnections;
-  boost::shared_ptr<IoConnection> connectionPtr;
+  std::vector<boost::shared_ptr<Connection> > vecConnections;
+  boost::shared_ptr<Connection> connectionPtr;
 
   // Get all camera clients hearing for a given camera.
   this->clientCameraMap->findOutputs(this->currentInput.camUid,
                                      vecConnections);
   BOOST_FOREACH(connectionPtr, vecConnections)
   {
-    connectionPtr->send(this->currentInput);
+    connectionPtr->write(this->currentInput);
   }
 
   this->processor->deliverPackage(this->currentInput);

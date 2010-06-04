@@ -15,15 +15,11 @@ int main(int argc,char **argv)
   Target<Pose> target(uid);
   Pose pose;
 
-  target.connect();
-
   for (int i = 0; i < 10; ++i)
   {
     pose = target.getNext();
     cout << static_cast<Position>(pose) << '\t' << pose.theta() << endl;
   }
-
-  target.disconnect();
 
   return 0;
 }

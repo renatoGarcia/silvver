@@ -1,7 +1,7 @@
 SET(silvver_server_SRCS outputMultiMap.cpp
                         log.cpp
                         inputFactory.cpp
-                        ioConnection.cpp
+                        connection.cpp
                         main.cpp
                         markerProcessor.cpp
                         receptionist.cpp)
