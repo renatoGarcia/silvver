@@ -42,6 +42,7 @@ public:
 private:
   static void runIoService();
 
+  /// Length of TCP message header.
   static const unsigned HEADER_LENGTH = 8;
 
   static boost::asio::io_service ioService;

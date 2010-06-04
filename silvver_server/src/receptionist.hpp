@@ -52,9 +52,7 @@ public:
   // Visitors of the boost::variant Request type.
   void operator()(NullRequest& request);
   void operator()(AddTargetClient& request);
-  void operator()(DelTargetClient& request);
   void operator()(AddCameraClient& request);
-  void operator()(DelCameraClient& request);
   void operator()(AddCamera& request);
 
 private:

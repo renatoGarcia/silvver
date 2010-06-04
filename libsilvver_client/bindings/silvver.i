@@ -108,12 +108,13 @@ namespace silvver
   {
     AbstractCameraUid camUid;
     uint64_t timestamp;
-
+    Image image;
     std::vector<Identity<TargetType> > localizations;
 
     CameraReading();
     CameraReading(const AbstractCameraUid& camUid,
                   uint64_t timestamp,
+                  const Image& image,
                   std::vector<Identity<TargetType> > localizations);
   };
 
@@ -122,14 +123,10 @@ namespace silvver
   {
   public:
     Target(const TargetUid& targetUid,
-           const std::string& serverIp="127.0.0.1",
-           unsigned receptionistPort=12000);
+           const std::string& serverName="localhost",
+           const std::string& receptionistPort="12000");
 
     ~Target() throw();
-
-    void connect();
-
-    void disconnect();
 
     TargetUid getUid();
 
@@ -148,14 +145,10 @@ namespace silvver
   public:
     AbstractCamera(boost::function<void(CameraReading<T>)> callback,
                    const AbstractCameraUid& abstractCameraUid,
-                   const std::string& serverIp="127.0.0.1",
-                   unsigned receptionistPort=12000);
+                   const std::string& serverName="localhost",
+                   const std::string& receptionistPort="12000");
 
     ~AbstractCamera() throw();
-
-    void connect();
-
-    void disconnect();
 
     AbstractCameraUid getUid();
   };

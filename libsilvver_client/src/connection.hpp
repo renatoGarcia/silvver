@@ -1,4 +1,4 @@
-/* Copyright 2009 Renato Florentino Garcia <fgar.renato@gmail.com>
+/* Copyright 2009-2010 Renato Florentino Garcia <fgar.renato@gmail.com>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3, as
@@ -16,10 +16,7 @@
 #ifndef CONNECTION_HPP
 #define CONNECTION_HPP
 
-#include <boost/asio/buffer.hpp>
-#include <boost/asio/ip/tcp.hpp>
-#include <boost/asio/ip/udp.hpp>
-#include <boost/asio/placeholders.hpp>
+#include <boost/asio.hpp>
 #include <boost/bind.hpp>
 #include <boost/ref.hpp>
 #include <boost/scoped_ptr.hpp>
@@ -36,74 +33,82 @@ class Connection
 {
 public:
 
-  Connection(const std::string& serverIp, unsigned receptionistPort);
+  // Can throw silvver::connection_error
+  Connection(const std::string& serverName,
+             const std::string& receptionistPort,
+             const silvver::TargetUid& targetUid);
+
+  // Can throw silvver::connection_error
+  Connection(const std::string& serverName,
+             const std::string& receptionistPort,
+             const silvver::AbstractCameraUid& cameraUid);
 
   ~Connection();
 
-  void connect(const silvver::TargetUid& targetUid);
-
-  void connect(const silvver::AbstractCameraUid& cameraUid);
-
-  void disconnect(const silvver::TargetUid& targetUid);
-
-  void disconnect(const silvver::AbstractCameraUid& cameraUid);
+  template <typename T>
+  void read(T& t);
 
   /** Asynchronously read a value of type T.
    * @param t Reference to the variable where the read value will be returned.
    * @param handler Function with signature "void handler()" which to be called
    *                when the operation completes. */
   template <typename T, typename Handler>
-  inline void
+  inline
+  void
   asyncRead(T& t, Handler handler)
   {
-    this->inputSocket.async_receive
-      (boost::asio::buffer(this->inboundData),
-       boost::bind(&Connection::readData<T, Handler>,
-                   this,
-                   boost::asio::placeholders::error,
-                   boost::asio::placeholders::bytes_transferred,
-                   boost::ref(t),
-                   boost::make_tuple(handler)));
+    boost::asio::async_read(this->socket,
+                            boost::asio::buffer(this->inboundHeader),
+                            boost::bind(&Connection::readHeader<T, Handler>,
+                                        this,
+                                        boost::asio::placeholders::error,
+                                        boost::asio::placeholders::bytes_transferred,
+                                        boost::ref(t),
+                                        boost::make_tuple(handler)));
   }
 
-private:
+  // Can throw silvver::connection_error
+  template <typename T>
+  void write(const T& t);
 
-  friend class boost::thread;
+private:
+  static void runIoService();
 
   /// Length of TCP message header.
   static const unsigned HEADER_LENGTH = 8;
-
-  /// Max length of UPD messages.
-  static const unsigned UPD_MAX_LENGTH = 8192;
 
   static boost::asio::io_service ioService;
 
   static boost::scoped_ptr<boost::thread> th;
 
-  static boost::mutex runMutex;
-  static bool ioServiceRunning;
+  static boost::once_flag onceFlag;
 
-  static void runIoService();
+private:
+  void beginConstruction(const std::string& serverName,
+                         const std::string& receptionistPort);
 
-  boost::asio::ip::tcp::socket receptionistSocket;
-
-  const boost::asio::ip::tcp::endpoint receptionistEP;
-
-  boost::asio::ip::udp::socket inputSocket;
-
-  std::vector<char> inboundData;
-
-  template <typename T>
-  void writeToReceptionist(const T& t);
-
-  template <typename T>
-  void readFromReceptionist(T& t);
+  template <class T, class Handler>
+  void readHeader(const boost::system::error_code& e,
+                  std::size_t bytes_transferred,
+                  T& t,
+                  boost::tuple<Handler> handler);
 
   template <typename T, typename Handler>
   void readData(const boost::system::error_code& e,
                 std::size_t bytes_transferred,
                 T& t,
                 boost::tuple<Handler> handler);
+
+  std::size_t getDataSize();
+
+  template <class T>
+  void extractData(T& t);
+
+  boost::asio::ip::tcp::socket socket;
+
+  char inboundHeader[HEADER_LENGTH];
+
+  std::vector<char> inboundData;
 };
 
 #endif // CONNECTION_HPP

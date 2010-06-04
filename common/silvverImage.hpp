@@ -149,6 +149,24 @@ namespace silvver
     return *this;
   }
 
+#ifdef HAS_OPENCV
+  inline
+  IplImage*
+  Image::toIplImage()
+  {
+    IplImage* iplImage = cvCreateImage(cvSize(this->width, this->height),
+                                       this->depth,
+                                       this->nChannels);
+    iplImage->dataOrder = this->dataOrder;
+    iplImage->origin = this->origin;
+    iplImage->widthStep = this->widthStep;
+
+    assert(iplImage->imageSize == this->imageSize);
+    memcpy(iplImage->imageData, this->imageData, this->imageSize);
+
+    return iplImage;
+  }
+#endif
 } // Namespace silvver
 
 #endif /* _SILVVER_IMAGE_HPP_ */

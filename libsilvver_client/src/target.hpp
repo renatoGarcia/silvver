@@ -1,4 +1,4 @@
-/* Copyright 2009 Renato Florentino Garcia <fgar.renato@gmail.com>
+/* Copyright 2009-2010 Renato Florentino Garcia <fgar.renato@gmail.com>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3, as
@@ -36,19 +36,13 @@ namespace silvver
     /** Target class constructor.
      * @param targetId Target silvver uid.
      * @param serverIp IP address of silvver-server.
-     * @param receptionistPort Port number of silvver-server receptionist. */
+     * @param receptionistPort Port number of silvver-server receptionist.
+     * Can throw silvver::connection_error */
     Target(const TargetUid& targetUid,
-           const std::string& serverIp="127.0.0.1",
-           unsigned receptionistPort=12000);
+           const std::string& serverName="localhost",
+           const std::string& receptionistPort="12000");
 
     ~Target() throw();
-
-    /** Connect to the silvver-server.
-     * Can throw connection_error when silvver-server is unreachable. */
-    void connect();
-
-    /// Can throw connection_error when silvver-server is unreachable.
-    void disconnect();
 
     /** Get the UID of target.
      * @return The UID of this target.  */

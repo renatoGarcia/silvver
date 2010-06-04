@@ -28,8 +28,8 @@ namespace silvver
   public:
     CheshireCat(boost::function<void(CameraReading<T>)> callback,
                 const silvver::AbstractCameraUid& abstractCameraUid,
-                const std::string& serverIp,
-                unsigned receptionistPort);
+                const std::string& serverName,
+                const std::string& receptionistPort);
 
     ~CheshireCat();
 
@@ -44,20 +44,21 @@ namespace silvver
     CameraReading<T> currentReading;
 
     Connection connection;
-
-    bool connected;
   };
 
   template<class T> AbstractCamera<T>::
   CheshireCat::CheshireCat(boost::function<void(CameraReading<T>)> callback,
                            const silvver::AbstractCameraUid& abstractCameraUid,
-                           const std::string& serverIp,
-                           unsigned receptionistPort)
+                           const std::string& serverName,
+                           const std::string& receptionistPort)
     :callbackFunction(callback)
     ,abstractCameraUid(abstractCameraUid)
-    ,connection(serverIp, receptionistPort)
-    ,connected(false)
-  {}
+    ,connection(serverName, receptionistPort, abstractCameraUid)
+  {
+    this->connection.asyncRead(this->currentReading,
+                               boost::bind(&CheshireCat::handleReceive,
+                                           this));
+  }
 
   template<class T>
   AbstractCamera<T>::CheshireCat::~CheshireCat()
@@ -78,46 +79,6 @@ namespace silvver
   }
 
   template<class T>
-  void
-  AbstractCamera<T>::connect()
-  {
-    if (!smile->connected)
-    {
-      try
-      {
-        smile->connection.connect(smile->abstractCameraUid);
-        smile->connected = true;
-
-        smile->connection.asyncRead(smile->currentReading,
-                                    boost::bind(&CheshireCat::handleReceive,
-                                                smile.get()));
-      }
-      catch (const boost::system::system_error& e)
-      {
-        throw silvver::connection_error(e.what());
-      }
-    }
-  }
-
-  template<class T>
-  void
-  AbstractCamera<T>::disconnect()
-  {
-    if (smile->connected)
-    {
-      try
-      {
-        smile->connection.disconnect(smile->abstractCameraUid);
-        smile->connected = false;
-      }
-      catch (const boost::system::system_error& e)
-      {
-        throw silvver::connection_error(e.what());
-      }
-    }
-  }
-
-  template<class T>
   silvver::AbstractCameraUid
   AbstractCamera<T>::getUid()
   {
@@ -127,22 +88,15 @@ namespace silvver
   template<class T>
   AbstractCamera<T>::AbstractCamera(boost::function<void(CameraReading<T>)> callback,
                                     const silvver::AbstractCameraUid& abstractCameraUid,
-                                    const std::string& serverIp,
-                                    unsigned receptionistPort)
+                                    const std::string& serverName,
+                                    const std::string& receptionistPort)
     :smile(new CheshireCat(callback, abstractCameraUid,
-                           serverIp, receptionistPort))
+                           serverName, receptionistPort))
   {}
 
   template<class T>
   AbstractCamera<T>::~AbstractCamera() throw()
-  {
-    try
-    {
-      this->disconnect();
-    }
-    catch(...)
-    {}
-  }
+  {}
 
   // Templates to be compiled in library
   template class AbstractCamera<Position>;

@@ -25,13 +25,14 @@
 #include <boost/asio/read.hpp>
 #include <boost/asio/write.hpp>
 
+#include "exceptions.hpp"
 #include "serializations.hpp"
 
 namespace bip = boost::asio::ip;
 
 template <typename T>
 void
-Connection::writeToReceptionist(const T& t)
+Connection::write(const T& t)
 {
   std::string outboundData;
   std::string outboundHeader;
@@ -44,9 +45,9 @@ Connection::writeToReceptionist(const T& t)
 
   // Format the header.
   std::ostringstream headerStream;
-  headerStream << std::setw(HEADER_LENGTH)
+  headerStream << std::setw(Connection::HEADER_LENGTH)
                << std::hex << outboundData.size();
-  if (!headerStream || headerStream.str().size() != HEADER_LENGTH)
+  if (!headerStream || headerStream.str().size() != Connection::HEADER_LENGTH)
   {
 //     // Something went wrong, inform the caller.
 //     boost::system::error_code error(boost::asio::error::invalid_argument);
@@ -59,39 +60,72 @@ Connection::writeToReceptionist(const T& t)
   buffers.push_back(boost::asio::buffer(outboundHeader));
   buffers.push_back(boost::asio::buffer(outboundData));
 
-  boost::asio::write(this->receptionistSocket, buffers);
+  try
+  {
+    boost::asio::write(this->socket, buffers);
+  }
+  catch (const boost::system::system_error& e)
+  {
+    throw silvver::connection_error("Error writing to silvver-server");
+  }
 }
 
-template <typename T>
+template <class T>
 void
-Connection::readFromReceptionist(T& t)
+Connection::extractData(T& t)
 {
-  char inHeader[HEADER_LENGTH];
-  boost::asio::read(this->receptionistSocket, boost::asio::buffer(inHeader));
-
-  // Determine the length of the serialized data.
-  std::istringstream is(std::string(inHeader, HEADER_LENGTH));
-  std::size_t inboundDataSize = 0;
-  if (!(is >> std::hex >> inboundDataSize))
-  {
-    throw boost::system::system_error(boost::asio::error::invalid_argument);
-  }
-
-  std::vector<char> inData(inboundDataSize);
-  boost::asio::read(this->receptionistSocket, boost::asio::buffer(inData));
-
   // Extract the data structure from the data just received.
   try
   {
-    std::string archiveData(&inData[0], inData.size());
+    std::string archiveData(&this->inboundData[0], this->inboundData.size());
     std::istringstream archiveStream(archiveData);
     boost::archive::text_iarchive archive(archiveStream);
     archive >> t;
   }
   catch (std::exception& e)
   {
-    // Unable to decode data.
-    throw boost::system::system_error(boost::asio::error::invalid_argument);
+    throw silvver::connection_error("Unable to decode data read from silvver-server");
+  }
+}
+
+template <typename T>
+void
+Connection::read(T& t)
+{
+  boost::asio::read(this->socket, boost::asio::buffer(this->inboundHeader));
+  this->inboundData.resize(this->getDataSize());
+
+  boost::asio::read(this->socket, boost::asio::buffer(this->inboundData));
+  this->extractData(t);
+}
+
+// Handle a completed read of a message header. The handler is passed using
+// a tuple since boost::bind seems to have trouble binding a function object
+// created using boost::bind as a parameter.
+template <typename T, typename Handler>
+void
+Connection::readHeader(const boost::system::error_code& e,
+                       std::size_t bytes_transferred,
+                       T& t,
+                       boost::tuple<Handler> handler)
+{
+  if (e)
+  {
+    throw silvver::connection_error("Error on async reading");
+  }
+  else
+  {
+    this->inboundData.resize(this->getDataSize());
+
+    boost::asio::async_read
+      (this->socket,
+       boost::asio::buffer(this->inboundData),
+       boost::bind(&Connection::readData<T, Handler>,
+                   this,
+                   boost::asio::placeholders::error,
+                   boost::asio::placeholders::bytes_transferred,
+                   boost::ref(t),
+                   handler));
   }
 }
 
@@ -104,23 +138,13 @@ Connection::readData(const boost::system::error_code& e,
 {
   if (e)
   {
-    throw boost::system::system_error(e);
+    throw silvver::connection_error("Error on async reading");
   }
-
-  try
+  else
   {
-    std::string archiveData(&this->inboundData[0], bytes_transferred);
-    std::istringstream archiveStream(archiveData);
-    boost::archive::text_iarchive archive(archiveStream);
-    archive >> t;
+    this->extractData(t);
+    boost::get<0>(handler)();
   }
-  catch (std::exception& e)
-  {
-    // Unable to decode data.
-    throw boost::system::system_error(boost::asio::error::invalid_argument);
-  }
-
-  boost::get<0>(handler)();
 }
 
 #endif // CONNECTION_IPP

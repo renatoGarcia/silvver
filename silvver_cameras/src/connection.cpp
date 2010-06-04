@@ -51,8 +51,8 @@ Connection::Connection(const std::string& serverName,
   boost::system::error_code error = boost::asio::error::host_not_found;
   while (error && endpoint_iterator != end)
   {
-    socket.close();
-    socket.connect(*endpoint_iterator, error);
+    this->socket.close();
+    this->socket.connect(*endpoint_iterator, error);
     ++endpoint_iterator;
   }
   if (error)

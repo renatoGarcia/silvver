@@ -1,4 +1,4 @@
-/* Copyright 2009 Renato Florentino Garcia <fgar.renato@gmail.com>
+/* Copyright 2009-2010 Renato Florentino Garcia <fgar.renato@gmail.com>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3, as
@@ -32,8 +32,8 @@ namespace silvver
   {
   public:
     CheshireCat(const silvver::TargetUid& targetUid,
-                const std::string& serverIp,
-                unsigned receptionistPort);
+                const std::string& serverName,
+                const std::string& receptionistPort);
 
     ~CheshireCat();
 
@@ -58,19 +58,20 @@ namespace silvver
     Identity<T> last;
 
     Connection connection;
-
-    bool connected;
   };
 
   template<class T>
   Target<T>::CheshireCat::CheshireCat(const silvver::TargetUid& targetUid,
-                                      const std::string& serverIp,
-                                      unsigned receptionistPort)
+                                      const std::string& serverName,
+                                      const std::string& receptionistPort)
     :targetUid(targetUid)
     ,currentIsNew(false)
-    ,connection(serverIp, receptionistPort)
-    ,connected(false)
-  {}
+    ,connection(serverName, receptionistPort, targetUid)
+  {
+    this->connection.asyncRead(this->last,
+                               boost::bind(&CheshireCat::update,
+                                           this));
+  }
 
   template<class T>
   Target<T>::CheshireCat::~CheshireCat()
@@ -95,46 +96,6 @@ namespace silvver
     this->connection.asyncRead(this->last,
                                boost::bind(&CheshireCat::update,
                                            this));
-  }
-
-  template<class T>
-  void
-  Target<T>::connect()
-  {
-    if (!smile->connected)
-    {
-      try
-      {
-        smile->connection.connect(smile->targetUid);
-        smile->connected = true;
-
-        smile->connection.asyncRead(smile->last,
-                                    boost::bind(&CheshireCat::update,
-                                                smile.get()));
-      }
-      catch (const boost::system::system_error& e)
-      {
-        throw silvver::connection_error(e.what());
-      }
-    }
-  }
-
-  template<class T>
-  void
-  Target<T>::disconnect()
-  {
-    if (smile->connected)
-    {
-      try
-      {
-        smile->connection.disconnect(smile->targetUid);
-        smile->connected = false;
-      }
-      catch (const boost::system::system_error& e)
-      {
-        throw silvver::connection_error(e.what());
-      }
-    }
   }
 
   template<class T>
@@ -198,21 +159,14 @@ namespace silvver
 
   template<class T>
   Target<T>::Target(const silvver::TargetUid& targetUid,
-                    const std::string& serverIp,
-                    unsigned receptionistPort)
-    :smile(new CheshireCat(targetUid, serverIp, receptionistPort))
+                    const std::string& serverName,
+                    const std::string& receptionistPort)
+    :smile(new CheshireCat(targetUid, serverName, receptionistPort))
   {}
 
   template<class T>
   Target<T>::~Target() throw()
-  {
-    try
-    {
-      this->disconnect();
-    }
-    catch(...)
-    {}
-  }
+  {}
 
   // Templates to be compiled in library
   template class Target<Position>;

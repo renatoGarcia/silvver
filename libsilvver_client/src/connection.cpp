@@ -18,14 +18,14 @@
 
 #include <iostream>
 
+#include "exceptions.hpp"
 #include "request.hpp"
 
 namespace bip = boost::asio::ip;
 
 boost::asio::io_service Connection::ioService;
 boost::scoped_ptr<boost::thread> Connection::th;
-boost::mutex Connection::runMutex;
-bool Connection::ioServiceRunning = false;
+boost::once_flag Connection::onceFlag = BOOST_ONCE_INIT;
 
 void
 Connection::runIoService()
@@ -45,21 +45,37 @@ Connection::runIoService()
   }
 }
 
-Connection::Connection(const std::string& serverIp, unsigned receptionistPort)
-  :receptionistSocket(Connection::ioService)
-  ,receptionistEP(bip::address::from_string(serverIp), receptionistPort)
-  ,inputSocket(Connection::ioService)
-  ,inboundData(UPD_MAX_LENGTH)
-{}
+Connection::Connection(const std::string& serverName,
+                       const std::string& receptionistPort,
+                       const silvver::TargetUid& targetUid)
+  :socket(Connection::ioService)
+{
+  this->beginConstruction(serverName, receptionistPort);
+
+  Request request = AddTargetClient(targetUid);
+  this->write(request);
+}
+
+Connection::Connection(const std::string& serverName,
+                       const std::string& receptionistPort,
+                       const silvver::AbstractCameraUid& cameraUid)
+
+  :socket(Connection::ioService)
+{
+  this->beginConstruction(serverName, receptionistPort);
+
+  Request request = AddCameraClient(cameraUid);
+  this->write(request);
+}
 
 Connection::~Connection()
 {
-  if(this->inputSocket.is_open())
+  if(this->socket.is_open())
   {
     try
     {
-      this->inputSocket.shutdown(bip::udp::socket::shutdown_both);
-      this->inputSocket.close();
+      this->socket.shutdown(bip::tcp::socket::shutdown_both);
+      this->socket.close();
     }
     catch(...)
     {}
@@ -67,101 +83,45 @@ Connection::~Connection()
 }
 
 void
-Connection::connect(const silvver::TargetUid& targetUid)
+Connection::beginConstruction(const std::string& serverName,
+                              const std::string& receptionistPort)
 {
-  if (!Connection::ioServiceRunning)
+  // Only one static io_service to all connection classes
+  boost::call_once(Connection::onceFlag,
+                   boost::bind(&boost::scoped_ptr<boost::thread>::reset,
+                               &Connection::th,
+                               new boost::thread(Connection::runIoService)));
+
+  bip::tcp::resolver resolver(Connection::ioService);
+  bip::tcp::resolver::query query(serverName, receptionistPort);
+
+  bip::tcp::resolver::iterator endpoint_iterator = resolver.resolve(query);
+  bip::tcp::resolver::iterator end;
+  boost::system::error_code error = boost::asio::error::host_not_found;
+  while (error && endpoint_iterator != end)
   {
-    boost::mutex::scoped_lock lock(Connection::runMutex);
-    if (!Connection::ioServiceRunning)
-    {
-      Connection::th.reset(new boost::thread(Connection::runIoService));
-      Connection::ioServiceRunning = true;
-    }
+    this->socket.close();
+    this->socket.connect(*endpoint_iterator, error);
+    ++endpoint_iterator;
+  }
+  if (error)
+  {
+    throw silvver::connection_error("Server " + serverName + " not found.");
+  }
+}
+
+std::size_t
+Connection::getDataSize()
+{
+  // Determine the length of the serialized data.
+  std::istringstream is(std::string(this->inboundHeader,
+                                    Connection::HEADER_LENGTH));
+  std::size_t inboundDataSize = 0;
+  if (!(is >> std::hex >> inboundDataSize))
+  {
+    // throw boost::system::system_error(boost::asio::error::invalid_argument);
+    throw silvver::connection_error("Error on reading from silvver-server");
   }
 
-  this->inputSocket.open(bip::udp::v4());
-  this->inputSocket.bind(bip::udp::endpoint());
-
-  this->receptionistSocket.connect(this->receptionistEP);
-
-  Request request = AddTargetClient(targetUid,
-                                    this->inputSocket.local_endpoint().port());
-
-  this->writeToReceptionist(request);
-
-  unsigned short remotePort;
-  this->readFromReceptionist(remotePort);
-
-  this->inputSocket.connect(bip::udp::endpoint(this->receptionistEP.address(),
-                                               remotePort));
-
-  this->receptionistSocket.shutdown(bip::tcp::socket::shutdown_both);
-  this->receptionistSocket.close();
-}
-
-void
-Connection::connect(const silvver::AbstractCameraUid& cameraUid)
-{
-  if (!Connection::ioServiceRunning)
-  {
-    boost::mutex::scoped_lock lock(Connection::runMutex);
-    if (!Connection::ioServiceRunning)
-    {
-      Connection::th.reset(new boost::thread(Connection::runIoService));
-      Connection::ioServiceRunning = true;
-    }
-  }
-
-  this->inputSocket.open(bip::udp::v4());
-  this->inputSocket.bind(bip::udp::endpoint());
-
-  this->receptionistSocket.connect(this->receptionistEP);
-
-  Request request = AddCameraClient(cameraUid,
-                                    this->inputSocket.local_endpoint().port());
-
-  this->writeToReceptionist(request);
-
-  unsigned short remotePort;
-  this->readFromReceptionist(remotePort);
-
-  this->inputSocket.connect(bip::udp::endpoint(this->receptionistEP.address(),
-                                               remotePort));
-
-  this->receptionistSocket.shutdown(bip::tcp::socket::shutdown_both);
-  this->receptionistSocket.close();
-}
-
-void
-Connection::disconnect(const silvver::TargetUid& targetUid)
-{
-  this->receptionistSocket.connect(this->receptionistEP);
-
-  Request request = DelTargetClient(targetUid,
-                                    this->inputSocket.local_endpoint().port());
-
-  this->writeToReceptionist(request);
-
-  this->inputSocket.shutdown(bip::udp::socket::shutdown_both);
-  this->inputSocket.close();
-
-  this->receptionistSocket.shutdown(bip::tcp::socket::shutdown_both);
-  this->receptionistSocket.close();
-}
-
-void
-Connection::disconnect(const silvver::AbstractCameraUid& cameraUid)
-{
-  this->receptionistSocket.connect(this->receptionistEP);
-
-  Request request = DelCameraClient(cameraUid,
-                                    this->inputSocket.local_endpoint().port());
-
-  this->writeToReceptionist(request);
-
-  this->inputSocket.shutdown(bip::udp::socket::shutdown_both);
-  this->inputSocket.close();
-
-  this->receptionistSocket.shutdown(bip::tcp::socket::shutdown_both);
-  this->receptionistSocket.close();
+  return inboundDataSize;
 }

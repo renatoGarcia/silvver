@@ -35,17 +35,10 @@ namespace silvver
      * @param receptionistPort Port number of silvver-server receptionist. */
     AbstractCamera(boost::function<void (CameraReading<T>)> callback,
                    const AbstractCameraUid& abstractCameraUid,
-                   const std::string& serverIp="127.0.0.1",
-                   unsigned receptionistPort=12000);
+                   const std::string& serverName="localhost",
+                   const std::string& receptionistPort="12000");
 
     ~AbstractCamera() throw();
-
-    /** Connect to the silvver-server.
-     * Can throw connection_error when silvver-server is unreachable. */
-    void connect();
-
-    /// Can throw connection_error when silvver-server is unreachable.
-    void disconnect();
 
     /** Get the id of camera.
      * @return The id of this camera.

@@ -177,7 +177,7 @@ public:
   }
 
   // This method will be called from another thread, the one of ioService from
-  // Connection class. Because of this is needed the SWIG_PYTHON_THREAD_*
+  // Connection class. Because of this, is needed the SWIG_PYTHON_THREAD_*
   // macros.
   void operator()(silvver::CameraReading<T> cameraReading)
   {
