@@ -13,8 +13,8 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef CONNECTION_HPP
-#define CONNECTION_HPP
+#ifndef _CONNECTION_HPP_
+#define _CONNECTION_HPP_
 
 #include <boost/asio.hpp>
 #include <boost/bind.hpp>
@@ -33,25 +33,43 @@ class Connection
 {
 public:
 
-  // Can throw silvver::connection_error
+  /** Construct a targetClient connection.
+   * This constructor can throw silvver::connection_error.
+   * @param serverName IP address or hostname of silvver-server.
+   * @param receptionistPort Port number of receptionist.
+   * @param targetUid UID of target to observe. */
   Connection(const std::string& serverName,
              const std::string& receptionistPort,
              const silvver::TargetUid& targetUid);
 
-  // Can throw silvver::connection_error
+  /** Construct a AbstractCameraClient connection.
+   * This constructor can throw silvver::connection_error.
+   * @param serverName IP address or hostname of silvver-server.
+   * @param receptionistPort Port number of receptionist.
+   * @param AbstractCameraUid UID of abstractCamera to observe. */
   Connection(const std::string& serverName,
              const std::string& receptionistPort,
              const silvver::AbstractCameraUid& cameraUid);
 
-  ~Connection();
+  ~Connection() throw();
 
+  bool isOpen()
+  {
+    return this->socket.is_open();
+  }
+
+  /** Synchronously read a value of type T.
+   * This method will block until all data be read.
+   * @param t Reference to variable where the read value will be returned. */
   template <typename T>
   void read(T& t);
 
   /** Asynchronously read a value of type T.
-   * @param t Reference to the variable where the read value will be returned.
-   * @param handler Function with signature "void handler()" which to be called
-   *                when the operation completes. */
+   * This method will return immediately, and will call the handler function
+   * when all data was read.
+   * @param t Reference to variable where the read value will be returned.
+   * @param handler Function with signature "void handler()" which will be
+   *                 called when the operation completes. */
   template <typename T, typename Handler>
   inline
   void
@@ -67,7 +85,9 @@ public:
                                         boost::make_tuple(handler)));
   }
 
-  // Can throw silvver::connection_error
+  /** Synchronously write a value t.
+   * This method will block until all data be written.
+   * @param t Variable to be written. */
   template <typename T>
   void write(const T& t);
 
@@ -84,8 +104,14 @@ private:
   static boost::once_flag onceFlag;
 
 private:
+  /** Open a connection with the silvver-server.
+   * This method can throw silvver::connection_error.
+   * @param serverName IP address or hostname of silvver-server.
+   * @param receptionistPort Port number of receptionist. */
   void beginConstruction(const std::string& serverName,
                          const std::string& receptionistPort);
+
+  void close();
 
   template <class T, class Handler>
   void readHeader(const boost::system::error_code& e,
@@ -99,6 +125,9 @@ private:
                 T& t,
                 boost::tuple<Handler> handler);
 
+  /** Inspect the message header and computes the data size in bytes.
+   * This method can throw silvver::connection_error.
+   * @return The data size in bytes.  */
   std::size_t getDataSize();
 
   template <class T>
@@ -111,4 +140,4 @@ private:
   std::vector<char> inboundData;
 };
 
-#endif // CONNECTION_HPP
+#endif // _CONNECTION_HPP_

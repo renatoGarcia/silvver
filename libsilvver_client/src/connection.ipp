@@ -1,4 +1,4 @@
-/* Copyright 2009 Renato Florentino Garcia <fgar.renato@gmail.com>
+/* Copyright 2009-2010 Renato Florentino Garcia <fgar.renato@gmail.com>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3, as
@@ -18,12 +18,11 @@
 
 #include "connection.hpp"
 
-#include <sstream>
-
 #include <boost/archive/text_iarchive.hpp>
 #include <boost/archive/text_oarchive.hpp>
 #include <boost/asio/read.hpp>
 #include <boost/asio/write.hpp>
+#include <sstream>
 
 #include "exceptions.hpp"
 #include "serializations.hpp"
@@ -82,7 +81,7 @@ Connection::extractData(T& t)
     boost::archive::text_iarchive archive(archiveStream);
     archive >> t;
   }
-  catch (std::exception& e)
+  catch (const std::exception& e)
   {
     throw silvver::connection_error("Unable to decode data read from silvver-server");
   }
@@ -111,22 +110,29 @@ Connection::readHeader(const boost::system::error_code& e,
 {
   if (e)
   {
-    throw silvver::connection_error("Error on async reading");
+    this->close();
+    return;
   }
-  else
+
+  try
   {
     this->inboundData.resize(this->getDataSize());
-
-    boost::asio::async_read
-      (this->socket,
-       boost::asio::buffer(this->inboundData),
-       boost::bind(&Connection::readData<T, Handler>,
-                   this,
-                   boost::asio::placeholders::error,
-                   boost::asio::placeholders::bytes_transferred,
-                   boost::ref(t),
-                   handler));
   }
+  catch (const silvver::connection_error& e)
+  {
+    this->close();
+    return;
+  }
+
+  boost::asio::async_read
+    (this->socket,
+     boost::asio::buffer(this->inboundData),
+     boost::bind(&Connection::readData<T, Handler>,
+                 this,
+                 boost::asio::placeholders::error,
+                 boost::asio::placeholders::bytes_transferred,
+                 boost::ref(t),
+                 handler));
 }
 
 template <typename T, typename Handler>
@@ -138,13 +144,21 @@ Connection::readData(const boost::system::error_code& e,
 {
   if (e)
   {
-    throw silvver::connection_error("Error on async reading");
+    this->close();
+    return;
   }
-  else
+
+  try
   {
     this->extractData(t);
-    boost::get<0>(handler)();
   }
+  catch (const silvver::connection_error& e)
+  {
+    this->close();
+    return;
+  }
+
+  boost::get<0>(handler)();
 }
 
 #endif // CONNECTION_IPP

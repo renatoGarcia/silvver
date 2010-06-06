@@ -103,6 +103,17 @@ namespace silvver
     Identity(const BaseClass& base, const TargetUid& uid);
   };
 
+  class Image
+  {
+  public:
+    Image();
+
+    Image(const Image& image);
+
+    int  width;
+    int  height;
+  };
+
   template<class TargetType>
   struct CameraReading
   {

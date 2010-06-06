@@ -33,14 +33,14 @@ namespace silvver
 
     ~CheshireCat();
 
-    /// Callback method called when a new localization arrives.
+    // Callback method called when a new localization arrives.
     void handleReceive();
 
     boost::function<void (CameraReading<T>)> callbackFunction;
 
     const silvver::AbstractCameraUid abstractCameraUid;
 
-    /// Value of last received reading.
+    // Value of last received reading.
     CameraReading<T> currentReading;
 
     Connection connection;
@@ -102,4 +102,4 @@ namespace silvver
   template class AbstractCamera<Position>;
   template class AbstractCamera<Pose>;
 
-} //Namespace silvver
+} // Namespace silvver

@@ -16,8 +16,6 @@
 #include "connection.hpp"
 #include "connection.ipp"
 
-#include <iostream>
-
 #include "exceptions.hpp"
 #include "request.hpp"
 
@@ -68,18 +66,24 @@ Connection::Connection(const std::string& serverName,
   this->write(request);
 }
 
-Connection::~Connection()
+void
+Connection::close()
 {
   if(this->socket.is_open())
   {
-    try
-    {
-      this->socket.shutdown(bip::tcp::socket::shutdown_both);
-      this->socket.close();
-    }
-    catch(...)
-    {}
+    this->socket.shutdown(bip::tcp::socket::shutdown_both);
+    this->socket.close();
   }
+}
+
+Connection::~Connection() throw()
+{
+  try
+  {
+    this->close();
+  }
+  catch(...)
+  {}
 }
 
 void

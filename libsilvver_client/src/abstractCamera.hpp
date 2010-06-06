@@ -30,8 +30,11 @@ namespace silvver
   {
   public:
     /** AbstractCamera class constructor.
-     * @param abstractCameraUid AbstractCamera silvver uid.
-     * @param serverIp IP address of silvver-server.
+     * @param callback A function with signature
+     *                 "void callback(cameraReading<T>)" which will be called
+     *                 to all received cameraReading.
+     * @param abstractCameraUid  Silvver UID of abstractCamera to observe.
+     * @param serverName IP address or hostname of silvver-server.
      * @param receptionistPort Port number of silvver-server receptionist. */
     AbstractCamera(boost::function<void (CameraReading<T>)> callback,
                    const AbstractCameraUid& abstractCameraUid,
@@ -40,9 +43,8 @@ namespace silvver
 
     ~AbstractCamera() throw();
 
-    /** Get the id of camera.
-     * @return The id of this camera.
-     */
+    /** Get the UID of observed abstractCamera.
+     * @return The UID of abstractCamera. */
     AbstractCameraUid getUid();
 
   private:

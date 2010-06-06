@@ -43,7 +43,6 @@ namespace silvver
     IplImage* toIplImage();
 #endif
 
-  // private:
     int  nChannels;
     int  depth;
     int  dataOrder;
@@ -154,6 +153,11 @@ namespace silvver
   IplImage*
   Image::toIplImage()
   {
+    if (this->imageData == NULL)
+    {
+      return NULL;
+    }
+
     IplImage* iplImage = cvCreateImage(cvSize(this->width, this->height),
                                        this->depth,
                                        this->nChannels);

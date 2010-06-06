@@ -34,10 +34,10 @@ namespace silvver
   {
   public:
     /** Target class constructor.
-     * @param targetId Target silvver uid.
-     * @param serverIp IP address of silvver-server.
-     * @param receptionistPort Port number of silvver-server receptionist.
-     * Can throw silvver::connection_error */
+     * Can throw silvver::connection_error
+     * @param targetUid Target silvver uid.
+     * @param serverName IP address or hostname of silvver-server.
+     * @param receptionistPort Port number of silvver-server receptionist. */
     Target(const TargetUid& targetUid,
            const std::string& serverName="localhost",
            const std::string& receptionistPort="12000");
@@ -48,19 +48,32 @@ namespace silvver
      * @return The UID of this target.  */
     TargetUid getUid();
 
-    /// Get the last received target localization.
+    /** Get the last received target localization.
+     * Immediately return the last received target, even if it was already
+     * read. This method can throw silvver::connection_error if the connection
+     * with silvver-server is closed.
+     * @return The last received target localization. */
     Identity<T> getLast();
 
-    /** Get a never gotten taget localization, or throw an
-     * old_pose_error exception.
-     * @param waitTime
-     *
-     * @return  */
+    /** Get a never gotten taget localization.
+     * This method will wait for waitTime until throw a
+     * silvver::time_expired_error exception. If the connection with
+     * silvver-server is closed, it will throw a silvver::connection_error.
+     * @param waitTime The time to wait for before throw the exception. The
+     *                 default waitTime is infinity.
+     * @return The target localization. */
     Identity<T> getNew(const boost::posix_time::time_duration&
                        waitTime = boost::date_time::pos_infin);
 
-    /** Return the next received target localization.
-     * This function wait until a new Pose arrives and returns */
+    /** Get the next target localization.
+     * This method will wait until a new target localization arrives from
+     * silvver-server. If that don't arrives in waitTime a
+     * silvver::time_expired_error exception will be threw. If the connection
+     * with silvver-server is closed, it will throw a
+     * silvver::connection_error.
+     * @param waitTime The time to wait for before throw the exception. The
+     *                 default waitTime is infinity.
+     * @return The target localization. */
     Identity<T> getNext(const boost::posix_time::time_duration&
                         waitTime = boost::date_time::pos_infin);
 

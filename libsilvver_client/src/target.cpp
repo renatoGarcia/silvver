@@ -37,24 +37,24 @@ namespace silvver
 
     ~CheshireCat();
 
-    /// Callback method called when a new localization arrives.
+    // Callback method called when a new localization arrives.
     void update();
 
     const silvver::TargetUid targetUid;
 
-    /// Synchronize the write and read in current.
+    // Synchronize the write and read in current.
     boost::mutex mutexCurrentPose;
 
     boost::condition_variable newPoseCondition;
 
-    /// Value of last received Pose.
+    // Value of last received Pose.
     Identity<T> current;
 
     // Signalize a never returned/read current.
     bool currentIsNew;
 
-    /// Will holds an Ente until convert it safely to
-    /// current locking mutexCurrentPose.
+    // Will holds an Ente until convert it safely to
+    // current locking mutexCurrentPose.
     Identity<T> last;
 
     Connection connection;
@@ -109,6 +109,11 @@ namespace silvver
   Identity<T>
   Target<T>::getLast()
   {
+    if (!smile->connection.isOpen())
+    {
+      throw connection_error("The silvver-server has closed the connection");
+    }
+
     boost::mutex::scoped_lock lock(smile->mutexCurrentPose);
 
     smile->currentIsNew = false;
@@ -119,6 +124,11 @@ namespace silvver
   Identity<T>
   Target<T>::getNew(const boost::posix_time::time_duration& waitTime)
   {
+    if (!smile->connection.isOpen())
+    {
+      throw connection_error("The silvver-server has closed the connection");
+    }
+
     boost::mutex::scoped_lock lock(smile->mutexCurrentPose);
 
     while (!smile->currentIsNew)
@@ -141,6 +151,11 @@ namespace silvver
   Identity<T>
   Target<T>::getNext(const boost::posix_time::time_duration& waitTime)
   {
+    if (!smile->connection.isOpen())
+    {
+      throw connection_error("The silvver-server has closed the connection");
+    }
+
     boost::mutex::scoped_lock lock(smile->mutexCurrentPose);
 
     // Wait for update function notifies a new pose.

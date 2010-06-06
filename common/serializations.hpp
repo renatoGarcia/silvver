@@ -1,4 +1,4 @@
-/* Copyright 2009 Renato Florentino Garcia <fgar.renato@gmail.com>
+/* Copyright 2009-2010 Renato Florentino Garcia <fgar.renato@gmail.com>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3, as
@@ -73,7 +73,7 @@ namespace boost
 
     template<class Archive>
     void
-    save(Archive& ar, const silvver::Image& image, const unsigned int version)
+    save(Archive& ar, const silvver::Image& image, const unsigned version)
     {
       ar << image.nChannels;
       ar << image.depth;
@@ -91,7 +91,7 @@ namespace boost
 
     template<class Archive>
     void
-    load(Archive& ar, silvver::Image& image, const unsigned int version)
+    load(Archive& ar, silvver::Image& image, const unsigned version)
     {
       int old_size = image.imageSize;
 
