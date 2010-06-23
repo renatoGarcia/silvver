@@ -128,6 +128,10 @@ namespace silvver
 
 %apply unsigned { uint64_t };
 
+%pythoncode %{
+import cv
+%}
+
 %include ../silvver.i
 
 %header %{
@@ -315,6 +319,24 @@ namespace silvver
       return ss.str().c_str();
     }
   }
+
+  %extend Image{
+    PyObject* toString()
+    {
+      std::cout << "teste" << std::endl;
+      return PyString_FromStringAndSize($self->imageData,
+                                        (Py_ssize_t)$self->imageSize);
+    }
+  }
+  %pythoncode %{
+    def toIplImage(self):
+      cv_img = cv.CreateImageHeader((self.width,self.height), cv.IPL_DEPTH_8U, 3) # RGB image
+      cv.SetData(cv_img, self.toString())
+      return cv_img
+
+    Image.toIplImage = toIplImage
+    del toIplImage
+  %}
 
   %extend Target{
     Identity<T> _getNew(int days, int seconds, int microseconds)

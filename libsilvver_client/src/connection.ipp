@@ -110,7 +110,7 @@ Connection::readHeader(const boost::system::error_code& e,
 {
   if (e)
   {
-    this->close();
+    // this->close();
     return;
   }
 
@@ -120,7 +120,7 @@ Connection::readHeader(const boost::system::error_code& e,
   }
   catch (const silvver::connection_error& e)
   {
-    this->close();
+    // this->close();
     return;
   }
 
@@ -144,7 +144,7 @@ Connection::readData(const boost::system::error_code& e,
 {
   if (e)
   {
-    this->close();
+    // this->close();
     return;
   }
 
@@ -154,7 +154,7 @@ Connection::readData(const boost::system::error_code& e,
   }
   catch (const silvver::connection_error& e)
   {
-    this->close();
+    // this->close();
     return;
   }
 

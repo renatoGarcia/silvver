@@ -28,10 +28,10 @@ boost::once_flag Connection::onceFlag = BOOST_ONCE_INIT;
 void
 Connection::runIoService()
 {
-  boost::asio::io_service::work work(Connection::ioService);
+  // boost::asio::io_service::work work(Connection::ioService);
 
-  while (true)
-  {
+  // while (true)
+  // {
     try
     {
       Connection::ioService.run();
@@ -40,7 +40,7 @@ Connection::runIoService()
     // any asynchronous send, receive or connect operations yet.
     catch(boost::system::system_error& e)
     {}
-  }
+  // }
 }
 
 Connection::Connection(const std::string& serverName,
