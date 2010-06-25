@@ -1,7 +1,5 @@
 #include <cstdio>
-#include <cstdlib>
 #include <iostream>
-#include <string>
 
 #include <silvver/silvverTypes.hpp>
 #include <silvver/abstractCamera.hpp>
@@ -25,9 +23,8 @@ void printPose(CameraReading<Pose> reading)
 
 int main(int argc, char *argv[])
 {
-  AbstractCameraUid uid(1,1);
-
-  AbstractCamera<Pose> camera(printPose, uid);
+  AbstractCamera<Pose> camera(AbstractCameraUid(1,1));
+  camera.setCallback(printPose);
 
   cout << "Press [enter] to quit." << endl;
   getchar();

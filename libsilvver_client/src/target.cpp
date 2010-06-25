@@ -22,8 +22,6 @@
 
 #include "connection.ipp"
 
-namespace bpt = boost::posix_time;
-
 namespace silvver
 {
   template<class T>
@@ -38,26 +36,30 @@ namespace silvver
     ~CheshireCat();
 
     // Callback method called when a new localization arrives.
-    void update();
+    void handleReceive();
 
     const silvver::TargetUid targetUid;
 
-    // Synchronize the write and read in current.
-    boost::mutex mutexCurrentPose;
+    // Outside callback function called when a new localization arrives.
+    boost::function<void (Identity<T>)> callback;
 
-    boost::condition_variable newPoseCondition;
+    // Synchronize the access to localization attribute.
+    boost::mutex mutexLocalization;
 
-    // Value of last received Pose.
-    Identity<T> current;
+    // Condition of there to be an unseen localization.
+    boost::condition_variable unseenLocalization;
 
-    // Signalize a never returned/read current.
-    bool currentIsNew;
+    // Last received localization.
+    Identity<T> localization;
 
-    // Will holds an Ente until convert it safely to
-    // current locking mutexCurrentPose.
-    Identity<T> last;
+    // Signalize if current localization was never returned/read.
+    bool localizationIsUnseen;
 
-    Connection connection;
+    // Will holds a localization until copy it safely to
+    // localization attribute.
+    Identity<T> tmpLocalization;
+
+    Connection serverConnection;
   };
 
   template<class T>
@@ -65,12 +67,17 @@ namespace silvver
                                       const std::string& serverName,
                                       const std::string& receptionistPort)
     :targetUid(targetUid)
-    ,currentIsNew(false)
-    ,connection(serverName, receptionistPort, targetUid)
+    ,callback()
+    ,mutexLocalization()
+    ,unseenLocalization()
+    ,localization()
+    ,localizationIsUnseen(false)
+    ,tmpLocalization()
+    ,serverConnection(serverName, receptionistPort, targetUid)
   {
-    this->connection.asyncRead(this->last,
-                               boost::bind(&CheshireCat::update,
-                                           this));
+    this->serverConnection.asyncRead(this->tmpLocalization,
+                                     boost::bind(&CheshireCat::handleReceive,
+                                                 this));
   }
 
   template<class T>
@@ -79,23 +86,36 @@ namespace silvver
 
   template<class T>
   void
-  Target<T>::CheshireCat::update()
+  Target<T>::CheshireCat::handleReceive()
   {
-    if (this->last.uid == this->targetUid)
+    if (this->tmpLocalization.uid == this->targetUid)
     {
       {
-        boost::mutex::scoped_lock lock(this->mutexCurrentPose);
-        this->current = this->last;
+        boost::mutex::scoped_lock lock(this->mutexLocalization);
+        this->localization = this->tmpLocalization;
 
-        this->currentIsNew = true;
+        this->localizationIsUnseen = true;
+
+        if (this->callback)
+        {
+          this->callback(this->localization);
+          this->localizationIsUnseen = false;
+        }
       }
 
-      this->newPoseCondition.notify_one();
+      this->unseenLocalization.notify_one();
     }
 
-    this->connection.asyncRead(this->last,
-                               boost::bind(&CheshireCat::update,
-                                           this));
+    this->serverConnection.asyncRead(this->tmpLocalization,
+                                     boost::bind(&CheshireCat::handleReceive,
+                                                 this));
+  }
+
+  template<class T>
+  void
+  Target<T>::setCallback(boost::function<void (Identity<T>)> callback)
+  {
+    smile->callback = callback;
   }
 
   template<class T>
@@ -109,33 +129,31 @@ namespace silvver
   Identity<T>
   Target<T>::getLast()
   {
-    if (!smile->connection.isOpen())
+    if (!smile->serverConnection.isOpen())
     {
       throw connection_error("The silvver-server has closed the connection");
     }
 
-    boost::mutex::scoped_lock lock(smile->mutexCurrentPose);
+    boost::mutex::scoped_lock lock(smile->mutexLocalization);
 
-    smile->currentIsNew = false;
-    return smile->current;
+    smile->localizationIsUnseen = false;
+    return smile->localization;
   }
 
   template<class T>
   Identity<T>
-  Target<T>::getNew(const boost::posix_time::time_duration& waitTime)
+  Target<T>::getUnseen(const boost::posix_time::time_duration& waitTime)
   {
-    if (!smile->connection.isOpen())
+    if (!smile->serverConnection.isOpen())
     {
       throw connection_error("The silvver-server has closed the connection");
     }
 
-    boost::mutex::scoped_lock lock(smile->mutexCurrentPose);
+    boost::mutex::scoped_lock lock(smile->mutexLocalization);
 
-    while (!smile->currentIsNew)
+    while (!smile->localizationIsUnseen)
     {
-      if (!smile->newPoseCondition.timed_wait(lock,
-                                              bpt::second_clock::universal_time() +
-                                              waitTime))
+      if (!smile->unseenLocalization.timed_wait(lock, waitTime))
       {
         throw typename
           silvver::time_expired_error("The wait time expired without a new "
@@ -143,33 +161,31 @@ namespace silvver
       }
     }
 
-    smile->currentIsNew = false;
-    return smile->current;
+    smile->localizationIsUnseen = false;
+    return smile->localization;
   }
 
   template<class T>
   Identity<T>
   Target<T>::getNext(const boost::posix_time::time_duration& waitTime)
   {
-    if (!smile->connection.isOpen())
+    if (!smile->serverConnection.isOpen())
     {
       throw connection_error("The silvver-server has closed the connection");
     }
 
-    boost::mutex::scoped_lock lock(smile->mutexCurrentPose);
+    boost::mutex::scoped_lock lock(smile->mutexLocalization);
 
-    // Wait for update function notifies a new pose.
-    if (!smile->newPoseCondition.timed_wait(lock,
-                                            bpt::second_clock::universal_time() +
-                                            waitTime))
+    // Wait for handleReceive method notifies a new pose.
+    if (!smile->unseenLocalization.timed_wait(lock, waitTime))
     {
       throw typename
         silvver::time_expired_error("The wait time expired without the next "
                                     "pose arrives");
     }
 
-    smile->currentIsNew = false;
-    return smile->current;
+    smile->localizationIsUnseen = false;
+    return smile->localization;
   }
 
   template<class T>

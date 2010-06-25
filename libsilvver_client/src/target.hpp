@@ -16,12 +16,11 @@
 #ifndef _SILVVER_TARGET_HPP_
 #define _SILVVER_TARGET_HPP_
 
-#include <memory>
-#include <stdexcept>
-#include <string>
-
-#include <boost/date_time/time_duration.hpp>
 #include <boost/date_time/posix_time/posix_time.hpp>
+#include <boost/date_time/time_duration.hpp>
+#include <boost/function.hpp>
+#include <memory>
+#include <string>
 
 #include "exceptions.hpp"
 #include "silvverTypes.hpp"
@@ -44,26 +43,33 @@ namespace silvver
 
     ~Target() throw();
 
+    /** Set a callback function which will be called to all received
+     * localizations.
+     * A zero value will unset the current callback.
+     * @param callback A function with signature
+     *                 "void callback(Identity<T>)"  */
+     void setCallback(boost::function<void (Identity<T>)> callback=0);
+
     /** Get the UID of target.
      * @return The UID of this target.  */
     TargetUid getUid();
 
     /** Get the last received target localization.
      * Immediately return the last received target, even if it was already
-     * read. This method can throw silvver::connection_error if the connection
+     * seen. This method can throw silvver::connection_error if the connection
      * with silvver-server is closed.
      * @return The last received target localization. */
     Identity<T> getLast();
 
-    /** Get a never gotten taget localization.
+    /** Get a never seen taget localization.
      * This method will wait for waitTime until throw a
      * silvver::time_expired_error exception. If the connection with
      * silvver-server is closed, it will throw a silvver::connection_error.
      * @param waitTime The time to wait for before throw the exception. The
      *                 default waitTime is infinity.
      * @return The target localization. */
-    Identity<T> getNew(const boost::posix_time::time_duration&
-                       waitTime = boost::date_time::pos_infin);
+    Identity<T> getUnseen(const boost::posix_time::time_duration&
+                          waitTime = boost::date_time::pos_infin);
 
     /** Get the next target localization.
      * This method will wait until a new target localization arrives from

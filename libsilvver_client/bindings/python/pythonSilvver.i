@@ -13,6 +13,12 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+%pythoncode %{
+import cv
+TimeExpired = _silvver.TimeExpired
+ConnectionError = _silvver.ConnectionError
+%}
+
 namespace silvver
 {
   %typemap(typecheck) AbstractCameraUid&
@@ -93,6 +99,38 @@ namespace silvver
   %typemap(in) TargetUid& = AbstractCameraUid&;
   %typemap(freearg) TargetUid& = AbstractCameraUid&;
 
+  %typemap(typecheck) boost::function<void (Identity<Position>)>
+  {
+    $1 = PyCallable_Check($input);
+  }
+
+  %typemap(typecheck) boost::function<void (Identity<Pose>)>
+  {
+    $1 = PyCallable_Check($input);
+  }
+
+  %typemap(in) boost::function<void (Identity<Position>)>
+  {
+    if (!PyCallable_Check($input))
+    {
+      PyErr_SetString(PyExc_TypeError, "Need a callable object!");
+      return NULL;
+    }
+    Callback<silvver::Position> cb($input);
+    $1 = cb;
+  }
+
+  %typemap(in) boost::function<void (Identity<Pose>)>
+  {
+    if (!PyCallable_Check($input))
+    {
+      PyErr_SetString(PyExc_TypeError, "Need a callable object!");
+      return NULL;
+    }
+    Callback<silvver::Pose> cb($input);
+    $1 = cb;
+  }
+
   %typemap(typecheck) boost::function<void (CameraReading<Position>)>
   {
     $1 = PyCallable_Check($input);
@@ -128,10 +166,6 @@ namespace silvver
 
 %apply unsigned { uint64_t };
 
-%pythoncode %{
-import cv
-%}
-
 %include ../silvver.i
 
 %header %{
@@ -166,6 +200,20 @@ public:
     Py_DECREF(this->pyFunction);
   }
 
+  PyObject* makeSwigPyObject(silvver::Identity<silvver::Position>* p)
+  {
+    return SWIG_NewPointerObj(p,
+                              SWIGTYPE_p_silvver__IdentityT_silvver__Position_t,
+                              0);
+  }
+
+  PyObject* makeSwigPyObject(silvver::Identity<silvver::Pose>* p)
+  {
+    return SWIG_NewPointerObj(p,
+                              SWIGTYPE_p_silvver__IdentityT_silvver__Pose_t,
+                              0);
+  }
+
   PyObject* makeSwigPyObject(silvver::CameraReading<silvver::Position>* p)
   {
     return SWIG_NewPointerObj(p,
@@ -178,6 +226,21 @@ public:
     return SWIG_NewPointerObj(p,
                               SWIGTYPE_p_silvver__CameraReadingT_silvver__Pose_t,
                               0);
+  }
+
+  // This method will be called from another thread, the one of ioService from
+  // Connection class. Because of this, is needed the SWIG_PYTHON_THREAD_*
+  // macros.
+  void operator()(silvver::Identity<T> identity)
+  {
+    PYTHON_THREAD_BEGIN_BLOCK;
+    PyObject* argument = this->makeSwigPyObject(&identity);
+    PyObject* arg = Py_BuildValue("(O)", argument);
+
+    PyObject_CallObject(this->pyFunction, arg);
+    Py_DECREF(argument);
+    Py_DECREF(arg);
+    PYTHON_THREAD_END_BLOCK;
   }
 
   // This method will be called from another thread, the one of ioService from
@@ -323,12 +386,11 @@ namespace silvver
   %extend Image{
     PyObject* toString()
     {
-      std::cout << "teste" << std::endl;
       return PyString_FromStringAndSize($self->imageData,
                                         (Py_ssize_t)$self->imageSize);
     }
   }
-  %pythoncode %{
+  %pythoncode {
     def toIplImage(self):
       cv_img = cv.CreateImageHeader((self.width,self.height), cv.IPL_DEPTH_8U, 3) # RGB image
       cv.SetData(cv_img, self.toString())
@@ -339,39 +401,60 @@ namespace silvver
   %}
 
   %extend Target{
-    Identity<T> _getNew(int days, int seconds, int microseconds)
+    Identity<T> _getUnseen(int days, int seconds, int microseconds)
     {
-      return $self->getNew(boost::posix_time::hours(days*24) +
-                           boost::posix_time::seconds(seconds) +
-                           boost::posix_time::microseconds(microseconds));
+      return $self->getUnseen(boost::posix_time::hours(days*24) +
+                              boost::posix_time::seconds(seconds) +
+                              boost::posix_time::microseconds(microseconds));
     }
 
-    Identity<T> _getNew()
+    Identity<T> _getUnseen()
     {
-      return $self->getNew(boost::date_time::pos_infin);
+      return $self->getUnseen(boost::date_time::pos_infin);
+    }
+
+    Identity<T> _getNext(int days, int seconds, int microseconds)
+    {
+      return $self->getNext(boost::posix_time::hours(days*24) +
+                            boost::posix_time::seconds(seconds) +
+                            boost::posix_time::microseconds(microseconds));
+    }
+
+    Identity<T> _gettNext()
+    {
+      return $self->getNext(boost::date_time::pos_infin);
     }
   }
 
-  %feature("shadow") Target::getNew %{
-    def getNew(self, timedelta='infinity'):
+  %feature("shadow") Target::getUnseen %{
+    def getUnseen(self, timedelta='infinity'):
         if timedelta == 'infinity':
-            return self._getNew()
+            return self._getUnseen()
         else:
-            return self._getNew(timedelta.days, timedelta.seconds,
-                                timedelta.microseconds)
+            return self._getUnseen(timedelta.days, timedelta.seconds,
+                                   timedelta.microseconds)
   %}
 
-  %template(IdentityPosition) Identity<Position>;
-  %template(IdentityPose) Identity<Pose>;
+  %feature("shadow") Target::getNext %{
+    def getNext(self, timedelta='infinity'):
+        if timedelta == 'infinity':
+            return self._getNext()
+        else:
+            return self._getNext(timedelta.days, timedelta.seconds,
+                                 timedelta.microseconds)
+  %}
 
-  %template(CameraReadingPosition) CameraReading<Position>;
-  %template(CameraReadingPose) CameraReading<Pose>;
+  %template(Identity_Position) Identity<Position>;
+  %template(Identity_Pose) Identity<Pose>;
 
-  %template(TargetPosition) Target<Position>;
-  %template(TargetPose) Target<Pose>;
+  %template(CameraReading_Position) CameraReading<Position>;
+  %template(CameraReading_Pose) CameraReading<Pose>;
 
-  %template(AbstractCameraPosition) AbstractCamera<Position>;
-  %template(AbstractCameraPose) AbstractCamera<Pose>;
+  %template(Target_Position) Target<Position>;
+  %template(Target_Pose) Target<Pose>;
+
+  %template(AbstractCamera_Position) AbstractCamera<Position>;
+  %template(AbstractCamera_Pose) AbstractCamera<Pose>;
 }
 
 namespace std

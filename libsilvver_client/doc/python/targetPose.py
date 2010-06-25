@@ -2,12 +2,9 @@
 
 from silvver import *
 
-target = TargetPose((1,1))
-target.connect()
+target = Target_Pose((1,1))
 
 for i in range(10):
-    pose = target.getNew()
+    pose = target.getUnseen()
     print(pose)
     print
-
-target.disconnect()

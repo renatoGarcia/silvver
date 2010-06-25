@@ -16,6 +16,8 @@
 #include "abstractCamera.hpp"
 
 #include <boost/bind.hpp>
+#include <boost/thread/condition.hpp>
+#include <boost/thread/mutex.hpp>
 
 #include "connection.ipp"
 
@@ -26,38 +28,55 @@ namespace silvver
   AbstractCamera<T>::CheshireCat
   {
   public:
-    CheshireCat(boost::function<void(CameraReading<T>)> callback,
-                const silvver::AbstractCameraUid& abstractCameraUid,
+    CheshireCat(const silvver::AbstractCameraUid& abstractCameraUid,
                 const std::string& serverName,
                 const std::string& receptionistPort);
 
     ~CheshireCat();
 
-    // Callback method called when a new localization arrives.
+    // Callback method called when a new cameraReading arrives.
     void handleReceive();
-
-    boost::function<void (CameraReading<T>)> callbackFunction;
 
     const silvver::AbstractCameraUid abstractCameraUid;
 
-    // Value of last received reading.
-    CameraReading<T> currentReading;
+    // Outside callback function called when a new cameraReading arrives.
+    boost::function<void (CameraReading<T>)> callback;
 
-    Connection connection;
+    // Synchronize the access to cameraReading attribute.
+    boost::mutex mutexCameraReading;
+
+    // Condition of there to be an unseen cameraReading.
+    boost::condition_variable unseenCameraReading;
+
+    // Last received cameraReading.
+    CameraReading<T> cameraReading;
+
+    // Signalize a never seen cameraReading.
+    bool cameraReadingIsUnseen;
+
+    // Will holds a cameraReading until copy it safely to
+    // cameraReading attribute.
+    CameraReading<T> tmpCameraReading;
+
+    Connection serverConnection;
   };
 
   template<class T> AbstractCamera<T>::
-  CheshireCat::CheshireCat(boost::function<void(CameraReading<T>)> callback,
-                           const silvver::AbstractCameraUid& abstractCameraUid,
+  CheshireCat::CheshireCat(const silvver::AbstractCameraUid& abstractCameraUid,
                            const std::string& serverName,
                            const std::string& receptionistPort)
-    :callbackFunction(callback)
-    ,abstractCameraUid(abstractCameraUid)
-    ,connection(serverName, receptionistPort, abstractCameraUid)
+    :abstractCameraUid(abstractCameraUid)
+    ,callback()
+    ,mutexCameraReading()
+    ,unseenCameraReading()
+    ,cameraReading()
+    ,cameraReadingIsUnseen(false)
+    ,tmpCameraReading()
+    ,serverConnection(serverName, receptionistPort, abstractCameraUid)
   {
-    this->connection.asyncRead(this->currentReading,
-                               boost::bind(&CheshireCat::handleReceive,
-                                           this));
+    this->serverConnection.asyncRead(this->cameraReading,
+                                     boost::bind(&CheshireCat::handleReceive,
+                                                 this));
   }
 
   template<class T>
@@ -68,14 +87,34 @@ namespace silvver
   void
   AbstractCamera<T>::CheshireCat::handleReceive()
   {
-    if (this->currentReading.camUid == this->abstractCameraUid)
+    if (this->tmpCameraReading.camUid == this->abstractCameraUid)
     {
-      this->callbackFunction(this->currentReading);
+      {
+        boost::mutex::scoped_lock lock(this->mutexCameraReading);
+        this->cameraReading = this->tmpCameraReading;
+
+        this->cameraReadingIsUnseen = true;
+
+        if (this->callback)
+        {
+          this->callback(this->cameraReading);
+          this->cameraReadingIsUnseen = false;
+        }
+      }
+
+      this->unseenCameraReading.notify_one();
     }
 
-    this->connection.asyncRead(this->currentReading,
-                               boost::bind(&CheshireCat::handleReceive,
-                                           this));
+    this->serverConnection.asyncRead(this->tmpCameraReading,
+                                     boost::bind(&CheshireCat::handleReceive,
+                                                 this));
+  }
+
+  template<class T>
+  void
+  AbstractCamera<T>::setCallback(boost::function<void (CameraReading<T>)> callback)
+  {
+    smile->callback = callback;
   }
 
   template<class T>
@@ -86,12 +125,73 @@ namespace silvver
   }
 
   template<class T>
-  AbstractCamera<T>::AbstractCamera(boost::function<void(CameraReading<T>)> callback,
-                                    const silvver::AbstractCameraUid& abstractCameraUid,
+  CameraReading<T>
+  AbstractCamera<T>::getLast()
+  {
+    if (!smile->serverConnection.isOpen())
+    {
+      throw connection_error("The silvver-server has closed the connection");
+    }
+
+    boost::mutex::scoped_lock lock(smile->mutexCameraReading);
+
+    smile->cameraReadingIsUnseen = false;
+    return smile->cameraReading;
+  }
+
+  template<class T>
+  CameraReading<T>
+  AbstractCamera<T>::getUnseen(const boost::posix_time::time_duration& waitTime)
+  {
+    if (!smile->serverConnection.isOpen())
+    {
+      throw connection_error("The silvver-server has closed the connection");
+    }
+
+    boost::mutex::scoped_lock lock(smile->mutexCameraReading);
+
+    while (!smile->cameraReadingIsUnseen)
+    {
+      if (!smile->unseenCameraReading.timed_wait(lock, waitTime))
+      {
+        throw typename
+          silvver::time_expired_error("The wait time expired without a new "
+                                      "pose arrives");
+      }
+    }
+
+    smile->cameraReadingIsUnseen = false;
+    return smile->cameraReading;
+  }
+
+  template<class T>
+  CameraReading<T>
+  AbstractCamera<T>::getNext(const boost::posix_time::time_duration& waitTime)
+  {
+    if (!smile->serverConnection.isOpen())
+    {
+      throw connection_error("The silvver-server has closed the connection");
+    }
+
+    boost::mutex::scoped_lock lock(smile->mutexCameraReading);
+
+    // Wait for handleReceive method notifies a new cameraReading.
+    if (!smile->unseenCameraReading.timed_wait(lock, waitTime))
+    {
+      throw typename
+        silvver::time_expired_error("The wait time expired without the next "
+                                    "pose arrives");
+    }
+
+    smile->cameraReadingIsUnseen = false;
+    return smile->cameraReading;
+  }
+
+  template<class T>
+  AbstractCamera<T>::AbstractCamera(const silvver::AbstractCameraUid& abstractCameraUid,
                                     const std::string& serverName,
                                     const std::string& receptionistPort)
-    :smile(new CheshireCat(callback, abstractCameraUid,
-                           serverName, receptionistPort))
+    :smile(new CheshireCat(abstractCameraUid, serverName, receptionistPort))
   {}
 
   template<class T>

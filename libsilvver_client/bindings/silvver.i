@@ -141,10 +141,12 @@ namespace silvver
 
     TargetUid getUid();
 
+    void setCallback(boost::function<void (Identity<T>)> callback=0);
+
     Identity<T> getLast();
 
-    Identity<T> getNew(const boost::posix_time::time_duration&
-                       waitTime = boost::date_time::pos_infin);
+    Identity<T> getUnseen(const boost::posix_time::time_duration&
+                          waitTime = boost::date_time::pos_infin);
 
     Identity<T> getNext(const boost::posix_time::time_duration&
                         waitTime = boost::date_time::pos_infin);
@@ -154,13 +156,22 @@ namespace silvver
   class AbstractCamera
   {
   public:
-    AbstractCamera(boost::function<void(CameraReading<T>)> callback,
-                   const AbstractCameraUid& abstractCameraUid,
+    AbstractCamera(const AbstractCameraUid& abstractCameraUid,
                    const std::string& serverName="localhost",
                    const std::string& receptionistPort="12000");
 
     ~AbstractCamera() throw();
 
     AbstractCameraUid getUid();
+
+    void setCallback(boost::function<void (CameraReading<T>)> callback=0);
+
+    CameraReading<T> getLast();
+
+    CameraReading<T> getUnseen(const boost::posix_time::time_duration&
+                               waitTime = boost::date_time::pos_infin);
+
+    CameraReading<T> getNext(const boost::posix_time::time_duration&
+                             waitTime = boost::date_time::pos_infin);
   };
 } //silvver namespace
