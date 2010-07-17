@@ -145,7 +145,7 @@ CfReader::readV4l2Config()
 {
   scene::V4l2 v4l2;
 
-  luaParser.readValue(v4l2.uid, "identifier");
+  luaParser.readValue(v4l2.uid, "uid");
   luaParser.readValue(v4l2.colorMode, "color_mode");
 
   luaParser.readValue(v4l2.brightness, "brightness");

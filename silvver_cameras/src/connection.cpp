@@ -36,7 +36,7 @@ Connection::runIoService()
 Connection::Connection(const std::string& serverName,
                        const std::string& receptionistPort,
                        const Request& request)
-  :socket(Connection::ioService, bip::tcp::endpoint())
+  :socket(Connection::ioService)
 {
   boost::call_once(Connection::onceFlag,
                    boost::bind(&boost::scoped_ptr<boost::thread>::reset,
