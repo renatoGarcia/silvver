@@ -22,10 +22,12 @@
 #include <iostream>
 #include <string>
 
+#include "common/channelTypes.hpp"
+#include "common/tcpIp.hpp"
+#include "common/version.hpp"
 #include "globalOptions.hpp"
-#include "sceneMounter.hpp"
 #include "log.hpp"
-#include "version.hpp"
+#include "sceneMounter.hpp"
 
 namespace po = boost::program_options;
 
@@ -69,6 +71,8 @@ std::string getLevelsNames()
 
 int main(int argc, char **argv)
 {
+  std::string serverName;
+  std::string receptionistPort;
   std::string luaFile;
   LogLevel verbosity;
 
@@ -81,10 +85,10 @@ int main(int argc, char **argv)
     ("help,h", "Print this help message and exit")
     ("version,V", "Print version and exit")
     ("server-name,s",
-     po::value<std::string>(&global_options.serverName)->default_value("localhost"),
+     po::value<std::string>(&serverName)->default_value("localhost"),
      "Hostname or IP address of silvver-server")
     ("receptionist-port,p",
-     po::value<std::string>(&global_options.receptionistPort)->default_value("12000"),
+     po::value<std::string>(&receptionistPort)->default_value("12000"),
      "Port on the server where the receptionist is hearing")
     ("scene-config,c",
      po::value<std::string>(&luaFile)->default_value("scene.lua"),
@@ -133,6 +137,11 @@ int main(int argc, char **argv)
               << "----------------------------------------------\n"
               << std::endl;
 
+    global_options.receptionistEp = TcpIp::resolve(serverName, receptionistPort).front();
+    if (serverName == "localhost" || serverName == "127.0.0.1")
+      global_options.channelType = IPC;
+    else
+      global_options.channelType = TCP_IP;
     global_options.sendImages = vm.count("send-images");
     global_options.showImages = vm.count("show");
     global_options.saveDistortedImages = vm.count("save-distorted");

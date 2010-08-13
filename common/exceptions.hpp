@@ -13,8 +13,8 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef _EXCEPTIONS_HPP_
-#define _EXCEPTIONS_HPP_
+#ifndef _COMMON_EXCEPTIONS_HPP_
+#define _COMMON_EXCEPTIONS_HPP_
 
 #include <stdexcept>
 
@@ -22,30 +22,22 @@ class connection_error
   :public std::runtime_error
 {
 public:
-  connection_error(const std::string& whatArg)
-    :runtime_error(whatArg)
-  {}
-
-  virtual ~connection_error() throw()
-  {}
+  connection_error(const std::string& whatArg);
+  virtual ~connection_error() throw();
 };
 
 class broken_connection
   :public connection_error
 {
 public:
-  broken_connection(const std::string& whatArg)
-    :connection_error(whatArg)
-  {}
+  broken_connection(const std::string& whatArg);
 };
 
 class data_error
   :public connection_error
 {
 public:
-  data_error(const std::string& whatArg)
-    :connection_error(whatArg)
-  {}
+  data_error(const std::string& whatArg);
 };
 
-#endif /* _EXCEPTIONS_HPP_ */
+#endif /* _COMMON_EXCEPTIONS_HPP_ */

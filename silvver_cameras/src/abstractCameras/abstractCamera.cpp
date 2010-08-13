@@ -17,6 +17,7 @@
 
 #include "../globalOptions.hpp"
 #include "../hardCameraFactory.hpp"
+#include "common/channelTypes.hpp"
 
 extern globalOptions::Options global_options;
 
@@ -26,8 +27,7 @@ AbstractCamera::AbstractCamera(const scene::Camera& cameraConfig,
   :subjectHardCamera(HardCameraFactory::create(cameraConfig.hardware))
   ,currentFrame()
   ,abstractCameraUid(silvverUid, subjectHardCamera->silvverUid)
-  ,serverConnection(global_options.serverName, global_options.receptionistPort,
-                    AddCamera(processorOptions, this->abstractCameraUid))
+  ,serverConnection()
   ,unreadImage(false)
   ,unreadImageAccess()
   ,unreadImageCondition()
@@ -35,6 +35,8 @@ AbstractCamera::AbstractCamera(const scene::Camera& cameraConfig,
   ,trans(cameraConfig.translationVector)
 {
   this->subjectHardCamera->attach(this);
+  this->serverConnection.connect(global_options.receptionistEp,
+                                 global_options.channelType);
 }
 
 AbstractCamera::~AbstractCamera()

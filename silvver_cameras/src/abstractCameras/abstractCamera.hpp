@@ -23,15 +23,15 @@
 #include <cstdlib>
 #include <stdint.h>
 
-#include "../connection.ipp"
 #include "../exceptions.hpp"
 #include "../frame.hpp"
 #include "../hardCameras/hardCamera.hpp"
 #include "../log.hpp"
 #include "../observer.hpp"
 #include "../scene.hpp"
-#include "processorOptions.hpp"
-#include "silvverTypes.hpp"
+#include "common/connection.ipp"
+#include "common/processorOptions.hpp"
+#include "common/silvverTypes.hpp"
 
 /// Abstract base class to all abstract cameras.
 class AbstractCamera: public boost::noncopyable, public Observer
@@ -110,7 +110,7 @@ AbstractCamera::sendLocalizations(const std::vector<silvver::Identity<TargetType
 
   try
   {
-    this->serverConnection.write(cameraReading);
+    this->serverConnection.send(cameraReading);
   }
   catch (const server_connection_error& e)
   {

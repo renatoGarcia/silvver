@@ -18,7 +18,7 @@
 
 #include <boost/array.hpp>
 
-#include "silvverTypes.hpp"
+#include "common/silvverTypes.hpp"
 
 class MountedTarget
 {

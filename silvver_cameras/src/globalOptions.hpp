@@ -15,12 +15,14 @@
 
 #include <string>
 
+#include "common/channelTypes.hpp"
+
 namespace globalOptions
 {
   struct Options
   {
-    std::string serverName;
-    std::string receptionistPort;
+    TcpIpEp receptionistEp;
+    ChannelsEnum channelType;
 
     bool sendImages;
 

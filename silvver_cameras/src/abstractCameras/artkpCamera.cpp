@@ -23,7 +23,7 @@
 
 #include "../exceptions.hpp"
 #include "../log.hpp"
-#include "silvverTypes.hpp"
+#include "common/silvverTypes.hpp"
 
 ArtkpCamera::ArtkpCamera(const scene::Camera& cameraConfig,
                          const scene::ArtkpTargets& targets)
