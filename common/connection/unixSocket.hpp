@@ -13,39 +13,20 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef _CHANNEL_HPP_
-#define _CHANNEL_HPP_
+#ifndef _UNIX_SOCKET_HPP_
+#define _UNIX_SOCKET_HPP_
 
-#include <string>
+#include <boost/asio/local/stream_protocol.hpp>
 
+#include "asioStream.hpp"
 #include "channelTypes.hpp"
-#include "exceptions.hpp"
 
-class Channel
+struct UnixSocketSpec
 {
-public:
-  virtual ~Channel()
-  {}
-
-  virtual void close()=0;
-
-  virtual Endpoint getEndpoint() const=0;
-
-  /** Block until data be sent.
-   * This method can throw broken_connection and data_error.
-   *
-   * @param data A string with the data to be sent.  */
-  virtual void send(const std::string& data)=0;
-
-  /** Block until receive a data package.
-   * This method can throw broken_connection and data_error.
-   *
-   * @param data A string where put the received data.  */
-  virtual void receive(std::string& data)=0;
-
-protected:
-  Channel()
-  {}
+  typedef boost::asio::local::stream_protocol AsioClass;
+  static const ChannelType portableClassId = UNIX_SOCKET;
 };
 
-#endif /* _CHANNEL_HPP_ */
+typedef AsioStream<UnixSocketSpec> UnixSocket;
+
+#endif /* _UNIX_SOCKET_HPP_ */

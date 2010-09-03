@@ -13,37 +13,19 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef _CONNECTION_IPP_
-#define _CONNECTION_IPP_
-
-#include "connection.hpp"
+#ifndef _SERIALIZATOR_HPP_
+#define _SERIALIZATOR_HPP_
 
 #include <boost/archive/text_iarchive.hpp>
 #include <boost/archive/text_oarchive.hpp>
+#include <sstream>
+#include <string>
 
-#include "serializations.hpp"
-
-template <class T>
-void
-Connection::send(const T& t)
-{
-  std::string data;
-  serialize(data, t);
-  this->channel->send(data);
-}
+#include "exceptions.hpp"
 
 template <class T>
 void
-Connection::receive(T& t)
-{
-  std::string data;
-  this->channel->receive(data);
-  deserialize(t, data);
-}
-
-template <class T>
-void
-Connection::serialize(std::string& data, const T& t)
+serialize(std::string& data, const T& t)
 {
   std::ostringstream archiveStream;
   boost::archive::text_oarchive archive(archiveStream);
@@ -53,7 +35,7 @@ Connection::serialize(std::string& data, const T& t)
 
 template <class T>
 void
-Connection::deserialize(T& t, const std::string& data)
+deserialize(T& t, const std::string& data)
 {
   try
   {
@@ -68,4 +50,5 @@ Connection::deserialize(T& t, const std::string& data)
   }
 }
 
-#endif /* _CONNECTION_IPP_ */
+
+#endif /* _SERIALIZATOR_HPP_ */

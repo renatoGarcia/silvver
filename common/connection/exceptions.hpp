@@ -17,6 +17,19 @@
 #define _COMMON_EXCEPTIONS_HPP_
 
 #include <stdexcept>
+#include <string>
+
+#include "boost/enum.hpp"
+
+namespace connection {
+
+BOOST_ENUM(error_code,
+           (success)
+           (connection_error)
+           (broken_connection)
+           (data_error));
+
+} // namespace connection
 
 class connection_error
   :public std::runtime_error
