@@ -21,6 +21,8 @@
 #include "asioStream.hpp"
 #include "channelTypes.hpp"
 
+namespace connection {
+
 struct UnixSocketSpec
 {
   typedef boost::asio::local::stream_protocol AsioClass;
@@ -28,5 +30,7 @@ struct UnixSocketSpec
 };
 
 typedef AsioStream<UnixSocketSpec> UnixSocket;
+
+} // namespace connection
 
 #endif /* _UNIX_SOCKET_HPP_ */

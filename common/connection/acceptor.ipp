@@ -28,6 +28,8 @@
 #include "tcpIp.hpp"
 #include "unixSocket.hpp"
 
+namespace connection {
+
 template <class Type>
 boost::asio::io_service Acceptor<Type>::ioService;
 
@@ -84,5 +86,7 @@ Acceptor<Type>::createChannel(boost::asio::io_service& ioService,
 
   return channel.release();
 }
+
+} // namespace connection
 
 #endif /* _ACCEPTOR_IPP_ */

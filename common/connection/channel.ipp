@@ -24,6 +24,8 @@
 
 #include "serializator.hpp"
 
+namespace connection {
+
 template <class AcceptorType>
 void
 Channel::connect(const typename AcceptorType::Endpoint& acceptorEp)
@@ -77,12 +79,12 @@ Channel::readHandler(boost::shared_ptr<std::string> data,
                      const boost::system::error_code& ec,
                      std::size_t bytes_transferred)
 {
-  connection::error_code error(connection::error_code::success);
+  error_code error(error_code::success);
 
   if ((ec == boost::asio::error::broken_pipe) ||
       (ec == boost::asio::error::connection_aborted))
   {
-    error = connection::error_code::broken_connection;
+    error = error_code::broken_connection;
     if (!this->closeHandler.empty())
     {
       this->closeHandler();
@@ -90,7 +92,7 @@ Channel::readHandler(boost::shared_ptr<std::string> data,
   }
   else if(ec)
   {
-    error = connection::error_code::connection_error;
+    error = error_code::connection_error;
   }
   else
   {
@@ -100,11 +102,13 @@ Channel::readHandler(boost::shared_ptr<std::string> data,
     }
     catch (const data_error& e)
     {
-      error = connection::error_code::data_error;
+      error = error_code::data_error;
     }
   }
 
   handler(error);
 }
+
+} // namespace connection
 
 #endif /* _CHANNEL_IPP_ */

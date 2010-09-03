@@ -26,6 +26,8 @@
 #include "channel.hpp"
 #include "channelTypes.hpp"
 
+namespace connection {
+
 /** Class template which wrap a asio socket class as a Channel.
  * The template argument Type must be a class that fulfill a boost asio socket
  * with stream protocol, like boost::asio::ip::tcp or
@@ -90,5 +92,7 @@ private:
   std::vector<char> inboundData;
 
 };
+
+} // namespace connection
 
 #endif /* _ASIO_STREAM_HPP_ */

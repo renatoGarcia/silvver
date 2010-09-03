@@ -24,6 +24,8 @@
 #include <boost/serialization/variant.hpp>
 #include <boost/variant.hpp>
 
+namespace connection {
+
 enum ChannelType
 {
   TCP_IP,
@@ -35,15 +37,18 @@ typedef boost::asio::local::stream_protocol::endpoint UnixSocketEp;
 
 typedef boost::variant<TcpIpEp, UnixSocketEp> AnyEndpoint;
 
-BOOST_SERIALIZATION_SPLIT_FREE(TcpIpEp);
-BOOST_SERIALIZATION_SPLIT_FREE(UnixSocketEp);
+} // namespace connection
+
+BOOST_SERIALIZATION_SPLIT_FREE(connection::TcpIpEp);
+BOOST_SERIALIZATION_SPLIT_FREE(connection::UnixSocketEp);
 
 namespace boost {
 namespace serialization {
 
 //-------------------------- TcpIpEp
 template<class Archive>
-void save(Archive& ar, const TcpIpEp& ep, const unsigned int version)
+void save(Archive& ar, const connection::TcpIpEp& ep,
+          const unsigned int version)
 {
   std::string s(ep.address().to_string());
   unsigned int i(ep.port());
@@ -52,7 +57,7 @@ void save(Archive& ar, const TcpIpEp& ep, const unsigned int version)
 }
 
 template<class Archive>
-void load(Archive& ar, TcpIpEp& ep, const unsigned int version)
+void load(Archive& ar, connection::TcpIpEp& ep, const unsigned int version)
 {
   std::string ipAddress;
   unsigned short portNumber;
@@ -65,14 +70,16 @@ void load(Archive& ar, TcpIpEp& ep, const unsigned int version)
 
 //-------------------------- UnixSocketEp
 template<class Archive>
-void save(Archive& ar, const UnixSocketEp& ep, const unsigned int version)
+void save(Archive& ar, const connection::UnixSocketEp& ep,
+          const unsigned int version)
 {
   std::string path(ep.path());
   ar << path;
 }
 
 template<class Archive>
-void load(Archive & ar, UnixSocketEp& ep, const unsigned int version)
+void load(Archive & ar, connection::UnixSocketEp& ep,
+          const unsigned int version)
 {
   std::string path;
   ar >> path;

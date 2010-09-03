@@ -23,6 +23,8 @@
 
 #include "exceptions.hpp"
 
+namespace connection {
+
 template <class T>
 void
 serialize(std::string& data, const T& t)
@@ -50,5 +52,6 @@ deserialize(T& t, const std::string& data)
   }
 }
 
+} // namespace connection
 
 #endif /* _SERIALIZATOR_HPP_ */

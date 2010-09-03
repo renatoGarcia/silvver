@@ -17,4 +17,8 @@
 
 #include "asioStream.ipp"
 
+namespace connection {
+
 template class AsioStream<UnixSocketSpec>;
+
+} // namespace connection

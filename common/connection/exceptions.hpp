@@ -29,8 +29,6 @@ BOOST_ENUM(error_code,
            (broken_connection)
            (data_error));
 
-} // namespace connection
-
 class connection_error
   :public std::runtime_error
 {
@@ -52,5 +50,7 @@ class data_error
 public:
   data_error(const std::string& whatArg);
 };
+
+} // namespace connection
 
 #endif /* _COMMON_EXCEPTIONS_HPP_ */

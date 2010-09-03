@@ -20,6 +20,8 @@
 
 #include "channel.hpp"
 
+namespace connection {
+
 /** Class to accept incoming connections.
  * The Type template argument must be an instantiation of AsioStream or any
  * derived class.
@@ -58,5 +60,7 @@ private:
 
   typename Type::Acceptor acceptor;
 };
+
+} // namespace connection
 
 #endif /* _ACCEPTOR_HPP_ */

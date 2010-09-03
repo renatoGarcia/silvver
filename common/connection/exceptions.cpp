@@ -15,6 +15,8 @@
 
 #include "exceptions.hpp"
 
+namespace connection {
+
 connection_error:: connection_error(const std::string& whatArg)
   :runtime_error(whatArg)
 {}
@@ -30,3 +32,4 @@ data_error::data_error(const std::string& whatArg)
   :connection_error(whatArg)
 {}
 
+} // namespace connection

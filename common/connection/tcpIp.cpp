@@ -17,6 +17,8 @@
 
 #include "asioStream.ipp"
 
+namespace connection {
+
 namespace bip = boost::asio::ip;
 
 std::vector<bip::tcp::endpoint>
@@ -49,3 +51,5 @@ TcpIp::TcpIp(boost::asio::io_service& ioService, const TcpIpEp& localEp)
 
 TcpIp::~TcpIp() throw()
 {}
+
+} // namespace connection

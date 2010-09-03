@@ -24,6 +24,8 @@
 #include "asioStream.hpp"
 #include "channelTypes.hpp"
 
+namespace connection {
+
 struct TcpIpSpec
 {
   typedef boost::asio::ip::tcp AsioClass;
@@ -56,5 +58,7 @@ public:
 
   virtual ~TcpIp() throw();
 };
+
+} // namespace connection
 
 #endif /* _TCP_IP_HPP_ */

@@ -30,6 +30,8 @@
 #include "channel.ipp"
 #include "serializator.hpp"
 
+namespace connection {
+
 namespace bip = boost::asio::ip;
 
 template <class Type>
@@ -235,5 +237,7 @@ AsioStream<Type>::readData(const boost::system::error_code& e,
   // Inform caller that data has been received ok.
   handler(e, bytes_transferred);
 }
+
+} // namespace connection
 
 #endif /* _ASIO_STREAM_IPP_ */

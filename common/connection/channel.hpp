@@ -25,6 +25,8 @@
 #include "channelTypes.hpp"
 #include "exceptions.hpp"
 
+namespace connection {
+
 class Channel
 {
 public:
@@ -117,5 +119,7 @@ private:
 
   boost::function<void (void)> closeHandler;
 };
+
+} // namespace connection
 
 #endif /* _CHANNEL_HPP_ */
