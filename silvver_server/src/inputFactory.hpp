@@ -18,16 +18,16 @@
 
 #include <boost/shared_ptr.hpp>
 
+#include "common/connection/channel.hpp"
+#include "common/processorOptions.hpp"
 #include "inputInterface.hpp"
-#include "connection.hpp"
-#include "processorOptions.hpp"
 
 class InputFactory
 {
 public:
   static boost::shared_ptr<InputInterface>
   createInput(const procOpt::AnyProcOpt& processorOpt,
-              const boost::shared_ptr<Connection>& connection);
+              boost::shared_ptr<connection::Channel> channel);
 
 private:
   /** Private constructor not implemented.

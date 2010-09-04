@@ -16,18 +16,20 @@
 #ifndef _RECEPTIONIST_HPP_
 #define _RECEPTIONIST_HPP_
 
-#include <boost/asio.hpp>
+#include <boost/asio/io_service.hpp>
 #include <boost/scoped_ptr.hpp>
 #include <boost/shared_ptr.hpp>
 #include <boost/thread/thread.hpp>
 #include <map>
 #include <string>
 
-#include "outputMultiMap.hpp"
+#include "common/connection/acceptor.hpp"
+#include "common/connection/channel.hpp"
+#include "common/connection/tcpIp.hpp"
+#include "common/request.hpp"
+#include "common/silvverTypes.hpp"
 #include "inputInterface.hpp"
-#include "connection.hpp"
-#include "request.hpp"
-#include "silvverTypes.hpp"
+#include "outputMultiMap.hpp"
 
 /** Receive and manage the incoming connections demands.
  *
@@ -56,27 +58,22 @@ public:
   void operator()(AddCamera& request);
 
 private:
-  void run();
-
-  void handleAccept(Connection::pointer connection);
+  void handleAccept(connection::Channel* channel, connection::error_code ec);
 
   void closeTargetClient(const silvver::TargetUid& targetUid,
-                         boost::shared_ptr<Connection> connection);
+                         boost::shared_ptr<connection::Channel> channel);
 
   void closeCameraClient(const silvver::AbstractCameraUid& cameraUid,
-                         boost::shared_ptr<Connection> connection);
+                         boost::shared_ptr<connection::Channel> channel);
 
   void closeCamera(const silvver::AbstractCameraUid& cameraUid);
 
   boost::asio::io_service ioService;
 
-  boost::asio::ip::tcp::acceptor acceptor;
+  connection::Acceptor<connection::TcpIp> acceptor;
 
-  /// Handle the TCP connection with the client being currently managed.
-  Connection::pointer currentReception;
-
-  /// Handle the request of the client being currently managed.
-  Request request;
+  // /// Handle the TCP connection with the client being currently managed.
+  boost::shared_ptr<connection::Channel> currentReception;
 
   /// Connected input clients collection
   std::map<silvver::AbstractCameraUid, boost::shared_ptr<InputInterface> > mapInputs;
@@ -86,7 +83,7 @@ private:
   boost::shared_ptr<OutputMultiMap<silvver::AbstractCameraUid> > cameraOutputs;
 
   /// Thread where the boost io_service will run
-  boost::scoped_ptr<boost::thread> thReceptionist;
+  boost::thread thReceptionist;
 };
 
 #endif /* _RECEPTIONIST_HPP_ */

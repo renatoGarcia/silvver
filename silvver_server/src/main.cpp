@@ -22,9 +22,9 @@
 #include <iostream>
 #include <string>
 
+#include "common/version.hpp"
 #include "log.hpp"
 #include "receptionist.hpp"
-#include "version.hpp"
 
 namespace po = boost::program_options;
 

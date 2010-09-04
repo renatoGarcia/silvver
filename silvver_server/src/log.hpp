@@ -16,9 +16,9 @@
 #ifndef _LOG_HPP_
 #define _LOG_HPP_
 
-#include <boost/enum.hpp>
-#include <logging.hpp>
-#include <tsostream.hpp>
+#include "boost/enum.hpp"
+#include "common/logging.hpp"
+#include "common/tsostream.hpp"
 
 BOOST_ENUM(MessageLogLevel,
            (DEBUG)

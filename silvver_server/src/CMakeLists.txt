@@ -1,7 +1,9 @@
 SET(silvver_server_SRCS outputMultiMap.cpp
                         log.cpp
                         inputFactory.cpp
-                        connection.cpp
+                        ${CMAKE_SOURCE_DIR}/../common/connection/exceptions.cpp
+                        ${CMAKE_SOURCE_DIR}/../common/connection/tcpIp.cpp
+                        ${CMAKE_SOURCE_DIR}/../common/connection/unixSocket.cpp
                         main.cpp
                         markerProcessor.cpp
                         receptionist.cpp)

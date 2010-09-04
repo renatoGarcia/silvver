@@ -19,34 +19,38 @@
 #include <boost/shared_ptr.hpp>
 #include <string>
 
+#include "common/connection/channel.hpp"
+#include "common/connection/exceptions.hpp"
+#include "common/silvverTypes.hpp"
 #include "inputInterface.hpp"
-#include "connection.hpp"
 #include "outputMultiMap.hpp"
 #include "processorInterface.hpp"
-#include "silvverTypes.hpp"
 
 /// Receive the data sent by cameras and send it to correct processor class.
 template <class Type>
-class Input: public InputInterface
+class Input
+  :public InputInterface
 {
 public:
   /** Input class constructor.
-   * @param connection A shared_ptr to a Connection object already connected
-   *                   with a camera.
-   * @param processor A shared_ptr to the correct processor.  */
-  Input(boost::shared_ptr<Connection> connection,
+   *
+   * @param channel A shared_ptr to a Channel object already connected
+   *        with a camera.
+   * @param processor A shared_ptr to the correct processor.
+   */
+  Input(boost::shared_ptr<connection::Channel> channel,
         boost::shared_ptr<ProcessorInterface<Type> > processor);
 
   ~Input();
 
 private:
-  void handleReceive();
+  void handleReceive(connection::error_code ec);
 
   /// Hold the last input received.
   silvver::CameraReading<Type> currentInput;
 
   /// The connection with the camera.
-  boost::shared_ptr<Connection> connection;
+  boost::shared_ptr<connection::Channel> channel;
 
   boost::shared_ptr<ProcessorInterface<Type> > processor;
 

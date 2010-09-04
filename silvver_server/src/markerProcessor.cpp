@@ -16,6 +16,7 @@
 #include "markerProcessor.hpp"
 
 #include <boost/foreach.hpp>
+#include "common/serializations.hpp"
 
 #include "processor.ipp"
 

@@ -15,8 +15,8 @@
 
 #include "outputMultiMap.hpp"
 
-#include "connection.ipp"
-#include "silvverTypes.hpp"
+#include "common/connection/channel.ipp"
+#include "common/silvverTypes.hpp"
 
 template<class KeyType>
 OutputMultiMap<KeyType>::OutputMultiMap()
@@ -24,18 +24,16 @@ OutputMultiMap<KeyType>::OutputMultiMap()
 
 template<class KeyType>
 void
-OutputMultiMap<KeyType>::addOutput(KeyType silvverUid,
-                                   boost::shared_ptr<Connection> connection)
+OutputMultiMap<KeyType>::addOutput(KeyType silvverUid, ChannelPointer channel)
 {
   boost::unique_lock<boost::shared_mutex> lock(this->accessMap);
 
-  this->outputs.insert(std::make_pair(silvverUid, connection));
+  this->outputs.insert(std::make_pair(silvverUid, channel));
 }
 
 template<class KeyType>
 void
-OutputMultiMap<KeyType>::delOutput(KeyType silvverUid,
-                                   boost::shared_ptr<Connection> connection)
+OutputMultiMap<KeyType>::delOutput(KeyType silvverUid, ChannelPointer channel)
 {
   boost::unique_lock<boost::shared_mutex> lock(this->accessMap);
 
@@ -48,7 +46,7 @@ OutputMultiMap<KeyType>::delOutput(KeyType silvverUid,
       it != range.second;
       ++it)
   {
-    if(it->second == connection)
+    if(it->second == channel)
     {
       this->outputs.erase(it);
     }
@@ -58,9 +56,9 @@ OutputMultiMap<KeyType>::delOutput(KeyType silvverUid,
 template<class KeyType>
 void
 OutputMultiMap<KeyType>::findOutputs(KeyType silvverUid,
-                                     std::vector<boost::shared_ptr<Connection> >& outputsConnections)
+                                     std::vector<ChannelPointer>& outputsChannels)
 {
-  outputsConnections.clear();
+  outputsChannels.clear();
 
   boost::shared_lock<boost::shared_mutex> lock(this->accessMap);
 
@@ -71,7 +69,7 @@ OutputMultiMap<KeyType>::findOutputs(KeyType silvverUid,
       it != range.second;
       ++it)
   {
-    outputsConnections.push_back(it->second);
+    outputsChannels.push_back(it->second);
   }
 }
 

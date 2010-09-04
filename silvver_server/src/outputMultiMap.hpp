@@ -21,8 +21,8 @@
 #include <map>
 #include <vector>
 
-#include "connection.hpp"
-#include "singleton.hpp"
+#include "common/connection/channel.hpp"
+#include "common/singleton.hpp"
 
 /** A class to hold the connected outputs.
  * This class wrap the STL multimap for thread safety. */
@@ -31,29 +31,30 @@ class OutputMultiMap
   :public Singleton<OutputMultiMap<KeyType> >
 {
 public:
+  typedef boost::shared_ptr<connection::Channel> ChannelPointer;
+
   /** Add a output.
    * @param silvverUid The silvver uid of target or camera being observed.
-   * @param connection A Connection already made with the output.  */
-  void addOutput(KeyType silvverUid, boost::shared_ptr<Connection> connection);
+   * @param channel A Channel already made with the output.  */
+  void addOutput(KeyType silvverUid, ChannelPointer channel);
 
   /** Delete a output.
    * @param silvverUid The silvver uid of target or camera being observed.
-   * @param connection A pointer to connection of the output to be deleted. */
-  void delOutput(KeyType silvverUid, boost::shared_ptr<Connection> connection);
+   * @param channel A pointer to channel of the output to be deleted. */
+  void delOutput(KeyType silvverUid, ChannelPointer channel);
 
-  /** Return connections to all outputs which are listening for a given target.
+  /** Return channels to all outputs which are listening for a given target.
    * @param silvverUid The silvver uid of target or camera being observed.
-   * @param outputsConnections A vector of shared_prt with Connections to
+   * @param outputsChannels A vector of shared_prt with Channels to
    *                           all clients found.  */
   void findOutputs(KeyType silvverUid,
-                   std::vector<boost::shared_ptr<Connection> >& outputsConnections);
+                   std::vector<ChannelPointer>& outputsChannels);
 
 private:
   friend class Singleton<OutputMultiMap<KeyType> >;
 
-  typedef std::multimap<KeyType, boost::shared_ptr<Connection> > TMultiMap;
+  typedef std::multimap<KeyType, ChannelPointer> TMultiMap;
 
-private:
   OutputMultiMap();
 
   boost::shared_mutex accessMap;

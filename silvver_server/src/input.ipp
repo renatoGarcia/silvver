@@ -21,21 +21,22 @@
 #include <boost/bind.hpp>
 #include <boost/foreach.hpp>
 
+#include "common/connection/channel.ipp"
+#include "common/serializations.hpp"
 #include "log.hpp"
-#include "connection.ipp"
 
 template <typename Type>
-Input<Type>::Input(boost::shared_ptr<Connection> connection,
+Input<Type>::Input(boost::shared_ptr<connection::Channel> channel,
                    boost::shared_ptr< ProcessorInterface<Type> > processor)
   :InputInterface()
   ,currentInput()
-  ,connection(connection)
+  ,channel(channel)
   ,processor(processor)
   ,clientCameraMap(OutputMultiMap<silvver::AbstractCameraUid>::instantiate())
 {
-  this->connection->asyncRead(this->currentInput,
+  this->channel->asyncReceive(this->currentInput,
                               boost::bind(&Input<Type>::handleReceive,
-                                          this));
+                                          this, _1));
 }
 
 template <typename Type>
@@ -44,7 +45,7 @@ Input<Type>::~Input()
 
 template <typename Type>
 void
-Input<Type>::handleReceive()
+Input<Type>::handleReceive(connection::error_code ec)
 {
   message(MessageLogLevel::DEBUG)
     << ts_output::lock
@@ -53,22 +54,22 @@ Input<Type>::handleReceive()
     << this->currentInput.camUid << std::endl
     << ts_output::unlock;
 
-  std::vector<boost::shared_ptr<Connection> > vecConnections;
-  boost::shared_ptr<Connection> connectionPtr;
+  std::vector<boost::shared_ptr<connection::Channel> > vecChannels;
+  boost::shared_ptr<connection::Channel> channelPtr;
 
   // Get all camera clients hearing for a given camera.
   this->clientCameraMap->findOutputs(this->currentInput.camUid,
-                                     vecConnections);
-  BOOST_FOREACH(connectionPtr, vecConnections)
+                                     vecChannels);
+  BOOST_FOREACH(channelPtr, vecChannels)
   {
-    connectionPtr->write(this->currentInput);
+    channelPtr->send(this->currentInput);
   }
 
   this->processor->deliverPackage(this->currentInput);
 
-  this->connection->asyncRead(this->currentInput,
+  this->channel->asyncReceive(this->currentInput,
                               boost::bind(&Input<Type>::handleReceive,
-                                          this));
+                                          this, _1));
 }
 
 #endif /* _INPUT_IPP_ */

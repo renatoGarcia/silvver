@@ -15,8 +15,8 @@
 
 #include <iostream>
 
-#include <logging.hpp>
-#include <tsostream.hpp>
+#include "common/logging.hpp"
+#include "common/tsostream.hpp"
 
 tsostream ts(std::cout.rdbuf());
 logging message(ts);

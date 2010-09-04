@@ -17,15 +17,15 @@
 
 #include <boost/variant.hpp>
 
+#include "common/connection/channel.ipp"
+#include "common/silvverTypes.hpp"
 #include "input.ipp"
-#include "connection.ipp"
-#include "silvverTypes.hpp"
 
 #include "markerProcessor.hpp"
 
 boost::shared_ptr<InputInterface>
 InputFactory::createInput(const procOpt::AnyProcOpt& processorOpt,
-                          const boost::shared_ptr<Connection>& connection)
+                          boost::shared_ptr<connection::Channel> channel)
 {
   boost::shared_ptr<InputInterface> returnPtr;
 
@@ -33,7 +33,7 @@ InputFactory::createInput(const procOpt::AnyProcOpt& processorOpt,
       boost::get<procOpt::Marker>(&processorOpt))
   {
     returnPtr.reset(new Input<silvver::Pose>
-                    (connection, MarkerProcessor::instantiate()));
+                    (channel, MarkerProcessor::instantiate()));
   }
   else
   {

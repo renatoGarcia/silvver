@@ -17,6 +17,7 @@
 #define _PROCESSOR_HPP_
 
 #include <boost/shared_ptr.hpp>
+#include "common/connection/channel.hpp"
 #include <map>
 #include <vector>
 
@@ -29,6 +30,8 @@ class Processor
   :public ProcessorInterface<Tinput>
 {
 protected:
+  typedef boost::shared_ptr<connection::Channel> ChannelPointer;
+
   Processor();
 
   /** Send the final localizations to clients hearing for it.

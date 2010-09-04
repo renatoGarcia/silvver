@@ -20,9 +20,9 @@
 #include <map>
 #include <string>
 
+#include "common/silvverTypes.hpp"
+#include "common/singleton.hpp"
 #include "processor.hpp"
-#include "silvverTypes.hpp"
-#include "singleton.hpp"
 
 class MarkerProcessor: public Processor<silvver::Pose, silvver::Pose>,
                        public Singleton<MarkerProcessor>

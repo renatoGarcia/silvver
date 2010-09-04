@@ -16,7 +16,7 @@
 #ifndef _PROCESSOR_INTERFACE_HPP_
 #define _PROCESSOR_INTERFACE_HPP_
 
-#include "silvverTypes.hpp"
+#include "common/silvverTypes.hpp"
 
 /// Interface to access a Processor class withou know the output type.
 template <class Tinput>

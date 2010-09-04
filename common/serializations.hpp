@@ -24,109 +24,106 @@
 #include "silvverTypes.hpp"
 #include "silvverImage.hpp"
 
-namespace boost
+namespace boost {
+namespace serialization {
+
+template<class Archive>
+void
+serialize(Archive& ar, silvver::AbstractCameraUid& uid, const unsigned version)
 {
-  namespace serialization
+  ar & uid.targetSystem;
+  ar & uid.hardCamera;
+}
+
+template<class Archive>
+void
+serialize(Archive& ar, silvver::TargetUid& uid, const unsigned version)
+{
+  ar & uid.targetSystem;
+  ar & uid.internal;
+}
+
+template<class Archive>
+void
+serialize(Archive& ar, silvver::Position& position, const unsigned version)
+{
+  ar & position.x;
+  ar & position.y;
+  ar & position.z;
+}
+
+template<class Archive>
+void
+serialize(Archive& ar, silvver::Pose& pose, const unsigned version)
+{
+  ar & boost::serialization::base_object<silvver::Position>(pose);
+  ar & pose.rotationMatrix;
+}
+
+template<class Archive, class T>
+void
+serialize(Archive& ar, silvver::Identity<T>& id, const unsigned version)
+{
+  ar & boost::serialization::base_object<T>(id);
+  ar & id.uid;
+}
+
+template<class Archive>
+void
+save(Archive& ar, const silvver::Image& image, const unsigned version)
+{
+  ar << image.nChannels;
+  ar << image.depth;
+  ar << image.dataOrder;
+  ar << image.origin;
+  ar << image.width;
+  ar << image.height;
+  ar << image.imageSize;
+  for(int i = 0; i < image.imageSize; ++i)
   {
-    template<class Archive>
-    void
-    serialize(Archive& ar, silvver::AbstractCameraUid& uid,
-              const unsigned version)
-    {
-      ar & uid.targetSystem;
-      ar & uid.hardCamera;
-    }
+    ar << image.imageData[i];
+  }
+  ar << image.widthStep;
+}
 
-    template<class Archive>
-    void
-    serialize(Archive& ar, silvver::TargetUid& uid,
-              const unsigned version)
-    {
-      ar & uid.targetSystem;
-      ar & uid.internal;
-    }
+template<class Archive>
+void
+load(Archive& ar, silvver::Image& image, const unsigned version)
+{
+  int old_size = image.imageSize;
 
-    template<class Archive>
-    void
-    serialize(Archive& ar, silvver::Position& position, const unsigned version)
-    {
-      ar & position.x;
-      ar & position.y;
-      ar & position.z;
-    }
+  ar >> image.nChannels;
+  ar >> image.depth;
+  ar >> image.dataOrder;
+  ar >> image.origin;
+  ar >> image.width;
+  ar >> image.height;
+  ar >> image.imageSize;
+  if(image.imageSize != old_size)
+  {
+    delete[] image.imageData;
+    image.imageData = new char[image.imageSize];
+  }
+  for(int i = 0; i < image.imageSize; ++i)
+  {
+    ar >> image.imageData[i];
+  }
+  ar >> image.widthStep;
 
-    template<class Archive>
-    void
-    serialize(Archive& ar, silvver::Pose& pose, const unsigned version)
-    {
-      ar & boost::serialization::base_object<silvver::Position>(pose);
-      ar & pose.rotationMatrix;
-    }
+  image.imageDataOrigin = image.imageData;
+}
 
-    template<class Archive, class T>
-    void
-    serialize(Archive& ar, silvver::Identity<T>& id, const unsigned version)
-    {
-      ar & boost::serialization::base_object<T>(id);
-      ar & id.uid;
-    }
+template<class Archive, class T>
+void
+serialize(Archive& ar,  silvver::CameraReading<T>& id, const unsigned version)
+{
+  ar & id.camUid;
+  ar & id.timestamp;
+  ar & id.image;
+  ar & id.localizations;
+}
 
-    template<class Archive>
-    void
-    save(Archive& ar, const silvver::Image& image, const unsigned version)
-    {
-      ar << image.nChannels;
-      ar << image.depth;
-      ar << image.dataOrder;
-      ar << image.origin;
-      ar << image.width;
-      ar << image.height;
-      ar << image.imageSize;
-      for(int i=0; i<image.imageSize; ++i)
-      {
-        ar << image.imageData[i];
-      }
-      ar << image.widthStep;
-    }
-
-    template<class Archive>
-    void
-    load(Archive& ar, silvver::Image& image, const unsigned version)
-    {
-      int old_size = image.imageSize;
-
-      ar >> image.nChannels;
-      ar >> image.depth;
-      ar >> image.dataOrder;
-      ar >> image.origin;
-      ar >> image.width;
-      ar >> image.height;
-      ar >> image.imageSize;
-      if(image.imageSize != old_size)
-      {
-        delete[] image.imageData;
-        image.imageData = new char[image.imageSize];
-      }
-      for(int i=0; i<image.imageSize ; ++i)
-      {
-        ar >> image.imageData[i];
-      }
-      ar >> image.widthStep;
-
-      image.imageDataOrigin = image.imageData;
-    }
-
-    template<class Archive, class T>
-    void
-    serialize(Archive& ar,  silvver::CameraReading<T>& id,
-              const unsigned version)
-    {
-      ar & id.camUid;
-      ar & id.timestamp;
-      ar & id.image;
-      ar & id.localizations;
-    }
-  } // namespace serialization
+} // namespace serialization
 } // namespace boost
 
 BOOST_SERIALIZATION_SPLIT_FREE(silvver::Image)

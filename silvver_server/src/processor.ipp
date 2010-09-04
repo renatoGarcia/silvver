@@ -20,9 +20,9 @@
 
 #include <boost/foreach.hpp>
 
-#include "connection.ipp"
+#include "common/connection/channel.ipp"
+#include "common/silvverTypes.hpp"
 #include "log.hpp"
-#include "silvverTypes.hpp"
 
 template<class Tinput, class Toutput>
 Processor<Tinput,Toutput>::Processor()
@@ -34,8 +34,8 @@ void
 Processor<Tinput,Toutput>::sendToOutputs
          (const std::vector<silvver::Identity<Toutput> >& localizations) const
 {
-  std::vector< boost::shared_ptr<Connection> > vecConnections;
-  boost::shared_ptr<Connection> connectionPtr;
+  std::vector<ChannelPointer> vecChannels;
+  ChannelPointer channelPtr;
 
   BOOST_FOREACH(silvver::Identity<Toutput> output, localizations)
   {
@@ -45,11 +45,11 @@ Processor<Tinput,Toutput>::sendToOutputs
       << ts_output::unlock;
 
     // Get all clients hearing for a given target.
-    this->outputMap->findOutputs(output.uid, vecConnections);
+    this->outputMap->findOutputs(output.uid, vecChannels);
 
-    BOOST_FOREACH(connectionPtr, vecConnections)
+    BOOST_FOREACH(channelPtr, vecChannels)
     {
-      connectionPtr->write(output);
+      channelPtr->send(output);
     }
   }
 }
