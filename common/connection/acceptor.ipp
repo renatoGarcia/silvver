@@ -18,6 +18,7 @@
 
 #include "acceptor.hpp"
 
+#include <boost/ref.hpp>
 #include <memory>
 #include <string>
 
@@ -31,11 +32,9 @@
 namespace connection {
 
 template <class Type>
-boost::asio::io_service Acceptor<Type>::ioService;
-
-template <class Type>
-Acceptor<Type>::Acceptor(const typename Type::Endpoint& localEp)
-  :acceptor(Acceptor<Type>::ioService, localEp)
+Acceptor<Type>::Acceptor(boost::asio::io_service& ioService,
+                         const typename Type::Endpoint& localEp)
+  :acceptor(ioService, localEp)
 {}
 
 template <class Type>
@@ -64,7 +63,47 @@ Acceptor<Type>::accept(boost::asio::io_service& ioService)
   }
   else
   {
-    throw connection_error("Unknown channel type");
+    throw data_error("Unknown channel type");
+  }
+}
+
+template <class Type>
+void
+Acceptor<Type>::asyncAccept(boost::asio::io_service& ioService,
+                            AcceptHandler handler)
+{
+  boost::shared_ptr<Type> tmpChannel(new Type(ioService));
+  this->acceptor.async_accept(tmpChannel->getSocket(),
+                              boost::bind(&Acceptor<Type>::receiveChannelType,
+                                          tmpChannel, boost::ref(ioService),
+                                          handler, _1));
+}
+
+template <class Type>
+void
+Acceptor<Type>::receiveChannelType(boost::shared_ptr<Type> tmpChannel,
+                                   boost::asio::io_service& ioService,
+                                   AcceptHandler handler,
+                                   const boost::system::error_code& ec)
+{
+  std::string data;
+  tmpChannel->read(data);
+  ChannelType channelType;
+  deserialize(channelType, data);
+
+  if (channelType == TCP_IP)
+  {
+    handler(createChannel<TcpIp>(ioService, *tmpChannel),
+            error_code::success);
+  }
+  else if (channelType == UNIX_SOCKET)
+  {
+    handler(createChannel<UnixSocket>(ioService, *tmpChannel),
+            error_code::success);
+  }
+  else
+  {
+    handler(NULL, error_code::data_error);
   }
 }
 
@@ -75,7 +114,7 @@ Acceptor<Type>::createChannel(boost::asio::io_service& ioService,
                               Type& tmpChannel)
 {
   std::auto_ptr<TChannel> channel(new TChannel(ioService));
-  typename TChannel::Acceptor acceptor(Acceptor<Type>::ioService,
+  typename TChannel::Acceptor acceptor(ioService,
                                        typename TChannel::Endpoint());
 
   std::string data;

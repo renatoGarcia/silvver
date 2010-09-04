@@ -17,6 +17,9 @@
 #define _ACCEPTOR_HPP_
 
 #include <boost/asio/io_service.hpp>
+#include <boost/function.hpp>
+#include <boost/shared_ptr.hpp>
+#include <boost/system/error_code.hpp>
 
 #include "channel.hpp"
 
@@ -30,11 +33,15 @@ template <class Type>
 class Acceptor
 {
 public:
+  typedef boost::function<void (Channel*, error_code)> AcceptHandler;
+
   /** Construct a new Acceptor, binding it to localEp.
    *
+   * @param ioService A boost io_service with threads used in async operations.
    * @param localEp The local endpont where to wait for incoming connections.
    */
-  Acceptor(const typename Type::Endpoint& localEp);
+  Acceptor(boost::asio::io_service& ioService,
+           const typename Type::Endpoint& localEp);
 
   ~Acceptor();
 
@@ -47,10 +54,23 @@ public:
    */
   Channel* accept(boost::asio::io_service& ioService);
 
+  /** Asynchronously wait for a connection request.
+   * This method will return immediately, and will call the handler when a
+   * connection is made. A pointer to created Channel will be passed to handler
+   * as argument, its concrete type will be dictated by peer.
+   *
+   * @param ioService The boost io_service to be assigned to Channel created.
+   * @param hander A functional with signature
+   *        void handler(Channel*, error_code).
+   */
+  void asyncAccept(boost::asio::io_service& ioService, AcceptHandler handler);
+
 private:
-  // As there aren't asynchronous operations, this io_service don't will be
-  // run on a thread.
-  static boost::asio::io_service ioService;
+  static
+  void receiveChannelType(boost::shared_ptr<Type> tmpChannel,
+                          boost::asio::io_service& ioService,
+                          AcceptHandler handler,
+                          const boost::system::error_code& ec);
 
   // Since the type of resulting Channel is knew, this method will finalize the
   // connection acceptation.

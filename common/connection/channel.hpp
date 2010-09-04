@@ -62,7 +62,7 @@ public:
    *
    * @param t Reference to the variable where put the received value.
    * @param handler Functional with signature
-   *        void handler(connection::error_code ec), which will be
+   *        void handler(connection::error_code), which will be
    *        called when the operation completes.
    */
   template <class T>
