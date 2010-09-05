@@ -15,14 +15,13 @@
 
 #include <string>
 
-#include "common/channelTypes.hpp"
+#include "common/connection/channelTypes.hpp"
 
 namespace globalOptions
 {
   struct Options
   {
-    TcpIpEp receptionistEp;
-    ChannelsEnum channelType;
+    connection::TcpIpEp receptionistEp;
 
     bool sendImages;
 

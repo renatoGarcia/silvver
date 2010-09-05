@@ -17,9 +17,14 @@
 
 #include "../globalOptions.hpp"
 #include "../hardCameraFactory.hpp"
-#include "common/channelTypes.hpp"
+#include "common/connection/channelTypes.hpp"
+#include "common/connection/tcpIp.hpp"
+#include "common/connection/unixSocket.hpp"
+#include "common/request.hpp"
 
 extern globalOptions::Options global_options;
+
+boost::asio::io_service AbstractCamera::ioService;
 
 AbstractCamera::AbstractCamera(const scene::Camera& cameraConfig,
                                const unsigned silvverUid,
@@ -27,16 +32,17 @@ AbstractCamera::AbstractCamera(const scene::Camera& cameraConfig,
   :subjectHardCamera(HardCameraFactory::create(cameraConfig.hardware))
   ,currentFrame()
   ,abstractCameraUid(silvverUid, subjectHardCamera->silvverUid)
-  ,serverConnection()
+  ,serverChannel(AbstractCamera::createChannel(global_options.receptionistEp))
   ,unreadImage(false)
   ,unreadImageAccess()
   ,unreadImageCondition()
   ,rot(cameraConfig.rotationMatrix)
   ,trans(cameraConfig.translationVector)
 {
+  this->serverChannel->connect<connection::TcpIp>(global_options.receptionistEp);
+  Request request = AddCamera(processorOptions, this->abstractCameraUid);
+  this->serverChannel->send(request);
   this->subjectHardCamera->attach(this);
-  this->serverConnection.connect(global_options.receptionistEp,
-                                 global_options.channelType);
 }
 
 AbstractCamera::~AbstractCamera()
@@ -124,6 +130,19 @@ AbstractCamera::toWorld(silvver::Pose &pose) const
     this->rot[6] * tempPose.x +
     this->rot[7] * tempPose.y +
     this->rot[8] * tempPose.z;
+}
+
+connection::Channel*
+AbstractCamera::createChannel(const connection::TcpIpEp& receptionistEp)
+{
+  // if (receptionistEp.address().to_string() == "127.0.0.1")
+  // {
+    return new connection::UnixSocket(AbstractCamera::ioService);
+  // }
+  // else
+  // {
+  //   return new connection::TcpIp(AbstractCamera::ioService);
+  // }
 }
 
 silvver::Image

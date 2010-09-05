@@ -47,25 +47,40 @@ template <typename Type>
 void
 Input<Type>::handleReceive(connection::error_code ec)
 {
-  message(MessageLogLevel::DEBUG)
-    << ts_output::lock
-    << "Received " << this->currentInput.localizations.size()
-    << " targets from camera "
-    << this->currentInput.camUid << std::endl
-    << ts_output::unlock;
-
-  std::vector<boost::shared_ptr<connection::Channel> > vecChannels;
-  boost::shared_ptr<connection::Channel> channelPtr;
-
-  // Get all camera clients hearing for a given camera.
-  this->clientCameraMap->findOutputs(this->currentInput.camUid,
-                                     vecChannels);
-  BOOST_FOREACH(channelPtr, vecChannels)
+  if (ec == connection::error_code::success)
   {
-    channelPtr->send(this->currentInput);
-  }
+    message(MessageLogLevel::DEBUG)
+      << ts_output::lock
+      << "Received " << this->currentInput.localizations.size()
+      << " targets from camera "
+      << this->currentInput.camUid << std::endl
+      << ts_output::unlock;
 
-  this->processor->deliverPackage(this->currentInput);
+    std::vector<boost::shared_ptr<connection::Channel> > vecChannels;
+    boost::shared_ptr<connection::Channel> channelPtr;
+
+    // Get all camera clients hearing for a given camera.
+    this->clientCameraMap->findOutputs(this->currentInput.camUid,
+                                     vecChannels);
+    BOOST_FOREACH(channelPtr, vecChannels)
+    {
+      channelPtr->send(this->currentInput);
+    }
+
+    this->processor->deliverPackage(this->currentInput);
+  }
+  else if (ec == connection::error_code::broken_connection)
+  {
+    return;
+  }
+  else
+  {
+    message(MessageLogLevel::ERROR)
+      << ts_output::lock
+      << "Error " << ec << " when receiving message from a camera"
+      << std::endl
+      << ts_output::unlock;
+  }
 
   this->channel->asyncReceive(this->currentInput,
                               boost::bind(&Input<Type>::handleReceive,

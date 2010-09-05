@@ -199,6 +199,7 @@ AsioStream<Type>::readHeader(const boost::system::error_code& e,
   if (e)
   {
     handler(e, bytes_transferred);
+    return;
   }
 
   std::size_t size;
@@ -230,6 +231,7 @@ AsioStream<Type>::readData(const boost::system::error_code& e,
   if (e)
   {
     handler(e, bytes_transferred);
+    return;
   }
 
   data->assign(this->inboundData.begin(), this->inboundData.end());

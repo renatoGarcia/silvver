@@ -82,7 +82,8 @@ Channel::readHandler(boost::shared_ptr<std::string> data,
   error_code error(error_code::success);
 
   if ((ec == boost::asio::error::broken_pipe) ||
-      (ec == boost::asio::error::connection_aborted))
+      (ec == boost::asio::error::connection_aborted) ||
+      (ec == boost::asio::error::eof))
   {
     error = error_code::broken_connection;
     if (!this->closeHandler.empty())

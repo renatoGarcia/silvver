@@ -22,8 +22,8 @@
 #include <iostream>
 #include <string>
 
-#include "common/channelTypes.hpp"
-#include "common/tcpIp.hpp"
+#include "common/connection/channelTypes.hpp"
+#include "common/connection/tcpIp.hpp"
 #include "common/version.hpp"
 #include "globalOptions.hpp"
 #include "log.hpp"
@@ -137,11 +137,11 @@ int main(int argc, char **argv)
               << "----------------------------------------------\n"
               << std::endl;
 
-    global_options.receptionistEp = TcpIp::resolve(serverName, receptionistPort).front();
-    if (serverName == "localhost" || serverName == "127.0.0.1")
-      global_options.channelType = IPC;
-    else
-      global_options.channelType = TCP_IP;
+    global_options.receptionistEp = connection::TcpIp::resolve(serverName, receptionistPort).front();
+    // if (serverName == "localhost" || serverName == "127.0.0.1")
+    //   global_options.channelType = IPC;
+    // else
+    //   global_options.channelType = TCP_IP;
     global_options.sendImages = vm.count("send-images");
     global_options.showImages = vm.count("show");
     global_options.saveDistortedImages = vm.count("save-distorted");

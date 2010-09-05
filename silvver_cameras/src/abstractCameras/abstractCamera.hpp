@@ -16,7 +16,9 @@
 #ifndef _ABSTRACT_CAMERA_HPP_
 #define _ABSTRACT_CAMERA_HPP_
 
+#include <boost/asio/io_service.hpp>
 #include <boost/noncopyable.hpp>
+#include <boost/scoped_ptr.hpp>
 #include <boost/shared_ptr.hpp>
 #include <boost/thread/condition.hpp>
 #include <boost/thread/mutex.hpp>
@@ -29,12 +31,15 @@
 #include "../log.hpp"
 #include "../observer.hpp"
 #include "../scene.hpp"
-#include "common/connection.ipp"
+#include "common/connection/channel.ipp"
 #include "common/processorOptions.hpp"
 #include "common/silvverTypes.hpp"
+#include "common/serializations.hpp"
 
 /// Abstract base class to all abstract cameras.
-class AbstractCamera: public boost::noncopyable, public Observer
+class AbstractCamera
+  :public boost::noncopyable
+  ,public Observer
 {
 public:
   virtual ~AbstractCamera();
@@ -73,13 +78,19 @@ protected:
   const silvver::AbstractCameraUid abstractCameraUid;
 
 private:
+  static
+  connection::Channel* createChannel(const connection::TcpIpEp& receptionistEp);
+
+  static boost::asio::io_service ioService;
 
   /** Return current image if send image option is enabled.
-   * @return Image with current image or a NULL image. */
+   *
+   * @return Image with current image or a NULL image.
+   */
   silvver::Image imageToSend();
 
-  /// Connection with the silvver-server used to send the target localizations.
-  Connection serverConnection;
+  /// Channel with the silvver-server used to send the target localizations.
+  boost::scoped_ptr<connection::Channel> serverChannel;
 
   /// This boolean represents if the last image grabbed by hardCamera was
   /// already precessed or not. Its access is thread safe.
@@ -110,7 +121,7 @@ AbstractCamera::sendLocalizations(const std::vector<silvver::Identity<TargetType
 
   try
   {
-    this->serverConnection.send(cameraReading);
+    this->serverChannel->send(cameraReading);
   }
   catch (const server_connection_error& e)
   {
