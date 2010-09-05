@@ -36,142 +36,141 @@ namespace boost
   {};
 }
 
-namespace silvver
+namespace silvver{
+
+struct AbstractCameraUid
+  :private boost::totally_ordered<AbstractCameraUid>
 {
-  struct AbstractCameraUid
-    :private boost::totally_ordered<AbstractCameraUid>
-  {
-    unsigned targetSystem;
-    unsigned hardCamera;
+  unsigned targetSystem;
+  unsigned hardCamera;
 
-    AbstractCameraUid();
+  AbstractCameraUid();
 
-    AbstractCameraUid(const unsigned targetSystem, const unsigned hardCamera);
+  AbstractCameraUid(const unsigned targetSystem, const unsigned hardCamera);
 
-    AbstractCameraUid(const AbstractCameraUid& uid);
+  AbstractCameraUid(const AbstractCameraUid& uid);
 
-    bool operator<(const AbstractCameraUid& uid) const;
+  bool operator<(const AbstractCameraUid& uid) const;
 
-    bool operator==(const AbstractCameraUid& uid) const;
-  };
+  bool operator==(const AbstractCameraUid& uid) const;
+};
 
-  struct TargetUid
-    :private boost::totally_ordered<TargetUid>
-  {
-    unsigned targetSystem;
-    unsigned internal;
+struct TargetUid
+  :private boost::totally_ordered<TargetUid>
+{
+  unsigned targetSystem;
+  unsigned internal;
 
-    TargetUid();
+  TargetUid();
 
-    TargetUid(const unsigned targetSystem, const unsigned internal);
+  TargetUid(const unsigned targetSystem, const unsigned internal);
 
-    TargetUid(const TargetUid& uid);
+  TargetUid(const TargetUid& uid);
 
-    bool operator<(const TargetUid& uid) const;
+  bool operator<(const TargetUid& uid) const;
 
-    bool operator==(const TargetUid& uid) const;
-  };
+  bool operator==(const TargetUid& uid) const;
+};
 
-  struct Position
-  {
-    double x;
-    double y;
-    double z;
+struct Position
+{
+  double x;
+  double y;
+  double z;
 
-    Position(const double x=0.0, const double y=0.0, const double z=0.0);
+  Position(const double x=0.0, const double y=0.0, const double z=0.0);
 
-    Position(const Position& position);
-  };
+  Position(const Position& position);
+};
 
-  struct Pose: public Position
-  {
-    boost::array<double, 9> rotationMatrix;
+struct Pose
+  :public Position
+{
+  boost::array<double, 9> rotationMatrix;
 
-    double theta();
+  double theta();
 
-    Pose();
+  Pose();
 
-    Pose(const Pose& pose);
-  };
+  Pose(const Pose& pose);
+};
 
-  template<class BaseClass>
-  struct Identity: public BaseClass
-  {
-    TargetUid uid;
+template<class BaseClass>
+struct Identity
+  :public BaseClass
+{
+  TargetUid uid;
 
-    Identity();
-    Identity(const BaseClass& base, const TargetUid& uid);
-  };
+  Identity();
+  Identity(const BaseClass& base, const TargetUid& uid);
+};
 
-  class Image
-  {
-  public:
-    Image();
+class Image
+{
+public:
+  Image();
 
-    Image(const Image& image);
+  Image(const Image& image);
 
-    int  width;
-    int  height;
-  };
+  int  width;
+  int  height;
+};
 
-  template<class TargetType>
-  struct CameraReading
-  {
-    AbstractCameraUid camUid;
-    uint64_t timestamp;
-    Image image;
-    std::vector<Identity<TargetType> > localizations;
+template<class TargetType>
+struct CameraReading
+{
+  AbstractCameraUid camUid;
+  uint64_t timestamp;
+  Image image;
+  std::vector<Identity<TargetType> > localizations;
 
-    CameraReading();
-    CameraReading(const AbstractCameraUid& camUid,
-                  uint64_t timestamp,
-                  const Image& image,
-                  std::vector<Identity<TargetType> > localizations);
-  };
+  CameraReading();
+  CameraReading(const AbstractCameraUid& camUid,
+                uint64_t timestamp,
+                const Image& image,
+                std::vector<Identity<TargetType> > localizations);
+};
 
-  template<class T>
-  class Target
-  {
-  public:
-    Target(const TargetUid& targetUid,
-           const std::string& serverName="localhost",
-           const std::string& receptionistPort="12000");
+template<class T>
+class Target
+{
+public:
+  Target(const TargetUid& targetUid,
+         const std::string& serverName="localhost",
+         const std::string& receptionistPort="12000");
 
-    ~Target() throw();
+  ~Target() throw();
 
-    TargetUid getUid();
+  TargetUid getUid();
 
-    void setCallback(boost::function<void (Identity<T>)> callback=0);
+  Identity<T> getLast();
 
-    Identity<T> getLast();
-
-    Identity<T> getUnseen(const boost::posix_time::time_duration&
-                          waitTime = boost::date_time::pos_infin);
-
-    Identity<T> getNext(const boost::posix_time::time_duration&
+  Identity<T> getUnseen(const boost::posix_time::time_duration&
                         waitTime = boost::date_time::pos_infin);
-  };
 
-  template<class T>
-  class AbstractCamera
-  {
-  public:
-    AbstractCamera(const AbstractCameraUid& abstractCameraUid,
-                   const std::string& serverName="localhost",
-                   const std::string& receptionistPort="12000");
+  Identity<T> getNext(const boost::posix_time::time_duration&
+                      waitTime = boost::date_time::pos_infin);
+};
 
-    ~AbstractCamera() throw();
+template<class T>
+class AbstractCamera
+{
+public:
+  AbstractCamera(const AbstractCameraUid& abstractCameraUid,
+                 const std::string& serverName="localhost",
+                 const std::string& receptionistPort="12000");
 
-    AbstractCameraUid getUid();
+  ~AbstractCamera() throw();
 
-    void setCallback(boost::function<void (CameraReading<T>)> callback=0);
+  AbstractCameraUid getUid();
 
-    CameraReading<T> getLast();
+  CameraReading<T> getLast();
 
-    CameraReading<T> getUnseen(const boost::posix_time::time_duration&
-                               waitTime = boost::date_time::pos_infin);
-
-    CameraReading<T> getNext(const boost::posix_time::time_duration&
+  CameraReading<T> getUnseen(const boost::posix_time::time_duration&
                              waitTime = boost::date_time::pos_infin);
-  };
+
+  CameraReading<T> getNext(const boost::posix_time::time_duration&
+                           waitTime = boost::date_time::pos_infin);
+};
+
 } //silvver namespace

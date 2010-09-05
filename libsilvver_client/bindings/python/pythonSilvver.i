@@ -19,248 +19,95 @@ TimeExpired = _silvver.TimeExpired
 ConnectionError = _silvver.ConnectionError
 %}
 
-namespace silvver
+namespace silvver {
+
+%typemap(typecheck) AbstractCameraUid&
 {
-  %typemap(typecheck) AbstractCameraUid&
+  if ((PySequence_Check($input)) && (PySequence_Size($input) == 2))
   {
-    if ((PySequence_Check($input)) && (PySequence_Size($input) == 2))
+    PyObject* first = PySequence_GetItem($input, 0);
+    PyObject* second = PySequence_GetItem($input, 1);
+    if ((PyInt_AsLong(first) > 0) && (PyInt_AsLong(second) > 0))
     {
-      PyObject* first = PySequence_GetItem($input, 0);
-      PyObject* second = PySequence_GetItem($input, 1);
-      if ((PyInt_AsLong(first) > 0) && (PyInt_AsLong(second) > 0))
-      {
-        $1 = true;
-      }
-      else
-      {
-        $1 = false;
-      }
-      Py_DECREF(first);
-      Py_DECREF(second);
+      $1 = true;
     }
     else
     {
-      void* temp;
-      if (!SWIG_IsOK(SWIG_ConvertPtr($input, &temp, $1_descriptor, 0)))
-      {
-        $1 = false;
-      }
-      else
-      {
-        $1 = true;
-      }
+      $1 = false;
     }
+    Py_DECREF(first);
+    Py_DECREF(second);
   }
-
-  %typemap(in) AbstractCameraUid& (bool isTuple)
+  else
   {
-    if (PySequence_Check($input))
+    void* temp;
+    if (!SWIG_IsOK(SWIG_ConvertPtr($input, &temp, $1_descriptor, 0)))
     {
-      if (PySequence_Size($input) != 2)
-      {
-        SWIG_exception_fail(SWIG_TypeError,
-                            "Sequences to be set as $1_type "
-                            "must have length 2");
-      }
-      isTuple = true;
-      PyObject* first = PySequence_GetItem($input, 0);
-      PyObject* second = PySequence_GetItem($input, 1);
-      $1 = new $1_basetype(PyInt_AsUnsignedLongMask(first),
-                           PyInt_AsUnsignedLongMask(second));
-      Py_DECREF(first);
-      Py_DECREF(second);
+      $1 = false;
     }
     else
     {
-      isTuple = false;
-      int res2 = SWIG_ConvertPtr($input, (void**) &$1, $1_descriptor, 0);
-      if (!SWIG_IsOK(res2))
-      {
-        SWIG_exception_fail(SWIG_ArgError(res2),
-                            "Erron converting argument to $1_type "
-                            "in function $symname");
-      }
-      if (!$1)
-      {
-        SWIG_exception_fail(SWIG_ValueError,
-                            "invalid null reference of type $1_type "
-                            "in function $symname");
-      }
+      $1 = true;
     }
-  }
-
-  %typemap(freearg) AbstractCameraUid&
-  {
-    if (isTuple$argnum)
-      delete $1;
-  }
-
-  %typemap(typecheck) TargetUid& = AbstractCameraUid&;
-  %typemap(in) TargetUid& = AbstractCameraUid&;
-  %typemap(freearg) TargetUid& = AbstractCameraUid&;
-
-  %typemap(typecheck) boost::function<void (Identity<Position>)>
-  {
-    $1 = PyCallable_Check($input);
-  }
-
-  %typemap(typecheck) boost::function<void (Identity<Pose>)>
-  {
-    $1 = PyCallable_Check($input);
-  }
-
-  %typemap(in) boost::function<void (Identity<Position>)>
-  {
-    if (!PyCallable_Check($input))
-    {
-      PyErr_SetString(PyExc_TypeError, "Need a callable object!");
-      return NULL;
-    }
-    Callback<silvver::Position> cb($input);
-    $1 = cb;
-  }
-
-  %typemap(in) boost::function<void (Identity<Pose>)>
-  {
-    if (!PyCallable_Check($input))
-    {
-      PyErr_SetString(PyExc_TypeError, "Need a callable object!");
-      return NULL;
-    }
-    Callback<silvver::Pose> cb($input);
-    $1 = cb;
-  }
-
-  %typemap(typecheck) boost::function<void (CameraReading<Position>)>
-  {
-    $1 = PyCallable_Check($input);
-  }
-
-  %typemap(typecheck) boost::function<void (CameraReading<Pose>)>
-  {
-    $1 = PyCallable_Check($input);
-  }
-
-  %typemap(in) boost::function<void (CameraReading<Position>)>
-  {
-    if (!PyCallable_Check($input))
-    {
-      PyErr_SetString(PyExc_TypeError, "Need a callable object!");
-      return NULL;
-    }
-    Callback<silvver::Position> cb($input);
-    $1 = cb;
-  }
-
-  %typemap(in) boost::function<void (CameraReading<Pose>)>
-  {
-    if (!PyCallable_Check($input))
-    {
-      PyErr_SetString(PyExc_TypeError, "Need a callable object!");
-      return NULL;
-    }
-    Callback<silvver::Pose> cb($input);
-    $1 = cb;
   }
 }
+
+%typemap(in) AbstractCameraUid& (bool isTuple)
+{
+  if (PySequence_Check($input))
+  {
+    if (PySequence_Size($input) != 2)
+    {
+      SWIG_exception_fail(SWIG_TypeError,
+                          "Sequences to be set as $1_type "
+                          "must have length 2");
+    }
+    isTuple = true;
+    PyObject* first = PySequence_GetItem($input, 0);
+    PyObject* second = PySequence_GetItem($input, 1);
+    $1 = new $1_basetype(PyInt_AsUnsignedLongMask(first),
+                         PyInt_AsUnsignedLongMask(second));
+    Py_DECREF(first);
+    Py_DECREF(second);
+  }
+  else
+  {
+    isTuple = false;
+    int res2 = SWIG_ConvertPtr($input, (void**) &$1, $1_descriptor, 0);
+    if (!SWIG_IsOK(res2))
+    {
+      SWIG_exception_fail(SWIG_ArgError(res2),
+                          "Erron converting argument to $1_type "
+                          "in function $symname");
+    }
+    if (!$1)
+    {
+      SWIG_exception_fail(SWIG_ValueError,
+                          "invalid null reference of type $1_type "
+                          "in function $symname");
+    }
+  }
+}
+
+%typemap(freearg) AbstractCameraUid&
+{
+  if (isTuple$argnum)
+    delete $1;
+}
+
+%typemap(typecheck) TargetUid& = AbstractCameraUid&;
+%typemap(in) TargetUid& = AbstractCameraUid&;
+%typemap(freearg) TargetUid& = AbstractCameraUid&;
+
+} // namespace silvver
 
 %apply unsigned { uint64_t };
 
 %include ../silvver.i
 
 %header %{
-#define PYTHON_THREAD_BEGIN_BLOCK PyGILState_STATE thread_block = PyGILState_Ensure()
-
-#define PYTHON_THREAD_END_BLOCK PyGILState_Release(thread_block)
-
 static PyObject* pTimeExpired;
 static PyObject* pConnectionError;
-
-template <class T>
-class Callback
-{
-public:
-  Callback(PyObject* pyFunction)
-    :pyFunction(pyFunction)
-  {
-    if (!PyCallable_Check(this->pyFunction)) {
-      PyErr_SetString(PyExc_TypeError, "Construct fail! Expected a callable object.");
-    }
-    Py_INCREF(this->pyFunction);
-  }
-
-  Callback(const Callback& cc)
-    :pyFunction(cc.pyFunction)
-  {
-    Py_INCREF(this->pyFunction);
-  }
-
-  ~Callback()
-  {
-    Py_DECREF(this->pyFunction);
-  }
-
-  PyObject* makeSwigPyObject(silvver::Identity<silvver::Position>* p)
-  {
-    return SWIG_NewPointerObj(p,
-                              SWIGTYPE_p_silvver__IdentityT_silvver__Position_t,
-                              0);
-  }
-
-  PyObject* makeSwigPyObject(silvver::Identity<silvver::Pose>* p)
-  {
-    return SWIG_NewPointerObj(p,
-                              SWIGTYPE_p_silvver__IdentityT_silvver__Pose_t,
-                              0);
-  }
-
-  PyObject* makeSwigPyObject(silvver::CameraReading<silvver::Position>* p)
-  {
-    return SWIG_NewPointerObj(p,
-                              SWIGTYPE_p_silvver__CameraReadingT_silvver__Position_t,
-                              0);
-  }
-
-  PyObject* makeSwigPyObject(silvver::CameraReading<silvver::Pose>* p)
-  {
-    return SWIG_NewPointerObj(p,
-                              SWIGTYPE_p_silvver__CameraReadingT_silvver__Pose_t,
-                              0);
-  }
-
-  // This method will be called from another thread, the one of ioService from
-  // Connection class. Because of this, is needed the SWIG_PYTHON_THREAD_*
-  // macros.
-  void operator()(silvver::Identity<T> identity)
-  {
-    PYTHON_THREAD_BEGIN_BLOCK;
-    PyObject* argument = this->makeSwigPyObject(&identity);
-    PyObject* arg = Py_BuildValue("(O)", argument);
-
-    PyObject_CallObject(this->pyFunction, arg);
-    Py_DECREF(argument);
-    Py_DECREF(arg);
-    PYTHON_THREAD_END_BLOCK;
-  }
-
-  // This method will be called from another thread, the one of ioService from
-  // Connection class. Because of this, is needed the SWIG_PYTHON_THREAD_*
-  // macros.
-  void operator()(silvver::CameraReading<T> cameraReading)
-  {
-    PYTHON_THREAD_BEGIN_BLOCK;
-    PyObject* argument = this->makeSwigPyObject(&cameraReading);
-    PyObject* arg = Py_BuildValue("(O)", argument);
-
-    PyObject_CallObject(this->pyFunction, arg);
-    Py_DECREF(argument);
-    Py_DECREF(arg);
-    PYTHON_THREAD_END_BLOCK;
-  }
-private:
-  PyObject* const pyFunction;
-};
-
 %}
 
 %init{
@@ -270,8 +117,6 @@ pConnectionError = PyErr_NewException(const_cast<char*>("_silvver.ConnectionErro
                                       NULL, NULL);
 PyModule_AddObject(m, "TimeExpired", pTimeExpired);
 PyModule_AddObject(m, "ConnectionError", pConnectionError);
-
-PyEval_InitThreads();
 }
 
 %exception {
@@ -306,159 +151,163 @@ PyEval_InitThreads();
   }
 }
 
-namespace boost
+namespace boost {
+
+%extend array<double, 9>
 {
-  %extend array<double, 9>
+  void __setitem__(int key, double value)
   {
-    void __setitem__(int key, double value)
-    {
-      $self->at(key) = value;
-    }
+    $self->at(key) = value;
+  }
 
-    double __getitem__(int key)
-    {
-      return $self->at(key);
-    }
+  double __getitem__(int key)
+  {
+    return $self->at(key);
+  }
 
-    char* __str__()
-    {
-      static char temp[256];
-      sprintf(temp, "%g\t%g\t%g\t%g\t%g\t%g\t%g\t%g\t%g", (*$self)[0],
-              (*$self)[1], (*$self)[2], (*$self)[3], (*$self)[4],
-              (*$self)[5], (*$self)[6], (*$self)[7], (*$self)[8]);
-      return temp;
-    }
+  char* __str__()
+  {
+    static char temp[256];
+    sprintf(temp, "%g\t%g\t%g\t%g\t%g\t%g\t%g\t%g\t%g", (*$self)[0],
+            (*$self)[1], (*$self)[2], (*$self)[3], (*$self)[4],
+            (*$self)[5], (*$self)[6], (*$self)[7], (*$self)[8]);
+    return temp;
   }
 }
 
-namespace silvver
-{
-  %extend AbstractCameraUid{
-    const char* __str__()
-    {
-      static std::stringstream ss(std::stringstream::out);
-      ss.str("");
-      ss << *$self;
-      return ss.str().c_str();
-    }
-  }
+} // namespace boost
 
-  %extend TargetUid{
-    const char* __str__()
-    {
-      static std::stringstream ss(std::stringstream::out);
-      ss.str("");
-      ss << *$self;
-      return ss.str().c_str();
-    }
-  }
+namespace silvver {
 
-  %extend Position{
-    const char* __str__()
-    {
-      static std::stringstream ss(std::stringstream::out);
-      ss.str("");
-      ss << *$self;
-      return ss.str().c_str();
-    }
+%extend AbstractCameraUid{
+  const char* __str__()
+  {
+    static std::stringstream ss(std::stringstream::out);
+    ss.str("");
+    ss << *$self;
+    return ss.str().c_str();
   }
+}
 
-  %extend Pose{
-    const char* __str__()
-    {
-      static std::stringstream ss(std::stringstream::out);
-      ss.str("");
-      ss << *$self;
-      return ss.str().c_str();
-    }
+%extend TargetUid{
+  const char* __str__()
+  {
+    static std::stringstream ss(std::stringstream::out);
+    ss.str("");
+    ss << *$self;
+    return ss.str().c_str();
   }
+}
 
-  %extend Identity{
-    const char* __str__()
-    {
-      static std::stringstream ss(std::stringstream::out);
-      ss.str("");
-      ss << *$self;
-      return ss.str().c_str();
-    }
+%extend Position{
+  const char* __str__()
+  {
+    static std::stringstream ss(std::stringstream::out);
+    ss.str("");
+    ss << *$self;
+    return ss.str().c_str();
   }
+}
 
-  %extend Image{
-    PyObject* toString()
-    {
-      return PyString_FromStringAndSize($self->imageData,
-                                        (Py_ssize_t)$self->imageSize);
-    }
+%extend Pose{
+  const char* __str__()
+  {
+    static std::stringstream ss(std::stringstream::out);
+    ss.str("");
+    ss << *$self;
+    return ss.str().c_str();
   }
-  %pythoncode {
+}
+
+%extend Identity{
+  const char* __str__()
+  {
+    static std::stringstream ss(std::stringstream::out);
+    ss.str("");
+    ss << *$self;
+    return ss.str().c_str();
+  }
+}
+
+%extend Image{
+  PyObject* toString()
+  {
+    return PyString_FromStringAndSize($self->imageData,
+                                      (Py_ssize_t)$self->imageSize);
+  }
+}
+
+%pythoncode {
     def toIplImage(self):
-      cv_img = cv.CreateImageHeader((self.width,self.height), cv.IPL_DEPTH_8U, 3) # RGB image
-      cv.SetData(cv_img, self.toString())
-      return cv_img
+        cv_img = cv.CreateImageHeader((self.width,self.height), cv.IPL_DEPTH_8U, 3) # RGB image
+        cv.SetData(cv_img, self.toString())
+        return cv_img
 
     Image.toIplImage = toIplImage
     del toIplImage
-  %}
+%}
 
-  %extend Target{
-    Identity<T> _getUnseen(int days, int seconds, int microseconds)
-    {
-      return $self->getUnseen(boost::posix_time::hours(days*24) +
-                              boost::posix_time::seconds(seconds) +
-                              boost::posix_time::microseconds(microseconds));
-    }
-
-    Identity<T> _getUnseen()
-    {
-      return $self->getUnseen(boost::date_time::pos_infin);
-    }
-
-    Identity<T> _getNext(int days, int seconds, int microseconds)
-    {
-      return $self->getNext(boost::posix_time::hours(days*24) +
+%extend Target{
+  Identity<T> _getUnseen(int days, int seconds, int microseconds)
+  {
+    return $self->getUnseen(boost::posix_time::hours(days*24) +
                             boost::posix_time::seconds(seconds) +
                             boost::posix_time::microseconds(microseconds));
-    }
-
-    Identity<T> _gettNext()
-    {
-      return $self->getNext(boost::date_time::pos_infin);
-    }
   }
 
-  %feature("shadow") Target::getUnseen %{
+  Identity<T> _getUnseen()
+  {
+    return $self->getUnseen(boost::date_time::pos_infin);
+  }
+
+  Identity<T> _getNext(int days, int seconds, int microseconds)
+  {
+    return $self->getNext(boost::posix_time::hours(days*24) +
+                          boost::posix_time::seconds(seconds) +
+                          boost::posix_time::microseconds(microseconds));
+  }
+
+  Identity<T> _getNext()
+  {
+    return $self->getNext(boost::date_time::pos_infin);
+  }
+}
+
+%feature("shadow") Target::getUnseen %{
     def getUnseen(self, timedelta='infinity'):
         if timedelta == 'infinity':
             return self._getUnseen()
         else:
             return self._getUnseen(timedelta.days, timedelta.seconds,
                                    timedelta.microseconds)
-  %}
+%}
 
-  %feature("shadow") Target::getNext %{
+%feature("shadow") Target::getNext %{
     def getNext(self, timedelta='infinity'):
         if timedelta == 'infinity':
             return self._getNext()
         else:
             return self._getNext(timedelta.days, timedelta.seconds,
                                  timedelta.microseconds)
-  %}
+%}
 
-  %template(Identity_Position) Identity<Position>;
-  %template(Identity_Pose) Identity<Pose>;
+%template(Identity_Position) Identity<Position>;
+%template(Identity_Pose) Identity<Pose>;
 
-  %template(CameraReading_Position) CameraReading<Position>;
-  %template(CameraReading_Pose) CameraReading<Pose>;
+%template(CameraReading_Position) CameraReading<Position>;
+%template(CameraReading_Pose) CameraReading<Pose>;
 
-  %template(Target_Position) Target<Position>;
-  %template(Target_Pose) Target<Pose>;
+%template(Target_Position) Target<Position>;
+%template(Target_Pose) Target<Pose>;
 
-  %template(AbstractCamera_Position) AbstractCamera<Position>;
-  %template(AbstractCamera_Pose) AbstractCamera<Pose>;
-}
+%template(AbstractCamera_Position) AbstractCamera<Position>;
+%template(AbstractCamera_Pose) AbstractCamera<Pose>;
 
-namespace std
-{
-  %template(VectorPositionId) vector<silvver::Identity<silvver::Position> >;
-  %template(VectorPoseId) vector<silvver::Identity<silvver::Pose> >;
-};
+} // namespace silvver
+
+namespace std {
+
+%template(VectorPositionId) vector<silvver::Identity<silvver::Position> >;
+%template(VectorPoseId) vector<silvver::Identity<silvver::Pose> >;
+
+} // namespace std

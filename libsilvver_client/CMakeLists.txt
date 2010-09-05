@@ -7,7 +7,7 @@ INCLUDE_DIRECTORIES(../)
 INCLUDE_DIRECTORIES(../common)
 
 ADD_SUBDIRECTORY(src)
-# ADD_SUBDIRECTORY(bindings)
+ADD_SUBDIRECTORY(bindings)
 
 INSTALL(DIRECTORY doc/
         DESTINATION share/doc/silvver/client_examples/
