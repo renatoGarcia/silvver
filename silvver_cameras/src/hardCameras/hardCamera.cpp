@@ -33,9 +33,9 @@ HardCamera::HardCamera(const scene::Hardware& config, int iplDepth)
   ,framePixels(config.resolution.at(0) * config.resolution.at(1))
   ,frameSize(cvSize(config.resolution.at(0), config.resolution.at(1)))
   ,iplDepth(iplDepth)
-  ,distortedFrame(NULL)
-  ,undistortedFrame(NULL)
-  ,undistortedFrameBuffer()
+  ,warpedFrame(NULL)
+  ,unwarpedFrame(NULL)
+  ,unwarpedFrameBuffer()
   ,framesAccessMutex()
   ,mapx(this->frameSize, IPL_DEPTH_32F, 1)
   ,mapy(this->frameSize, IPL_DEPTH_32F, 1)
@@ -51,10 +51,10 @@ HardCamera::HardCamera(const scene::Hardware& config, int iplDepth)
   ,saveTimestamp(global_options.saveTimestamp)
   ,timestampWriter()
 {
-  undistortedFrameBuffer[0].image = IplImageWrapper(this->frameSize,
-                                                    this->iplDepth, 3);
-  undistortedFrameBuffer[1].image = IplImageWrapper(this->frameSize,
-                                                    this->iplDepth, 3);
+  unwarpedFrameBuffer[0].image = IplImageWrapper(this->frameSize,
+                                                 this->iplDepth, 3);
+  unwarpedFrameBuffer[1].image = IplImageWrapper(this->frameSize,
+                                                 this->iplDepth, 3);
 
   CvMat* intrinsic = cvCreateMat(3, 3, CV_32FC1);
   // Opencv 1.0.0 can handle only 4x1 distortion matrix
@@ -136,16 +136,16 @@ HardCamera::createFormat(const std::string& strFormat,
 void
 HardCamera::updateCurrentFrame(Frame& frame)
 {
-  static int undistortedIdx = 0;
+  static int unwarpedIdx = 0;
 
-  cvRemap(frame.image, this->undistortedFrameBuffer[undistortedIdx].image,
+  cvRemap(frame.image, this->unwarpedFrameBuffer[unwarpedIdx].image,
           this->mapx, this->mapy,
           CV_INTER_LINEAR+CV_WARP_FILL_OUTLIERS, cvScalarAll(0));
-  this->undistortedFrameBuffer[undistortedIdx].timestamp = frame.timestamp;
+  this->unwarpedFrameBuffer[unwarpedIdx].timestamp = frame.timestamp;
 
   this->framesAccessMutex.lock();
-  this->distortedFrame = &frame;
-  this->undistortedFrame = &this->undistortedFrameBuffer[undistortedIdx];
+  this->warpedFrame = &frame;
+  this->unwarpedFrame = &this->unwarpedFrameBuffer[unwarpedIdx];
   this->framesAccessMutex.unlock();
 
   // Notify the classes observing this camera.
@@ -156,12 +156,12 @@ HardCamera::updateCurrentFrame(Frame& frame)
     this->saveImageFormat % this->silvverUid % this->imagesCounter
                           % "w";
     cvSaveImage(this->saveImageFormat.str().c_str(),
-                this->distortedFrame->image);
+                this->warpedFrame->image);
     if (this->saveTimestamp)
     {
       bfs::path path(this->saveImageFormat.str());
       this->timestampWriter.add(path.filename(),
-                                this->distortedFrame->timestamp);
+                                this->warpedFrame->timestamp);
     }
   }
 
@@ -170,35 +170,35 @@ HardCamera::updateCurrentFrame(Frame& frame)
     this->saveImageFormat % this->silvverUid % this->imagesCounter
                           % "u";
     cvSaveImage(this->saveImageFormat.str().c_str(),
-                this->undistortedFrame->image);
+                this->unwarpedFrame->image);
     if (this->saveTimestamp)
     {
       bfs::path path(this->saveImageFormat.str());
       this->timestampWriter.add(path.filename(),
-                                this->undistortedFrame->timestamp);
+                                this->unwarpedFrame->timestamp);
     }
   }
 
   if (this->showImages)
   {
-    cvShowImage(this->windowName.c_str(), this->undistortedFrame->image);
+    cvShowImage(this->windowName.c_str(), this->unwarpedFrame->image);
     cvWaitKey(5);
   }
 
-  undistortedIdx = (undistortedIdx+1) % 2;
+  unwarpedIdx = (unwarpedIdx+1) % 2;
   this->imagesCounter++;
 }
 
 void
-HardCamera::getDistortedFrame(Frame& image)
+HardCamera::getWarpedFrame(Frame& image)
 {
   boost::shared_lock<boost::shared_mutex> lock(this->framesAccessMutex);
-  image = *this->distortedFrame;
+  image = *this->warpedFrame;
 }
 
 void
-HardCamera::getUndistortedFrame(Frame& image)
+HardCamera::getUnwarpedFrame(Frame& image)
 {
   boost::shared_lock<boost::shared_mutex> lock(this->framesAccessMutex);
-  image = *this->undistortedFrame;
+  image = *this->unwarpedFrame;
 }

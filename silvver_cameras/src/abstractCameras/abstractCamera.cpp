@@ -69,7 +69,7 @@ AbstractCamera::updateFrame()
     this->unreadImageCondition.wait(lock);
   }
 
-  this->subjectHardCamera->getUndistortedFrame(this->currentFrame);
+  this->subjectHardCamera->getUnwarpedFrame(this->currentFrame);
 
   this->unreadImage = false;
 }
@@ -135,14 +135,14 @@ AbstractCamera::toWorld(silvver::Pose &pose) const
 connection::Channel*
 AbstractCamera::createChannel(const connection::TcpIpEp& receptionistEp)
 {
-  if (receptionistEp.address().to_string() == "127.0.0.1")
-  {
+  // if (receptionistEp.address().to_string() == "127.0.0.1")
+  // {
     return new connection::UnixSocket(AbstractCamera::ioService);
-  }
-  else
-  {
-    return new connection::TcpIp(AbstractCamera::ioService);
-  }
+  // }
+  // else
+  // {
+  //   return new connection::TcpIp(AbstractCamera::ioService);
+  // }
 }
 
 silvver::Image

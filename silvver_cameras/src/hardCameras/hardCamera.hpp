@@ -45,9 +45,9 @@ class HardCamera: public boost::noncopyable, public Subject
 public:
   virtual ~HardCamera();
 
-  void getDistortedFrame(Frame& image);
+  void getWarpedFrame(Frame& image);
 
-  void getUndistortedFrame(Frame& image);
+  void getUnwarpedFrame(Frame& image);
 
   /// A uid to differentiate this camera, e.g.: when saving images or
   /// in title of window where showing the captured images.
@@ -75,13 +75,13 @@ private:
 
   unsigned getBitsPerPixel(int iplDepth) const;
 
-  Frame* distortedFrame;
-  Frame* undistortedFrame;
+  Frame* warpedFrame;
+  Frame* unwarpedFrame;
 
-  boost::array<Frame, 2> undistortedFrameBuffer;
+  boost::array<Frame, 2> unwarpedFrameBuffer;
 
-  /// Mutex to control the read/write operations in distortedFrame and
-  /// undistortedFrame.
+  /// Mutex to control the read/write operations in warpedFrame and
+  /// unwarpedFrame.
   boost::shared_mutex framesAccessMutex;
 
   /// Maps to distort captured images
