@@ -68,6 +68,8 @@ public:
   template <class T>
   void asyncReceive(T& t, ReceiveHandler handler);
 
+  virtual bool isOpen() const=0;
+
   /// Close the current connection.
   virtual void close()=0;
 

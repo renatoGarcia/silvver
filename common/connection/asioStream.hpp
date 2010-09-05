@@ -55,12 +55,17 @@ public:
   virtual void asyncRead(boost::shared_ptr<std::string> data,
                          ReadHandler handler);
 
+  virtual bool isOpen() const
+  {
+    return this->socket.is_open();
+  }
+
+  virtual void close();
+
   virtual AnyEndpoint localEndpoint() const
   {
     return this->socket.local_endpoint();
   }
-
-  virtual void close();
 
   Socket& getSocket()
   {

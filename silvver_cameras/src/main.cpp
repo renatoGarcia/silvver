@@ -22,7 +22,6 @@
 #include <iostream>
 #include <string>
 
-#include "common/connection/channelTypes.hpp"
 #include "common/connection/tcpIp.hpp"
 #include "common/version.hpp"
 #include "globalOptions.hpp"
@@ -58,8 +57,9 @@ void validate(boost::any& v,
 std::string getLevelsNames()
 {
   std::string levelsNames;
-  LogLevel::const_iterator iterLevel = LogLevel::begin();
-  for(; iterLevel < LogLevel::end(); ++iterLevel)
+  for(LogLevel::const_iterator iterLevel = LogLevel::begin();
+      iterLevel < LogLevel::end();
+      ++iterLevel)
   {
     levelsNames += '|';
     levelsNames += iterLevel->str();
@@ -138,10 +138,6 @@ int main(int argc, char **argv)
               << std::endl;
 
     global_options.receptionistEp = connection::TcpIp::resolve(serverName, receptionistPort).front();
-    // if (serverName == "localhost" || serverName == "127.0.0.1")
-    //   global_options.channelType = IPC;
-    // else
-    //   global_options.channelType = TCP_IP;
     global_options.sendImages = vm.count("send-images");
     global_options.showImages = vm.count("show");
     global_options.saveDistortedImages = vm.count("save-distorted");

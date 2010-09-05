@@ -1,4 +1,4 @@
-LIB_FLAG = -lsilvver_client
+LIB_FLAG = -lsilvver_client -ggdb
 
 OBJECTS = targetPose targetTimedWait abstractCamera saveImage
 all: $(OBJECTS)

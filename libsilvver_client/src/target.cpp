@@ -16,191 +16,225 @@
 #include "target.hpp"
 
 #include <boost/bind.hpp>
+#include <boost/scoped_ptr.hpp>
 #include <boost/thread/condition.hpp>
 #include <boost/thread/mutex.hpp>
+#include <boost/thread/thread.hpp>
 #include <cstdlib>
 
-#include "connection.ipp"
+#include "connection/channel.ipp"
+#include "connection/unixSocket.hpp"
+#include "connection/tcpIp.hpp"
+#include "request.hpp"
+#include "serializations.hpp"
 
-namespace silvver
+namespace silvver {
+
+template<class T>
+class
+Target<T>::CheshireCat
 {
-  template<class T>
-  class
-  Target<T>::CheshireCat
+public:
+  connection::Channel* constructChannel(const std::string& serverName,
+                                        const std::string& receptionistPort);
+
+  CheshireCat(const silvver::TargetUid& targetUid,
+              const std::string& serverName,
+              const std::string& receptionistPort);
+
+  ~CheshireCat();
+
+  // Callback method called when a new target localization arrives.
+  void handleReceive(connection::error_code ec);
+
+  const silvver::TargetUid targetUid;
+
+  // Synchronize the access to localization attribute.
+  boost::mutex mutexLocalization;
+
+  // Condition of there to be an unseen localization.
+  boost::condition_variable unseenLocalization;
+
+  // Last received localization.
+  Identity<T> localization;
+
+  // Signalize if current localization was never returned/read.
+  bool localizationIsUnseen;
+
+  // Will holds a localization until copy it safely to
+  // localization attribute.
+  Identity<T> tmpLocalization;
+
+  boost::asio::io_service ioService;
+
+  boost::asio::io_service::work work;
+
+  boost::thread serviceThread;
+
+  boost::scoped_ptr<connection::Channel> serverChannel;
+};
+
+template<class T>
+connection::Channel*
+Target<T>::CheshireCat::constructChannel(const std::string& serverName,
+                                         const std::string& receptionistPort)
+{
+  using namespace connection;
+
+  std::auto_ptr<Channel> channel;
+
+  if ((serverName == "localhost") || (serverName == "127.0.0.1"))
   {
-  public:
-    CheshireCat(const silvver::TargetUid& targetUid,
-                const std::string& serverName,
-                const std::string& receptionistPort);
-
-    ~CheshireCat();
-
-    // Callback method called when a new localization arrives.
-    void handleReceive();
-
-    const silvver::TargetUid targetUid;
-
-    // Outside callback function called when a new localization arrives.
-    boost::function<void (Identity<T>)> callback;
-
-    // Synchronize the access to localization attribute.
-    boost::mutex mutexLocalization;
-
-    // Condition of there to be an unseen localization.
-    boost::condition_variable unseenLocalization;
-
-    // Last received localization.
-    Identity<T> localization;
-
-    // Signalize if current localization was never returned/read.
-    bool localizationIsUnseen;
-
-    // Will holds a localization until copy it safely to
-    // localization attribute.
-    Identity<T> tmpLocalization;
-
-    Connection serverConnection;
-  };
-
-  template<class T>
-  Target<T>::CheshireCat::CheshireCat(const silvver::TargetUid& targetUid,
-                                      const std::string& serverName,
-                                      const std::string& receptionistPort)
-    :targetUid(targetUid)
-    ,callback()
-    ,mutexLocalization()
-    ,unseenLocalization()
-    ,localization()
-    ,localizationIsUnseen(false)
-    ,tmpLocalization()
-    ,serverConnection(serverName, receptionistPort, targetUid)
+    channel.reset(new UnixSocket(this->ioService));
+  }
+  else
   {
-    this->serverConnection.asyncRead(this->tmpLocalization,
-                                     boost::bind(&CheshireCat::handleReceive,
-                                                 this));
+    channel.reset(new TcpIp(this->ioService));
   }
 
-  template<class T>
-  Target<T>::CheshireCat::~CheshireCat()
-  {}
+  TcpIpEp serverEp = TcpIp::resolve(serverName, receptionistPort).front();
+  channel->connect<TcpIp>(serverEp);
 
-  template<class T>
-  void
-  Target<T>::CheshireCat::handleReceive()
+  return channel.release();
+}
+
+template<class T>
+Target<T>::CheshireCat::CheshireCat(const silvver::TargetUid& targetUid,
+                                    const std::string& serverName,
+                                    const std::string& receptionistPort)
+  :targetUid(targetUid)
+  ,mutexLocalization()
+  ,unseenLocalization()
+  ,localization()
+  ,localizationIsUnseen(false)
+  ,tmpLocalization()
+  ,ioService()
+  ,work(ioService)
+  ,serviceThread(static_cast<std::size_t (boost::asio::io_service::*)()>(&boost::asio::io_service::run),
+                 &this->ioService)
+  ,serverChannel(constructChannel(serverName, receptionistPort))
+{
+  Request request = AddTargetClient(this->targetUid);
+  this->serverChannel->send(request);
+
+  this->serverChannel->asyncReceive(this->tmpLocalization,
+                                    boost::bind(&CheshireCat::handleReceive,
+                                                this, _1));
+}
+
+template<class T>
+Target<T>::CheshireCat::~CheshireCat()
+{}
+
+template<class T>
+void
+Target<T>::CheshireCat::handleReceive(connection::error_code ec)
+{
+  if (ec == connection::error_code::broken_connection)
   {
-    if (this->tmpLocalization.uid == this->targetUid)
+    return;
+  }
+
+  if (this->tmpLocalization.uid == this->targetUid)
+  {
     {
-      {
-        boost::mutex::scoped_lock lock(this->mutexLocalization);
-        this->localization = this->tmpLocalization;
+      boost::mutex::scoped_lock lock(this->mutexLocalization);
+      this->localization = this->tmpLocalization;
 
-        this->localizationIsUnseen = true;
-
-        if (this->callback)
-        {
-          this->callback(this->localization);
-          this->localizationIsUnseen = false;
-        }
-      }
-
-      this->unseenLocalization.notify_one();
+      this->localizationIsUnseen = true;
     }
 
-    this->serverConnection.asyncRead(this->tmpLocalization,
-                                     boost::bind(&CheshireCat::handleReceive,
-                                                 this));
+    this->unseenLocalization.notify_one();
   }
 
-  template<class T>
-  void
-  Target<T>::setCallback(boost::function<void (Identity<T>)> callback)
+  this->serverChannel->asyncReceive(this->tmpLocalization,
+                                    boost::bind(&CheshireCat::handleReceive,
+                                                this, _1));
+}
+
+template<class T>
+silvver::TargetUid
+Target<T>::getUid()
+{
+  return smile->targetUid;
+}
+
+template<class T>
+Identity<T>
+Target<T>::getLast()
+{
+  if (!smile->serverChannel->isOpen())
   {
-    smile->callback = callback;
+    throw connection_error("The silvver-server has closed the connection");
   }
 
-  template<class T>
-  silvver::TargetUid
-  Target<T>::getUid()
+  boost::mutex::scoped_lock lock(smile->mutexLocalization);
+
+  smile->localizationIsUnseen = false;
+  return smile->localization;
+}
+
+template<class T>
+Identity<T>
+Target<T>::getUnseen(const boost::posix_time::time_duration& waitTime)
+{
+  if (!smile->serverChannel->isOpen())
   {
-    return smile->targetUid;
+    throw connection_error("The silvver-server has closed the connection");
   }
 
-  template<class T>
-  Identity<T>
-  Target<T>::getLast()
+  boost::mutex::scoped_lock lock(smile->mutexLocalization);
+
+  while (!smile->localizationIsUnseen)
   {
-    if (!smile->serverConnection.isOpen())
-    {
-      throw connection_error("The silvver-server has closed the connection");
-    }
-
-    boost::mutex::scoped_lock lock(smile->mutexLocalization);
-
-    smile->localizationIsUnseen = false;
-    return smile->localization;
-  }
-
-  template<class T>
-  Identity<T>
-  Target<T>::getUnseen(const boost::posix_time::time_duration& waitTime)
-  {
-    if (!smile->serverConnection.isOpen())
-    {
-      throw connection_error("The silvver-server has closed the connection");
-    }
-
-    boost::mutex::scoped_lock lock(smile->mutexLocalization);
-
-    while (!smile->localizationIsUnseen)
-    {
-      if (!smile->unseenLocalization.timed_wait(lock, waitTime))
-      {
-        throw typename
-          silvver::time_expired_error("The wait time expired without a new "
-                                      "pose arrives");
-      }
-    }
-
-    smile->localizationIsUnseen = false;
-    return smile->localization;
-  }
-
-  template<class T>
-  Identity<T>
-  Target<T>::getNext(const boost::posix_time::time_duration& waitTime)
-  {
-    if (!smile->serverConnection.isOpen())
-    {
-      throw connection_error("The silvver-server has closed the connection");
-    }
-
-    boost::mutex::scoped_lock lock(smile->mutexLocalization);
-
-    // Wait for handleReceive method notifies a new pose.
     if (!smile->unseenLocalization.timed_wait(lock, waitTime))
     {
       throw typename
-        silvver::time_expired_error("The wait time expired without the next "
+        silvver::time_expired_error("The wait time expired without a new "
                                     "pose arrives");
     }
-
-    smile->localizationIsUnseen = false;
-    return smile->localization;
   }
 
-  template<class T>
-  Target<T>::Target(const silvver::TargetUid& targetUid,
-                    const std::string& serverName,
-                    const std::string& receptionistPort)
-    :smile(new CheshireCat(targetUid, serverName, receptionistPort))
-  {}
+  smile->localizationIsUnseen = false;
+  return smile->localization;
+}
 
-  template<class T>
-  Target<T>::~Target() throw()
-  {}
+template<class T>
+Identity<T>
+Target<T>::getNext(const boost::posix_time::time_duration& waitTime)
+{
+  if (!smile->serverChannel->isOpen())
+  {
+    throw connection_error("The silvver-server has closed the connection");
+  }
 
-  // Templates to be compiled in library
-  template class Target<Position>;
-  template class Target<Pose>;
+  boost::mutex::scoped_lock lock(smile->mutexLocalization);
+
+  // Wait for handleReceive method notifies a new pose.
+  if (!smile->unseenLocalization.timed_wait(lock, waitTime))
+  {
+    throw typename
+      silvver::time_expired_error("The wait time expired without the next "
+                                  "pose arrives");
+  }
+
+  smile->localizationIsUnseen = false;
+  return smile->localization;
+}
+
+template<class T>
+Target<T>::Target(const silvver::TargetUid& targetUid,
+                  const std::string& serverName,
+                  const std::string& receptionistPort)
+  :smile(new CheshireCat(targetUid, serverName, receptionistPort))
+{}
+
+template<class T>
+Target<T>::~Target() throw()
+{}
+
+// Templates to be compiled in library
+template class Target<Position>;
+template class Target<Pose>;
 
 } // End namespace silvver

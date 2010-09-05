@@ -3,10 +3,11 @@ SET(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${CMAKE_SOURCE_DIR}/../cmakeModules)
 
 PROJECT(silvver_client CXX)
 
+INCLUDE_DIRECTORIES(../)
 INCLUDE_DIRECTORIES(../common)
 
 ADD_SUBDIRECTORY(src)
-ADD_SUBDIRECTORY(bindings)
+# ADD_SUBDIRECTORY(bindings)
 
 INSTALL(DIRECTORY doc/
         DESTINATION share/doc/silvver/client_examples/

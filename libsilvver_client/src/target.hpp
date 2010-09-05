@@ -18,74 +18,77 @@
 
 #include <boost/date_time/posix_time/posix_time.hpp>
 #include <boost/date_time/time_duration.hpp>
-#include <boost/function.hpp>
 #include <memory>
 #include <string>
 
-#include "exceptions.hpp"
 #include "silvverTypes.hpp"
+#include "exceptions.hpp"
 
-namespace silvver
+namespace silvver {
+
+/// Represents a target looked by Silvver.
+template<class T>
+class Target
 {
-  /// Represents a target looked by Silvver.
-  template<class T>
-  class Target
-  {
-  public:
-    /** Target class constructor.
-     * Can throw silvver::connection_error
-     * @param targetUid Target silvver uid.
-     * @param serverName IP address or hostname of silvver-server.
-     * @param receptionistPort Port number of silvver-server receptionist. */
-    Target(const TargetUid& targetUid,
-           const std::string& serverName="localhost",
-           const std::string& receptionistPort="12000");
+public:
+  /** Target class constructor.
+   * Can throw silvver::connection_error
+   *
+   * @param targetUid Target silvver uid.
+   * @param serverName IP address or hostname of silvver-server.
+   * @param receptionistPort Port number of silvver-server receptionist.
+   */
+  Target(const TargetUid& targetUid,
+         const std::string& serverName="localhost",
+         const std::string& receptionistPort="12000");
 
-    ~Target() throw();
+  ~Target() throw();
 
-    /** Set a callback function which will be called to all received
-     * localizations.
-     * A zero value will unset the current callback.
-     * @param callback A function with signature
-     *                 "void callback(Identity<T>)"  */
-     void setCallback(boost::function<void (Identity<T>)> callback=0);
+  /** Get the UID of target.
+   *
+   * @return The UID of this target.
+   */
+  TargetUid getUid();
 
-    /** Get the UID of target.
-     * @return The UID of this target.  */
-    TargetUid getUid();
+  /** Get the last received target localization.
+   * Immediately return the last received target, even if it was already
+   * seen. This method can throw silvver::connection_error if the connection
+   * with silvver-server is closed.
+   *
+   * @return The last received target localization.
+   */
+  Identity<T> getLast();
 
-    /** Get the last received target localization.
-     * Immediately return the last received target, even if it was already
-     * seen. This method can throw silvver::connection_error if the connection
-     * with silvver-server is closed.
-     * @return The last received target localization. */
-    Identity<T> getLast();
-
-    /** Get a never seen taget localization.
-     * This method will wait for waitTime until throw a
-     * silvver::time_expired_error exception. If the connection with
-     * silvver-server is closed, it will throw a silvver::connection_error.
-     * @param waitTime The time to wait for before throw the exception. The
-     *                 default waitTime is infinity.
-     * @return The target localization. */
-    Identity<T> getUnseen(const boost::posix_time::time_duration&
-                          waitTime = boost::date_time::pos_infin);
-
-    /** Get the next target localization.
-     * This method will wait until a new target localization arrives from
-     * silvver-server. If that don't arrives in waitTime a
-     * silvver::time_expired_error exception will be threw. If the connection
-     * with silvver-server is closed, it will throw a
-     * silvver::connection_error.
-     * @param waitTime The time to wait for before throw the exception. The
-     *                 default waitTime is infinity.
-     * @return The target localization. */
-    Identity<T> getNext(const boost::posix_time::time_duration&
+  /** Get a never seen taget localization.
+   * This method will wait for waitTime until throw a
+   * silvver::time_expired_error exception. If the connection with
+   * silvver-server is closed, it will throw a silvver::connection_error.
+   *
+   * @param waitTime The time to wait for before throw the exception. The
+   *        default waitTime is infinity.
+   * @return The target localization.
+   */
+  Identity<T> getUnseen(const boost::posix_time::time_duration&
                         waitTime = boost::date_time::pos_infin);
 
-  private:
-    class CheshireCat;
-    std::auto_ptr<CheshireCat> smile;
-  };
-}
+  /** Get the next target localization.
+   * This method will wait until a new target localization arrives from
+   * silvver-server. If that don't arrives in waitTime a
+   * silvver::time_expired_error exception will be threw. If the connection
+   * with silvver-server is closed, it will throw a silvver::connection_error.
+   *
+   * @param waitTime The time to wait for before throw the exception. The
+   *        default waitTime is infinity.
+   * @return The target localization.
+   */
+  Identity<T> getNext(const boost::posix_time::time_duration&
+                      waitTime = boost::date_time::pos_infin);
+
+private:
+  class CheshireCat;
+  std::auto_ptr<CheshireCat> smile;
+};
+
+} // namespace silvver
+
 #endif /* _SILVVER_TARGET_HPP_ */

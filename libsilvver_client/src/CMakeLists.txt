@@ -3,7 +3,12 @@ INCLUDE_DIRECTORIES(${Boost_INCLUDE_DIRS})
 
 FIND_PACKAGE(OpenCV)
 
-ADD_LIBRARY(silvver_client SHARED connection.cpp target.cpp abstractCamera.cpp)
+ADD_LIBRARY(silvver_client SHARED target.cpp
+                                  abstractCamera.cpp
+                                  ${CMAKE_SOURCE_DIR}/../common/connection/exceptions.cpp
+                                  ${CMAKE_SOURCE_DIR}/../common/connection/tcpIp.cpp
+                                  ${CMAKE_SOURCE_DIR}/../common/connection/unixSocket.cpp
+)
 TARGET_LINK_LIBRARIES(silvver_client ${Boost_LIBRARIES})
 
 IF(OpenCV_FOUND)
@@ -17,9 +22,9 @@ INSTALL(TARGETS silvver_client
 INSTALL(FILES target.hpp
               abstractCamera.hpp
               exceptions.hpp
-              ../../common/version.hpp
-              ../../common/silvverTypes.hpp
-              ../../common/serializations.hpp
+              ${CMAKE_SOURCE_DIR}/../common/version.hpp
+              ${CMAKE_SOURCE_DIR}/../common/silvverTypes.hpp
+              ${CMAKE_SOURCE_DIR}/../common/serializations.hpp
         DESTINATION include/silvver)
 
 SET_TARGET_PROPERTIES(silvver_client PROPERTIES VERSION 0.6.0 SOVERSION 0)
