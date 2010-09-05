@@ -41,10 +41,10 @@ HardCamera::HardCamera(const scene::Hardware& config, int iplDepth)
   ,mapy(this->frameSize, IPL_DEPTH_32F, 1)
   ,showImages(global_options.showImages)
   ,windowName("Camera_" + config.silvverUid)
-  ,saveDistortedImages(global_options.saveDistortedImages &&
-                       !config.saveImageFormat.empty())
-  ,saveUndistortedImages(global_options.saveUndistortedImages &&
-                         !config.saveImageFormat.empty())
+  ,saveWarpedImages(global_options.saveWarpedImages &&
+                    !config.saveImageFormat.empty())
+  ,saveUnwarpedImages(global_options.saveUnwarpedImages &&
+                      !config.saveImageFormat.empty())
   ,saveImageFormat(HardCamera::createFormat(config.saveImageFormat,
                                             config.silvverUid))
   ,imagesCounter(0)
@@ -90,7 +90,7 @@ HardCamera::HardCamera(const scene::Hardware& config, int iplDepth)
   // Ignore if using not all placeholders in format string.
   this->saveImageFormat.exceptions(boost::io::all_error_bits ^
                                    boost::io::too_many_args_bit);
-  if (this->saveUndistortedImages || this->saveDistortedImages)
+  if (this->saveUnwarpedImages || this->saveWarpedImages)
   {
     this->saveImageFormat % this->silvverUid % this->imagesCounter
                           % "u";
@@ -151,10 +151,10 @@ HardCamera::updateCurrentFrame(Frame& frame)
   // Notify the classes observing this camera.
   notify();
 
-  if (this->saveDistortedImages)
+  if (this->saveWarpedImages)
   {
     this->saveImageFormat % this->silvverUid % this->imagesCounter
-                          % "d";
+                          % "w";
     cvSaveImage(this->saveImageFormat.str().c_str(),
                 this->distortedFrame->image);
     if (this->saveTimestamp)
@@ -165,7 +165,7 @@ HardCamera::updateCurrentFrame(Frame& frame)
     }
   }
 
-  if (this->saveUndistortedImages)
+  if (this->saveUnwarpedImages)
   {
     this->saveImageFormat % this->silvverUid % this->imagesCounter
                           % "u";

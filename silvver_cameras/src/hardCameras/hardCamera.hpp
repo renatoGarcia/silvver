@@ -91,8 +91,8 @@ private:
   const bool showImages;
   const std::string windowName;
 
-  const bool saveDistortedImages;
-  const bool saveUndistortedImages;
+  const bool saveWarpedImages;
+  const bool saveUnwarpedImages;
   boost::format saveImageFormat;
   unsigned imagesCounter;
 

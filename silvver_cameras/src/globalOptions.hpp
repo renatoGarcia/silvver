@@ -26,8 +26,8 @@ namespace globalOptions
     bool sendImages;
 
     bool showImages;
-    bool saveDistortedImages;
-    bool saveUndistortedImages;
+    bool saveWarpedImages;
+    bool saveUnwarpedImages;
     bool saveTimestamp;
   };
 }

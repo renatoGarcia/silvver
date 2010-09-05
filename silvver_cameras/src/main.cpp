@@ -32,6 +32,7 @@ namespace po = boost::program_options;
 
 globalOptions::Options global_options;
 
+// Overloaded boost program_options function to validate LogLevel
 void validate(boost::any& v,
               const std::vector<std::string>& values,
               LogLevel* verbosityLevel, int)
@@ -99,9 +100,9 @@ int main(int argc, char **argv)
      std::string("Minimum level of messages. ["  +
                  getLevelsNames() + ']').c_str())
     ("show", "Show the images captured by cameras")
-    ("save-undistorted",
+    ("save-unwarped",
      "Save the images captured by cameras with intrinsic distortion corrected")
-    ("save-distorted",
+    ("save-warped",
      "Save the images captured by cameras without correct the intrinsic distortion")
     ("save-timestamp", "Save a file with timestamps of saved images")
     ;
@@ -140,8 +141,8 @@ int main(int argc, char **argv)
     global_options.receptionistEp = connection::TcpIp::resolve(serverName, receptionistPort).front();
     global_options.sendImages = vm.count("send-images");
     global_options.showImages = vm.count("show");
-    global_options.saveDistortedImages = vm.count("save-distorted");
-    global_options.saveUndistortedImages = vm.count("save-undistorted");
+    global_options.saveWarpedImages = vm.count("save-warped");
+    global_options.saveUnwarpedImages = vm.count("save-unwarped");
     global_options.saveTimestamp = vm.count("save-timestamp");
     message.setThreshold(verbosity.value());
 
