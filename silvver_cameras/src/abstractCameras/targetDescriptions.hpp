@@ -33,8 +33,8 @@ namespace scene
 {
   struct Target
   {
-    /// Key unique to each targets system.
-    unsigned silvverUid;
+    /// Key unique to each targetSet.
+    unsigned targetSetUid;
   };
 
   /// Information about targets that is above (mounted) in a body (eg: a robot)

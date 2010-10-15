@@ -38,7 +38,7 @@ scene = {
         ARTKP{
             pattern_width = 50,
             threshold = 150,
-            silvver_uid = 1,
+            targetset_uid = 1,
 
             {
                 pattern_file = artkp_patt_dir .. '4x4_1.patt',

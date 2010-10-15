@@ -206,7 +206,7 @@ CfReader::readArtkp()
   luaParser.readValue(artkpTargets->threshold, "threshold");
   luaParser.readValue(artkpTargets->bodyTranslation, "body_translation");
   luaParser.readValue(artkpTargets->bodyRotation, "body_rotation");
-  luaParser.readValue(artkpTargets->silvverUid, "silvver_uid");
+  luaParser.readValue(artkpTargets->targetSetUid, "targetset_uid");
 
   luaParser.iterateArray(boost::bind(&CfReader::readArtkpTargets, this,
                                      artkpTargets));
@@ -234,7 +234,7 @@ CfReader::readButterfly()
   luaParser.readValue(butterflyTargets.maxButterflies, "max_butterflies");
   luaParser.readValue(butterflyTargets.bodyTranslation, "body_translation");
   luaParser.readValue(butterflyTargets.bodyRotation, "body_rotation");
-  luaParser.readValue(butterflyTargets.silvverUid, "silvver_uid");
+  luaParser.readValue(butterflyTargets.targetSetUid, "targetset_uid");
 
   return butterflyTargets;
 }

@@ -24,7 +24,7 @@
 
 ButterflyCamera::ButterflyCamera(const scene::Camera& cameraConfig,
                                  const scene::ButterflyTargets& confButterflies)
-  :AbstractCamera(cameraConfig, confButterflies.silvverUid, procOpt::Marker())
+  :AbstractCamera(cameraConfig, confButterflies.targetSetUid, procOpt::Marker())
   ,MountedTarget(confButterflies.bodyTranslation, confButterflies.bodyRotation)
   ,maxButterflies(confButterflies.maxButterflies)
   ,libButterfly(ButterflyCamera::createLibButterfly(cameraConfig,

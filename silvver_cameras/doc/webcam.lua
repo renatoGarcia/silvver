@@ -27,7 +27,7 @@ scene = {
         ARTKP{
             pattern_width = 50,
             threshold = 150,
-            silvver_uid = 1,
+            targetset_uid = 1,
 
             body_pose = target2body({0,0,0},{0,-1, 0,
                                              1, 0, 0,

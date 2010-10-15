@@ -27,11 +27,11 @@ extern globalOptions::Options global_options;
 boost::asio::io_service AbstractCamera::ioService;
 
 AbstractCamera::AbstractCamera(const scene::Camera& cameraConfig,
-                               const unsigned silvverUid,
+                               const unsigned targetSetUid,
                                const procOpt::AnyProcOpt& processorOptions)
   :subjectHardCamera(HardCameraFactory::create(cameraConfig.hardware))
   ,currentFrame()
-  ,abstractCameraUid(silvverUid, subjectHardCamera->hardCameraUid)
+  ,abstractCameraUid(targetSetUid, subjectHardCamera->hardCameraUid)
   ,serverChannel(AbstractCamera::createChannel(global_options.receptionistEp))
   ,unreadImage(false)
   ,unreadImageAccess()

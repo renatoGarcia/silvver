@@ -27,7 +27,7 @@
 
 ArtkpCamera::ArtkpCamera(const scene::Camera& cameraConfig,
                          const scene::ArtkpTargets& targets)
-  :AbstractCamera(cameraConfig, targets.silvverUid, procOpt::Marker())
+  :AbstractCamera(cameraConfig, targets.targetSetUid, procOpt::Marker())
   ,MountedTarget(targets.bodyTranslation, targets.bodyRotation)
   ,patternWidth(targets.patternWidth)
   ,threshold(targets.threshold)
@@ -41,7 +41,7 @@ ArtkpCamera::ArtkpCamera(const scene::Camera& cameraConfig,
     boost::apply_visitor(scene::GetHardware(), cameraConfig.hardware);
 
   const std::string camConfigFileName("/tmp/artkp" +
-                                      boost::lexical_cast<std::string>(targets.silvverUid));
+                                      boost::lexical_cast<std::string>(targets.targetSetUid));
 
   std::ofstream tmpConfig(camConfigFileName.c_str());
   tmpConfig.precision(10);
