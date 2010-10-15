@@ -14,7 +14,6 @@
  */
 
 %pythoncode %{
-import cv
 TimeExpired = _silvver.TimeExpired
 ConnectionError = _silvver.ConnectionError
 %}
@@ -228,24 +227,6 @@ namespace silvver {
     return ss.str().c_str();
   }
 }
-
-%extend Image{
-  PyObject* toString()
-  {
-    return PyString_FromStringAndSize($self->imageData,
-                                      (Py_ssize_t)$self->imageSize);
-  }
-}
-
-%pythoncode {
-    def toIplImage(self):
-        cv_img = cv.CreateImageHeader((self.width,self.height), cv.IPL_DEPTH_8U, 3) # RGB image
-        cv.SetData(cv_img, self.toString())
-        return cv_img
-
-    Image.toIplImage = toIplImage
-    del toIplImage
-%}
 
 %extend Target{
   Identity<T> _getUnseen(int days, int seconds, int microseconds)

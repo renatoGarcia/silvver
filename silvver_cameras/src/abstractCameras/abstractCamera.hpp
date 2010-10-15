@@ -83,12 +83,6 @@ private:
 
   static boost::asio::io_service ioService;
 
-  /** Return current image if send image option is enabled.
-   *
-   * @return Image with current image or a NULL image.
-   */
-  silvver::Image imageToSend();
-
   /// Channel with the silvver-server used to send the target localizations.
   boost::scoped_ptr<connection::Channel> serverChannel;
 
@@ -116,7 +110,6 @@ AbstractCamera::sendLocalizations(const std::vector<silvver::Identity<TargetType
   silvver::CameraReading<TargetType>
     cameraReading(this->abstractCameraUid,
                   this->currentFrame.timestamp,
-                  this->imageToSend(),
                   localizations);
 
   try

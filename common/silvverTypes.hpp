@@ -29,8 +29,6 @@
 #include <stdint.h>
 #include <vector>
 
-#include "silvverImage.hpp"
-
 namespace silvver
 {
   //------------------------------ Silvver UIDs
@@ -294,23 +292,19 @@ namespace silvver
   {
     AbstractCameraUid camUid;
     uint64_t timestamp;
-    Image image;
     std::vector<Identity<TargetType> > localizations;
 
     CameraReading()
       :camUid()
       ,timestamp(0)
-      ,image()
       ,localizations()
     {}
 
     CameraReading(const AbstractCameraUid& camUid,
                   uint64_t timestamp,
-                  const Image& image,
                   const std::vector<Identity<TargetType> >& localizations)
       :camUid(camUid)
       ,timestamp(timestamp)
-      ,image(image)
       ,localizations(localizations)
     {}
   };

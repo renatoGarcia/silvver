@@ -94,7 +94,6 @@ int main(int argc, char **argv)
     ("scene-config,c",
      po::value<std::string>(&luaFile)->default_value("scene.lua"),
      "Lua file with the scene configuration")
-    ("send-images,i", "Send the captured images to abstract camera clients")
     ("verbosity,v",
      po::value<LogLevel>(&verbosity)->default_value(LogLevel::WARN),
      std::string("Minimum level of messages. ["  +
@@ -139,7 +138,6 @@ int main(int argc, char **argv)
               << std::endl;
 
     global_options.receptionistEp = connection::TcpIp::resolve(serverName, receptionistPort).front();
-    global_options.sendImages = vm.count("send-images");
     global_options.showImages = vm.count("show");
     global_options.saveWarpedImages = vm.count("save-warped");
     global_options.saveUnwarpedImages = vm.count("save-unwarped");

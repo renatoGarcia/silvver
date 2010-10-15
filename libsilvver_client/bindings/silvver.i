@@ -105,29 +105,16 @@ struct Identity
   Identity(const BaseClass& base, const TargetUid& uid);
 };
 
-class Image
-{
-public:
-  Image();
-
-  Image(const Image& image);
-
-  int  width;
-  int  height;
-};
-
 template<class TargetType>
 struct CameraReading
 {
   AbstractCameraUid camUid;
   uint64_t timestamp;
-  Image image;
   std::vector<Identity<TargetType> > localizations;
 
   CameraReading();
   CameraReading(const AbstractCameraUid& camUid,
                 uint64_t timestamp,
-                const Image& image,
                 std::vector<Identity<TargetType> > localizations);
 };
 

@@ -22,7 +22,6 @@
 #include <boost/serialization/split_free.hpp>
 
 #include "silvverTypes.hpp"
-#include "silvverImage.hpp"
 
 namespace boost {
 namespace serialization {
@@ -68,64 +67,16 @@ serialize(Archive& ar, silvver::Identity<T>& id, const unsigned version)
   ar & id.uid;
 }
 
-template<class Archive>
-void
-save(Archive& ar, const silvver::Image& image, const unsigned version)
-{
-  ar << image.nChannels;
-  ar << image.depth;
-  ar << image.dataOrder;
-  ar << image.origin;
-  ar << image.width;
-  ar << image.height;
-  ar << image.imageSize;
-  for(int i = 0; i < image.imageSize; ++i)
-  {
-    ar << image.imageData[i];
-  }
-  ar << image.widthStep;
-}
-
-template<class Archive>
-void
-load(Archive& ar, silvver::Image& image, const unsigned version)
-{
-  int old_size = image.imageSize;
-
-  ar >> image.nChannels;
-  ar >> image.depth;
-  ar >> image.dataOrder;
-  ar >> image.origin;
-  ar >> image.width;
-  ar >> image.height;
-  ar >> image.imageSize;
-  if(image.imageSize != old_size)
-  {
-    delete[] image.imageData;
-    image.imageData = new char[image.imageSize];
-  }
-  for(int i = 0; i < image.imageSize; ++i)
-  {
-    ar >> image.imageData[i];
-  }
-  ar >> image.widthStep;
-
-  image.imageDataOrigin = image.imageData;
-}
-
 template<class Archive, class T>
 void
 serialize(Archive& ar,  silvver::CameraReading<T>& id, const unsigned version)
 {
   ar & id.camUid;
   ar & id.timestamp;
-  ar & id.image;
   ar & id.localizations;
 }
 
 } // namespace serialization
 } // namespace boost
-
-BOOST_SERIALIZATION_SPLIT_FREE(silvver::Image)
 
 #endif // _SERIALIZATIONS_HPP_

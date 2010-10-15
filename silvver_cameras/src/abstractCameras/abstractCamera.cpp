@@ -144,16 +144,3 @@ AbstractCamera::createChannel(const connection::TcpIpEp& receptionistEp)
   //   return new connection::TcpIp(AbstractCamera::ioService);
   // }
 }
-
-silvver::Image
-AbstractCamera::imageToSend()
-{
-  if (global_options.sendImages)
-  {
-    return silvver::Image(this->currentFrame.image);
-  }
-  else
-  {
-    return silvver::Image();
-  }
-}

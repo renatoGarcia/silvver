@@ -23,8 +23,6 @@ namespace globalOptions
   {
     connection::TcpIpEp receptionistEp;
 
-    bool sendImages;
-
     bool showImages;
     bool saveWarpedImages;
     bool saveUnwarpedImages;
