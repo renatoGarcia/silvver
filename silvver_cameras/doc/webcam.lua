@@ -6,7 +6,7 @@ artkp_patt_dir = 'artkpImgs/4x4patt/'
 
 scene = {
 
-    cameras = {
+    hardcameras = {
 
         V4l2{
             hardcamera_uid = 1,
@@ -22,7 +22,7 @@ scene = {
         },
     },
 
-    targets = {
+    targetsets = {
 
         ARTKP{
             pattern_width = 50,

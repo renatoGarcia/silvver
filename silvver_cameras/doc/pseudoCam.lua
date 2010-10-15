@@ -18,7 +18,7 @@ end
 
 scene = {
 
-    cameras = {
+    hardcameras = {
 
         PseudoCamera{
             -- Attention! This path on 'ls ...' is relative to directory
@@ -37,7 +37,7 @@ scene = {
         },
     },
 
-    targets = {
+    targetsets = {
 
         ARTKP{
             pattern_width = 50,

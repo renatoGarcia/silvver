@@ -33,14 +33,14 @@ public:
 
 private:
 
-  void readCamera();
+  void readHardCamera();
 
   void readHardware(scene::Hardware& hardware);
   scene::PseudoCamera readPseudoCameraConfig();
   scene::DC1394 readDC1394Config();
   scene::V4l2 readV4l2Config();
 
-  void readTarget();
+  void readTargetSet();
   scene::ArtkpTargets readArtkp();
   void readArtkpTargets(boost::shared_ptr<scene::ArtkpTargets> artkpTargets);
   scene::ButterflyTargets readButterfly();

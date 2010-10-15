@@ -32,12 +32,12 @@ CfReader::readConfigFile()
 {
   luaParser.loadGlobalTable("scene");
 
-  luaParser.loadTable("cameras");
-  luaParser.iterateArray(boost::bind(&CfReader::readCamera, this));
+  luaParser.loadTable("hardcameras");
+  luaParser.iterateArray(boost::bind(&CfReader::readHardCamera, this));
   luaParser.unloadTable();
 
-  luaParser.loadTable("targets");
-  luaParser.iterateArray(boost::bind(&CfReader::readTarget, this));
+  luaParser.loadTable("targetsets");
+  luaParser.iterateArray(boost::bind(&CfReader::readTargetSet, this));
   luaParser.unloadTable();
 
   luaParser.unloadTable(); // Unload scene table
@@ -46,7 +46,7 @@ CfReader::readConfigFile()
 }
 
 void
-CfReader::readCamera()
+CfReader::readHardCamera()
 {
   scene::Camera camera;
 
@@ -173,7 +173,7 @@ CfReader::readV4l2Config()
 }
 
 void
-CfReader::readTarget()
+CfReader::readTargetSet()
 {
   scene::AnyTarget target;
 
