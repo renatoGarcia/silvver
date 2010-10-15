@@ -56,7 +56,7 @@ DC1394::DC1394(const scene::DC1394& config)
   {
     throw open_camera_error()
       << info_what("Unable to get the iso channel number")
-      << info_cameraUid(this->silvverUid);
+      << info_cameraUid(this->hardCameraUid);
   }
 
   int e = dc1394_dma_setup_capture(this->raw1394Handle,
@@ -74,7 +74,7 @@ DC1394::DC1394(const scene::DC1394& config)
   {
     throw open_camera_error()
       << info_what("Unable to setup camera")
-      << info_cameraUid(this->silvverUid);
+      << info_cameraUid(this->hardCameraUid);
   }
   else
   {
@@ -87,7 +87,7 @@ DC1394::DC1394(const scene::DC1394& config)
   }
   catch(silvver_cameras_exception& e)
   {
-    throw e << info_cameraUid(this->silvverUid);
+    throw e << info_cameraUid(this->hardCameraUid);
   }
 
   // Have the camera start sending us data
@@ -97,7 +97,7 @@ DC1394::DC1394(const scene::DC1394& config)
   {
     throw open_camera_error()
       << info_what("Unable to start camera iso transmission")
-      << info_cameraUid(this->silvverUid);
+      << info_cameraUid(this->hardCameraUid);
   }
 
   this->grabFrameThread.reset(new boost::thread(&DC1394::doWork,this));
@@ -143,7 +143,7 @@ DC1394::findThisCamera(nodeid_t& node, int& cardIndex)
     {
       throw open_camera_error()
         << info_what("Unable to aquire a raw1394 handle")
-        << info_cameraUid(this->silvverUid);
+        << info_cameraUid(this->hardCameraUid);
     }
 
     cameraNodes = dc1394_get_camera_nodes(this->raw1394Handle, &nCameras, 0);
@@ -168,7 +168,7 @@ DC1394::findThisCamera(nodeid_t& node, int& cardIndex)
 
   throw open_camera_error()
     << info_what("Didn't found the camera with required uid")
-    << info_cameraUid(this->silvverUid);
+    << info_cameraUid(this->hardCameraUid);
 }
 
 std::string
@@ -194,7 +194,7 @@ DC1394::findVideo1394Device(unsigned cardNumber)
   // If here, didn't found camera devide
   throw open_camera_error()
     << info_what("Didn't found the path to camera device")
-    << info_cameraUid(this->silvverUid);
+    << info_cameraUid(this->hardCameraUid);
 }
 
 int
@@ -274,7 +274,7 @@ DC1394::getDc1394VideoMode(const scene::DC1394& config)
   {
     throw open_camera_error()
       << info_what("Could not set resolution and color mode together")
-      << info_cameraUid(config.silvverUid)
+      << info_cameraUid(config.hardCameraUid)
       << info_resolution(config.resolution)
       << info_colorMode(config.colorMode);
   }
@@ -339,7 +339,7 @@ DC1394::createColorConverter(const scene::DC1394& config)
     }
     catch (invalid_argument& e)
     {
-      throw e << info_cameraUid(config.silvverUid)
+      throw e << info_cameraUid(config.hardCameraUid)
               << info_colorMode(config.colorMode)
               << info_bayer(*(config.bayerMethod))
               << info_colorFilter(*(config.colorFilter));
@@ -354,7 +354,7 @@ DC1394::createColorConverter(const scene::DC1394& config)
     }
     catch (invalid_argument& e)
     {
-      throw e << info_cameraUid(config.silvverUid)
+      throw e << info_cameraUid(config.hardCameraUid)
               << info_colorMode(config.colorMode);
     }
   }

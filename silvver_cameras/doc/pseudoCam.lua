@@ -25,7 +25,7 @@ scene = {
             -- where you are when executing silvver_cameras
             images_path = output2table('ls -d artkpImgs/*.png'),
 
-            silvver_uid = 1,
+            hardcamera_uid = 1,
 
             resolution = {640, 480},
             frame_rate = 30,

@@ -49,9 +49,8 @@ public:
 
   void getUnwarpedFrame(Frame& image);
 
-  /// A uid to differentiate this camera, e.g.: when saving images or
-  /// in title of window where showing the captured images.
-  const unsigned silvverUid;
+  /// A uid to differentiate this hardCamera on Silvver system.
+  const unsigned hardCameraUid;
 
 protected:
   HardCamera(const scene::Hardware& config, int iplDepth);
@@ -71,7 +70,7 @@ private:
 
 private:
   static boost::format createFormat(const std::string& strFormat,
-                                    const unsigned silvverUid);
+                                    const unsigned hardCameraUid);
 
   unsigned getBitsPerPixel(int iplDepth) const;
 

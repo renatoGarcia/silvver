@@ -29,7 +29,7 @@ namespace bfs = boost::filesystem;
 extern globalOptions::Options global_options;
 
 HardCamera::HardCamera(const scene::Hardware& config, int iplDepth)
-  :silvverUid(config.silvverUid)
+  :hardCameraUid(config.hardCameraUid)
   ,framePixels(config.resolution.at(0) * config.resolution.at(1))
   ,frameSize(cvSize(config.resolution.at(0), config.resolution.at(1)))
   ,iplDepth(iplDepth)
@@ -40,13 +40,13 @@ HardCamera::HardCamera(const scene::Hardware& config, int iplDepth)
   ,mapx(this->frameSize, IPL_DEPTH_32F, 1)
   ,mapy(this->frameSize, IPL_DEPTH_32F, 1)
   ,showImages(global_options.showImages)
-  ,windowName("Camera_" + config.silvverUid)
+  ,windowName("Camera_" + config.hardCameraUid)
   ,saveWarpedImages(global_options.saveWarpedImages &&
                     !config.saveImageFormat.empty())
   ,saveUnwarpedImages(global_options.saveUnwarpedImages &&
                       !config.saveImageFormat.empty())
   ,saveImageFormat(HardCamera::createFormat(config.saveImageFormat,
-                                            config.silvverUid))
+                                            config.hardCameraUid))
   ,imagesCounter(0)
   ,saveTimestamp(global_options.saveTimestamp)
   ,timestampWriter()
@@ -92,7 +92,7 @@ HardCamera::HardCamera(const scene::Hardware& config, int iplDepth)
                                    boost::io::too_many_args_bit);
   if (this->saveUnwarpedImages || this->saveWarpedImages)
   {
-    this->saveImageFormat % this->silvverUid % this->imagesCounter
+    this->saveImageFormat % this->hardCameraUid % this->imagesCounter
                           % "u";
     // Create directory where images will be saved if it don't exists yet.
     bfs::path path(this->saveImageFormat.str());
@@ -109,7 +109,7 @@ HardCamera::~HardCamera()
   }
   if (this->saveTimestamp)
   {
-    this->saveImageFormat % this->silvverUid % this->imagesCounter
+    this->saveImageFormat % this->hardCameraUid % this->imagesCounter
                           % "u";
     bfs::path path(this->saveImageFormat.str());
     this->timestampWriter.save(path.parent_path().string() + "/timestamps");
@@ -118,7 +118,7 @@ HardCamera::~HardCamera()
 
 boost::format
 HardCamera::createFormat(const std::string& strFormat,
-                         const unsigned silvverUid)
+                         const unsigned hardCameraUid)
 {
   try
   {
@@ -129,7 +129,7 @@ HardCamera::createFormat(const std::string& strFormat,
     throw camera_parameter_error()
       << info_what("Syntax error on save image format string. Consult the "
                    "boost format library documentation.")
-      << info_cameraUid(silvverUid);
+      << info_cameraUid(hardCameraUid);
   }
 }
 
@@ -153,7 +153,7 @@ HardCamera::updateCurrentFrame(Frame& frame)
 
   if (this->saveWarpedImages)
   {
-    this->saveImageFormat % this->silvverUid % this->imagesCounter
+    this->saveImageFormat % this->hardCameraUid % this->imagesCounter
                           % "w";
     cvSaveImage(this->saveImageFormat.str().c_str(),
                 this->warpedFrame->image);
@@ -167,7 +167,7 @@ HardCamera::updateCurrentFrame(Frame& frame)
 
   if (this->saveUnwarpedImages)
   {
-    this->saveImageFormat % this->silvverUid % this->imagesCounter
+    this->saveImageFormat % this->hardCameraUid % this->imagesCounter
                           % "u";
     cvSaveImage(this->saveImageFormat.str().c_str(),
                 this->unwarpedFrame->image);

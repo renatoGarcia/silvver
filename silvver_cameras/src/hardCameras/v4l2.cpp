@@ -76,7 +76,7 @@ V4L2::V4L2(const scene::V4l2& config)
   {
     throw open_camera_error()
       << info_what("Device not compatible with v4l2 especification")
-      << info_cameraUid(this->silvverUid);
+      << info_cameraUid(this->hardCameraUid);
   }
 
   // Check if the device is a video capture with streaming capability.
@@ -85,7 +85,7 @@ V4L2::V4L2(const scene::V4l2& config)
   {
     throw open_camera_error()
       << info_what("Device is not a video capture with streaming capabilities")
-      << info_cameraUid(this->silvverUid);
+      << info_cameraUid(this->hardCameraUid);
   }
 
   try
@@ -95,7 +95,7 @@ V4L2::V4L2(const scene::V4l2& config)
   }
   catch (camera_parameter_error& e)
   {
-    throw e << info_cameraUid(this->silvverUid);
+    throw e << info_cameraUid(this->hardCameraUid);
   }
 
   struct v4l2_requestbuffers requestbuffers;
@@ -106,13 +106,13 @@ V4L2::V4L2(const scene::V4l2& config)
   {
     throw open_camera_error()
       << info_what("Could not request buffers")
-      << info_cameraUid(this->silvverUid);
+      << info_cameraUid(this->hardCameraUid);
   }
   if (requestbuffers.count != (uint)V4L2::N_BUFFERS)
   {
     throw open_camera_error()
       << info_what("Could not request all buffers")
-      << info_cameraUid(this->silvverUid);
+      << info_cameraUid(this->hardCameraUid);
   }
 
   for (int i = 0; i < V4L2::N_BUFFERS; i++)
@@ -128,7 +128,7 @@ V4L2::V4L2(const scene::V4l2& config)
     {
       throw open_camera_error()
         << info_what("Coud not query the status of a buffer")
-        << info_cameraUid(this->silvverUid);
+        << info_cameraUid(this->hardCameraUid);
     }
 
     this->buffers[i].length = buffer.length;
@@ -141,7 +141,7 @@ V4L2::V4L2(const scene::V4l2& config)
     {
       throw open_camera_error()
         << info_what("Coud not map the memory of buffer")
-        << info_cameraUid(this->silvverUid);
+        << info_cameraUid(this->hardCameraUid);
     }
   }
 
@@ -158,7 +158,7 @@ V4L2::V4L2(const scene::V4l2& config)
     {
       throw open_camera_error()
         << info_what("Coud not enqueue a buffer")
-        << info_cameraUid(this->silvverUid);
+        << info_cameraUid(this->hardCameraUid);
     }
   }
 
@@ -167,7 +167,7 @@ V4L2::V4L2(const scene::V4l2& config)
   {
     throw open_camera_error()
       << info_what("Failed when starting streaming")
-      << info_cameraUid(this->silvverUid);
+      << info_cameraUid(this->hardCameraUid);
   }
 
   this->grabFrameThread.reset(new boost::thread(&V4L2::doWork, this));
@@ -218,7 +218,7 @@ V4L2::findDevice() const
   // If here, didn't found camera devide
   throw open_camera_error()
     << info_what("Didn't found the path to camera device")
-    << info_cameraUid(this->silvverUid);
+    << info_cameraUid(this->hardCameraUid);
 }
 
 ColorConverter

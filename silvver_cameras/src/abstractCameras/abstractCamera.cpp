@@ -31,7 +31,7 @@ AbstractCamera::AbstractCamera(const scene::Camera& cameraConfig,
                                const procOpt::AnyProcOpt& processorOptions)
   :subjectHardCamera(HardCameraFactory::create(cameraConfig.hardware))
   ,currentFrame()
-  ,abstractCameraUid(silvverUid, subjectHardCamera->silvverUid)
+  ,abstractCameraUid(silvverUid, subjectHardCamera->hardCameraUid)
   ,serverChannel(AbstractCamera::createChannel(global_options.receptionistEp))
   ,unreadImage(false)
   ,unreadImageAccess()

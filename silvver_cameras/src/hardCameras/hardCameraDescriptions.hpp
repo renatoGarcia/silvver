@@ -35,8 +35,8 @@ namespace scene
   struct Hardware
   {
     /// An unique identifier which differentiate this hardCamera from
-    /// others hardCameras.
-    unsigned silvverUid;
+    /// others hardCameras. This uniqueness must be system wide.
+    unsigned hardCameraUid;
 
     /// String configuring the name of saved images. This string can have
     /// the placeholders %1%, %2% and %3%; where %1% is the camera identifier,

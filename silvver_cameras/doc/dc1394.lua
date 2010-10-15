@@ -9,7 +9,7 @@ scene = {
     cameras = {
 
         Dc1394{
-            silvver_uid = 1,
+            hardcamera_uid = 1,
 
             uid = dragonfly2uid(5110432),
 

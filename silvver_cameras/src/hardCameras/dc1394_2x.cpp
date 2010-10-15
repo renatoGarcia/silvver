@@ -45,7 +45,7 @@ DC1394::DC1394(const scene::DC1394& config)
   {
     throw open_camera_error()
       << info_what("Unable to create a libdc1394 context")
-      << info_cameraUid(this->silvverUid);
+      << info_cameraUid(this->hardCameraUid);
   }
 
   this->camera = dc1394_camera_new(this->context,
@@ -54,21 +54,21 @@ DC1394::DC1394(const scene::DC1394& config)
   {
     throw open_camera_error()
       << info_what("Don't found specified camera")
-      << info_cameraUid(this->silvverUid);
+      << info_cameraUid(this->hardCameraUid);
   }
 
   if (dc1394_video_set_iso_speed(this->camera, DC1394_ISO_SPEED_400))
   {
     throw open_camera_error()
       << info_what("Could not set 400Mbps iso speed")
-      << info_cameraUid(this->silvverUid);
+      << info_cameraUid(this->hardCameraUid);
   }
 
   if (dc1394_video_set_mode(camera, this->videoMode))
   {
     throw open_camera_error()
       << info_what("Could not set video mode")
-      << info_cameraUid(this->silvverUid);
+      << info_cameraUid(this->hardCameraUid);
   }
 
   if (dc1394_video_set_framerate(camera,
@@ -76,7 +76,7 @@ DC1394::DC1394(const scene::DC1394& config)
   {
     throw open_camera_error()
       << info_what("Could not set framerate")
-      << info_cameraUid(this->silvverUid);
+      << info_cameraUid(this->hardCameraUid);
   }
 
   if (dc1394_capture_setup(this->camera, DC1394::N_BUFFERS,
@@ -84,7 +84,7 @@ DC1394::DC1394(const scene::DC1394& config)
   {
     throw open_camera_error()
       << info_what("Could not setup camera. Make sure that the resolution and framerate are supported by your camera")
-      << info_cameraUid(this->silvverUid);
+      << info_cameraUid(this->hardCameraUid);
   }
 
   try
@@ -93,14 +93,14 @@ DC1394::DC1394(const scene::DC1394& config)
   }
   catch(silvver_cameras_exception& e)
   {
-    throw e << info_cameraUid(this->silvverUid);
+    throw e << info_cameraUid(this->hardCameraUid);
   }
 
   if (dc1394_video_set_transmission(this->camera, DC1394_ON))
   {
     throw open_camera_error()
       << info_what("Could not start camera iso transmission")
-      << info_cameraUid(this->silvverUid);
+      << info_cameraUid(this->hardCameraUid);
   }
   this->grabFrameThread.reset(new boost::thread(&DC1394::doWork, this));
 }
@@ -180,7 +180,7 @@ DC1394::getDc1394VideoMode(const scene::DC1394& config)
   {
     throw open_camera_error()
       << info_what("Could not set resolution and color mode together")
-      << info_cameraUid(config.silvverUid)
+      << info_cameraUid(config.hardCameraUid)
       << info_resolution(config.resolution)
       << info_colorMode(config.colorMode);
   }
@@ -306,7 +306,7 @@ DC1394::createColorConverter(const scene::DC1394& config)
     }
     catch (invalid_argument& e)
     {
-      throw e << info_cameraUid(config.silvverUid)
+      throw e << info_cameraUid(config.hardCameraUid)
               << info_colorMode(config.colorMode)
               << info_bayer(*(config.bayerMethod))
               << info_colorFilter(*(config.colorFilter));
@@ -321,7 +321,7 @@ DC1394::createColorConverter(const scene::DC1394& config)
     }
     catch (invalid_argument& e)
     {
-      throw e << info_cameraUid(config.silvverUid)
+      throw e << info_cameraUid(config.hardCameraUid)
               << info_colorMode(config.colorMode);
     }
   }

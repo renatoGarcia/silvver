@@ -12,6 +12,7 @@
 -- You should have received a copy of the GNU General Public License
 -- along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+-- Convert a string to an array of characters
 function explode_string(str)
    char_array = {}
    for i = 1,string.len(str) do
@@ -21,6 +22,8 @@ function explode_string(str)
    return char_array
 end
 
+-- Sum two numeric strings as if they was numbers.
+-- Return the sum as string.
 function string_num_sum(term_a, term_b)
    term_a = explode_string(term_a)
    term_b = explode_string(term_b)

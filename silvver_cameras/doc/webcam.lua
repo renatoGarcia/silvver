@@ -9,7 +9,7 @@ scene = {
     cameras = {
 
         V4l2{
-            silvver_uid = 1,
+            hardcamera_uid = 1,
 
             uid = 0,
             focal_length = {531.206054688, 531.451049805},

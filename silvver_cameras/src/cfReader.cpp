@@ -80,7 +80,7 @@ CfReader::readCamera()
 void
 CfReader::readHardware(scene::Hardware& hardware)
 {
-  luaParser.readValue(hardware.silvverUid, "silvver_uid");
+  luaParser.readValue(hardware.hardCameraUid, "hardcamera_uid");
   luaParser.readValue(hardware.saveImageFormat, "save_image_format");
   luaParser.readValue(hardware.resolution, "resolution");
 

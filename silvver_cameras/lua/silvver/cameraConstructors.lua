@@ -20,22 +20,10 @@ function __getOptional(value, default)
     end
 end
 
-do
-    local automaticUid = 0
-    function __getOptionalUid(value)
-        if value then
-            return value
-        else
-            automaticUid = automaticUid + 1
-            return '_silvverInternal_camera' .. automaticUid
-        end
-    end
-end
-
 function PseudoCamera(parameters)
     camera = {}
     camera.__driver = 'pseudocamera'
-    camera.silvver_uid = __getOptionalUid(parameters.silvver_uid)
+    camera.hardcamera_uid = parameters.hardcamera_uid
 
     camera.save_image_format = __getOptional(parameters.save_image_format,
                                              os.date("%Y%m%d%H%M%S")..'/%1%_%|2$08|_%3%.png')
@@ -62,7 +50,7 @@ end
 function Dc1394(parameters)
     camera = {}
     camera.__driver = 'dc1394'
-    camera.silvver_uid = __getOptionalUid(parameters.silvver_uid)
+    camera.hardcamera_uid = parameters.hardcamera_uid
 
     camera.save_image_format = __getOptional(parameters.save_image_format,
                                              os.date("%Y%m%d%H%M%S")..'/%1%_%|2$08|_%3%.png')
@@ -132,7 +120,7 @@ function V4l2(parameters)
 
     camera.save_image_format = __getOptional(parameters.save_image_format,
                                              os.date("%Y%m%d%H%M%S")..'/%1%_%|2$08|_%3%.png')
-    camera.silvver_uid = __getOptionalUid(parameters.silvver_uid)
+    camera.hardcamera_uid = parameters.hardcamera_uid
     camera.uid = parameters.uid
 
     camera.focal_length = parameters.focal_length
@@ -177,7 +165,7 @@ end
 function Dragonfly(parameters)
     camera = {}
     camera.__driver = 'dc1394'
-    camera.silvver_uid = __getOptionalUid(parameters.silvver_uid)
+    camera.hardcamera_uid = parameters.hardcamera_uid
 
     camera.save_image_format = __getOptional(parameters.save_image_format,
                                              os.date("%Y%m%d%H%M%S")..'/%1%_%|2$08|_%3%.png')
