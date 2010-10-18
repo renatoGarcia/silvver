@@ -78,8 +78,7 @@ namespace scene
     float frameRate;
 
     /// The color mode of the camera.
-    /// One of: yuv444, yuv422, yuv411, rgb8, mono8 or mono16. All letters must
-    /// be in lower case.
+    /// One of: yuv411, yuyv, uyvy, rgb8, mono8 or mono16.
     std::string colorMode;
 
     boost::optional<std::string> bayerMethod;
