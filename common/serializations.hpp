@@ -19,7 +19,6 @@
 #include <boost/serialization/array.hpp>
 #include <boost/serialization/base_object.hpp>
 #include <boost/serialization/vector.hpp>
-#include <boost/serialization/split_free.hpp>
 
 #include "silvverTypes.hpp"
 
@@ -71,7 +70,7 @@ template<class Archive, class T>
 void
 serialize(Archive& ar,  silvver::CameraReading<T>& id, const unsigned version)
 {
-  ar & id.camUid;
+  ar & id.uid;
   ar & id.timestamp;
   ar & id.localizations;
 }

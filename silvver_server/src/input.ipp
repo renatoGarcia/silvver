@@ -53,14 +53,14 @@ Input<Type>::handleReceive(connection::error_code ec)
       << ts_output::lock
       << "Received " << this->currentInput.localizations.size()
       << " targets from camera "
-      << this->currentInput.camUid << std::endl
+      << this->currentInput.uid << std::endl
       << ts_output::unlock;
 
     std::vector<boost::shared_ptr<connection::Channel> > vecChannels;
     boost::shared_ptr<connection::Channel> channelPtr;
 
     // Get all camera clients hearing for a given camera.
-    this->clientCameraMap->findOutputs(this->currentInput.camUid,
+    this->clientCameraMap->findOutputs(this->currentInput.uid,
                                      vecChannels);
     BOOST_FOREACH(channelPtr, vecChannels)
     {

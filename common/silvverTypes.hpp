@@ -290,20 +290,20 @@ namespace silvver
   template<class TargetType>
   struct CameraReading
   {
-    AbstractCameraUid camUid;
+    AbstractCameraUid uid;
     uint64_t timestamp;
     std::vector<Identity<TargetType> > localizations;
 
     CameraReading()
-      :camUid()
+      :uid()
       ,timestamp(0)
       ,localizations()
     {}
 
-    CameraReading(const AbstractCameraUid& camUid,
+    CameraReading(const AbstractCameraUid& uid,
                   uint64_t timestamp,
                   const std::vector<Identity<TargetType> >& localizations)
-      :camUid(camUid)
+      :uid(uid)
       ,timestamp(timestamp)
       ,localizations(localizations)
     {}
