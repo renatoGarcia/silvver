@@ -182,7 +182,7 @@ ArtkpCamera::doWork()
                                            transMatrix);
       // }
 
-      pose.uid = silvver::TargetUid(this->abstractCameraUid.targetSystem,
+      pose.uid = silvver::TargetUid(this->abstractCameraUid.targetSet,
                                     this->idMap.at(markerInfo[marker].id));
       pose.x = transMatrix[0][3];
       pose.y = transMatrix[1][3];

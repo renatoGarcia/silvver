@@ -29,7 +29,7 @@ template<class Archive>
 void
 serialize(Archive& ar, silvver::AbstractCameraUid& uid, const unsigned version)
 {
-  ar & uid.targetSystem;
+  ar & uid.targetSet;
   ar & uid.hardCamera;
 }
 
@@ -37,7 +37,7 @@ template<class Archive>
 void
 serialize(Archive& ar, silvver::TargetUid& uid, const unsigned version)
 {
-  ar & uid.targetSystem;
+  ar & uid.targetSet;
   ar & uid.internal;
 }
 

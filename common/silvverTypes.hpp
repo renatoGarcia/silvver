@@ -33,33 +33,32 @@ namespace silvver
 {
   //------------------------------ Silvver UIDs
   struct AbstractCameraUid
-    :private boost::totally_ordered<AbstractCameraUid>
   {
-    unsigned targetSystem;
+    unsigned targetSet;
     unsigned hardCamera;
 
     AbstractCameraUid()
-      :targetSystem(0)
+      :targetSet(0)
       ,hardCamera(0)
     {}
 
-    AbstractCameraUid(const unsigned targetSystem, const unsigned hardCamera)
-      :targetSystem(targetSystem)
+    AbstractCameraUid(const unsigned targetSet, const unsigned hardCamera)
+      :targetSet(targetSet)
       ,hardCamera(hardCamera)
     {}
 
     AbstractCameraUid(const AbstractCameraUid& uid)
-      :targetSystem(uid.targetSystem)
+      :targetSet(uid.targetSet)
       ,hardCamera(uid.hardCamera)
     {}
 
     bool
     operator<(const AbstractCameraUid& uid) const
     {
-      if (this->targetSystem < uid.targetSystem) return true;
-      else if (this->targetSystem > uid.targetSystem) return false;
+      if (this->targetSet < uid.targetSet) return true;
+      else if (this->targetSet > uid.targetSet) return false;
 
-      // If here the two targetSystems are equals
+      // If here the two targetSetUids are equals
       else if (this->hardCamera < uid.hardCamera) return true;
       else if (this->hardCamera > uid.hardCamera) return false;
 
@@ -70,7 +69,7 @@ namespace silvver
     bool
     operator==(const AbstractCameraUid& uid) const
     {
-      return ((this->targetSystem == uid.targetSystem) &&
+      return ((this->targetSet == uid.targetSet) &&
               (this->hardCamera == uid.hardCamera));
     }
   };
@@ -81,38 +80,37 @@ namespace silvver
   operator<<(std::basic_ostream<charT,traits>& strm,
              const AbstractCameraUid& uid)
   {
-    strm << "(" << uid.targetSystem << ", " << uid.hardCamera << ')';
+    strm << "(" << uid.targetSet << ", " << uid.hardCamera << ')';
     return strm;
   }
 
   struct TargetUid
-    :private boost::totally_ordered<TargetUid>
   {
-    unsigned targetSystem;
+    unsigned targetSet;
     unsigned internal;
 
     TargetUid()
-      :targetSystem(0)
+      :targetSet(0)
       ,internal(0)
     {}
 
-    TargetUid(const unsigned targetSystem, const unsigned internal)
-      :targetSystem(targetSystem)
+    TargetUid(const unsigned targetSet, const unsigned internal)
+      :targetSet(targetSet)
       ,internal(internal)
     {}
 
     TargetUid(const TargetUid& uid)
-      :targetSystem(uid.targetSystem)
+      :targetSet(uid.targetSet)
       ,internal(uid.internal)
     {}
 
     bool
     operator<(const TargetUid& uid) const
     {
-      if (this->targetSystem < uid.targetSystem) return true;
-      else if (this->targetSystem > uid.targetSystem) return false;
+      if (this->targetSet < uid.targetSet) return true;
+      else if (this->targetSet > uid.targetSet) return false;
 
-      // If here the two targetSystems are equals
+      // If here the two targetSetUids are equals
       else if (this->internal < uid.internal) return true;
       else if (this->internal > uid.internal) return false;
 
@@ -123,7 +121,7 @@ namespace silvver
     bool
     operator==(const TargetUid& uid) const
     {
-      return ((this->targetSystem == uid.targetSystem) &&
+      return ((this->targetSet == uid.targetSet) &&
               (this->internal == uid.internal));
     }
   };
@@ -134,7 +132,7 @@ namespace silvver
   operator<<(std::basic_ostream<charT,traits>& strm,
              const TargetUid& uid)
   {
-    strm << "(" << uid.targetSystem << ", " << uid.internal << ')';
+    strm << "(" << uid.targetSet << ", " << uid.internal << ')';
     return strm;
   }
 

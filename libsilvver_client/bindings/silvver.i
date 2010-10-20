@@ -39,14 +39,13 @@ namespace boost
 namespace silvver{
 
 struct AbstractCameraUid
-  :private boost::totally_ordered<AbstractCameraUid>
 {
-  unsigned targetSystem;
+  unsigned targetSet;
   unsigned hardCamera;
 
   AbstractCameraUid();
 
-  AbstractCameraUid(const unsigned targetSystem, const unsigned hardCamera);
+  AbstractCameraUid(const unsigned targetSet, const unsigned hardCamera);
 
   AbstractCameraUid(const AbstractCameraUid& uid);
 
@@ -56,14 +55,13 @@ struct AbstractCameraUid
 };
 
 struct TargetUid
-  :private boost::totally_ordered<TargetUid>
 {
-  unsigned targetSystem;
+  unsigned targetSet;
   unsigned internal;
 
   TargetUid();
 
-  TargetUid(const unsigned targetSystem, const unsigned internal);
+  TargetUid(const unsigned targetSet, const unsigned internal);
 
   TargetUid(const TargetUid& uid);
 
@@ -108,12 +106,12 @@ struct Identity
 template<class TargetType>
 struct CameraReading
 {
-  AbstractCameraUid camUid;
+  AbstractCameraUid uid;
   uint64_t timestamp;
   std::vector<Identity<TargetType> > localizations;
 
   CameraReading();
-  CameraReading(const AbstractCameraUid& camUid,
+  CameraReading(const AbstractCameraUid& uid,
                 uint64_t timestamp,
                 std::vector<Identity<TargetType> > localizations);
 };
