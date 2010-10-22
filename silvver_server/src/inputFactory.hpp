@@ -22,26 +22,26 @@
 #include "common/connection/channel.hpp"
 #include "common/processorOptions.hpp"
 #include "common/silvverTypes.hpp"
-#include "inputInterface.hpp"
+#include "inputBase.hpp"
 
 class InputFactory
 {
 public:
   static
-  InputInterface* create(const silvver::TargetSetUid& targetSetUid,
-                         const procOpt::AnyProcOpt& processorOpt,
-                         boost::shared_ptr<connection::Channel> channel);
+  InputBase* create(const silvver::TargetSetUid& targetSetUid,
+                    const procOpt::AnyProcOpt& processorOpt,
+                    boost::shared_ptr<connection::Channel> channel);
 
 private:
   class Visitor
-    :public boost::static_visitor<InputInterface*>
+    :public boost::static_visitor<InputBase*>
   {
   public:
     Visitor(const silvver::TargetSetUid& targetSetUid,
             boost::shared_ptr<connection::Channel> channel);
 
     template <class T>
-    InputInterface* operator()(const T& processorSpec) const;
+    InputBase* operator()(const T& processorSpec) const;
 
   private:
     const silvver::TargetSetUid targetSetUid;

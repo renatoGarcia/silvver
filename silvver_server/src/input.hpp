@@ -21,14 +21,14 @@
 #include "common/connection/channel.hpp"
 #include "common/connection/exceptions.hpp"
 #include "common/silvverTypes.hpp"
-#include "inputInterface.hpp"
+#include "inputBase.hpp"
 #include "outputMultiMap.hpp"
 #include "processor.hpp"
 
 /// Receive data sent by abstractCameras and deliver it to correct processor.
 template <class Type>
 class Input
-  :public InputInterface
+  :public InputBase
 {
 public:
   /** Input class constructor.

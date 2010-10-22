@@ -23,7 +23,7 @@
 #include "markerProcessor.hpp"
 #include "processorFactory.hpp"
 
-InputInterface*
+InputBase*
 InputFactory::create(const silvver::TargetSetUid& targetSetUid,
                      const procOpt::AnyProcOpt& processorOpt,
                      boost::shared_ptr<connection::Channel> channel)
@@ -38,7 +38,7 @@ InputFactory::Visitor::Visitor(const silvver::TargetSetUid& targetSetUid,
 {}
 
 template <class T>
-InputInterface*
+InputBase*
 InputFactory::Visitor::operator()(const T& processorSpec) const
 {
   return new Input<typename T::InputType>

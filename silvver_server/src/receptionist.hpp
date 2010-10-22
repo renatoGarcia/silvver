@@ -28,7 +28,7 @@
 #include "common/connection/tcpIp.hpp"
 #include "common/request.hpp"
 #include "common/silvverTypes.hpp"
-#include "inputInterface.hpp"
+#include "inputBase.hpp"
 #include "outputMultiMap.hpp"
 
 /** Receive and manage the incoming connections demands.
@@ -76,7 +76,7 @@ private:
   boost::shared_ptr<connection::Channel> currentReception;
 
   /// Connected input clients collection
-  std::map<silvver::AbstractCameraUid, boost::shared_ptr<InputInterface> > mapInputs;
+  std::map<silvver::AbstractCameraUid, boost::shared_ptr<InputBase> > mapInputs;
 
   boost::shared_ptr<OutputMultiMap<silvver::TargetUid> > targetOutputs;
 

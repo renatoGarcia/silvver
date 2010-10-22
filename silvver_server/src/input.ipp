@@ -28,7 +28,7 @@
 template <typename Type>
 Input<Type>::Input(boost::shared_ptr<connection::Channel> channel,
                    Processor<Type>* processor)
-  :InputInterface()
+  :InputBase()
   ,currentInput()
   ,channel(channel)
   ,processor(processor)

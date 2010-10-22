@@ -138,7 +138,7 @@ Receptionist::operator()(AddCamera& request)
     << "Add abstractCamera request. Uid: " << request.cameraUid << std::endl
     << ts_output::unlock;
 
-  boost::shared_ptr<InputInterface> input;
+  boost::shared_ptr<InputBase> input;
 
   try
   {
