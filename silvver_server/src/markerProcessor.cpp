@@ -1,4 +1,4 @@
-/* Copyright 2009 Renato Florentino Garcia <fgar.renato@gmail.com>
+/* Copyright 2009-2010 Renato Florentino Garcia <fgar.renato@gmail.com>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3, as
@@ -16,18 +16,20 @@
 #include "markerProcessor.hpp"
 
 #include <boost/foreach.hpp>
-#include "common/serializations.hpp"
 
+#include "common/serializations.hpp"
 #include "processor.ipp"
 
-MarkerProcessor::MarkerProcessor()
-  :Processor<silvver::Pose, silvver::Pose>::Processor()
+MarkerProcessor::MarkerProcessor(const procOpt::Marker& spec)
+  :Processor<silvver::Pose>::Processor(procOpt::AnyProcOpt(spec))
+  ,lastReadings()
+  ,lastReadingsAccess()
 {}
 
 void
 MarkerProcessor::deliverPackage(silvver::CameraReading<silvver::Pose>& reading)
 {
-  boost::mutex::scoped_lock lock(mutexArmazenador);
+  boost::mutex::scoped_lock lock(this->lastReadingsAccess);
   this->lastReadings[reading.uid] = reading;
 
   this->process(reading.localizations);

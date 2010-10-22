@@ -1,4 +1,4 @@
-/* Copyright 2009 Renato Florentino Garcia <fgar.renato@gmail.com>
+/* Copyright 2009-2010 Renato Florentino Garcia <fgar.renato@gmail.com>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3, as
@@ -18,17 +18,18 @@
 
 #include <boost/thread/mutex.hpp>
 #include <map>
-#include <string>
 
+#include "common/processorOptions.hpp"
 #include "common/silvverTypes.hpp"
-#include "common/singleton.hpp"
 #include "processor.hpp"
 
-class MarkerProcessor: public Processor<silvver::Pose, silvver::Pose>,
-                       public Singleton<MarkerProcessor>
-
+class MarkerProcessor
+  :public Processor<silvver::Pose>
 {
 public:
+  MarkerProcessor(const procOpt::Marker& spec);
+
+  virtual
   void deliverPackage(silvver::CameraReading<silvver::Pose>& reading);
 
 private:
@@ -36,17 +37,12 @@ private:
   typedef std::map<silvver::AbstractCameraUid,
                    silvver::CameraReading<silvver::Pose> > TMap;
 
-  friend class Singleton<MarkerProcessor>;
+  void process(std::vector<silvver::Identity<silvver::Pose> >& currentPoses) const;
 
-private:
   /// Hold the last reading of each camera.
   TMap lastReadings;
 
-  MarkerProcessor();
-
-  void process(std::vector<silvver::Identity<silvver::Pose> >& currentPoses) const;
-
-  boost::mutex mutexArmazenador;
+  boost::mutex lastReadingsAccess;
 };
 
 #endif /* _MARKER_PROCESSOR_HPP_ */

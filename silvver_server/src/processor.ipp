@@ -1,4 +1,4 @@
-/* Copyright 2009 Renato Florentino Garcia <fgar.renato@gmail.com>
+/* Copyright 2009-2010 Renato Florentino Garcia <fgar.renato@gmail.com>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3, as
@@ -21,17 +21,26 @@
 #include <boost/foreach.hpp>
 
 #include "common/connection/channel.ipp"
-#include "common/silvverTypes.hpp"
 #include "log.hpp"
 
-template<class Tinput, class Toutput>
-Processor<Tinput,Toutput>::Processor()
-  :outputMap(OutputMultiMap<silvver::TargetUid>::instantiate())
+template<class Tinput>
+Processor<Tinput>::Processor(const procOpt::AnyProcOpt& spec)
+  :ProcessorBase()
+  ,outputMap(OutputMultiMap<silvver::TargetUid>::instantiate())
+  ,processorSpec(spec)
 {}
 
-template <class Tinput, class Toutput>
+template<class Tinput>
+bool
+Processor<Tinput>::isSameSpec(const procOpt::AnyProcOpt& spec)
+{
+  return this->processorSpec == spec;
+}
+
+template <class Tinput>
+template <class Toutput>
 void
-Processor<Tinput,Toutput>::sendToOutputs
+Processor<Tinput>::sendToOutputs
          (const std::vector<silvver::Identity<Toutput> >& localizations) const
 {
   std::vector<ChannelPointer> vecChannels;

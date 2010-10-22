@@ -16,12 +16,22 @@
 #ifndef _PROCESSOR_OPTIONS_HPP_
 #define _PROCESSOR_OPTIONS_HPP_
 
-#include <boost/variant.hpp>
+#include <boost/variant/variant.hpp>
+
+#include "silvverTypes.hpp"
 
 namespace procOpt
 {
   struct Marker
   {
+    typedef silvver::Pose InputType;
+
+    bool operator==(const Marker&) const
+    {
+      // There is no attributes, then objects will be ever equal.
+      return true;
+    }
+
     template<class Archive>
     void
     serialize(Archive & ar, const unsigned int version)

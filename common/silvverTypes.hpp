@@ -32,9 +32,11 @@
 namespace silvver
 {
   //------------------------------ Silvver UIDs
+  typedef unsigned TargetSetUid;
+
   struct AbstractCameraUid
   {
-    unsigned targetSet;
+    TargetSetUid targetSet;
     unsigned hardCamera;
 
     AbstractCameraUid()
@@ -42,7 +44,7 @@ namespace silvver
       ,hardCamera(0)
     {}
 
-    AbstractCameraUid(const unsigned targetSet, const unsigned hardCamera)
+    AbstractCameraUid(const TargetSetUid& targetSet, const unsigned hardCamera)
       :targetSet(targetSet)
       ,hardCamera(hardCamera)
     {}
@@ -58,11 +60,11 @@ namespace silvver
       if (this->targetSet < uid.targetSet) return true;
       else if (this->targetSet > uid.targetSet) return false;
 
-      // If here the two targetSetUids are equals
+      // If here, the two targetSetUids are equals
       else if (this->hardCamera < uid.hardCamera) return true;
       else if (this->hardCamera > uid.hardCamera) return false;
 
-      // If here the two AbstractCameraUids are equals
+      // If here, the two AbstractCameraUids are equals
       else return false;
     }
 
@@ -86,7 +88,7 @@ namespace silvver
 
   struct TargetUid
   {
-    unsigned targetSet;
+    TargetSetUid targetSet;
     unsigned internal;
 
     TargetUid()
@@ -94,7 +96,7 @@ namespace silvver
       ,internal(0)
     {}
 
-    TargetUid(const unsigned targetSet, const unsigned internal)
+    TargetUid(const TargetSetUid& targetSet, const unsigned internal)
       :targetSet(targetSet)
       ,internal(internal)
     {}
@@ -110,11 +112,11 @@ namespace silvver
       if (this->targetSet < uid.targetSet) return true;
       else if (this->targetSet > uid.targetSet) return false;
 
-      // If here the two targetSetUids are equals
+      // If here, the two targetSetUids are equals
       else if (this->internal < uid.internal) return true;
       else if (this->internal > uid.internal) return false;
 
-      // If here the two TargetUids are equals
+      // If here, the two TargetUids are equals
       else return false;
     }
 

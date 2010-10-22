@@ -1,4 +1,4 @@
-/* Copyright 2009 Renato Florentino Garcia <fgar.renato@gmail.com>
+/* Copyright 2009-2010 Renato Florentino Garcia <fgar.renato@gmail.com>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3, as
@@ -17,16 +17,15 @@
 #define _INPUT_HPP_
 
 #include <boost/shared_ptr.hpp>
-#include <string>
 
 #include "common/connection/channel.hpp"
 #include "common/connection/exceptions.hpp"
 #include "common/silvverTypes.hpp"
 #include "inputInterface.hpp"
 #include "outputMultiMap.hpp"
-#include "processorInterface.hpp"
+#include "processor.hpp"
 
-/// Receive the data sent by cameras and send it to correct processor class.
+/// Receive data sent by abstractCameras and deliver it to correct processor.
 template <class Type>
 class Input
   :public InputInterface
@@ -35,11 +34,11 @@ public:
   /** Input class constructor.
    *
    * @param channel A shared_ptr to a Channel object already connected
-   *        with a camera.
-   * @param processor A shared_ptr to the correct processor.
+   *        with an abstractCamera.
+   * @param processor A pointer to the correct processor.
    */
   Input(boost::shared_ptr<connection::Channel> channel,
-        boost::shared_ptr<ProcessorInterface<Type> > processor);
+        Processor<Type>* processor);
 
   ~Input();
 
@@ -52,9 +51,9 @@ private:
   /// The connection with the camera.
   boost::shared_ptr<connection::Channel> channel;
 
-  boost::shared_ptr<ProcessorInterface<Type> > processor;
+  Processor<Type>* processor;
 
-  /// Clients hearing for localizations before be processed.
+  /// AbstractCamera Clients hearing for localizations before be processed.
   boost::shared_ptr<OutputMultiMap<silvver::AbstractCameraUid> > clientCameraMap;
 };
 

@@ -21,6 +21,7 @@
 #include "common/connection/acceptor.ipp"
 #include "common/connection/channel.ipp"
 #include "common/serializations.hpp"
+#include "exceptions.hpp"
 #include "inputFactory.hpp"
 #include "log.hpp"
 
@@ -134,17 +135,35 @@ Receptionist::operator()(AddCamera& request)
 {
   message(MessageLogLevel::INFO)
     << ts_output::lock
-    << "Add camera request. Uid: " << request.cameraUid << std::endl
+    << "Add abstractCamera request. Uid: " << request.cameraUid << std::endl
     << ts_output::unlock;
+
+  boost::shared_ptr<InputInterface> input;
+
+  try
+  {
+    input.reset(InputFactory::create(request.cameraUid.targetSet,
+                                     request.processorOpt,
+                                     this->currentReception));
+  }
+  catch (const conflicting_targetsets& e)
+  {
+    message(MessageLogLevel::ERROR)
+      << ts_output::lock
+      << "Trying to add the abstractCamera uid " << request.cameraUid
+      << ", but already exists a processor to targetSet uid "
+      << request.cameraUid.targetSet << " with a different specification."
+      << std::endl
+      << ts_output::unlock;
+
+    return;
+  }
+
+  this->mapInputs.insert(std::make_pair(request.cameraUid, input));
 
   this->currentReception->setCloseHandler(boost::bind(&Receptionist::closeCamera,
                                                       this,
                                                       request.cameraUid));
-
-  boost::shared_ptr<InputInterface> input =
-    InputFactory::createInput(request.processorOpt, this->currentReception);
-
-  this->mapInputs.insert(std::make_pair(request.cameraUid, input));
 }
 
 void

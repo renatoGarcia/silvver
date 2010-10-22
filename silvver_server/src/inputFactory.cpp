@@ -15,31 +15,34 @@
 
 #include "inputFactory.hpp"
 
-#include <boost/variant.hpp>
+#include <boost/variant/apply_visitor.hpp>
 
 #include "common/connection/channel.ipp"
 #include "common/silvverTypes.hpp"
 #include "input.ipp"
-
 #include "markerProcessor.hpp"
+#include "processorFactory.hpp"
 
-boost::shared_ptr<InputInterface>
-InputFactory::createInput(const procOpt::AnyProcOpt& processorOpt,
-                          boost::shared_ptr<connection::Channel> channel)
+InputInterface*
+InputFactory::create(const silvver::TargetSetUid& targetSetUid,
+                     const procOpt::AnyProcOpt& processorOpt,
+                     boost::shared_ptr<connection::Channel> channel)
 {
-  boost::shared_ptr<InputInterface> returnPtr;
+  return boost::apply_visitor(Visitor(targetSetUid, channel), processorOpt);
+}
 
-  if (const procOpt::Marker* const marker =
-      boost::get<procOpt::Marker>(&processorOpt))
-  {
-    returnPtr.reset(new Input<silvver::Pose>
-                    (channel, MarkerProcessor::instantiate()));
-  }
-  else
-  {
-    throw std::invalid_argument("Processor option 'get' not implemented in "
-                                "InputFactory class.");
-  }
+InputFactory::Visitor::Visitor(const silvver::TargetSetUid& targetSetUid,
+                               boost::shared_ptr<connection::Channel> channel)
+  :targetSetUid(targetSetUid)
+  ,channel(channel)
+{}
 
-  return returnPtr;
+template <class T>
+InputInterface*
+InputFactory::Visitor::operator()(const T& processorSpec) const
+{
+  return new Input<typename T::InputType>
+                              (this->channel,
+                               ProcessorFactory::create(this->targetSetUid,
+                                                        processorSpec));
 }

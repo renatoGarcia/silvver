@@ -1,12 +1,14 @@
-SET(silvver_server_SRCS outputMultiMap.cpp
-                        log.cpp
+SET(silvver_server_SRCS exceptions.cpp
                         inputFactory.cpp
-                        ${CMAKE_SOURCE_DIR}/../common/connection/exceptions.cpp
-                        ${CMAKE_SOURCE_DIR}/../common/connection/tcpIp.cpp
-                        ${CMAKE_SOURCE_DIR}/../common/connection/unixSocket.cpp
+                        log.cpp
                         main.cpp
                         markerProcessor.cpp
-                        receptionist.cpp)
+                        outputMultiMap.cpp
+                        processorFactory.cpp
+                        receptionist.cpp
+                        ${CMAKE_SOURCE_DIR}/../common/connection/exceptions.cpp
+                        ${CMAKE_SOURCE_DIR}/../common/connection/tcpIp.cpp
+                        ${CMAKE_SOURCE_DIR}/../common/connection/unixSocket.cpp)
 
 FIND_PACKAGE(Boost REQUIRED program_options serialization system thread)
 INCLUDE_DIRECTORIES(${Boost_INCLUDE_DIR})
