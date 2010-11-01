@@ -1,8 +1,9 @@
 FIND_PACKAGE(Boost REQUIRED serialization system thread)
 INCLUDE_DIRECTORIES(${Boost_INCLUDE_DIRS})
 
-ADD_LIBRARY(silvver_client SHARED target.cpp
-                                  abstractCamera.cpp
+ADD_LIBRARY(silvver_client SHARED abstractCamera.cpp
+                                  target.cpp
+                                  targetSet.cpp
                                   ${CMAKE_SOURCE_DIR}/../common/connection/exceptions.cpp
                                   ${CMAKE_SOURCE_DIR}/../common/connection/tcpIp.cpp
                                   ${CMAKE_SOURCE_DIR}/../common/connection/unixSocket.cpp

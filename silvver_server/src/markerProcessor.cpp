@@ -20,8 +20,9 @@
 #include "common/serializations.hpp"
 #include "processor.ipp"
 
-MarkerProcessor::MarkerProcessor(const procOpt::Marker& spec)
-  :Processor<silvver::Pose>::Processor(procOpt::AnyProcOpt(spec))
+MarkerProcessor::MarkerProcessor(const procOpt::Marker& spec,
+                                 const silvver::TargetSetUid& targetSetUid)
+  :Processor<silvver::Pose>::Processor(procOpt::AnyProcOpt(spec), targetSetUid)
   ,lastReadings()
   ,lastReadingsAccess()
 {}

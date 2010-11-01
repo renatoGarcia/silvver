@@ -1,4 +1,4 @@
-/* Copyright 2009-2010 Renato Florentino Garcia <fgar.renato@gmail.com>
+/* Copyright 2010 Renato Florentino Garcia <fgar.renato@gmail.com>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3, as
@@ -13,13 +13,14 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef _SILVVER_TARGET_HPP_
-#define _SILVVER_TARGET_HPP_
+#ifndef _SILVVER_TARGET_SET_HPP_
+#define _SILVVER_TARGET_SET_HPP_
 
 #include <boost/date_time/posix_time/posix_time.hpp>
 #include <boost/date_time/time_duration.hpp>
 #include <memory>
 #include <string>
+#include <vector>
 
 #include "silvverTypes.hpp"
 #include "exceptions.hpp"
@@ -28,27 +29,27 @@ namespace silvver {
 
 /// Represents a target looked by Silvver.
 template<class T>
-class Target
+class TargetSet
 {
 public:
-  /** Target class constructor.
+  /** TargetSet class constructor.
    * Can throw silvver::connection_error
    *
-   * @param targetUid Target silvver uid.
+   * @param targetSetUid TargetSet uid.
    * @param serverName IP address or hostname of silvver-server.
    * @param receptionistPort Port number of silvver-server receptionist.
    */
-  Target(const TargetUid& targetUid,
-         const std::string& serverName="localhost",
-         const std::string& receptionistPort="12000");
+  TargetSet(const TargetSetUid& targetSetUid,
+            const std::string& serverName="localhost",
+            const std::string& receptionistPort="12000");
 
-  ~Target() throw();
+  ~TargetSet() throw();
 
   /** Get the UID of target.
    *
    * @return The UID of this target.
    */
-  TargetUid getUid();
+  TargetSetUid getUid();
 
   /** Get the last received target localization.
    * Immediately return the last received target, even if it was already
@@ -57,7 +58,7 @@ public:
    *
    * @return The last received target localization.
    */
-  Identity<T> getLast();
+  std::vector<Identity<T> > getLast();
 
   /** Get a never seen taget localization.
    * This method will wait for waitTime until throw a
@@ -68,8 +69,8 @@ public:
    *        default waitTime is infinity.
    * @return The target localization.
    */
-  Identity<T> getUnseen(const boost::posix_time::time_duration&
-                        waitTime = boost::date_time::pos_infin);
+  std::vector<Identity<T> > getUnseen(const boost::posix_time::time_duration&
+                                      waitTime = boost::date_time::pos_infin);
 
   /** Get the next target localization.
    * This method will wait until a new target localization arrives from
@@ -81,8 +82,8 @@ public:
    *        default waitTime is infinity.
    * @return The target localization.
    */
-  Identity<T> getNext(const boost::posix_time::time_duration&
-                      waitTime = boost::date_time::pos_infin);
+  std::vector<Identity<T> > getNext(const boost::posix_time::time_duration&
+                                    waitTime = boost::date_time::pos_infin);
 
 private:
   class CheshireCat;
@@ -91,4 +92,4 @@ private:
 
 } // namespace silvver
 
-#endif /* _SILVVER_TARGET_HPP_ */
+#endif /* _SILVVER_TARGET_SET_HPP_ */

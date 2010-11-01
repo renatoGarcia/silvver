@@ -24,10 +24,13 @@
 #include "log.hpp"
 
 template<class Tinput>
-Processor<Tinput>::Processor(const procOpt::AnyProcOpt& spec)
+Processor<Tinput>::Processor(const procOpt::AnyProcOpt& spec,
+                             const silvver::TargetSetUid& targetSetUid)
   :ProcessorBase()
-  ,outputMap(OutputMultiMap<silvver::TargetUid>::instantiate())
+  ,targetClients(OutputMultiMap<silvver::TargetUid>::instantiate())
+  ,targetSetClients(OutputMultiMap<silvver::TargetSetUid>::instantiate())
   ,processorSpec(spec)
+  ,targetSetUid(targetSetUid)
 {}
 
 template<class Tinput>
@@ -46,6 +49,7 @@ Processor<Tinput>::sendToOutputs
   std::vector<ChannelPointer> vecChannels;
   ChannelPointer channelPtr;
 
+  //------------------ Send localizations to targetClients
   BOOST_FOREACH(silvver::Identity<Toutput> output, localizations)
   {
     targetsLog(TargetsLogLevel::INFO)
@@ -54,12 +58,21 @@ Processor<Tinput>::sendToOutputs
       << ts_output::unlock;
 
     // Get all clients hearing for a given target.
-    this->outputMap->findOutputs(output.uid, vecChannels);
+    this->targetClients->findOutputs(output.uid, vecChannels);
 
     BOOST_FOREACH(channelPtr, vecChannels)
     {
       channelPtr->send(output);
     }
+  }
+
+  //------------------ Send localizations to targetSetClients
+
+  this->targetSetClients->findOutputs(this->targetSetUid, vecChannels);
+
+  BOOST_FOREACH(channelPtr, vecChannels)
+  {
+    channelPtr->send(localizations);
   }
 }
 

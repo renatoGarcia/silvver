@@ -38,14 +38,16 @@ namespace boost
 
 namespace silvver{
 
+typedef unsigned TargetSetUid;
+
 struct AbstractCameraUid
 {
-  unsigned targetSet;
+  TargetSetUid targetSet;
   unsigned hardCamera;
 
   AbstractCameraUid();
 
-  AbstractCameraUid(const unsigned targetSet, const unsigned hardCamera);
+  AbstractCameraUid(const TargetSetUid targetSet, const unsigned hardCamera);
 
   AbstractCameraUid(const AbstractCameraUid& uid);
 
@@ -56,12 +58,12 @@ struct AbstractCameraUid
 
 struct TargetUid
 {
-  unsigned targetSet;
+  TargetSetUid targetSet;
   unsigned internal;
 
   TargetUid();
 
-  TargetUid(const unsigned targetSet, const unsigned internal);
+  TargetUid(const TargetSetUid targetSet, const unsigned internal);
 
   TargetUid(const TargetUid& uid);
 
@@ -156,6 +158,27 @@ public:
 
   CameraReading<T> getNext(const boost::posix_time::time_duration&
                            waitTime = boost::date_time::pos_infin);
+};
+
+template<class T>
+class TargetSet
+{
+public:
+  TargetSet(const TargetSetUid& targetSetUid,
+            const std::string& serverName="localhost",
+            const std::string& receptionistPort="12000");
+
+  ~TargetSet() throw();
+
+  TargetSetUid getUid();
+
+  std::vector<Identity<T> > getLast();
+
+  std::vector<Identity<T> > getUnseen(const boost::posix_time::time_duration&
+                                      waitTime = boost::date_time::pos_infin);
+
+  std::vector<Identity<T> > getNext(const boost::posix_time::time_duration&
+                                    waitTime = boost::date_time::pos_infin);
 };
 
 } //silvver namespace

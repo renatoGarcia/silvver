@@ -73,5 +73,6 @@ OutputMultiMap<KeyType>::findOutputs(KeyType silvverUid,
   }
 }
 
+template class OutputMultiMap<silvver::TargetSetUid>;
 template class OutputMultiMap<silvver::TargetUid>;
 template class OutputMultiMap<silvver::AbstractCameraUid>;

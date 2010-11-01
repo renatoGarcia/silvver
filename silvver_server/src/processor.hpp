@@ -45,7 +45,8 @@ public:
 protected:
   typedef boost::shared_ptr<connection::Channel> ChannelPointer;
 
-  Processor(const procOpt::AnyProcOpt& spec);
+  Processor(const procOpt::AnyProcOpt& spec,
+            const silvver::TargetSetUid& targetSetUid);
 
   /** Send the final localizations to clients hearing for it.
    *
@@ -55,9 +56,13 @@ protected:
                      localizations) const;
 
 private:
-  boost::shared_ptr<OutputMultiMap<silvver::TargetUid> > outputMap;
+  boost::shared_ptr<OutputMultiMap<silvver::TargetUid> > targetClients;
+
+  boost::shared_ptr<OutputMultiMap<silvver::TargetSetUid> > targetSetClients;
 
   const procOpt::AnyProcOpt processorSpec;
+
+  const silvver::TargetSetUid targetSetUid;
 };
 
 #endif /* _PROCESSOR_HPP_ */

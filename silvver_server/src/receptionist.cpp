@@ -35,6 +35,7 @@ Receptionist::Receptionist(unsigned localPort)
   ,mapInputs()
   ,targetOutputs(OutputMultiMap<silvver::TargetUid>::instantiate())
   ,cameraOutputs(OutputMultiMap<silvver::AbstractCameraUid>::instantiate())
+  ,targetSetClients(OutputMultiMap<silvver::TargetSetUid>::instantiate())
   ,thReceptionist(static_cast<std::size_t (boost::asio::io_service::*)()>(&boost::asio::io_service::run),
                   &this->ioService)
 {
@@ -128,6 +129,37 @@ Receptionist::closeCameraClient(const silvver::AbstractCameraUid& cameraUid,
     << ts_output::unlock;
 
   this->cameraOutputs->delOutput(cameraUid, channel);
+}
+
+void
+Receptionist::operator()(AddTargetSetClient& request)
+{
+  message(MessageLogLevel::INFO)
+    << ts_output::lock
+    << "Add targetSet client request. Uid: " << request.targetSetUid
+    << std::endl
+    << ts_output::unlock;
+
+  this->currentReception->setCloseHandler(boost::bind(&Receptionist::closeTargetSetClient,
+                                                      this,
+                                                      request.targetSetUid,
+                                                      this->currentReception));
+
+  this->targetSetClients->addOutput(request.targetSetUid,
+                                    this->currentReception);
+}
+
+void
+Receptionist::closeTargetSetClient(const silvver::TargetSetUid& targetSetUid,
+                                   boost::shared_ptr<connection::Channel> channel)
+{
+  message(MessageLogLevel::INFO)
+    << ts_output::lock
+    << "Closed connection with targetSet client uid: " << targetSetUid
+    << std::endl
+    << ts_output::unlock;
+
+  this->targetSetClients->delOutput(targetSetUid, channel);
 }
 
 void

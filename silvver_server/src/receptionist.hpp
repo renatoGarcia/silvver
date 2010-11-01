@@ -55,6 +55,7 @@ public:
   void operator()(NullRequest& request);
   void operator()(AddTargetClient& request);
   void operator()(AddCameraClient& request);
+  void operator()(AddTargetSetClient& request);
   void operator()(AddCamera& request);
 
 private:
@@ -65,6 +66,9 @@ private:
 
   void closeCameraClient(const silvver::AbstractCameraUid& cameraUid,
                          boost::shared_ptr<connection::Channel> channel);
+
+  void closeTargetSetClient(const silvver::TargetSetUid& targetSetUid,
+                            boost::shared_ptr<connection::Channel> channel);
 
   void closeCamera(const silvver::AbstractCameraUid& cameraUid);
 
@@ -81,6 +85,8 @@ private:
   boost::shared_ptr<OutputMultiMap<silvver::TargetUid> > targetOutputs;
 
   boost::shared_ptr<OutputMultiMap<silvver::AbstractCameraUid> > cameraOutputs;
+
+  boost::shared_ptr<OutputMultiMap<silvver::TargetSetUid> > targetSetClients;
 
   /// Thread where the boost io_service will run
   boost::thread thReceptionist;

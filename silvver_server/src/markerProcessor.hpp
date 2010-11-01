@@ -27,7 +27,8 @@ class MarkerProcessor
   :public Processor<silvver::Pose>
 {
 public:
-  MarkerProcessor(const procOpt::Marker& spec);
+  MarkerProcessor(const procOpt::Marker& spec,
+                  const silvver::TargetSetUid& targetSetUid);
 
   virtual
   void deliverPackage(silvver::CameraReading<silvver::Pose>& reading);

@@ -20,23 +20,17 @@
 
 namespace silvver {
 
-template <class A>
-struct Spec
-{
-  typedef AbstractCameraUid UidType;
-  typedef CameraReading<A> LocalizationType;
-  typedef AddCameraClient RequestType;
-};
-
 template<class T>
 class AbstractCamera<T>::CheshireCat
-  :public GenericClient<Spec<T> >
+  :public GenericClient<AbstractCameraUid, CameraReading<T>, AddCameraClient>
 {
 public:
   CheshireCat(const AbstractCameraUid& uid,
               const std::string& serverName,
               const std::string& receptionistPort)
-    :GenericClient<Spec<T> >(uid, serverName, receptionistPort)
+    :GenericClient<AbstractCameraUid,
+                   CameraReading<T>,
+                   AddCameraClient   >(uid, serverName, receptionistPort)
   {}
 };
 

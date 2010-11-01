@@ -72,6 +72,25 @@ struct AddCameraClient
   }
 };
 
+struct AddTargetSetClient
+{
+  silvver::TargetSetUid targetSetUid;
+
+  AddTargetSetClient()
+    :targetSetUid()
+  {}
+
+  AddTargetSetClient(silvver::TargetSetUid targetSetUid)
+    :targetSetUid(targetSetUid)
+  {}
+
+  template<typename Archive>
+  void serialize(Archive& ar, const unsigned)
+  {
+    ar & targetSetUid;
+  }
+};
+
 struct AddCamera
 {
   procOpt::AnyProcOpt processorOpt;
@@ -99,7 +118,7 @@ struct AddCamera
 typedef boost::variant<NullRequest,
                        AddTargetClient,
                        AddCameraClient,
-                       AddCamera       > Request;
-
+                       AddTargetSetClient,
+                       AddCamera          > Request;
 
 #endif // _REQUEST_HPP_

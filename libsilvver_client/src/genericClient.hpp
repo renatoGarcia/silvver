@@ -29,14 +29,14 @@
 #include "request.hpp"
 #include "serializations.hpp"
 
-template<class Spec>
+template<class UidType, class LocalizationType, class RequestType>
 class GenericClient
 {
 public:
   connection::Channel* constructChannel(const std::string& serverName,
                                         const std::string& receptionistPort);
 
-  GenericClient(const typename Spec::UidType& uid,
+  GenericClient(const UidType& uid,
                 const std::string& serverName,
                 const std::string& receptionistPort);
 
@@ -45,15 +45,15 @@ public:
   // Callback method called when a new localization arrives.
   void handleReceive(connection::error_code ec);
 
-  typename Spec::UidType getUid();
+  UidType getUid();
 
-  typename Spec::LocalizationType getLast();
+  LocalizationType getLast();
 
-  typename Spec::LocalizationType getUnseen(const boost::posix_time::time_duration& waitTime);
+  LocalizationType getUnseen(const boost::posix_time::time_duration& waitTime);
 
-  typename Spec::LocalizationType getNext(const boost::posix_time::time_duration& waitTime);
+  LocalizationType getNext(const boost::posix_time::time_duration& waitTime);
 
-  const typename Spec::UidType uid;
+  const UidType uid;
 
   // Synchronize the access to localization attribute.
   boost::mutex mutexLocalization;
@@ -62,14 +62,14 @@ public:
   boost::condition_variable unseenLocalization;
 
   // Last received localization.
-  typename Spec::LocalizationType localization;
+  LocalizationType localization;
 
   // Signalize a never seen localization.
   bool localizationIsUnseen;
 
   // Will holds a localization until copy it safely to
   // localization attribute.
-  typename Spec::LocalizationType tmpLocalization;
+  LocalizationType tmpLocalization;
 
   boost::asio::io_service ioService;
 
@@ -80,10 +80,11 @@ public:
   boost::scoped_ptr<connection::Channel> serverChannel;
 };
 
-template<class Spec>
+template<class UidType, class LocalizationType, class RequestType>
 connection::Channel*
-GenericClient<Spec>::constructChannel(const std::string& serverName,
-                                      const std::string& receptionistPort)
+GenericClient<UidType, LocalizationType, RequestType>::
+constructChannel(const std::string& serverName,
+                 const std::string& receptionistPort)
 {
   using namespace connection;
 
@@ -104,10 +105,11 @@ GenericClient<Spec>::constructChannel(const std::string& serverName,
   return channel.release();
 }
 
-template<class Spec>
-GenericClient<Spec>::GenericClient(const typename Spec::UidType& uid,
-                                   const std::string& serverName,
-                                   const std::string& receptionistPort)
+template<class UidType, class LocalizationType, class RequestType>
+GenericClient<UidType, LocalizationType, RequestType>::
+GenericClient(const UidType& uid,
+              const std::string& serverName,
+              const std::string& receptionistPort)
   :uid(uid)
   ,mutexLocalization()
   ,unseenLocalization()
@@ -120,54 +122,55 @@ GenericClient<Spec>::GenericClient(const typename Spec::UidType& uid,
                  &this->ioService)
   ,serverChannel(constructChannel(serverName, receptionistPort))
 {
-  Request request = typename Spec::RequestType(this->uid);
+  Request request = RequestType(this->uid);
   this->serverChannel->send(request);
 
   this->serverChannel->asyncReceive(this->tmpLocalization,
-                                    boost::bind(&GenericClient<Spec>::handleReceive,
+                                    boost::bind(&GenericClient<UidType, LocalizationType, RequestType>::handleReceive,
                                                 this, _1));
 }
 
-template<class Spec>
-GenericClient<Spec>::~GenericClient()
+template<class UidType, class LocalizationType, class RequestType>
+GenericClient<UidType, LocalizationType, RequestType>::
+~GenericClient()
 {}
 
-template<class Spec>
+template<class UidType, class LocalizationType, class RequestType>
 void
-GenericClient<Spec>::handleReceive(connection::error_code ec)
+GenericClient<UidType, LocalizationType, RequestType>::
+handleReceive(connection::error_code ec)
 {
   if (ec == connection::error_code::broken_connection)
   {
     return;
   }
 
-  if (this->tmpLocalization.uid == this->uid)
   {
-    {
-      boost::mutex::scoped_lock lock(this->mutexLocalization);
-      this->localization = this->tmpLocalization;
+    boost::mutex::scoped_lock lock(this->mutexLocalization);
+    this->localization = this->tmpLocalization;
 
-      this->localizationIsUnseen = true;
-    }
-
-    this->unseenLocalization.notify_one();
+    this->localizationIsUnseen = true;
   }
 
+  this->unseenLocalization.notify_one();
+
   this->serverChannel->asyncReceive(this->tmpLocalization,
-                                    boost::bind(&GenericClient<Spec>::handleReceive,
+                                    boost::bind(&GenericClient<UidType, LocalizationType, RequestType>::handleReceive,
                                                 this, _1));
 }
 
-template<class Spec>
-typename Spec::UidType
-GenericClient<Spec>::getUid()
+template<class UidType, class LocalizationType, class RequestType>
+UidType
+GenericClient<UidType, LocalizationType, RequestType>::
+getUid()
 {
   return this->uid;
 }
 
-template<class Spec>
-typename Spec::LocalizationType
-GenericClient<Spec>::getLast()
+template<class UidType, class LocalizationType, class RequestType>
+LocalizationType
+GenericClient<UidType, LocalizationType, RequestType>::
+getLast()
 {
   if (!this->serverChannel->isOpen())
   {
@@ -180,9 +183,10 @@ GenericClient<Spec>::getLast()
   return this->localization;
 }
 
-template<class Spec>
-typename Spec::LocalizationType
-GenericClient<Spec>::getUnseen(const boost::posix_time::time_duration& waitTime)
+template<class UidType, class LocalizationType, class RequestType>
+LocalizationType
+GenericClient<UidType, LocalizationType, RequestType>::
+getUnseen(const boost::posix_time::time_duration& waitTime)
 {
   if (!this->serverChannel->isOpen())
   {
@@ -204,9 +208,10 @@ GenericClient<Spec>::getUnseen(const boost::posix_time::time_duration& waitTime)
   return this->localization;
 }
 
-template<class Spec>
-typename Spec::LocalizationType
-GenericClient<Spec>::getNext(const boost::posix_time::time_duration& waitTime)
+template<class UidType, class LocalizationType, class RequestType>
+LocalizationType
+GenericClient<UidType, LocalizationType, RequestType>::
+getNext(const boost::posix_time::time_duration& waitTime)
 {
   if (!this->serverChannel->isOpen())
   {

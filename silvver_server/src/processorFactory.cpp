@@ -29,7 +29,8 @@ ProcessorFactory::create(const silvver::TargetSetUid& targetSetUid,
   // If there aren't a processor to targetSetUid.
   if (it == createdProcessors.end())
   {
-    boost::shared_ptr<ProcessorBase> processorPtr(new MarkerProcessor(spec));
+    boost::shared_ptr<ProcessorBase> processorPtr(new MarkerProcessor(spec,
+                                                                      targetSetUid));
     it = createdProcessors.insert(std::make_pair(targetSetUid, processorPtr)).first;
   }
 

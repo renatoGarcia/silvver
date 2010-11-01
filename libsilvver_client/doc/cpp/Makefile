@@ -1,6 +1,6 @@
 LIB_FLAG = -lsilvver_client -ggdb
 
-OBJECTS = targetPose targetTimedWait abstractCamera
+OBJECTS = targetSetSimple targetPose targetTimedWait abstractCamera
 all: $(OBJECTS)
 
 clean:
