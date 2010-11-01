@@ -14,6 +14,7 @@ TARGET_LINK_LIBRARIES(silvver_client ${Boost_LIBRARIES})
 INSTALL(TARGETS silvver_client
         LIBRARY DESTINATION lib)
 INSTALL(FILES abstractCamera.hpp
+              callbackWrapper.hpp
               exceptions.hpp
               target.hpp
               targetSet.hpp

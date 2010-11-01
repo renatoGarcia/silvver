@@ -32,6 +32,8 @@ template<class T>
 class TargetSet
 {
 public:
+  typedef std::vector<Identity<T> > LocalizationType;
+
   /** TargetSet client class constructor.
    * Can throw silvver::connection_error
    *

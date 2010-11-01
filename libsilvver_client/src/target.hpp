@@ -31,6 +31,8 @@ template<class T>
 class Target
 {
 public:
+  typedef Identity<T> LocalizationType;
+
   /** Target client class constructor.
    * Can throw silvver::connection_error
    *

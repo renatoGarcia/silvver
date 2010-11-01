@@ -1,5 +1,5 @@
-#include <cstdio>
 #include <iostream>
+#include <vector>
 
 #include <silvver/silvverTypes.hpp>
 #include <silvver/abstractCamera.hpp>

@@ -31,6 +31,8 @@ template<class T>
 class AbstractCamera
 {
 public:
+  typedef CameraReading<T> LocalizationType;
+
   /** AbstractCamera client class constructor.
    * Can throw silvver::connection_error
    *
