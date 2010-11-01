@@ -47,7 +47,7 @@ Target<T>::~Target() throw()
 
 template<class T>
 TargetUid
-Target<T>::getUid()
+Target<T>::getUid() const
 {
   return smile->getUid();
 }

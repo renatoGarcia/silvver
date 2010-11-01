@@ -27,15 +27,15 @@
 
 namespace silvver {
 
-/// Represents a target looked by Silvver.
+/// Represents a targetSet observed by Silvver.
 template<class T>
 class TargetSet
 {
 public:
-  /** TargetSet class constructor.
+  /** TargetSet client class constructor.
    * Can throw silvver::connection_error
    *
-   * @param targetSetUid TargetSet uid.
+   * @param targetSetUid TargetSetUid to be observed.
    * @param serverName IP address or hostname of silvver-server.
    * @param receptionistPort Port number of silvver-server receptionist.
    */
@@ -45,42 +45,42 @@ public:
 
   ~TargetSet() throw();
 
-  /** Get the UID of target.
+  /** Get the targetSetUid of observed targetSet.
    *
-   * @return The UID of this target.
+   * @return The targetSetUid.
    */
-  TargetSetUid getUid();
+  TargetSetUid getUid() const;
 
-  /** Get the last received target localization.
-   * Immediately return the last received target, even if it was already
-   * seen. This method can throw silvver::connection_error if the connection
-   * with silvver-server is closed.
+  /** Get the last received localizations of observed targetSet.
+   * Immediately return the last received localizations, even if it was
+   * already seen. This method can throw silvver::connection_error if the
+   * connection with silvver-server is closed.
    *
-   * @return The last received target localization.
+   * @return A std::vector with the last received localizations.
    */
   std::vector<Identity<T> > getLast();
 
-  /** Get a never seen taget localization.
+  /** Get a never seen localizations of observed targetSet.
    * This method will wait for waitTime until throw a
    * silvver::time_expired_error exception. If the connection with
    * silvver-server is closed, it will throw a silvver::connection_error.
    *
    * @param waitTime The time to wait for before throw the exception. The
    *        default waitTime is infinity.
-   * @return The target localization.
+   * @return A std::vector with the localizations.
    */
   std::vector<Identity<T> > getUnseen(const boost::posix_time::time_duration&
                                       waitTime = boost::date_time::pos_infin);
 
-  /** Get the next target localization.
-   * This method will wait until a new target localization arrives from
+  /** Get the next localizations of observed targetSet.
+   * This method will wait until a new set of localizations arrives from
    * silvver-server. If that don't arrives in waitTime a
    * silvver::time_expired_error exception will be threw. If the connection
    * with silvver-server is closed, it will throw a silvver::connection_error.
    *
    * @param waitTime The time to wait for before throw the exception. The
    *        default waitTime is infinity.
-   * @return The target localization.
+   * @return A std::vector with the localizations.
    */
   std::vector<Identity<T> > getNext(const boost::posix_time::time_duration&
                                     waitTime = boost::date_time::pos_infin);

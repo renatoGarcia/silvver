@@ -47,7 +47,7 @@ AbstractCamera<T>::~AbstractCamera() throw()
 
 template<class T>
 AbstractCameraUid
-AbstractCamera<T>::getUid()
+AbstractCamera<T>::getUid() const
 {
   return smile->getUid();
 }

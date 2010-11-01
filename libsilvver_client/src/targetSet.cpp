@@ -47,7 +47,7 @@ TargetSet<T>::~TargetSet() throw()
 
 template<class T>
 TargetSetUid
-TargetSet<T>::getUid()
+TargetSet<T>::getUid() const
 {
   return smile->getUid();
 }

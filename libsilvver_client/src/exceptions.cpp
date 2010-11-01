@@ -13,28 +13,16 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef _SILVVER_EXCEPTIONS_HPP_
-#define _SILVVER_EXCEPTIONS_HPP_
-
-#include <stdexcept>
-#include <string>
+#include "exceptions.hpp"
 
 namespace silvver {
 
-class time_expired_error
-  :public std::runtime_error
-{
-public:
-  time_expired_error(const std::string& whatArg);
-};
+time_expired_error::time_expired_error(const std::string& whatArg)
+  :runtime_error(whatArg)
+{}
 
-class connection_error
-  :public std::runtime_error
-{
-public:
-  connection_error(const std::string& whatArg);
-};
+connection_error::connection_error(const std::string& whatArg)
+  :runtime_error(whatArg)
+{}
 
 }
-
-#endif /* _SILVVER_EXCEPTIONS_HPP_ */

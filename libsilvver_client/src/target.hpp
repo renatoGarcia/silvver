@@ -26,15 +26,15 @@
 
 namespace silvver {
 
-/// Represents a target looked by Silvver.
+/// Represents a target observed by Silvver.
 template<class T>
 class Target
 {
 public:
-  /** Target class constructor.
+  /** Target client class constructor.
    * Can throw silvver::connection_error
    *
-   * @param targetUid Target silvver uid.
+   * @param targetUid TargetUid to be observed.
    * @param serverName IP address or hostname of silvver-server.
    * @param receptionistPort Port number of silvver-server receptionist.
    */
@@ -44,11 +44,11 @@ public:
 
   ~Target() throw();
 
-  /** Get the UID of target.
+  /** Get the targetUid of observed target.
    *
-   * @return The UID of this target.
+   * @return The targetUid.
    */
-  TargetUid getUid();
+  TargetUid getUid() const;
 
   /** Get the last received target localization.
    * Immediately return the last received target, even if it was already

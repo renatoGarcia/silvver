@@ -2,6 +2,7 @@ FIND_PACKAGE(Boost REQUIRED serialization system thread)
 INCLUDE_DIRECTORIES(${Boost_INCLUDE_DIRS})
 
 ADD_LIBRARY(silvver_client SHARED abstractCamera.cpp
+                                  exceptions.cpp
                                   target.cpp
                                   targetSet.cpp
                                   ${CMAKE_SOURCE_DIR}/../common/connection/exceptions.cpp
@@ -12,9 +13,10 @@ TARGET_LINK_LIBRARIES(silvver_client ${Boost_LIBRARIES})
 
 INSTALL(TARGETS silvver_client
         LIBRARY DESTINATION lib)
-INSTALL(FILES target.hpp
-              abstractCamera.hpp
+INSTALL(FILES abstractCamera.hpp
               exceptions.hpp
+              target.hpp
+              targetSet.hpp
               ${CMAKE_SOURCE_DIR}/../common/version.hpp
               ${CMAKE_SOURCE_DIR}/../common/silvverTypes.hpp
               ${CMAKE_SOURCE_DIR}/../common/serializations.hpp

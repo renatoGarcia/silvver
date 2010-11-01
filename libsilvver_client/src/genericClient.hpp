@@ -22,10 +22,11 @@
 #include <boost/thread/mutex.hpp>
 #include <boost/thread/thread.hpp>
 #include <cstdlib>
+#include <string>
 
 #include "connection/channel.ipp"
-#include "connection/unixSocket.hpp"
 #include "connection/tcpIp.hpp"
+#include "connection/unixSocket.hpp"
 #include "request.hpp"
 #include "serializations.hpp"
 
@@ -40,12 +41,12 @@ public:
                 const std::string& serverName,
                 const std::string& receptionistPort);
 
-  ~GenericClient();
+  virtual ~GenericClient();
 
   // Callback method called when a new localization arrives.
   void handleReceive(connection::error_code ec);
 
-  UidType getUid();
+  UidType getUid() const;
 
   LocalizationType getLast();
 
@@ -55,7 +56,7 @@ public:
 
   const UidType uid;
 
-  // Synchronize the access to localization attribute.
+  // Synchronizes the access to localization attribute.
   boost::mutex mutexLocalization;
 
   // Condition of there to be an unseen localization.
@@ -162,7 +163,7 @@ handleReceive(connection::error_code ec)
 template<class UidType, class LocalizationType, class RequestType>
 UidType
 GenericClient<UidType, LocalizationType, RequestType>::
-getUid()
+getUid() const
 {
   return this->uid;
 }

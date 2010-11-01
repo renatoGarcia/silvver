@@ -26,14 +26,15 @@
 
 namespace silvver {
 
+/// Represents an abstractCamera observed by Silvver.
 template<class T>
 class AbstractCamera
 {
 public:
-  /** AbstractCamera class constructor.
+  /** AbstractCamera client class constructor.
    * Can throw silvver::connection_error
    *
-   * @param abstractCameraUid  Silvver UID of abstractCamera to observe.
+   * @param abstractCameraUid  AbstractCameraUid to be observed.
    * @param serverName IP address or hostname of silvver-server.
    * @param receptionistPort Port number of silvver-server receptionist.
    */
@@ -43,11 +44,11 @@ public:
 
   ~AbstractCamera() throw();
 
-  /** Get the UID of observed abstractCamera.
+  /** Get the abstractCameraUid of observed abstractCamera.
    *
-   * @return The UID of abstractCamera.
+   * @return The abstractCameraUid.
    */
-  AbstractCameraUid getUid();
+  AbstractCameraUid getUid() const;
 
   /** Get the last received cameraReading.
    * Immediately return the last received cameraReading, even if it was
@@ -81,7 +82,7 @@ public:
    * @return The cameraReading.
    */
   CameraReading<T> getNext(const boost::posix_time::time_duration&
-                             waitTime = boost::date_time::pos_infin);
+                           waitTime = boost::date_time::pos_infin);
 
 private:
   class CheshireCat;
