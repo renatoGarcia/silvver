@@ -14,7 +14,8 @@ namespace error_code {
 enum ErrorCode
 {
   success = 0,
-  connection_error
+  connection_error,
+  forced_exit
 };
 }
 using error_code::ErrorCode;
@@ -74,6 +75,12 @@ CallbackWrapper<T>::receive()
   {
     this->handler(typename T::LocalizationType(),
                   error_code::connection_error);
+    return;
+  }
+  catch (const forced_exit& e)
+  {
+    this->handler(typename T::LocalizationType(),
+                  error_code::forced_exit);
     return;
   }
 }

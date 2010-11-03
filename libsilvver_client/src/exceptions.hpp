@@ -28,6 +28,13 @@ public:
   time_expired_error(const std::string& whatArg);
 };
 
+class forced_exit
+  :public std::runtime_error
+{
+public:
+  forced_exit(const std::string& whatArg);
+};
+
 class connection_error
   :public std::runtime_error
 {

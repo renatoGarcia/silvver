@@ -54,6 +54,8 @@ public:
 
   LocalizationType getNext(const boost::posix_time::time_duration& waitTime);
 
+  void exitWait();
+
   const UidType uid;
 
   // Synchronizes the access to localization attribute.
@@ -62,10 +64,15 @@ public:
   // Condition of there to be an unseen localization.
   boost::condition_variable unseenLocalization;
 
+  // Signalizes that the wait was interrupted by exitWait method.
+  bool waitInterrupted;
+
+  boost::mutex mutexExitWait;
+
   // Last received localization.
   LocalizationType localization;
 
-  // Signalize a never seen localization.
+  // Signalizes a never seen localization.
   bool localizationIsUnseen;
 
   // Will holds a localization until copy it safely to
@@ -114,6 +121,8 @@ GenericClient(const UidType& uid,
   :uid(uid)
   ,mutexLocalization()
   ,unseenLocalization()
+  ,waitInterrupted(false)
+  ,mutexExitWait()
   ,localization()
   ,localizationIsUnseen(false)
   ,tmpLocalization()
@@ -134,7 +143,11 @@ GenericClient(const UidType& uid,
 template<class UidType, class LocalizationType, class RequestType>
 GenericClient<UidType, LocalizationType, RequestType>::
 ~GenericClient()
-{}
+{
+  this->ioService.stop();
+  this->serviceThread.interrupt();
+  this->serviceThread.join();
+}
 
 template<class UidType, class LocalizationType, class RequestType>
 void
@@ -203,6 +216,12 @@ getUnseen(const boost::posix_time::time_duration& waitTime)
       throw silvver::time_expired_error("The wait time expired without a new "
                                         "pose arrives");
     }
+    if (this->waitInterrupted)
+    {
+      boost::mutex::scoped_lock lock(this->mutexExitWait);
+      this->waitInterrupted = false;
+      throw silvver::forced_exit("GetUnseen interrupted");
+    }
   }
 
   this->localizationIsUnseen = false;
@@ -227,9 +246,25 @@ getNext(const boost::posix_time::time_duration& waitTime)
     throw silvver::time_expired_error("The wait time expired without the next "
                                       "pose arrives");
   }
+  if (this->waitInterrupted)
+  {
+    boost::mutex::scoped_lock lock(this->mutexExitWait);
+    this->waitInterrupted = false;
+    throw silvver::forced_exit("GetNext interrupted");
+  }
 
   this->localizationIsUnseen = false;
   return this->localization;
+}
+
+template<class UidType, class LocalizationType, class RequestType>
+void
+GenericClient<UidType, LocalizationType, RequestType>::
+exitWait()
+{
+  boost::mutex::scoped_lock lock(this->mutexExitWait);
+  this->waitInterrupted = true;
+  this->unseenLocalization.notify_one();
 }
 
 #endif /* _GENERIC_CLIENT_HPP_ */

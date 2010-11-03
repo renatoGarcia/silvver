@@ -21,6 +21,10 @@ time_expired_error::time_expired_error(const std::string& whatArg)
   :runtime_error(whatArg)
 {}
 
+forced_exit::forced_exit(const std::string& whatArg)
+  :runtime_error(whatArg)
+{}
+
 connection_error::connection_error(const std::string& whatArg)
   :runtime_error(whatArg)
 {}

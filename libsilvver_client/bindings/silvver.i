@@ -17,8 +17,9 @@
 
 %header %{
 #include "silvverTypes.hpp"
-#include "target.hpp"
 #include "abstractCamera.hpp"
+#include "target.hpp"
+#include "targetSet.hpp"
 #include <boost/system/system_error.hpp>
 #include <iostream>
 #include <sstream>
@@ -128,7 +129,7 @@ public:
 
   ~Target() throw();
 
-  TargetUid getUid();
+  TargetUid getUid() const;
 
   Identity<T> getLast();
 
@@ -137,6 +138,8 @@ public:
 
   Identity<T> getNext(const boost::posix_time::time_duration&
                       waitTime = boost::date_time::pos_infin);
+
+  void exitWait();
 };
 
 template<class T>
@@ -149,7 +152,7 @@ public:
 
   ~AbstractCamera() throw();
 
-  AbstractCameraUid getUid();
+  AbstractCameraUid getUid() const;
 
   CameraReading<T> getLast();
 
@@ -158,6 +161,8 @@ public:
 
   CameraReading<T> getNext(const boost::posix_time::time_duration&
                            waitTime = boost::date_time::pos_infin);
+
+  void exitWait();
 };
 
 template<class T>
@@ -170,7 +175,7 @@ public:
 
   ~TargetSet() throw();
 
-  TargetSetUid getUid();
+  TargetSetUid getUid() const;
 
   std::vector<Identity<T> > getLast();
 
@@ -179,6 +184,8 @@ public:
 
   std::vector<Identity<T> > getNext(const boost::posix_time::time_duration&
                                     waitTime = boost::date_time::pos_infin);
+
+  void exitWait();
 };
 
 } //silvver namespace

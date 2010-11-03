@@ -73,6 +73,13 @@ Target<T>::getNext(const boost::posix_time::time_duration& waitTime)
   return smile->getNext(waitTime);
 }
 
+template<class T>
+void
+Target<T>::exitWait()
+{
+  smile->exitWait();
+}
+
 // Templates to be compiled in library
 template class Target<Position>;
 template class Target<Pose>;

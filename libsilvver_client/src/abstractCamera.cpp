@@ -73,6 +73,13 @@ AbstractCamera<T>::getNext(const boost::posix_time::time_duration& waitTime)
   return smile->getNext(waitTime);
 }
 
+template<class T>
+void
+AbstractCamera<T>::exitWait()
+{
+  smile->exitWait();
+}
+
 // Templates to be compiled in library
 template class AbstractCamera<Position>;
 template class AbstractCamera<Pose>;

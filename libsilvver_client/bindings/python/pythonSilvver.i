@@ -15,7 +15,37 @@
 
 %pythoncode %{
 TimeExpired = _silvver.TimeExpired
+ForcedExit = _silvver.ForcedExit
 ConnectionError = _silvver.ConnectionError
+
+import thread
+import threading
+import weakref
+
+class CallbackWrapper(object):
+    def __init__(self, client, handler):
+        self._client = client
+        self._handler = handler
+
+        self._receive_ended = threading.Condition()
+        thread.start_new_thread(CallbackWrapper._receive,
+                                (weakref.proxy(self), self._receive_ended))
+
+    def _receive(weak_self, condition):
+        while True:
+            try:
+                weak_self._handler(weak_self._client.getUnseen())
+            except ForcedExit:
+                condition.acquire()
+                condition.notify()
+                condition.release()
+                return
+
+    def __del__(self):
+        self._receive_ended.acquire()
+        self._client.exitWait()
+        self._receive_ended.wait()
+        self._receive_ended.release()
 %}
 
 namespace silvver {
@@ -106,16 +136,22 @@ namespace silvver {
 
 %header %{
 static PyObject* pTimeExpired;
+static PyObject* pForcedExit;
 static PyObject* pConnectionError;
 %}
 
 %init{
 pTimeExpired = PyErr_NewException(const_cast<char*>("_silvver.TimeExpired"),
                                   NULL, NULL);
+pForcedExit = PyErr_NewException(const_cast<char*>("_silvver.ForcedExit"),
+                                 NULL, NULL);
 pConnectionError = PyErr_NewException(const_cast<char*>("_silvver.ConnectionError"),
                                       NULL, NULL);
 PyModule_AddObject(m, "TimeExpired", pTimeExpired);
+PyModule_AddObject(m, "ForcedExit", pForcedExit);
 PyModule_AddObject(m, "ConnectionError", pConnectionError);
+
+PyEval_InitThreads();
 }
 
 %exception {
@@ -131,6 +167,11 @@ PyModule_AddObject(m, "ConnectionError", pConnectionError);
   catch (const silvver::time_expired_error& e)
   {
     PyErr_SetString(pTimeExpired, const_cast<char*>(e.what()));
+    return NULL;
+  }
+  catch (const silvver::forced_exit& e)
+  {
+    PyErr_SetString(pForcedExit, const_cast<char*>(e.what()));
     return NULL;
   }
   catch (const std::out_of_range& e)
@@ -228,29 +269,169 @@ namespace silvver {
   }
 }
 
+%extend AbstractCamera{
+  CameraReading<T> _getUnseen(int days, int seconds, int microseconds)
+  {
+    silvver::CameraReading<T> cr;
+    Py_BEGIN_ALLOW_THREADS
+    try
+    {
+      cr = $self->getUnseen(boost::posix_time::hours(days*24) +
+                            boost::posix_time::seconds(seconds) +
+                            boost::posix_time::microseconds(microseconds));
+    }
+    catch (...)
+    {
+      Py_BLOCK_THREADS
+      throw;
+    }
+    Py_END_ALLOW_THREADS
+    return cr;
+  }
+
+  CameraReading<T> _getUnseen()
+  {
+    silvver::CameraReading<T> cr;
+    Py_BEGIN_ALLOW_THREADS
+    try
+    {
+      cr = $self->getUnseen(boost::date_time::pos_infin);
+    }
+    catch (...)
+    {
+      Py_BLOCK_THREADS
+      throw;
+    }
+    Py_END_ALLOW_THREADS
+    return cr;
+  }
+
+  CameraReading<T> _getNext(int days, int seconds, int microseconds)
+  {
+    silvver::CameraReading<T> cr;
+    Py_BEGIN_ALLOW_THREADS
+    try
+    {
+      cr =  $self->getNext(boost::posix_time::hours(days*24) +
+                           boost::posix_time::seconds(seconds) +
+                           boost::posix_time::microseconds(microseconds));
+    }
+    catch (...)
+    {
+      Py_BLOCK_THREADS
+      throw;
+    }
+    Py_END_ALLOW_THREADS
+    return cr;
+  }
+
+  CameraReading<T> _getNext()
+  {
+    silvver::CameraReading<T> cr;
+    Py_BEGIN_ALLOW_THREADS
+    try
+    {
+      cr = $self->getNext(boost::date_time::pos_infin);
+    }
+    catch (...)
+    {
+      Py_BLOCK_THREADS
+      throw;
+    }
+    Py_END_ALLOW_THREADS
+    return cr;
+  }
+}
+
+%feature("shadow") AbstractCamera::getUnseen %{
+    def getUnseen(self, timedelta='infinity'):
+        if timedelta == 'infinity':
+            return self._getUnseen()
+        else:
+            return self._getUnseen(timedelta.days, timedelta.seconds,
+                                   timedelta.microseconds)
+%}
+
+%feature("shadow") AbstractCamera::getNext %{
+    def getNext(self, timedelta='infinity'):
+        if timedelta == 'infinity':
+            return self._getNext()
+        else:
+            return self._getNext(timedelta.days, timedelta.seconds,
+                                 timedelta.microseconds)
+%}
+
 %extend Target{
   Identity<T> _getUnseen(int days, int seconds, int microseconds)
   {
-    return $self->getUnseen(boost::posix_time::hours(days*24) +
+    silvver::Identity<T> id;
+    Py_BEGIN_ALLOW_THREADS
+    try
+    {
+      id = $self->getUnseen(boost::posix_time::hours(days*24) +
                             boost::posix_time::seconds(seconds) +
                             boost::posix_time::microseconds(microseconds));
+    }
+    catch (...)
+    {
+      Py_BLOCK_THREADS
+      throw;
+    }
+    Py_END_ALLOW_THREADS
+    return id;
   }
 
   Identity<T> _getUnseen()
   {
-    return $self->getUnseen(boost::date_time::pos_infin);
+    silvver::Identity<T> id;
+    Py_BEGIN_ALLOW_THREADS
+    try
+    {
+      id = $self->getUnseen(boost::date_time::pos_infin);
+    }
+    catch (...)
+    {
+      Py_BLOCK_THREADS
+      throw;
+    }
+    Py_END_ALLOW_THREADS
+    return id;
   }
 
   Identity<T> _getNext(int days, int seconds, int microseconds)
   {
-    return $self->getNext(boost::posix_time::hours(days*24) +
+    silvver::Identity<T> id;
+    Py_BEGIN_ALLOW_THREADS
+    try
+    {
+      id = $self->getNext(boost::posix_time::hours(days*24) +
                           boost::posix_time::seconds(seconds) +
                           boost::posix_time::microseconds(microseconds));
+    }
+    catch (...)
+    {
+      Py_BLOCK_THREADS
+      throw;
+    }
+    Py_END_ALLOW_THREADS
+    return id;
   }
 
   Identity<T> _getNext()
   {
-    return $self->getNext(boost::date_time::pos_infin);
+    silvver::Identity<T> id;
+    Py_BEGIN_ALLOW_THREADS
+    try
+    {
+      id = $self->getNext(boost::date_time::pos_infin);
+    }
+    catch (...)
+    {
+      Py_BLOCK_THREADS
+      throw;
+    }
+    Py_END_ALLOW_THREADS
+    return id;
   }
 }
 
@@ -272,17 +453,112 @@ namespace silvver {
                                  timedelta.microseconds)
 %}
 
+%extend TargetSet{
+  std::vector<Identity<T> > _getUnseen(int days, int seconds, int microseconds)
+  {
+    std::vector<silvver::Identity<T> > vecId;
+    Py_BEGIN_ALLOW_THREADS
+    try
+    {
+      vecId = $self->getUnseen(boost::posix_time::hours(days*24) +
+                               boost::posix_time::seconds(seconds) +
+                               boost::posix_time::microseconds(microseconds));
+    }
+    catch (...)
+    {
+      Py_BLOCK_THREADS
+      throw;
+    }
+    Py_END_ALLOW_THREADS
+    return vecId;
+  }
+
+  std::vector<Identity<T> > _getUnseen()
+  {
+    std::vector<silvver::Identity<T> > vecId;
+    Py_BEGIN_ALLOW_THREADS
+    try
+    {
+      vecId = $self->getUnseen(boost::date_time::pos_infin);
+    }
+    catch (...)
+    {
+      Py_BLOCK_THREADS
+      throw;
+    }
+    Py_END_ALLOW_THREADS
+    return vecId;
+  }
+
+  std::vector<Identity<T> > _getNext(int days, int seconds, int microseconds)
+  {
+    std::vector<silvver::Identity<T> > vecId;
+    Py_BEGIN_ALLOW_THREADS
+    try
+    {
+      vecId = $self->getNext(boost::posix_time::hours(days*24) +
+                             boost::posix_time::seconds(seconds) +
+                             boost::posix_time::microseconds(microseconds));
+    }
+    catch (...)
+    {
+      Py_BLOCK_THREADS
+      throw;
+    }
+    Py_END_ALLOW_THREADS
+    return vecId;
+  }
+
+  std::vector<Identity<T> > _getNext()
+  {
+    std::vector<silvver::Identity<T> > vecId;
+    Py_BEGIN_ALLOW_THREADS
+    try
+    {
+      vecId = $self->getNext(boost::date_time::pos_infin);
+    }
+    catch (...)
+    {
+      Py_BLOCK_THREADS
+      throw;
+    }
+    Py_END_ALLOW_THREADS
+    return vecId;
+  }
+}
+
+%feature("shadow") TargetSet::getUnseen %{
+    def getUnseen(self, timedelta='infinity'):
+        if timedelta == 'infinity':
+            return self._getUnseen()
+        else:
+            return self._getUnseen(timedelta.days, timedelta.seconds,
+                                   timedelta.microseconds)
+%}
+
+%feature("shadow") TargetSet::getNext %{
+    def getNext(self, timedelta='infinity'):
+        if timedelta == 'infinity':
+            return self._getNext()
+        else:
+            return self._getNext(timedelta.days, timedelta.seconds,
+                                 timedelta.microseconds)
+%}
+
 %template(Identity_Position) Identity<Position>;
 %template(Identity_Pose) Identity<Pose>;
 
 %template(CameraReading_Position) CameraReading<Position>;
 %template(CameraReading_Pose) CameraReading<Pose>;
 
+%template(AbstractCamera_Position) AbstractCamera<Position>;
+%template(AbstractCamera_Pose) AbstractCamera<Pose>;
+
 %template(Target_Position) Target<Position>;
 %template(Target_Pose) Target<Pose>;
 
-%template(AbstractCamera_Position) AbstractCamera<Position>;
-%template(AbstractCamera_Pose) AbstractCamera<Pose>;
+%template(TargetSet_Position) TargetSet<Position>;
+%template(TargetSet_Pose) TargetSet<Pose>;
 
 } // namespace silvver
 
@@ -291,4 +567,4 @@ namespace std {
 %template(VectorPositionId) vector<silvver::Identity<silvver::Position> >;
 %template(VectorPoseId) vector<silvver::Identity<silvver::Pose> >;
 
-} // namespace std
+ } // namespace std

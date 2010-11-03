@@ -64,7 +64,8 @@ public:
   /** Get a never seen cameraReading.
    * This method will wait for waitTime until throw a
    * silvver::time_expired_error exception. If the connection with
-   * silvver-server is closed, it will throw a silvver::connection_error.
+   * silvver-server is closed, it will throw a silvver::connection_error. If
+   * the exitWait method is called, it will throw a silvver::forced_exit.
    *
    * @param waitTime The time to wait for before throw the exception. The
    *        default waitTime is infinity.
@@ -78,6 +79,7 @@ public:
    * silvver-server. If that don't arrives in waitTime a
    * silvver::time_expired_error exception will be threw. If the connection
    * with silvver-server is closed, it will throw a silvver::connection_error.
+   * If the exitWait method is called, it will throw a silvver::forced_exit.
    *
    * @param waitTime The time to wait for before throw the exception. The
    *        default waitTime is infinity.
@@ -85,6 +87,11 @@ public:
    */
   CameraReading<T> getNext(const boost::posix_time::time_duration&
                            waitTime = boost::date_time::pos_infin);
+
+  /** Immediately exits from a waiting getUnseen or getNext method.
+   * The waiting method will throws a silvver::forced_exit exception.
+   */
+  void exitWait();
 
 private:
   class CheshireCat;
