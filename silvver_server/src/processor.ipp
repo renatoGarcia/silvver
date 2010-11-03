@@ -27,15 +27,15 @@ template<class Tinput>
 Processor<Tinput>::Processor(const procOpt::AnyProcOpt& spec,
                              const silvver::TargetSetUid& targetSetUid)
   :ProcessorBase()
-  ,targetClients(OutputMultiMap<silvver::TargetUid>::instantiate())
-  ,targetSetClients(OutputMultiMap<silvver::TargetSetUid>::instantiate())
+  ,targetClients(ClientMultiMap<silvver::TargetUid>::instantiate())
+  ,targetSetClients(ClientMultiMap<silvver::TargetSetUid>::instantiate())
   ,processorSpec(spec)
   ,targetSetUid(targetSetUid)
 {}
 
 template<class Tinput>
 bool
-Processor<Tinput>::isSameSpec(const procOpt::AnyProcOpt& spec)
+Processor<Tinput>::isSameSpec(const procOpt::AnyProcOpt& spec) const
 {
   return this->processorSpec == spec;
 }
@@ -58,7 +58,7 @@ Processor<Tinput>::sendToOutputs
       << ts_output::unlock;
 
     // Get all clients hearing for a given target.
-    this->targetClients->findOutputs(output.uid, vecChannels);
+    this->targetClients->findClients(output.uid, vecChannels);
 
     BOOST_FOREACH(channelPtr, vecChannels)
     {
@@ -68,7 +68,7 @@ Processor<Tinput>::sendToOutputs
 
   //------------------ Send localizations to targetSetClients
 
-  this->targetSetClients->findOutputs(this->targetSetUid, vecChannels);
+  this->targetSetClients->findClients(this->targetSetUid, vecChannels);
 
   BOOST_FOREACH(channelPtr, vecChannels)
   {

@@ -22,7 +22,7 @@
 #include "common/connection/exceptions.hpp"
 #include "common/silvverTypes.hpp"
 #include "inputBase.hpp"
-#include "outputMultiMap.hpp"
+#include "clientMultiMap.hpp"
 #include "processor.hpp"
 
 /// Receive data sent by abstractCameras and deliver it to correct processor.
@@ -48,13 +48,13 @@ private:
   /// Hold the last input received.
   silvver::CameraReading<Type> currentInput;
 
-  /// The connection with the camera.
+  /// The connection with the abstractCamera.
   boost::shared_ptr<connection::Channel> channel;
 
-  Processor<Type>* processor;
+  Processor<Type>* const processor;
 
   /// AbstractCamera Clients hearing for localizations before be processed.
-  boost::shared_ptr<OutputMultiMap<silvver::AbstractCameraUid> > clientCameraMap;
+  boost::shared_ptr<ClientMultiMap<silvver::AbstractCameraUid> > clientCameraMap;
 };
 
 #endif /* _INPUT_HPP_ */

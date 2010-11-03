@@ -17,13 +17,12 @@
 #define _PROCESSOR_HPP_
 
 #include <boost/shared_ptr.hpp>
-#include <map>
 #include <vector>
 
 #include "common/connection/channel.hpp"
 #include "common/processorOptions.hpp"
 #include "common/silvverTypes.hpp"
-#include "outputMultiMap.hpp"
+#include "clientMultiMap.hpp"
 #include "processorBase.hpp"
 
 /// Abstract base class to the concrete processor classes.
@@ -40,7 +39,7 @@ public:
   void deliverPackage(silvver::CameraReading<Tinput>& reading) = 0;
 
   virtual
-  bool isSameSpec(const procOpt::AnyProcOpt& spec);
+  bool isSameSpec(const procOpt::AnyProcOpt& spec) const;
 
 protected:
   typedef boost::shared_ptr<connection::Channel> ChannelPointer;
@@ -52,13 +51,12 @@ protected:
    *
    * @param localizations A vector with all target localized.  */
   template <class Toutput>
-  void sendToOutputs(const std::vector<silvver::Identity<Toutput> >&
-                     localizations) const;
+  void sendToOutputs(const std::vector<silvver::Identity<Toutput> >& localizations) const;
 
 private:
-  boost::shared_ptr<OutputMultiMap<silvver::TargetUid> > targetClients;
+  boost::shared_ptr<ClientMultiMap<silvver::TargetUid> > targetClients;
 
-  boost::shared_ptr<OutputMultiMap<silvver::TargetSetUid> > targetSetClients;
+  boost::shared_ptr<ClientMultiMap<silvver::TargetSetUid> > targetSetClients;
 
   const procOpt::AnyProcOpt processorSpec;
 

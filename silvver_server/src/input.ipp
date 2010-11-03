@@ -32,7 +32,7 @@ Input<Type>::Input(boost::shared_ptr<connection::Channel> channel,
   ,currentInput()
   ,channel(channel)
   ,processor(processor)
-  ,clientCameraMap(OutputMultiMap<silvver::AbstractCameraUid>::instantiate())
+  ,clientCameraMap(ClientMultiMap<silvver::AbstractCameraUid>::instantiate())
 {
   this->channel->asyncReceive(this->currentInput,
                               boost::bind(&Input<Type>::handleReceive,
@@ -60,7 +60,7 @@ Input<Type>::handleReceive(connection::error_code ec)
     boost::shared_ptr<connection::Channel> channelPtr;
 
     // Get all camera clients hearing for a given camera.
-    this->clientCameraMap->findOutputs(this->currentInput.uid,
+    this->clientCameraMap->findClients(this->currentInput.uid,
                                      vecChannels);
     BOOST_FOREACH(channelPtr, vecChannels)
     {

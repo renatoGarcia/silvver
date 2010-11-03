@@ -18,13 +18,17 @@
 
 #include "common/processorOptions.hpp"
 
-/// Common base to all template classes Processor.
+/** Interface base class to all Processor<> classes.
+ * This is a base class to template classes Procesor<>. Its role is allow to
+ * hold a pointer to all Processor classes together, and without to know the
+ * type used in template.
+ */
 class ProcessorBase
 {
 public:
   // Check if spec is the same of this processor.
   virtual
-  bool isSameSpec(const procOpt::AnyProcOpt& spec) = 0;
+  bool isSameSpec(const procOpt::AnyProcOpt& spec) const = 0;
 };
 
 #endif /* _PROCESSOR_BASE_HPP_ */

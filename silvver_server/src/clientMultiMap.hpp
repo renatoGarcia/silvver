@@ -13,8 +13,8 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef _OUTPUT_MULTIMAP_HPP_
-#define _OUTPUT_MULTIMAP_HPP_
+#ifndef _CLIENT_MULTIMAP_HPP_
+#define _CLIENT_MULTIMAP_HPP_
 
 #include <boost/shared_ptr.hpp>
 #include <boost/thread/shared_mutex.hpp>
@@ -27,39 +27,39 @@
 /** A class to hold the connected outputs.
  * This class wrap the STL multimap for thread safety. */
 template<class KeyType>
-class OutputMultiMap
-  :public Singleton<OutputMultiMap<KeyType> >
+class ClientMultiMap
+  :public Singleton<ClientMultiMap<KeyType> >
 {
 public:
   typedef boost::shared_ptr<connection::Channel> ChannelPointer;
 
-  /** Add a output.
-   * @param silvverUid The silvver uid of target or camera being observed.
-   * @param channel A Channel already made with the output.  */
-  void addOutput(KeyType silvverUid, ChannelPointer channel);
+  /** Adds a client.
+   * @param uid The uid of connected client.
+   * @param channel A Channel already connected with the client.  */
+  void addClient(KeyType uid, ChannelPointer channel);
 
-  /** Delete a output.
-   * @param silvverUid The silvver uid of target or camera being observed.
-   * @param channel A pointer to channel of the output to be deleted. */
-  void delOutput(KeyType silvverUid, ChannelPointer channel);
+  /** Deletes a client.
+   * @param uid The uid of client to be removed.
+   * @param channel A pointer to channel of the client to be removed. */
+  void delClient(KeyType uid, ChannelPointer channel);
 
-  /** Return channels to all outputs which are listening for a given target.
-   * @param silvverUid The silvver uid of target or camera being observed.
-   * @param outputsChannels A vector of shared_prt with Channels to
-   *                           all clients found.  */
-  void findOutputs(KeyType silvverUid,
-                   std::vector<ChannelPointer>& outputsChannels);
+  /** Returns channels to all clients which are listening for a given target.
+   * @param uid The uid of client.
+   * @param clientChannels A vector of shared_prt with Channels to
+            all clients found.
+  */
+  void findClients(KeyType uid, std::vector<ChannelPointer>& clientChannels);
 
 private:
-  friend class Singleton<OutputMultiMap<KeyType> >;
+  friend class Singleton<ClientMultiMap<KeyType> >;
 
   typedef std::multimap<KeyType, ChannelPointer> TMultiMap;
 
-  OutputMultiMap();
+  ClientMultiMap();
 
   boost::shared_mutex accessMap;
 
-  TMultiMap outputs;
+  TMultiMap clients;
 };
 
-#endif /* _OUTPUT_MULTIMAP_HPP_ */
+#endif /* _CLIENT_MULTIMAP_HPP_ */

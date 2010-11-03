@@ -42,7 +42,6 @@ private:
   ProcessorMap createdProcessors;
 
   ProcessorFactory();
-  virtual ~ProcessorFactory();
 };
 
 #endif /* _PROCESSOR_FACTORY_HPP_ */

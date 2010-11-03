@@ -17,9 +17,9 @@
 #define _INPUT_BASE_HPP_
 
 /** Interface base class to all Input<> classes.
- * This is a base class to template class Input<>. Its role is allow hold a
- * pointer to all Input classes together, and without to know the type used in
- * template.
+ * This is a base class to template classes Input<>. Its role is allow to hold
+ * a pointer to all Input classes together, and without to know the type used
+ * in template.
  */
 class InputBase
 {

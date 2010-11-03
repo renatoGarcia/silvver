@@ -17,7 +17,6 @@
 #define _RECEPTIONIST_HPP_
 
 #include <boost/asio/io_service.hpp>
-#include <boost/scoped_ptr.hpp>
 #include <boost/shared_ptr.hpp>
 #include <boost/thread/thread.hpp>
 #include <map>
@@ -29,24 +28,23 @@
 #include "common/request.hpp"
 #include "common/silvverTypes.hpp"
 #include "inputBase.hpp"
-#include "outputMultiMap.hpp"
+#include "clientMultiMap.hpp"
 
-/** Receive and manage the incoming connections demands.
- *
- * \author Renato Florentino Garcia
- */
+/// Receive and manage the incoming connections demands.
 class Receptionist
 {
 public:
   /** Necessary for boost::apply_visitor function to receive a Receptionist
    * object as an argument. With this typedef, the Receptionist class fulfills
-   * the requirements of a "static visitor" boost::variant concept. */
+   * the requirements of a "static visitor" boost::variant concept.
+   */
   typedef void result_type;
 
-public:
   /** The class constructor
+   *
    * @param localPort TCP port where the receptionist will be hearing for
-   *                  incoming connections. */
+   *                  incoming connections.
+   */
   Receptionist(unsigned localPort);
 
   ~Receptionist();
@@ -79,14 +77,14 @@ private:
   // /// Handle the TCP connection with the client being currently managed.
   boost::shared_ptr<connection::Channel> currentReception;
 
-  /// Connected input clients collection
+  /// AbstractCameras Connected.
   std::map<silvver::AbstractCameraUid, boost::shared_ptr<InputBase> > mapInputs;
 
-  boost::shared_ptr<OutputMultiMap<silvver::TargetUid> > targetOutputs;
+  boost::shared_ptr<ClientMultiMap<silvver::TargetUid> > targetClients;
 
-  boost::shared_ptr<OutputMultiMap<silvver::AbstractCameraUid> > cameraOutputs;
+  boost::shared_ptr<ClientMultiMap<silvver::AbstractCameraUid> > abstractCameraClients;
 
-  boost::shared_ptr<OutputMultiMap<silvver::TargetSetUid> > targetSetClients;
+  boost::shared_ptr<ClientMultiMap<silvver::TargetSetUid> > targetSetClients;
 
   /// Thread where the boost io_service will run
   boost::thread thReceptionist;

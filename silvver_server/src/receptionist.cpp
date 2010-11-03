@@ -33,9 +33,9 @@ Receptionist::Receptionist(unsigned localPort)
             bip::tcp::endpoint(bip::tcp::v4(), localPort))
   ,currentReception()
   ,mapInputs()
-  ,targetOutputs(OutputMultiMap<silvver::TargetUid>::instantiate())
-  ,cameraOutputs(OutputMultiMap<silvver::AbstractCameraUid>::instantiate())
-  ,targetSetClients(OutputMultiMap<silvver::TargetSetUid>::instantiate())
+  ,targetClients(ClientMultiMap<silvver::TargetUid>::instantiate())
+  ,abstractCameraClients(ClientMultiMap<silvver::AbstractCameraUid>::instantiate())
+  ,targetSetClients(ClientMultiMap<silvver::TargetSetUid>::instantiate())
   ,thReceptionist(static_cast<std::size_t (boost::asio::io_service::*)()>(&boost::asio::io_service::run),
                   &this->ioService)
 {
@@ -88,7 +88,7 @@ Receptionist::operator()(AddTargetClient& request)
                                                       request.targetUid,
                                                       this->currentReception));
 
-  this->targetOutputs->addOutput(request.targetUid, this->currentReception);
+  this->targetClients->addClient(request.targetUid, this->currentReception);
 }
 
 void
@@ -100,7 +100,7 @@ Receptionist::closeTargetClient(const silvver::TargetUid& targetUid,
     << "Closed connection with target client uid: " << targetUid << std::endl
     << ts_output::unlock;
 
-  this->targetOutputs->delOutput(targetUid, channel);
+  this->targetClients->delClient(targetUid, channel);
 }
 
 void
@@ -116,7 +116,7 @@ Receptionist::operator()(AddCameraClient& request)
                                                       request.cameraUid,
                                                       this->currentReception));
 
-  this->cameraOutputs->addOutput(request.cameraUid, this->currentReception);
+  this->abstractCameraClients->addClient(request.cameraUid, this->currentReception);
 }
 
 void
@@ -128,7 +128,7 @@ Receptionist::closeCameraClient(const silvver::AbstractCameraUid& cameraUid,
     << "Closed connection with camera client uid: " << cameraUid << std::endl
     << ts_output::unlock;
 
-  this->cameraOutputs->delOutput(cameraUid, channel);
+  this->abstractCameraClients->delClient(cameraUid, channel);
 }
 
 void
@@ -145,7 +145,7 @@ Receptionist::operator()(AddTargetSetClient& request)
                                                       request.targetSetUid,
                                                       this->currentReception));
 
-  this->targetSetClients->addOutput(request.targetSetUid,
+  this->targetSetClients->addClient(request.targetSetUid,
                                     this->currentReception);
 }
 
@@ -159,7 +159,7 @@ Receptionist::closeTargetSetClient(const silvver::TargetSetUid& targetSetUid,
     << std::endl
     << ts_output::unlock;
 
-  this->targetSetClients->delOutput(targetSetUid, channel);
+  this->targetSetClients->delClient(targetSetUid, channel);
 }
 
 void

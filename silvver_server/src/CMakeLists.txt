@@ -1,9 +1,9 @@
-SET(silvver_server_SRCS exceptions.cpp
+SET(silvver_server_SRCS clientMultiMap.cpp
+                        exceptions.cpp
                         inputFactory.cpp
                         log.cpp
                         main.cpp
                         markerProcessor.cpp
-                        outputMultiMap.cpp
                         processorFactory.cpp
                         receptionist.cpp
                         ${CMAKE_SOURCE_DIR}/../common/connection/exceptions.cpp

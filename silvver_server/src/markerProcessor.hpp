@@ -18,6 +18,7 @@
 
 #include <boost/thread/mutex.hpp>
 #include <map>
+#include <vector>
 
 #include "common/processorOptions.hpp"
 #include "common/silvverTypes.hpp"
