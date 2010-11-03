@@ -130,10 +130,18 @@ GenericClient(const UidType& uid,
   ,work(ioService)
   ,serviceThread(static_cast<std::size_t (boost::asio::io_service::*)()>(&boost::asio::io_service::run),
                  &this->ioService)
-  ,serverChannel(constructChannel(serverName, receptionistPort))
+  ,serverChannel()
 {
-  Request request = RequestType(this->uid);
-  this->serverChannel->send(request);
+  try
+  {
+    serverChannel.reset(constructChannel(serverName, receptionistPort));
+    Request request = RequestType(this->uid);
+    this->serverChannel->send(request);
+  }
+  catch(const boost::system::system_error& e)
+  {
+    throw silvver::connection_error(e.what());
+  }
 
   this->serverChannel->asyncReceive(this->tmpLocalization,
                                     boost::bind(&GenericClient<UidType, LocalizationType, RequestType>::handleReceive,
