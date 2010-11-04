@@ -28,7 +28,6 @@
 ArtkpCamera::ArtkpCamera(const scene::AnyHardCamera& anyHardCamera,
                          const scene::ArtkpTargets& targets)
   :AbstractCamera(anyHardCamera, targets, procOpt::Marker())
-  ,MountedTarget(targets.bodyTranslation, targets.bodyRotation)
   ,patternWidth(targets.patternWidth)
   ,threshold(targets.threshold)
   ,logger()

@@ -70,6 +70,11 @@ protected:
   template<class TargetType>
   void sendLocalizations(const std::vector<silvver::Identity<TargetType> >& localizations);
 
+  /** Convert the target pose to body pose.
+   * @param pose The pose that will be converted.
+   */
+  void localizeBody(silvver::Pose& pose) const;
+
   /// Tranform a pose in camera coordinates do world coordinates.
   void toWorld(silvver::Pose& pose) const;
 
@@ -103,10 +108,18 @@ private:
   boost::condition_variable unreadImageCondition;
 
   /// Rotation matrix of camera in world coordinates.
-  const boost::array<double, 9> rot;
+  const boost::array<double, 9> hardCameraRotation;
 
   /// Translation vector of camera in world coordinates.
-  const boost::array<double, 3> trans;
+  const boost::array<double, 3> hardCameraTranslation;
+
+  /// Translation of body center in target coordinate system (Tbt). The order
+  /// is [x,y,z]
+  const boost::array<double,3> bodyTranslation;
+
+  /// Rotation matrix of body in target coordinate system (Rbt). The order of
+  /// items is: r11, r12, r13, r21, r22, r23, r31, r32, r33
+  const boost::array<double,9> bodyRotation;
 };
 
 template<class TargetType>

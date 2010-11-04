@@ -23,12 +23,10 @@
 #include <butterfly.h>
 
 #include "abstractCamera.hpp"
-#include "mountedTarget.hpp"
 #include "targetDescriptions.hpp"
 
 class ButterflyCamera
   :public AbstractCamera
-  ,private MountedTarget
 {
 public:
   ButterflyCamera(const scene::AnyHardCamera& anyHardCamera,

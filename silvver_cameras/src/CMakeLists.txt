@@ -15,7 +15,6 @@ SET(SUPPORTED_TARGETS "")
 
 SET(silvver_cameras_SRCS abstractCameraFactory.cpp
                          abstractCameras/abstractCamera.cpp
-                         abstractCameras/mountedTarget.cpp
                          ${CMAKE_SOURCE_DIR}/../common/connection/exceptions.cpp
                          ${CMAKE_SOURCE_DIR}/../common/connection/tcpIp.cpp
                          ${CMAKE_SOURCE_DIR}/../common/connection/unixSocket.cpp

@@ -36,8 +36,10 @@ AbstractCamera::AbstractCamera(const scene::AnyHardCamera& anyHardCamera,
   ,unreadImage(false)
   ,unreadImageAccess()
   ,unreadImageCondition()
-  ,rot(AbstractCamera::getRotationMatrix(anyHardCamera))
-  ,trans(AbstractCamera::getTranslationVector(anyHardCamera))
+  ,hardCameraRotation(AbstractCamera::getRotationMatrix(anyHardCamera))
+  ,hardCameraTranslation(AbstractCamera::getTranslationVector(anyHardCamera))
+  ,bodyTranslation(targetSet.bodyTranslation)
+  ,bodyRotation(targetSet.bodyRotation)
 {
   this->serverChannel->connect<connection::TcpIp>(global_options.receptionistEp);
   Request request = AddCamera(processorOptions, this->abstractCameraUid);
@@ -75,61 +77,124 @@ AbstractCamera::updateFrame()
 }
 
 void
+AbstractCamera::localizeBody(silvver::Pose& pose) const
+{
+  silvver::Pose tempPose(pose);
+
+  //------------------------------- Rbc = Rtc x Rbt
+  // Rotation of body in camera coordinates is Rotation of target in camera
+  // coordinates vec rotation of body in target coordinates
+  pose.rotationMatrix[0] =
+    tempPose.rotationMatrix[0] * this->bodyRotation[0] +
+    tempPose.rotationMatrix[1] * this->bodyRotation[3] +
+    tempPose.rotationMatrix[2] * this->bodyRotation[6];
+  pose.rotationMatrix[1] =
+    tempPose.rotationMatrix[0] * this->bodyRotation[1] +
+    tempPose.rotationMatrix[1] * this->bodyRotation[4] +
+    tempPose.rotationMatrix[2] * this->bodyRotation[7];
+  pose.rotationMatrix[2] =
+    tempPose.rotationMatrix[0] * this->bodyRotation[2] +
+    tempPose.rotationMatrix[1] * this->bodyRotation[5] +
+    tempPose.rotationMatrix[2] * this->bodyRotation[8];
+  pose.rotationMatrix[3] =
+    tempPose.rotationMatrix[3] * this->bodyRotation[0] +
+    tempPose.rotationMatrix[4] * this->bodyRotation[3] +
+    tempPose.rotationMatrix[5] * this->bodyRotation[6];
+  pose.rotationMatrix[4] =
+    tempPose.rotationMatrix[3] * this->bodyRotation[1] +
+    tempPose.rotationMatrix[4] * this->bodyRotation[4] +
+    tempPose.rotationMatrix[5] * this->bodyRotation[7];
+  pose.rotationMatrix[5] =
+    tempPose.rotationMatrix[3] * this->bodyRotation[2] +
+    tempPose.rotationMatrix[4] * this->bodyRotation[5] +
+    tempPose.rotationMatrix[5] * this->bodyRotation[8];
+  pose.rotationMatrix[6] =
+    tempPose.rotationMatrix[6] * this->bodyRotation[0] +
+    tempPose.rotationMatrix[7] * this->bodyRotation[3] +
+    tempPose.rotationMatrix[8] * this->bodyRotation[6];
+  pose.rotationMatrix[7] =
+    tempPose.rotationMatrix[6] * this->bodyRotation[1] +
+    tempPose.rotationMatrix[7] * this->bodyRotation[4] +
+    tempPose.rotationMatrix[8] * this->bodyRotation[7];
+  pose.rotationMatrix[8] =
+    tempPose.rotationMatrix[6] * this->bodyRotation[2] +
+    tempPose.rotationMatrix[7] * this->bodyRotation[5] +
+    tempPose.rotationMatrix[8] * this->bodyRotation[8];
+
+  //------------------------------- Tbc = Ttc + Rtc x Tbt
+  // Translation of body in camera coordinates is translation of target in
+  // camera coordinates plus rotation of target in camera coordinates vec
+  // translation of body in target coordinates
+  pose.x = tempPose.x +
+    tempPose.rotationMatrix[0] * this->bodyTranslation[0] +
+    tempPose.rotationMatrix[1] * this->bodyTranslation[1] +
+    tempPose.rotationMatrix[2] * this->bodyTranslation[2];
+  pose.y = tempPose.y +
+    tempPose.rotationMatrix[3] * this->bodyTranslation[0] +
+    tempPose.rotationMatrix[4] * this->bodyTranslation[1] +
+    tempPose.rotationMatrix[5] * this->bodyTranslation[2];
+  pose.z = tempPose.z +
+    tempPose.rotationMatrix[6] * this->bodyTranslation[0] +
+    tempPose.rotationMatrix[7] * this->bodyTranslation[1] +
+    tempPose.rotationMatrix[8] * this->bodyTranslation[2];
+}
+
+void
 AbstractCamera::toWorld(silvver::Pose &pose) const
 {
   silvver::Pose tempPose(pose);
 
   //------------------------------- Rmo = Rco x Rmc
   pose.rotationMatrix[0] =
-    this->rot[0] * tempPose.rotationMatrix[0] +
-    this->rot[1] * tempPose.rotationMatrix[3] +
-    this->rot[2] * tempPose.rotationMatrix[6];
+    this->hardCameraRotation[0] * tempPose.rotationMatrix[0] +
+    this->hardCameraRotation[1] * tempPose.rotationMatrix[3] +
+    this->hardCameraRotation[2] * tempPose.rotationMatrix[6];
   pose.rotationMatrix[1] =
-    this->rot[0] * tempPose.rotationMatrix[1] +
-    this->rot[1] * tempPose.rotationMatrix[4] +
-    this->rot[2] * tempPose.rotationMatrix[7];
+    this->hardCameraRotation[0] * tempPose.rotationMatrix[1] +
+    this->hardCameraRotation[1] * tempPose.rotationMatrix[4] +
+    this->hardCameraRotation[2] * tempPose.rotationMatrix[7];
   pose.rotationMatrix[2] =
-    this->rot[0] * tempPose.rotationMatrix[2] +
-    this->rot[1] * tempPose.rotationMatrix[5] +
-    this->rot[2] * tempPose.rotationMatrix[8];
+    this->hardCameraRotation[0] * tempPose.rotationMatrix[2] +
+    this->hardCameraRotation[1] * tempPose.rotationMatrix[5] +
+    this->hardCameraRotation[2] * tempPose.rotationMatrix[8];
   pose.rotationMatrix[3] =
-    this->rot[3] * tempPose.rotationMatrix[0] +
-    this->rot[4] * tempPose.rotationMatrix[3] +
-    this->rot[5] * tempPose.rotationMatrix[6];
+    this->hardCameraRotation[3] * tempPose.rotationMatrix[0] +
+    this->hardCameraRotation[4] * tempPose.rotationMatrix[3] +
+    this->hardCameraRotation[5] * tempPose.rotationMatrix[6];
   pose.rotationMatrix[4] =
-    this->rot[3] * tempPose.rotationMatrix[1] +
-    this->rot[4] * tempPose.rotationMatrix[4] +
-    this->rot[5] * tempPose.rotationMatrix[7];
+    this->hardCameraRotation[3] * tempPose.rotationMatrix[1] +
+    this->hardCameraRotation[4] * tempPose.rotationMatrix[4] +
+    this->hardCameraRotation[5] * tempPose.rotationMatrix[7];
   pose.rotationMatrix[5] =
-    this->rot[3] * tempPose.rotationMatrix[2] +
-    this->rot[4] * tempPose.rotationMatrix[5] +
-    this->rot[5] * tempPose.rotationMatrix[8];
+    this->hardCameraRotation[3] * tempPose.rotationMatrix[2] +
+    this->hardCameraRotation[4] * tempPose.rotationMatrix[5] +
+    this->hardCameraRotation[5] * tempPose.rotationMatrix[8];
   pose.rotationMatrix[6] =
-    this->rot[6] * tempPose.rotationMatrix[0] +
-    this->rot[7] * tempPose.rotationMatrix[3] +
-    this->rot[8] * tempPose.rotationMatrix[6];
+    this->hardCameraRotation[6] * tempPose.rotationMatrix[0] +
+    this->hardCameraRotation[7] * tempPose.rotationMatrix[3] +
+    this->hardCameraRotation[8] * tempPose.rotationMatrix[6];
   pose.rotationMatrix[7] =
-    this->rot[6] * tempPose.rotationMatrix[1] +
-    this->rot[7] * tempPose.rotationMatrix[4] +
-    this->rot[8] * tempPose.rotationMatrix[7];
+    this->hardCameraRotation[6] * tempPose.rotationMatrix[1] +
+    this->hardCameraRotation[7] * tempPose.rotationMatrix[4] +
+    this->hardCameraRotation[8] * tempPose.rotationMatrix[7];
   pose.rotationMatrix[8] =
-    this->rot[6] * tempPose.rotationMatrix[2] +
-    this->rot[7] * tempPose.rotationMatrix[5] +
-    this->rot[8] * tempPose.rotationMatrix[8];
+    this->hardCameraRotation[6] * tempPose.rotationMatrix[2] +
+    this->hardCameraRotation[7] * tempPose.rotationMatrix[5] +
+    this->hardCameraRotation[8] * tempPose.rotationMatrix[8];
 
   //------------------------------- Tmo = Tco + Rco x Tmc
-  pose.x = this->trans[0] +
-    this->rot[0] * tempPose.x +
-    this->rot[1] * tempPose.y +
-    this->rot[2] * tempPose.z;
-  pose.y = this->trans[1] +
-    this->rot[3] * tempPose.x +
-    this->rot[4] * tempPose.y +
-    this->rot[5] * tempPose.z;
-  pose.z = this->trans[2] +
-    this->rot[6] * tempPose.x +
-    this->rot[7] * tempPose.y +
-    this->rot[8] * tempPose.z;
+  pose.x = this->hardCameraTranslation[0] +
+    this->hardCameraRotation[0] * tempPose.x +
+    this->hardCameraRotation[1] * tempPose.y +
+    this->hardCameraRotation[2] * tempPose.z;
+  pose.y = this->hardCameraTranslation[1] +
+    this->hardCameraRotation[3] * tempPose.x +
+    this->hardCameraRotation[4] * tempPose.y +
+    this->hardCameraRotation[5] * tempPose.z;
+  pose.z = this->hardCameraTranslation[2] +
+    this->hardCameraRotation[6] * tempPose.x +
+    this->hardCameraRotation[7] * tempPose.y +
+    this->hardCameraRotation[8] * tempPose.z;
 }
 
 connection::Channel*

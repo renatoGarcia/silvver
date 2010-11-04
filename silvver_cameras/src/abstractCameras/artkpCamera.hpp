@@ -27,12 +27,10 @@
 #include <ARToolKitPlus/TrackerSingleMarker.h>
 
 #include "abstractCamera.hpp"
-#include "mountedTarget.hpp"
 #include "targetDescriptions.hpp"
 
 class ArtkpCamera
   :public AbstractCamera
-  ,private MountedTarget
 {
 public:
   ArtkpCamera(const scene::AnyHardCamera& anyHardCamera,
