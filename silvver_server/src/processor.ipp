@@ -21,6 +21,7 @@
 #include <boost/foreach.hpp>
 
 #include "common/connection/channel.ipp"
+#include "common/connection/exceptions.hpp"
 #include "log.hpp"
 
 template<class Tinput>
@@ -43,7 +44,7 @@ Processor<Tinput>::isSameSpec(const procOpt::AnyProcOpt& spec) const
 template <class Tinput>
 template <class Toutput>
 void
-Processor<Tinput>::sendToOutputs
+Processor<Tinput>::sendToClients
          (const std::vector<silvver::Identity<Toutput> >& localizations) const
 {
   std::vector<ChannelPointer> vecChannels;
@@ -62,7 +63,13 @@ Processor<Tinput>::sendToOutputs
 
     BOOST_FOREACH(channelPtr, vecChannels)
     {
-      channelPtr->send(output);
+      try
+      {
+        channelPtr->send(output);
+      }
+      // Do nothing, the receptionist will treat connection errors.
+      catch (const connection::connection_error& e)
+      {}
     }
   }
 
@@ -72,7 +79,13 @@ Processor<Tinput>::sendToOutputs
 
   BOOST_FOREACH(channelPtr, vecChannels)
   {
-    channelPtr->send(localizations);
+    try
+    {
+      channelPtr->send(localizations);
+    }
+    // Do nothing, the receptionist will treat connection errors.
+    catch (const connection::connection_error& e)
+    {}
   }
 }
 

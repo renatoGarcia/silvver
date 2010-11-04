@@ -48,18 +48,38 @@ template <class T>
 void
 Channel::send(const T& t)
 {
-  std::string data;
-  serialize(data, t);
-  this->write(data);
+  try
+  {
+    std::string data;
+    serialize(data, t);
+    this->write(data);
+  }
+  catch (const broken_connection& e)
+  {
+    if (!this->closeHandler.empty())
+      this->closeHandler();
+
+    throw;
+  }
 }
 
 template <class T>
 void
 Channel::receive(T& t)
 {
-  std::string data;
-  this->read(data);
-  deserialize(t, data);
+  try
+  {
+    std::string data;
+    this->read(data);
+    deserialize(t, data);
+  }
+  catch (const broken_connection& e)
+  {
+    if (!this->closeHandler.empty())
+      this->closeHandler();
+
+    throw;
+  }
 }
 
 template <class T>

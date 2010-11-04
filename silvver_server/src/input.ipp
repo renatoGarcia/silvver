@@ -22,6 +22,7 @@
 #include <boost/foreach.hpp>
 
 #include "common/connection/channel.ipp"
+#include "common/connection/exceptions.hpp"
 #include "common/serializations.hpp"
 #include "log.hpp"
 
@@ -64,7 +65,13 @@ Input<Type>::handleReceive(connection::error_code ec)
                                      vecChannels);
     BOOST_FOREACH(channelPtr, vecChannels)
     {
-      channelPtr->send(this->currentInput);
+      try
+      {
+        channelPtr->send(this->currentInput);
+      }
+      // Do nothing, the receptionist will treat connection errors.
+      catch (const connection::connection_error& e)
+      {}
     }
 
     this->processor->deliverPackage(this->currentInput);

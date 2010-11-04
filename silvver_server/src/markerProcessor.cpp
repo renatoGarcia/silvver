@@ -64,5 +64,5 @@ MarkerProcessor::process(std::vector<silvver::Identity<silvver::Pose> >& current
     }
   }
 
-  this->sendToOutputs(currentPoses);
+  this->sendToClients(currentPoses);
 }

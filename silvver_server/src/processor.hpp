@@ -51,7 +51,7 @@ protected:
    *
    * @param localizations A vector with all target localized.  */
   template <class Toutput>
-  void sendToOutputs(const std::vector<silvver::Identity<Toutput> >& localizations) const;
+  void sendToClients(const std::vector<silvver::Identity<Toutput> >& localizations) const;
 
 private:
   boost::shared_ptr<ClientMultiMap<silvver::TargetUid> > targetClients;
