@@ -1,4 +1,4 @@
-/* Copyright 2009 Renato Florentino Garcia <fgar.renato@gmail.com>
+/* Copyright 2009-2010 Renato Florentino Garcia <fgar.renato@gmail.com>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3, as
@@ -40,7 +40,9 @@
  *   -# Each call to captureFrame method must return only a frame still unread
  *      by calling object
  */
-class HardCamera: public boost::noncopyable, public Subject
+class HardCamera
+  :public boost::noncopyable
+  ,public Subject
 {
 public:
   virtual ~HardCamera();
@@ -53,7 +55,7 @@ public:
   const unsigned hardCameraUid;
 
 protected:
-  HardCamera(const scene::Hardware& config, int iplDepth);
+  HardCamera(const scene::HardCamera& config, int iplDepth);
 
   /// This method must be called by derived classes when it read a new frame
   void updateCurrentFrame(Frame& frame);

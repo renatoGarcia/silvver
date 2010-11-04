@@ -16,26 +16,29 @@
 #ifndef _HARD_CAMERA_FACTORY_HPP_
 #define _HARD_CAMERA_FACTORY_HPP_
 
-#include <boost/noncopyable.hpp>
 #include <boost/shared_ptr.hpp>
 #include <boost/thread/mutex.hpp>
+#include <boost/variant/static_visitor.hpp>
 #include <map>
-#include <string>
 
 #include "hardCameras/hardCamera.hpp"
 #include "hardCameras/hardCameraDescriptions.hpp"
 
-class HardCameraFactory : public boost::noncopyable
+class HardCameraFactory
 {
 public:
   /// Return a shared_ptr to the hardCamera described in cameraConfig.
-  /// @param cameraConfig The struct describing the hardware camera.
+  /// @param anyHardCamera The struct describing the hardCamera.
   /// @return A shared_ptr which will point to the required hardware camera.
-   static boost::shared_ptr<HardCamera>
-   create(const scene::AnyHardwareCamera& cameraConfig);
+   static
+   boost::shared_ptr<HardCamera>
+   create(const scene::AnyHardCamera& anyHardCamera);
 
 private:
-  struct ConstructHardCamera : public boost::static_visitor<HardCamera*>
+  typedef std::map<unsigned, boost::shared_ptr<HardCamera> > HardCameraMap;
+
+  struct Visitor
+    :public boost::static_visitor<HardCamera*>
   {
     HardCamera* operator()(const scene::PseudoCamera& config) const;
     HardCamera* operator()(const scene::DC1394& config) const;
@@ -45,8 +48,7 @@ private:
   HardCameraFactory();
 
   /// The unsigned key is the HardCamera identifier.
-  static std::map<unsigned, boost::shared_ptr<HardCamera> >
-  createdHardCameras;
+  static HardCameraMap createdHardCameras;
 
   static boost::mutex mutexCameraCreate;
 };

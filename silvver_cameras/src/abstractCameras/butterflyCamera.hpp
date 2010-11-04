@@ -26,10 +26,12 @@
 #include "mountedTarget.hpp"
 #include "targetDescriptions.hpp"
 
-class ButterflyCamera: public AbstractCamera, private MountedTarget
+class ButterflyCamera
+  :public AbstractCamera
+  ,private MountedTarget
 {
 public:
-  ButterflyCamera(const scene::Camera& cameraConfig,
+  ButterflyCamera(const scene::AnyHardCamera& anyHardCamera,
                   const scene::ButterflyTargets& confButterflies);
 
   ~ButterflyCamera();
@@ -43,7 +45,7 @@ private:
   void doWork();
 
   static ButterflyInstance*
-  createLibButterfly(const scene::Camera& cameraConfig,
+  createLibButterfly(const scene::anyHardCamera& anyHardCamera,
                      const scene::ButterflyTargets& confButterflies);
 
   const unsigned maxButterflies;

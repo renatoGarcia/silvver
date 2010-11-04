@@ -15,6 +15,8 @@
 
 #include "hardCameraFactory.hpp"
 
+#include <boost/variant/apply_visitor.hpp>
+
 #include "exceptions.hpp"
 #include "log.hpp"
 
@@ -37,25 +39,23 @@
 #  include "hardCameras/v4l2.hpp"
 #endif
 
-std::map <unsigned, boost::shared_ptr<HardCamera> >
-HardCameraFactory::createdHardCameras;
+HardCameraFactory::HardCameraMap HardCameraFactory::createdHardCameras;
 
-boost::mutex
-HardCameraFactory::mutexCameraCreate;
+boost::mutex HardCameraFactory::mutexCameraCreate;
 
 boost::shared_ptr<HardCamera>
-HardCameraFactory::create(const scene::AnyHardwareCamera& cameraConfig)
+HardCameraFactory::create(const scene::AnyHardCamera& anyHardCamera)
 {
   // HardCameras can't be simultaneously initialized
   boost::mutex::scoped_lock lock(HardCameraFactory::mutexCameraCreate);
 
   boost::shared_ptr<HardCamera> hardCamera;
 
-  const scene::Hardware hardwareConfig =
-    boost::apply_visitor(scene::GetHardware(), cameraConfig);
+  const scene::HardCamera hardCameraCfg =
+    boost::apply_visitor(scene::GetHardCamera(), anyHardCamera);
 
-  std::map<unsigned, boost::shared_ptr<HardCamera> >::iterator
-    iteHardCamera = HardCameraFactory::createdHardCameras.find(hardwareConfig.hardCameraUid);
+  HardCameraMap::iterator iteHardCamera =
+     HardCameraFactory::createdHardCameras.find(hardCameraCfg.hardCameraUid);
 
   // If hardCamera is already created
   if (iteHardCamera != HardCameraFactory::createdHardCameras.end())
@@ -64,25 +64,24 @@ HardCameraFactory::create(const scene::AnyHardwareCamera& cameraConfig)
   }
   else
   {
-    hardCamera.reset(boost::apply_visitor
-                     (HardCameraFactory::ConstructHardCamera(),
-                      cameraConfig));
+    hardCamera.reset(boost::apply_visitor(HardCameraFactory::Visitor(),
+                                          anyHardCamera));
 
-    HardCameraFactory::createdHardCameras.
-      insert(std::make_pair(hardwareConfig.hardCameraUid, hardCamera));
+    HardCameraFactory::createdHardCameras.insert(
+                  std::make_pair(hardCameraCfg.hardCameraUid, hardCamera));
   }
 
   return hardCamera;
 }
 
 HardCamera*
-HardCameraFactory::ConstructHardCamera::operator()(const scene::PseudoCamera& config) const
+HardCameraFactory::Visitor::operator()(const scene::PseudoCamera& config) const
 {
   return (new PseudoCamera(config));
 }
 
 HardCamera*
-HardCameraFactory::ConstructHardCamera::operator()(const scene::DC1394& config) const
+HardCameraFactory::Visitor::operator()(const scene::DC1394& config) const
 {
 #ifdef HAS_DC1394
   try
@@ -104,7 +103,7 @@ HardCameraFactory::ConstructHardCamera::operator()(const scene::DC1394& config) 
 }
 
 HardCamera*
-HardCameraFactory::ConstructHardCamera::operator()(const scene::V4l2& config) const
+HardCameraFactory::Visitor::operator()(const scene::V4l2& config) const
 {
 #ifdef HAS_V4L2
   try

@@ -1,4 +1,4 @@
-/* Copyright 2009 Renato Florentino Garcia <fgar.renato@gmail.com>
+/* Copyright 2009-2010 Renato Florentino Garcia <fgar.renato@gmail.com>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3, as
@@ -15,7 +15,7 @@
 
 #include "abstractCameraFactory.hpp"
 
-#include <boost/variant/get.hpp>
+#include <boost/variant/apply_visitor.hpp>
 
 #include "exceptions.hpp"
 
@@ -27,39 +27,39 @@
 #endif
 
 AbstractCamera*
-AbstractCameraFactory::create(const scene::Camera& cameraConfig,
-                              const scene::AnyTarget& targets)
+AbstractCameraFactory::create(const scene::AnyHardCamera& hardCamera,
+                              const scene::AnyTargetSet& targetSets)
 {
-  AbstractCamera* abstractCamera;
+  return boost::apply_visitor(Visitor(hardCamera), targetSets);
+}
 
-  if (const scene::ArtkpTargets* const artkpTarget =
-      boost::get<scene::ArtkpTargets>(&targets))
-  {
+AbstractCameraFactory::Visitor::
+Visitor(const scene::AnyHardCamera& hardCamera)
+  :hardCamera(hardCamera)
+{}
+
+AbstractCamera*
+AbstractCameraFactory::Visitor::
+operator()(const scene::ArtkpTargets& artkpTarget) const
+{
 #ifdef HAS_ARTKP
-    abstractCamera = new ArtkpCamera(cameraConfig,
-                                     *artkpTarget);
+  return new ArtkpCamera(this->hardCamera, artkpTarget);
 #else
-    throw invalid_argument()
-      << info_what("This program don't was compiled with support "
-                   "to ARToolKitPlus targets");
+  throw invalid_argument()
+    << info_what("This program don't was compiled with support "
+                 "to ARToolKitPlus targets");
 #endif
-  }
-  else if (const scene::ButterflyTargets* const butterflyTarget =
-      boost::get<scene::ButterflyTargets>(&targets))
-  {
-#ifdef HAS_BUTTERFLY
-    abstractCamera = new ButterflyCamera(cameraConfig,
-                                         *butterflyTarget);
-#else
-    throw invalid_argument()
-      << info_what("This program don't was compiled with support "
-                   "to Butterfly targets");
-#endif
-  }
-  else
-  {
-    throw invalid_argument() << info_what("Unknown target type");
-  }
+}
 
-  return abstractCamera;
+AbstractCamera*
+AbstractCameraFactory::Visitor::
+operator()(const scene::ButterflyTargets& butterflyTarget) const
+{
+#ifdef HAS_BUTTERFLY
+  return new ButterflyCamera(this->hardCamera, butterflyTarget);
+#else
+  throw invalid_argument()
+    << info_what("This program don't was compiled with support "
+                 "to Butterfly targets");
+#endif
 }

@@ -31,15 +31,11 @@
 
 namespace scene
 {
-  struct Target
+  struct TargetSet
   {
     /// Key unique to each targetSet.
     unsigned targetSetUid;
-  };
 
-  /// Information about targets that is above (mounted) in a body (eg: a robot)
-  struct Mounted
-  {
     /// Translation of body center in target coordinate system.
     boost::array<double,3> bodyTranslation;
 
@@ -49,8 +45,7 @@ namespace scene
 
   /// Struct with definitions of ARToolKitPlus targets.
   struct ArtkpTargets
-    :public Target
-    ,public Mounted
+    :public TargetSet
   {
     /// ARToolKitPlus pattern width [mm].
     int patternWidth;
@@ -64,8 +59,7 @@ namespace scene
   };
 
   struct ButterflyTargets
-    :public Target
-    ,public Mounted
+    :public TargetSet
   {
     // Size of one checkerboard square [mm]
     unsigned squareSize;
@@ -76,7 +70,7 @@ namespace scene
 
   /// The AnyTarget is a type which can handle any of target structs.
   typedef boost::variant<ArtkpTargets,
-                         ButterflyTargets> AnyTarget;
+                         ButterflyTargets> AnyTargetSet;
 }
 
 #endif /* _TARGET_DESCRIPTIONS_HPP_ */

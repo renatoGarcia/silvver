@@ -26,18 +26,18 @@ extern globalOptions::Options global_options;
 
 boost::asio::io_service AbstractCamera::ioService;
 
-AbstractCamera::AbstractCamera(const scene::Camera& cameraConfig,
-                               const unsigned targetSetUid,
+AbstractCamera::AbstractCamera(const scene::AnyHardCamera& anyHardCamera,
+                               const scene::TargetSet& targetSet,
                                const procOpt::AnyProcOpt& processorOptions)
-  :subjectHardCamera(HardCameraFactory::create(cameraConfig.hardware))
+  :subjectHardCamera(HardCameraFactory::create(anyHardCamera))
   ,currentFrame()
-  ,abstractCameraUid(targetSetUid, subjectHardCamera->hardCameraUid)
+  ,abstractCameraUid(targetSet.targetSetUid, subjectHardCamera->hardCameraUid)
   ,serverChannel(AbstractCamera::createChannel(global_options.receptionistEp))
   ,unreadImage(false)
   ,unreadImageAccess()
   ,unreadImageCondition()
-  ,rot(cameraConfig.rotationMatrix)
-  ,trans(cameraConfig.translationVector)
+  ,rot(AbstractCamera::getRotationMatrix(anyHardCamera))
+  ,trans(AbstractCamera::getTranslationVector(anyHardCamera))
 {
   this->serverChannel->connect<connection::TcpIp>(global_options.receptionistEp);
   Request request = AddCamera(processorOptions, this->abstractCameraUid);
@@ -143,4 +143,18 @@ AbstractCamera::createChannel(const connection::TcpIpEp& receptionistEp)
   // {
   //   return new connection::TcpIp(AbstractCamera::ioService);
   // }
+}
+
+boost::array<double, 9>
+AbstractCamera::getRotationMatrix(const scene::AnyHardCamera& anyHardCamera)
+{
+  return boost::apply_visitor(scene::GetHardCamera(),
+                              anyHardCamera).rotationMatrix;
+}
+
+boost::array<double, 3>
+AbstractCamera::getTranslationVector(const scene::AnyHardCamera& anyHardCamera)
+{
+  return boost::apply_visitor(scene::GetHardCamera(),
+                              anyHardCamera).translationVector;
 }

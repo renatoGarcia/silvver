@@ -1,4 +1,4 @@
-/* Copyright 2009 Renato Florentino Garcia <fgar.renato@gmail.com>
+/* Copyright 2009-2010 Renato Florentino Garcia <fgar.renato@gmail.com>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 3, as
@@ -16,7 +16,7 @@
 #ifndef _ABSTRACT_CAMERA_FACTORY_HPP_
 #define _ABSTRACT_CAMERA_FACTORY_HPP_
 
-#include <boost/shared_ptr.hpp>
+#include <boost/variant/static_visitor.hpp>
 
 #include "abstractCameras/abstractCamera.hpp"
 #include "scene.hpp"
@@ -25,10 +25,23 @@ class AbstractCameraFactory
 {
 public:
   static AbstractCamera*
-  create(const scene::Camera& cameraConfig,
-         const scene::AnyTarget& targets);
+  create(const scene::AnyHardCamera& hardCamera,
+         const scene::AnyTargetSet& targetSets);
 
 private:
+  class Visitor
+    :public boost::static_visitor<AbstractCamera*>
+  {
+  public:
+    Visitor(const scene::AnyHardCamera& hardCamera);
+
+    AbstractCamera* operator()(const scene::ArtkpTargets& artkpTarget) const;
+    AbstractCamera* operator()(const scene::ButterflyTargets& butterflyTarget) const;
+
+  private:
+    const scene::AnyHardCamera hardCamera;
+  };
+
   AbstractCameraFactory();
 };
 

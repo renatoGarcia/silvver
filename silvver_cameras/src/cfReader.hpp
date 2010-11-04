@@ -35,7 +35,7 @@ private:
 
   void readHardCamera();
 
-  void readHardware(scene::Hardware& hardware);
+  void readHardware(scene::HardCamera& hardware);
   scene::PseudoCamera readPseudoCameraConfig();
   scene::DC1394 readDC1394Config();
   scene::V4l2 readV4l2Config();

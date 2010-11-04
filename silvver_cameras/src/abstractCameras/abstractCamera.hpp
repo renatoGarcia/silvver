@@ -60,8 +60,8 @@ private:
 
 protected:
 
-  AbstractCamera(const scene::Camera& cameraConfig,
-                 const unsigned targetSetUid,
+  AbstractCamera(const scene::AnyHardCamera& anyHardCamera,
+                 const scene::TargetSet& targetSet,
                  const procOpt::AnyProcOpt& procOptions);
 
   /// Update the frame in currentFrame.
@@ -78,6 +78,12 @@ protected:
   const silvver::AbstractCameraUid abstractCameraUid;
 
 private:
+  static
+  boost::array<double, 9> getRotationMatrix(const scene::AnyHardCamera& anyHardCamera);
+
+  static
+  boost::array<double, 3> getTranslationVector(const scene::AnyHardCamera& anyHardCamera);
+
   static
   connection::Channel* createChannel(const connection::TcpIpEp& receptionistEp);
 

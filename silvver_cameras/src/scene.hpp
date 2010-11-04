@@ -20,38 +20,22 @@
 #ifndef _SCENE_HPP_
 #define _SCENE_HPP_
 
-#include <boost/array.hpp>
 #include <vector>
 
 #include "abstractCameras/targetDescriptions.hpp"
 #include "hardCameras/hardCameraDescriptions.hpp"
 
-namespace scene
+namespace scene{
+
+/// Complete description of scene, with hardCameras and targetSets.
+struct Scene
 {
-  /// Struct with all configurations of a camera.
-  /// This struct groups the hardware camera specific configurations and the
-  /// commons camera extrinsic parameters.
-  struct Camera
-  {
-    AnyHardwareCamera hardware;
+  std::vector<AnyTargetSet> targetSets;
 
-    /// Translation vector of camera, in origin referential.
-    boost::array<double, 3> translationVector;
+  /// Vector with configuration structs of all camera in scene.
+  std::vector<AnyHardCamera> hardCameras;
+};
 
-    /// Rotation matrix of camera, in origin referential.
-    /// The format must be {U11, U12, U13, U21, U22, U23, U31, U32, U33},
-    /// where Uxy is the item of row x and column y. */
-    boost::array<double, 9> rotationMatrix;
-  };
-
-  /// Complete description of scene, with cameras and targets.
-  struct Scene
-  {
-    std::vector<AnyTarget> targets;
-
-    /// Vector with configuration structs of all camera in scene.
-    std::vector<Camera> cameras;
-  };
 }
 
 #endif /* _SCENE_HPP_ */

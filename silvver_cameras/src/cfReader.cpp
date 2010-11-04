@@ -48,21 +48,21 @@ CfReader::readConfigFile()
 void
 CfReader::readHardCamera()
 {
-  scene::Camera camera;
+  scene::AnyHardCamera hardCamera;
 
   std::string driver;
   luaParser.readValue(driver, "__driver");
   if (driver == "pseudocamera")
   {
-    camera.hardware = this->readPseudoCameraConfig();
+    hardCamera = this->readPseudoCameraConfig();
   }
   else if (driver == "dc1394")
   {
-    camera.hardware = this->readDC1394Config();
+    hardCamera = this->readDC1394Config();
   }
   else if (driver == "v4l2")
   {
-    camera.hardware = this->readV4l2Config();
+    hardCamera = this->readV4l2Config();
   }
   else
   {
@@ -71,14 +71,11 @@ CfReader::readHardCamera()
       << info_fieldName("__driver");
   }
 
-  luaParser.readValue(camera.translationVector, "translation_vector");
-  luaParser.readValue(camera.rotationMatrix, "rotation_matrix");
-
-  this->sc.cameras.push_back(camera);
+  this->sc.hardCameras.push_back(hardCamera);
 }
 
 void
-CfReader::readHardware(scene::Hardware& hardware)
+CfReader::readHardware(scene::HardCamera& hardware)
 {
   luaParser.readValue(hardware.hardCameraUid, "hardcamera_uid");
   luaParser.readValue(hardware.saveImageFormat, "save_image_format");
@@ -88,6 +85,9 @@ CfReader::readHardware(scene::Hardware& hardware)
   luaParser.readValue(hardware.principalPoint, "principal_point");
   luaParser.readValue(hardware.radialCoef, "radial_coef");
   luaParser.readValue(hardware.tangentialCoef, "tangential_coef");
+
+  luaParser.readValue(hardware.translationVector, "translation_vector");
+  luaParser.readValue(hardware.rotationMatrix, "rotation_matrix");
 }
 
 scene::PseudoCamera
@@ -175,26 +175,26 @@ CfReader::readV4l2Config()
 void
 CfReader::readTargetSet()
 {
-  scene::AnyTarget target;
+  scene::AnyTargetSet targetSet;
 
   std::string type;
   luaParser.readValue(type, "__type");
   if (type == "artkp")
   {
-    target = this->readArtkp();
+    targetSet = this->readArtkp();
   }
   else if (type == "butterfly")
   {
-    target = this->readButterfly();
+    targetSet = this->readButterfly();
   }
   else
   {
     throw file_parsing_error()
-      << info_what("Unknown target system name")
+      << info_what("Unknown targetSet name")
       << info_fieldName("__type");
   }
 
-  this->sc.targets.push_back(target);
+  this->sc.targetSets.push_back(targetSet);
 }
 
 scene::ArtkpTargets

@@ -22,12 +22,12 @@
 
 #include "../exceptions.hpp"
 
-ButterflyCamera::ButterflyCamera(const scene::Camera& cameraConfig,
+ButterflyCamera::ButterflyCamera(const scene::AnyHardCamera& anyHardCamera,
                                  const scene::ButterflyTargets& confButterflies)
-  :AbstractCamera(cameraConfig, confButterflies.targetSetUid, procOpt::Marker())
+  :AbstractCamera(anyHardCamera, confButterflies, procOpt::Marker())
   ,MountedTarget(confButterflies.bodyTranslation, confButterflies.bodyRotation)
   ,maxButterflies(confButterflies.maxButterflies)
-  ,libButterfly(ButterflyCamera::createLibButterfly(cameraConfig,
+  ,libButterfly(ButterflyCamera::createLibButterfly(anyHardCamera,
                                                     confButterflies))
   ,runThread()
 {
@@ -51,24 +51,24 @@ ButterflyCamera::~ButterflyCamera()
 }
 
 ButterflyInstance*
-ButterflyCamera::createLibButterfly(const scene::Camera& cameraConfig,
+ButterflyCamera::createLibButterfly(const scene::AnyHardCamera& anyHardCamera,
                                     const scene::ButterflyTargets& confButterflies)
 {
-  const scene::Hardware hardwareConfig =
-    boost::apply_visitor(scene::GetHardware(), cameraConfig.hardware);
+  const scene::HardCamera hardCamera =
+    boost::apply_visitor(scene::GetHardCamera(), anyHardCamera);
 
   Butterfly_CamParams camParam;
-  camParam.image_size = cvSize(hardwareConfig.resolution.at(0),
-                               hardwareConfig.resolution.at(1));
-  camParam.focal_length[0] = hardwareConfig.focalLength.at(0);
-  camParam.focal_length[1] = hardwareConfig.focalLength.at(1);
-  camParam.principal_point[0] = hardwareConfig.principalPoint.at(0);
-  camParam.principal_point[1] = hardwareConfig.principalPoint.at(1);
-  camParam.radial_coef[0] = hardwareConfig.radialCoef.at(0);
-  camParam.radial_coef[1] = hardwareConfig.radialCoef.at(1);
-  camParam.radial_coef[2] = hardwareConfig.radialCoef.at(2);
-  camParam.tangential_coef[0] = hardwareConfig.tangentialCoef.at(0);
-  camParam.tangential_coef[1] = hardwareConfig.tangentialCoef.at(1);
+  camParam.image_size = cvSize(hardCamera.resolution.at(0),
+                               hardCamera.resolution.at(1));
+  camParam.focal_length[0] = hardCamera.focalLength.at(0);
+  camParam.focal_length[1] = hardCamera.focalLength.at(1);
+  camParam.principal_point[0] = hardCamera.principalPoint.at(0);
+  camParam.principal_point[1] = hardCamera.principalPoint.at(1);
+  camParam.radial_coef[0] = hardCamera.radialCoef.at(0);
+  camParam.radial_coef[1] = hardCamera.radialCoef.at(1);
+  camParam.radial_coef[2] = hardCamera.radialCoef.at(2);
+  camParam.tangential_coef[0] = hardCamera.tangentialCoef.at(0);
+  camParam.tangential_coef[1] = hardCamera.tangentialCoef.at(1);
 
   return butterfly_construct(confButterflies.squareSize, camParam,
                              confButterflies.maxButterflies, 0);

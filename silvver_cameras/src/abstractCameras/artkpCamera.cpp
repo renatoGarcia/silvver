@@ -25,20 +25,20 @@
 #include "../log.hpp"
 #include "common/silvverTypes.hpp"
 
-ArtkpCamera::ArtkpCamera(const scene::Camera& cameraConfig,
+ArtkpCamera::ArtkpCamera(const scene::AnyHardCamera& anyHardCamera,
                          const scene::ArtkpTargets& targets)
-  :AbstractCamera(cameraConfig, targets.targetSetUid, procOpt::Marker())
+  :AbstractCamera(anyHardCamera, targets, procOpt::Marker())
   ,MountedTarget(targets.bodyTranslation, targets.bodyRotation)
   ,patternWidth(targets.patternWidth)
   ,threshold(targets.threshold)
   ,logger()
   ,tracker(new ARToolKitPlus::TrackerSingleMarkerImpl<16,16,64,50,50>
-           (ArtkpCamera::getResolution(cameraConfig).at(0),
-            ArtkpCamera::getResolution(cameraConfig).at(1)))
+           (ArtkpCamera::getResolution(anyHardCamera).at(0),
+            ArtkpCamera::getResolution(anyHardCamera).at(1)))
   ,runThread()
 {
-  const scene::Hardware hardwareConfig =
-    boost::apply_visitor(scene::GetHardware(), cameraConfig.hardware);
+  const scene::HardCamera hardCamera =
+    boost::apply_visitor(scene::GetHardCamera(), anyHardCamera);
 
   const std::string camConfigFileName("/tmp/artkp" +
                                       boost::lexical_cast<std::string>(targets.targetSetUid));
@@ -46,12 +46,12 @@ ArtkpCamera::ArtkpCamera(const scene::Camera& cameraConfig,
   std::ofstream tmpConfig(camConfigFileName.c_str());
   tmpConfig.precision(10);
   tmpConfig << "ARToolKitPlus_CamCal_Rev02" << "\n"
-            << ArtkpCamera::getResolution(cameraConfig).at(0) << " "
-            << ArtkpCamera::getResolution(cameraConfig).at(1) << " "
-            << hardwareConfig.principalPoint.at(0) << " "
-            << hardwareConfig.principalPoint.at(1) << " "
-            << hardwareConfig.focalLength.at(0) << " "
-            << hardwareConfig.focalLength.at(1) << " "
+            << hardCamera.resolution.at(0) << " "
+            << hardCamera.resolution.at(1) << " "
+            << hardCamera.principalPoint.at(0) << " "
+            << hardCamera.principalPoint.at(1) << " "
+            << hardCamera.focalLength.at(0) << " "
+            << hardCamera.focalLength.at(1) << " "
             << 0.0 << " " << 0.0 << " " << 0.0 << " "
             << 0.0 << " " << 0.0 << " " << 0.0 << " "
             << 0;
@@ -103,9 +103,9 @@ ArtkpCamera::~ArtkpCamera()
 }
 
 boost::array<unsigned, 2>
-ArtkpCamera::getResolution(const scene::Camera& cameraConfig)
+ArtkpCamera::getResolution(const scene::AnyHardCamera& anyHardCamera)
 {
-  return boost::apply_visitor(scene::GetHardware(), cameraConfig.hardware).resolution;
+  return boost::apply_visitor(scene::GetHardCamera(), anyHardCamera).resolution;
 }
 
 void

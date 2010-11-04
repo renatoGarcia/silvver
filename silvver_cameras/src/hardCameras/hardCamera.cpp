@@ -28,7 +28,7 @@ namespace bfs = boost::filesystem;
 
 extern globalOptions::Options global_options;
 
-HardCamera::HardCamera(const scene::Hardware& config, int iplDepth)
+HardCamera::HardCamera(const scene::HardCamera& config, int iplDepth)
   :hardCameraUid(config.hardCameraUid)
   ,framePixels(config.resolution.at(0) * config.resolution.at(1))
   ,frameSize(cvSize(config.resolution.at(0), config.resolution.at(1)))

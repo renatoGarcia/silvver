@@ -39,13 +39,13 @@ SceneMounter::mount()
     CfReader cfReader(this->sceneDescriptorFile);
     const scene::Scene sc = cfReader.readConfigFile();
 
-    scene::Camera camera;
-    scene::AnyTarget target;
-    BOOST_FOREACH(camera, sc.cameras)
+    scene::AnyHardCamera hardCamera;
+    scene::AnyTargetSet targetSet;
+    BOOST_FOREACH(hardCamera, sc.hardCameras)
     {
-      BOOST_FOREACH(target, sc.targets)
+      BOOST_FOREACH(targetSet, sc.targetSets)
       {
-        this->constructAbstractCamera(camera, target);
+        this->constructAbstractCamera(hardCamera, targetSet);
       }
     }
   }
@@ -64,11 +64,11 @@ SceneMounter::mount()
 }
 
 void
-SceneMounter::constructAbstractCamera(const scene::Camera& camera,
-                                      const scene::AnyTarget& target)
+SceneMounter::constructAbstractCamera(const scene::AnyHardCamera& hardCamera,
+                                      const scene::AnyTargetSet& targetSet)
 {
-  this->abstractCameras.push_back(AbstractCameraFactory::create(camera,
-                                                                target));
+  this->abstractCameras.push_back(AbstractCameraFactory::create(hardCamera,
+                                                                targetSet));
 
   this->abstractCameras.back().run();
 }

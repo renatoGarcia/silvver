@@ -42,8 +42,8 @@ private:
   const std::string sceneDescriptorFile;
 
   /// Initialize the abstract camera given by cameraConfig and targets.
-  void constructAbstractCamera(const scene::Camera& cameraConfig,
-                               const scene::AnyTarget& target);
+  void constructAbstractCamera(const scene::AnyHardCamera& hardCamera,
+                               const scene::AnyTargetSet& targetSet);
 
   /// Handle all opened abstract cameras.
   boost::ptr_vector<AbstractCamera> abstractCameras;

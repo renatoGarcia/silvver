@@ -30,11 +30,12 @@
 #include "mountedTarget.hpp"
 #include "targetDescriptions.hpp"
 
-class ArtkpCamera: public AbstractCamera, private MountedTarget
+class ArtkpCamera
+  :public AbstractCamera
+  ,private MountedTarget
 {
 public:
-
-  ArtkpCamera(const scene::Camera& cameraConfig,
+  ArtkpCamera(const scene::AnyHardCamera& anyHardCamera,
               const scene::ArtkpTargets& targets);
 
   ~ArtkpCamera();
@@ -44,9 +45,9 @@ public:
   virtual void stop();
 
 private:
-  /// Return the image resolution from scene::Camera struct.
+  /// Return the image resolution from a scene::AnyHardCamera variant.
   static boost::array<unsigned, 2>
-  getResolution(const scene::Camera& cameraConfig);
+  getResolution(const scene::AnyHardCamera& anyHardCamera);
 
   /// It's the method which will be called when a new thread was created, and
   /// will make all camera work.
