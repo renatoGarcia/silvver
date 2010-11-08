@@ -43,7 +43,7 @@ private:
   void doWork();
 
   static ButterflyInstance*
-  createLibButterfly(const scene::anyHardCamera& anyHardCamera,
+  createLibButterfly(const scene::AnyHardCamera& anyHardCamera,
                      const scene::ButterflyTargets& confButterflies);
 
   const unsigned maxButterflies;

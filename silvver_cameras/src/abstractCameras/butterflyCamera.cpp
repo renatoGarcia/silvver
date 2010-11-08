@@ -111,7 +111,7 @@ ButterflyCamera::doWork()
 
     for (int k = 0; k < foundButterflies; ++k)
     {
-      tmpPose.uid = silvver::TargetUid(this->abstractCameraUid.targetSystem,
+      tmpPose.uid = silvver::TargetUid(this->abstractCameraUid.targetSet,
                                        butterflies[k].uid);
       tmpPose.x = butterflies[k].x;
       tmpPose.y = butterflies[k].y;
