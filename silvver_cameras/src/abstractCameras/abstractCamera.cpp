@@ -32,7 +32,8 @@ AbstractCamera::AbstractCamera(const scene::AnyHardCamera& anyHardCamera,
   :subjectHardCamera(HardCameraFactory::create(anyHardCamera))
   ,currentFrame()
   ,abstractCameraUid(targetSet.targetSetUid, subjectHardCamera->hardCameraUid)
-  ,serverChannel(AbstractCamera::createChannel(global_options.receptionistEp))
+  ,serverChannel(AbstractCamera::createChannel(global_options.serverName,
+                                               global_options.receptionistPort))
   ,unreadImage(false)
   ,unreadImageAccess()
   ,unreadImageCondition()
@@ -41,7 +42,6 @@ AbstractCamera::AbstractCamera(const scene::AnyHardCamera& anyHardCamera,
   ,bodyTranslation(targetSet.bodyTranslation)
   ,bodyRotation(targetSet.bodyRotation)
 {
-  this->serverChannel->connect<connection::TcpIp>(global_options.receptionistEp);
   Request request = AddCamera(processorOptions, this->abstractCameraUid);
   this->serverChannel->send(request);
   this->subjectHardCamera->attach(this);
@@ -198,16 +198,26 @@ AbstractCamera::toWorld(silvver::Pose &pose) const
 }
 
 connection::Channel*
-AbstractCamera::createChannel(const connection::TcpIpEp& receptionistEp)
+AbstractCamera::createChannel(const std::string& serverName,
+                              const std::string& receptionistPort)
 {
-  // if (receptionistEp.address().to_string() == "127.0.0.1")
-  // {
-    return new connection::UnixSocket(AbstractCamera::ioService);
-  // }
-  // else
-  // {
-  //   return new connection::TcpIp(AbstractCamera::ioService);
-  // }
+  using namespace connection;
+
+  std::auto_ptr<Channel> channel;
+
+  if ((serverName == "localhost") || (serverName == "127.0.0.1"))
+  {
+    channel.reset(new UnixSocket(AbstractCamera::ioService));
+  }
+  else
+  {
+    channel.reset(new TcpIp(AbstractCamera::ioService));
+  }
+
+  TcpIpEp serverEp = TcpIp::resolve(serverName, receptionistPort).front();
+  channel->connect<TcpIp>(serverEp);
+
+  return channel.release();
 }
 
 boost::array<double, 9>

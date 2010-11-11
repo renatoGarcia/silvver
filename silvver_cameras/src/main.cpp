@@ -22,7 +22,6 @@
 #include <iostream>
 #include <string>
 
-#include "common/connection/tcpIp.hpp"
 #include "common/version.hpp"
 #include "globalOptions.hpp"
 #include "log.hpp"
@@ -72,8 +71,6 @@ std::string getLevelsNames()
 
 int main(int argc, char **argv)
 {
-  std::string serverName;
-  std::string receptionistPort;
   std::string luaFile;
   LogLevel verbosity;
 
@@ -86,10 +83,10 @@ int main(int argc, char **argv)
     ("help,h", "Print this help message and exit")
     ("version,V", "Print version and exit")
     ("server-name,s",
-     po::value<std::string>(&serverName)->default_value("localhost"),
+     po::value<std::string>(&global_options.serverName)->default_value("localhost"),
      "Hostname or IP address of silvver-server")
     ("receptionist-port,p",
-     po::value<std::string>(&receptionistPort)->default_value("12000"),
+     po::value<std::string>(&global_options.receptionistPort)->default_value("12000"),
      "Port on the server where the receptionist is hearing")
     ("scene-config,c",
      po::value<std::string>(&luaFile)->default_value("scene.lua"),
@@ -137,7 +134,6 @@ int main(int argc, char **argv)
               << "----------------------------------------------\n"
               << std::endl;
 
-    global_options.receptionistEp = connection::TcpIp::resolve(serverName, receptionistPort).front();
     global_options.showImages = vm.count("show");
     global_options.saveWarpedImages = vm.count("save-warped");
     global_options.saveUnwarpedImages = vm.count("save-unwarped");

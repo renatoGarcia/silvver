@@ -21,7 +21,8 @@ namespace globalOptions
 {
   struct Options
   {
-    connection::TcpIpEp receptionistEp;
+    std::string serverName;
+    std::string receptionistPort;
 
     bool showImages;
     bool saveWarpedImages;

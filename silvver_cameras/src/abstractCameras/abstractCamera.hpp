@@ -90,7 +90,8 @@ private:
   boost::array<double, 3> getTranslationVector(const scene::AnyHardCamera& anyHardCamera);
 
   static
-  connection::Channel* createChannel(const connection::TcpIpEp& receptionistEp);
+  connection::Channel* createChannel(const std::string& serverName,
+                                     const std::string& receptionistPort);
 
   static boost::asio::io_service ioService;
 
