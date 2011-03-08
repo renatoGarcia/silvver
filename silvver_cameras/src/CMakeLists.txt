@@ -83,17 +83,23 @@ ENDIF(WITH_BUTTERFLY)
 
 FIND_PACKAGE(Boost REQUIRED system filesystem program_options thread serialization)
 FIND_PACKAGE(Lua51 REQUIRED lua m)
-FIND_PACKAGE(OpenCV REQUIRED)
+
+FIND_PACKAGE(OPENCV REQUIRED)
+IF(${OPENCV_VERSION_STRING} VERSION_LESS "2.2.0")
+  FIND_PACKAGE(OPENCV REQUIRED cv highgui)
+ELSE()
+  FIND_PACKAGE(OPENCV REQUIRED opencv_core opencv_highgui)
+ENDIF()
 
 INCLUDE_DIRECTORIES(${Boost_INCLUDE_DIR}
                     ${LUA_INCLUDE_DIR}
-                    ${OpenCV_INCLUDE_DIR})
+                    ${OPENCV_INCLUDE_DIRS})
 
 ADD_EXECUTABLE(silvver_cameras ${silvver_cameras_SRCS})
 
 TARGET_LINK_LIBRARIES(silvver_cameras ${Boost_LIBRARIES}
                                       ${LUA_LIBRARIES}
-                                      ${OpenCV_LIBRARIES})
+                                      ${OPENCV_LIBRARIES})
 
 IF(DC1394V2_FOUND)
   INCLUDE_DIRECTORIES(${DC1394V2_INCLUDE_DIRS})

@@ -25,6 +25,7 @@
 #include <fcntl.h>
 #include <stropts.h>
 #include <sys/mman.h>
+#include <sys/stat.h>
 
 #include "../frame.hpp"
 #include "../log.hpp"
@@ -410,7 +411,7 @@ V4L2::setFormat(const scene::V4l2& config)
   }
   else //Color mode is not in V4L2::COLOR_FORMAT
   {
-    throw invalid_argument()
+    throw ::invalid_argument()
       << info_what("Invalid color mode")
       << info_resolution(config.resolution)
       << info_colorMode(config.colorMode);

@@ -39,7 +39,7 @@ AbstractCameraFactory::create(const scene::Camera& cameraConfig,
     abstractCamera = new ArtkpCamera(cameraConfig,
                                      *artkpTarget);
 #else
-    throw invalid_argument()
+    throw ::invalid_argument()
       << info_what("This program don't was compiled with support "
                    "to ARToolKitPlus targets");
 #endif
@@ -51,14 +51,14 @@ AbstractCameraFactory::create(const scene::Camera& cameraConfig,
     abstractCamera = new ButterflyCamera(cameraConfig,
                                          *butterflyTarget);
 #else
-    throw invalid_argument()
+    throw ::invalid_argument()
       << info_what("This program don't was compiled with support "
                    "to Butterfly targets");
 #endif
   }
   else
   {
-    throw invalid_argument() << info_what("Unknown target type");
+      throw ::invalid_argument() << info_what("Unknown target type");
   }
 
   return abstractCamera;

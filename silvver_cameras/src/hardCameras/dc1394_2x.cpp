@@ -215,7 +215,7 @@ DC1394::getIplDepth(const std::string& colorMode)
   }
   else
   {
-    throw invalid_argument()
+    throw ::invalid_argument()
       << info_what("Invalid color mode")
       << info_colorMode(colorMode);
   }
@@ -304,7 +304,7 @@ DC1394::createColorConverter(const scene::DC1394& config)
                               bayerMap[*(config.bayerMethod)]);
       }
     }
-    catch (invalid_argument& e)
+    catch (::invalid_argument& e)
     {
       throw e << info_cameraUid(config.silvverUid)
               << info_colorMode(config.colorMode)
@@ -319,7 +319,7 @@ DC1394::createColorConverter(const scene::DC1394& config)
       return ColorConverter(colorSpaceMap[config.colorMode],
                             config.resolution.at(0), config.resolution.at(1));
     }
-    catch (invalid_argument& e)
+    catch (::invalid_argument& e)
     {
       throw e << info_cameraUid(config.silvverUid)
               << info_colorMode(config.colorMode);
